@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>監査論 復習管理</title>
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="監査論">
+<meta name="theme-color" content="#2d5be3">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 :root{
@@ -964,6 +969,15 @@ function saveSec(){
   closeSec();
 }
 document.getElementById('sec-overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeSec();});
+
+// ────────────────────────────────
+// PWA SERVICE WORKER
+// ────────────────────────────────
+if('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
 
 // ────────────────────────────────
 // INIT
