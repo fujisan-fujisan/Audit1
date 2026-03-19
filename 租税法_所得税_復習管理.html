@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>租税法（所得税）復習管理</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="租税法（所得税）">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Maru+Gothic:wght@700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f9f9f8;
+  --surface: #ffffff;
+  --border: #e8e8e5;
+  --border-strong: #d0d0cb;
+  --text: #111111;
+  --text-2: #666666;
+  --text-3: #aaaaaa;
+  --accent: #111111;
+  --o-color: #1a7a4a;
+  --o-bg: #edf7f2;
+  --x-color: #c0392b;
+  --x-bg: #fdf0ee;
+  --A-color: #c0392b;
+  --A-bg: #fdf0ee;
+  --B-color: #7c5c00;
+  --B-bg: #fdf4e3;
+  --C-color: #4a6a9a;
+  --C-bg: #eef3fa;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 100px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.header-top { padding: 14px 16px 12px; }
+
+.header-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.app-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  color: var(--text-3);
+  text-transform: uppercase;
+}
+
+.header-actions { display: flex; gap: 6px; }
+
+.btn-icon {
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 11px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.btn-icon:hover, .btn-icon.active { background: var(--text); border-color: var(--text); color: #fff; }
+
+.progress-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 7px;
+}
+
+.prog-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1;
+}
+
+.prog-label { font-size: 11px; color: var(--text-3); }
+
+.prog-track { height: 3px; background: var(--border); border-radius: 999px; overflow: hidden; }
+.prog-fill { height: 100%; background: var(--text); border-radius: 999px; transition: width .4s ease; }
+
+.tabs {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-top: 1px solid var(--border);
+  padding: 0 4px;
+}
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab {
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Noto Sans JP', sans-serif;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-3);
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all .15s;
+}
+.tab.active { color: var(--text); border-bottom-color: var(--text); }
+
+.round-info-bar {
+  display: flex;
+  align-items: center;
+  padding: 6px 16px 4px;
+  border-top: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex-wrap: nowrap;
+  gap: 0;
+}
+.round-info-bar::-webkit-scrollbar { display: none; }
+
+.ri-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 4px 12px 4px 0;
+  min-width: 0;
+  flex-shrink: 0;
+}
+.ri-item + .ri-item { border-left: 1px solid var(--border); padding-left: 12px; }
+.ri-lbl { font-size: 9px; font-weight: 700; color: var(--text-3); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 1px; }
+.ri-val { font-size: 13px; font-weight: 700; color: var(--text); font-family: 'DM Mono', monospace; white-space: nowrap; }
+.ri-val.warn { color: var(--x-color); }
+.ri-val.ok { color: var(--o-color); }
+.ri-deadline-btn {
+  background: none; border: none; padding: 0; cursor: pointer;
+  font-size: 13px; font-weight: 700; color: var(--text);
+  font-family: 'DM Mono', monospace;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+
+.filters {
+  display: flex;
+  gap: 5px;
+  padding: 8px 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-top: 1px solid var(--border);
+}
+.filters::-webkit-scrollbar { display: none; }
+
+.view-tabs {
+  display: flex;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+.vtab {
+  flex: 1;
+  padding: 9px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Noto Sans JP', sans-serif;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-3);
+  border-bottom: 2px solid transparent;
+  transition: all .15s;
+  letter-spacing: .02em;
+}
+.vtab.active { color: var(--text); border-bottom-color: var(--text); }
+
+.content { padding: 12px 14px; max-width: 700px; margin: 0 auto; }
+
+.ch-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.ch-card.hidden { display: none; }
+
+.ch-header {
+  padding: 12px 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  user-select: none;
+}
+.ch-header:active { background: var(--bg); }
+
+.ch-chevron { font-size: 9px; color: var(--text-3); transition: transform .2s; flex-shrink: 0; width: 12px; }
+.ch-card.open .ch-chevron { transform: rotate(90deg); }
+
+.ch-info { flex: 1; min-width: 0; }
+.ch-name { font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ch-sub { font-size: 10px; color: var(--text-3); margin-top: 1px; font-family: 'DM Mono', monospace; }
+
+.ch-badge {
+  font-size: 10px; font-family: 'DM Mono', monospace; font-weight: 500;
+  padding: 3px 8px; border-radius: var(--radius-sm);
+  background: var(--bg); border: 1px solid var(--border); color: var(--text-2);
+  flex-shrink: 0; transition: all .2s;
+}
+.ch-badge.done { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
+
+.items-wrap { display: none; border-top: 1px solid var(--border); }
+.ch-card.open .items-wrap { display: block; }
+
+.item-row {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.item-row:last-child { border-bottom: none; }
+.item-row.hidden { display: none; }
+
+.item-top { display: flex; align-items: center; gap: 7px; }
+
+.item-num { font-size: 10px; color: var(--text-3); font-family: 'DM Mono', monospace; flex-shrink: 0; min-width: 22px; align-self: flex-start; padding-top: 2px; }
+
+.item-name { flex: 1; font-size: 12px; line-height: 1.5; color: var(--text); }
+
+.item-badges { display: flex; gap: 3px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+
+.imp-badge {
+  font-size: 9px; font-weight: 700; font-family: 'DM Mono', monospace;
+  padding: 2px 5px; border-radius: 4px;
+  display: inline-flex; align-items: center; justify-content: center;
+  line-height: 1;
+}
+.imp-A { background: #fdf0ee; color: #c0392b; }
+.imp-B { background: #eef3fa; color: #2c5f9e; }
+.imp-C { background: #edf7f2; color: #1a7a4a; }
+.imp-Cplus { background: #f0edf7; color: #6a3a9a; }
+
+.diff-badge {
+  font-size: 9px; font-weight: 700; font-family: 'DM Mono', monospace;
+  padding: 2px 5px; border-radius: 4px;
+  background: var(--bg); border: 1px solid var(--border-strong); color: var(--text-2);
+  display: inline-flex; align-items: center; justify-content: center;
+  line-height: 1;
+}
+.diff-易 { background: #fdf0ee; border-color: #e8b0a8; color: #c0392b; }
+.diff-普 { background: #eef3fa; border-color: #a0b8dc; color: #2c5f9e; }
+.diff-難 { background: #edf7f2; border-color: #a8dcc0; color: #1a7a4a; }
+
+.u-btns { display: flex; gap: 4px; flex-shrink: 0; }
+
+.ub {
+  width: 40px; height: 32px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--bg);
+  font-size: 13px; font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .12s;
+  color: var(--text-3);
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.ub:active { transform: scale(.88); }
+.ub.sel-o { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
+.ub.sel-x { background: var(--x-bg); border-color: var(--x-color); color: var(--x-color); }
+
+.urgency-wrap { display: flex; align-items: center; gap: 7px; padding-left: 0; }
+.urgency-score { font-size: 11px; font-weight: 700; font-family: 'DM Mono', monospace; min-width: 32px; flex-shrink: 0; }
+.urgency-track { flex: 1; height: 5px; background: var(--border); border-radius: 999px; overflow: hidden; }
+.urgency-fill { height: 100%; border-radius: 999px; transition: width .4s ease, background .4s ease; }
+
+.urgency-wrap.reviewed .urgency-score { color: var(--text-3) !important; }
+.urgency-wrap.reviewed .urgency-fill { background: var(--border-strong) !important; }
+
+.reviewed-badge {
+  font-size: 9px; font-weight: 700; font-family: 'DM Mono', monospace;
+  padding: 2px 6px; border-radius: 4px;
+  background: var(--bg); border: 1px solid var(--border-strong); color: var(--text-3);
+  flex-shrink: 0;
+}
+.review-btn {
+  font-size: 10px; padding: 3px 8px; border-radius: 4px;
+  border: 1px solid var(--border-strong); background: transparent;
+  color: var(--text-3); cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif; flex-shrink: 0;
+  transition: all .15s; white-space: nowrap;
+}
+.review-btn:hover { border-color: var(--o-color); color: var(--o-color); }
+.review-btn.done { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
+
+.item-history { display: flex; gap: 4px; align-items: center; padding-left: 0; }
+.hist-dot-wrap { display: flex; align-items: center; gap: 2px; }
+.hist-label { font-size: 9px; color: var(--text-3); font-family: 'DM Mono', monospace; min-width: 20px; }
+.hist-dot {
+  width: 18px; height: 18px; border-radius: 4px; font-size: 10px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border); background: var(--bg); color: var(--text-3);
+  font-family: 'DM Mono', monospace; font-weight: 700;
+}
+.hist-dot.dot-o { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
+.hist-dot.dot-x { background: var(--x-bg); border-color: var(--x-color); color: var(--x-color); }
+
+.item-memo {
+  width: 100%; font-size: 11px; background: var(--bg);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 6px 9px; color: var(--text); font-family: 'Noto Sans JP', sans-serif;
+  resize: none; outline: none; min-height: 28px; line-height: 1.5;
+  transition: border-color .15s;
+}
+.item-memo:focus { border-color: var(--text); }
+.item-memo::placeholder { color: var(--text-3); }
+
+.ch-footer { border-top: 1px solid var(--border); background: var(--bg); }
+.ch-footer-row { padding: 8px 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ch-stat { font-family: 'Zen Maru Gothic', sans-serif; font-size: 20px; font-weight: 700; color: #1a3a6e; letter-spacing: .02em; }
+.ch-stat-lbl { font-size: 9px; font-weight: 500; color: #7a8fa8; font-family: 'Noto Sans JP', sans-serif; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 1px; }
+.ch-record-btn { font-size: 11px; padding: 4px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-2); cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: all .15s; white-space: nowrap; }
+.ch-record-btn:hover { border-color: var(--text); color: var(--text); }
+
+.ch-record-form { display: none; padding: 10px 14px 14px; border-top: 1px solid var(--border); gap: 8px; flex-direction: column; }
+.ch-record-form.open { display: flex; }
+.ch-record-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ch-record-form-lbl { font-size: 10px; font-weight: 700; color: var(--text-2); display: block; margin-bottom: 3px; }
+.ch-record-input { width: 100%; background: var(--surface); border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text); font-family: 'Noto Sans JP', sans-serif; font-size: 13px; padding: 8px 10px; outline: none; -webkit-appearance: none; appearance: none; }
+.ch-record-input:focus { border-color: var(--text); }
+.ch-record-form-btns { display: flex; gap: 6px; }
+.ch-record-save { flex: 1; padding: 10px; border-radius: var(--radius-sm); border: none; background: var(--text); color: #fff; font-family: 'Noto Sans JP', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; }
+.ch-record-cancel { padding: 10px 14px; border-radius: var(--radius-sm); border: 1.5px solid var(--border-strong); background: transparent; color: var(--text-2); font-family: 'Noto Sans JP', sans-serif; font-size: 13px; cursor: pointer; }
+
+.next-round-wrap { padding: 14px; text-align: center; max-width: 700px; margin: 0 auto; }
+.next-round-btn { background: var(--text); color: #fff; border: none; border-radius: var(--radius); padding: 13px 28px; font-size: 13px; font-weight: 700; font-family: 'Noto Sans JP', sans-serif; cursor: pointer; letter-spacing: .04em; }
+
+.weakness-header { padding: 14px 0 10px; }
+.weakness-title { font-size: 12px; font-weight: 700; color: var(--text-2); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 4px; }
+.weakness-subtitle { font-size: 11px; color: var(--text-3); }
+.weakness-section { margin-bottom: 16px; }
+.weakness-section-title { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); padding: 6px 0; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
+.weakness-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 6px; display: flex; flex-direction: column; gap: 6px; }
+.weakness-item-top { display: flex; align-items: flex-start; gap: 8px; }
+.weakness-ch { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--text-3); flex-shrink: 0; padding-top: 1px; min-width: 40px; }
+.weakness-name { flex: 1; font-size: 12px; line-height: 1.5; color: var(--text); }
+.weakness-history { display: flex; gap: 3px; padding-left: 48px; align-items: center; }
+
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 200; align-items: flex-end; justify-content: center; }
+.overlay.open { display: flex; }
+.scope-modal { background: var(--surface); border-radius: 16px 16px 0 0; padding: 20px 16px 44px; width: 100%; max-width: 700px; max-height: 80vh; overflow-y: auto; }
+.modal-handle { width: 32px; height: 3px; background: var(--border-strong); border-radius: 999px; margin: 0 auto 14px; }
+.scope-options { display: flex; flex-direction: column; gap: 8px; margin: 14px 0; }
+.scope-opt { padding: 13px 14px; border-radius: var(--radius); border: 1.5px solid var(--border-strong); background: var(--bg); font-size: 14px; font-weight: 700; font-family: 'Noto Sans JP', sans-serif; cursor: pointer; text-align: left; transition: all .15s; color: var(--text); }
+.scope-opt:hover { border-color: var(--text); }
+.scope-opt.sel { background: var(--text); color: #fff; border-color: var(--text); }
+.scope-opt .scope-sub { font-size: 11px; font-weight: 400; color: inherit; opacity: .7; display: block; margin-top: 2px; }
+.form-lbl { font-size: 11px; font-weight: 700; color: var(--text-2); display: block; margin-bottom: 4px; }
+
+.empty-state { text-align: center; padding: 48px 16px; color: var(--text-3); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="header-meta">
+      <div class="app-title">租税法（所得税）復習管理</div>
+      <div class="header-actions">
+        <button class="btn-icon" id="weakness-btn" onclick="toggleWeaknessPage()">弱点一覧</button>
+      </div>
+    </div>
+    <div class="progress-row">
+      <div class="prog-num" id="prog-pct">0%</div>
+      <div class="prog-label" id="prog-lbl">0 / 0 完了</div>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="prog-bar" style="width:0%"></div></div>
+  </div>
+  <div class="tabs" id="round-tabs"></div>
+  <div class="round-info-bar" id="round-info-bar"></div>
+  <div class="view-tabs" id="view-tabs">
+    <button class="vtab active" onclick="setViewTab('all',this)">全問題</button>
+    <button class="vtab" onclick="setViewTab('wrong',this)">不正解</button>
+    <button class="vtab" onclick="setViewTab('urgent',this)">要復習</button>
+  </div>
+</div>
+
+<div id="main-view">
+  <div class="content" id="content"></div>
+  <div class="next-round-wrap" id="next-round-wrap" style="display:none;">
+    <button class="next-round-btn" onclick="openScopeModal()">次の回を始める →</button>
+  </div>
+</div>
+
+<div id="weakness-view" class="content" style="display:none;"></div>
+
+<!-- SCOPE MODAL -->
+<div class="overlay" id="scope-overlay">
+  <div class="scope-modal">
+    <div class="modal-handle"></div>
+    <h2 id="scope-modal-title" style="font-size:14px;font-weight:700;margin-bottom:3px;"></h2>
+    <div style="font-size:11px;color:var(--text-2);margin-bottom:4px;">対象の重要度を選んでください</div>
+    <div class="scope-options">
+      <button class="scope-opt" onclick="selectScope('all')">全部（A・B・C+）<span class="scope-sub">すべての問題を対象にする</span></button>
+      <button class="scope-opt" onclick="selectScope('A')">重要度 A のみ<span class="scope-sub">重点的にAを復習する</span></button>
+      <button class="scope-opt" onclick="selectScope('B')">重要度 A・B<span class="scope-sub">A・Bを対象にする</span></button>
+    </div>
+    <div style="margin-bottom:8px;">
+      <label class="form-lbl">期限（任意）</label>
+      <input type="date" class="ch-record-input" id="scope-deadline" style="width:100%;">
+    </div>
+    <button class="ch-record-save" id="scope-confirm-btn" style="width:100%;opacity:.4;pointer-events:none;">この設定で始める</button>
+  </div>
+</div>
+
+<!-- DEADLINE EDIT MODAL -->
+<div class="overlay" id="deadline-overlay">
+  <div class="scope-modal">
+    <div class="modal-handle"></div>
+    <h2 style="font-size:14px;font-weight:700;margin-bottom:12px;">期限を変更</h2>
+    <input type="date" class="ch-record-input" id="deadline-input" style="width:100%;margin-bottom:12px;">
+    <div style="display:flex;gap:8px;">
+      <button class="ch-record-cancel" onclick="closeDeadlineModal()" style="flex:1;">キャンセル</button>
+      <button class="ch-record-save" onclick="saveDeadline()" style="flex:2;">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──
+const DATA = [
+  {ch:"第2章", chName:"利子所得", items:[
+    {id:"s2-1", name:"問題２－１　利子所得（所得の分類・課税方法）", imp:"B", diff:"普"},
+  ]},
+  {ch:"第3章", chName:"配当所得", items:[
+    {id:"s3-1", name:"問題３－１　配当所得①（所得の分類）", imp:"A", diff:"普"},
+    {id:"s3-2", name:"問題３－２　配当所得②（申告方法の選択）", imp:"A", diff:"普"},
+    {id:"s3-3", name:"問題３－３　配当所得③（申告方法の選択・負債の利子）", imp:"B", diff:"普"},
+  ]},
+  {ch:"第5章", chName:"不動産所得", items:[
+    {id:"s5-1", name:"問題５－１　不動産所得①（所得の分類）", imp:"A", diff:"普"},
+    {id:"s5-2", name:"問題５－２　不動産所得②（収入計上時期）", imp:"B", diff:"普"},
+    {id:"s5-3", name:"問題５－３　不動産所得③（青色申告特別控除①）", imp:"A", diff:"易"},
+    {id:"s5-4", name:"問題５－４　不動産所得④（青色申告特別控除②）", imp:"A", diff:"易"},
+    {id:"s5-5", name:"問題５－５　不動産所得⑤（総合問題・家事費の取扱い）", imp:"A", diff:"難"},
+    {id:"s5-6", name:"問題５－６　不動産所得⑥（資産損失①）", imp:"B", diff:"普"},
+    {id:"s5-7", name:"問題５－７　不動産所得⑦（資産損失②）", imp:"B", diff:"普"},
+  ]},
+  {ch:"第6章", chName:"事業所得", items:[
+    {id:"s6-1", name:"問題６－１　事業所得①（所得の分類）", imp:"A", diff:"易"},
+    {id:"s6-2", name:"問題６－２　事業所得②（自家消費・低額譲渡等①）", imp:"A", diff:"普"},
+    {id:"s6-3", name:"問題６－３　事業所得③（自家消費・低額譲渡等②）", imp:"A", diff:"普"},
+    {id:"s6-4", name:"問題６－４　事業所得④（売上原価① 評価損）", imp:"A", diff:"普"},
+    {id:"s6-5", name:"問題６－５　事業所得⑤（売上原価② 評価損と低価法）", imp:"B", diff:"普"},
+    {id:"s6-6", name:"問題６－６　事業所得⑥（減価償却① 強制償却）", imp:"A", diff:"普"},
+    {id:"s6-7", name:"問題６－７　事業所得⑦（減価償却② 少額・一括）", imp:"A", diff:"普"},
+    {id:"s6-8", name:"問題６－８　親族に対して支払う対価の取扱い①", imp:"A", diff:"普"},
+    {id:"s6-9", name:"問題６－９　親族に対して支払う対価の取扱い②", imp:"B", diff:"普"},
+  ]},
+  {ch:"第7章", chName:"給与所得", items:[
+    {id:"s7-1", name:"問題７－１　給与所得①（所得の分類）", imp:"A", diff:"易"},
+    {id:"s7-2", name:"問題７－２　給与所得②（非課税①）", imp:"A", diff:"易"},
+    {id:"s7-3", name:"問題７－３　給与所得③（非課税②）", imp:"B", diff:"普"},
+    {id:"s7-4", name:"問題７－４　給与所得④（特定支出控除）", imp:"B", diff:"普"},
+    {id:"s7-5", name:"問題７－５　給与所得⑤（他の所得との区分）", imp:"C+", diff:"普"},
+    {id:"s7-7", name:"問題７－７　給与所得⑦（ストック・オプション）", imp:"B", diff:"普"},
+    {id:"s7-8", name:"問題７－８　給与所得⑧（リストリクテッド・ストック）", imp:"B", diff:"普"},
+  ]},
+  {ch:"第8章", chName:"退職所得", items:[
+    {id:"s8-1", name:"問題８－１　退職所得①（所得の分類）", imp:"A", diff:"普"},
+    {id:"s8-2", name:"問題８－２　退職所得②（基本的な計算）", imp:"A", diff:"普"},
+    {id:"s8-3", name:"問題８－３　退職所得③（同一年中に２以上の退職手当等を受ける場合）", imp:"C+", diff:"普"},
+    {id:"s8-4", name:"問題８－４　退職所得④（特定役員退職手当等①）", imp:"A", diff:"易"},
+    {id:"s8-5", name:"問題８－５　退職所得⑤（特定役員退職手当等②）", imp:"B", diff:"普"},
+    {id:"s8-6", name:"問題８－６　退職所得⑥（特定役員退職手当等③）", imp:"C+", diff:"難"},
+    {id:"s8-7", name:"問題８－７　退職所得⑦（短期退職手当等）", imp:"A", diff:"易"},
+  ]},
+  {ch:"第10章", chName:"譲渡所得", items:[
+    {id:"s10-1", name:"問題10－１　譲渡所得①（所得の分類）", imp:"A", diff:"易"},
+    {id:"s10-2", name:"問題10－２　譲渡所得②（全般的な計算の流れ）", imp:"A", diff:"易"},
+    {id:"s10-3", name:"問題10－３　譲渡所得③（内部通算）", imp:"A", diff:"易"},
+    {id:"s10-4", name:"問題10－４　譲渡所得④（生活に通常必要でない資産の災害等による損失の控除）", imp:"A", diff:"易"},
+    {id:"s10-5", name:"問題10－５　譲渡所得⑤（取得費の計算）", imp:"A", diff:"易"},
+    {id:"s10-6", name:"問題10－６　譲渡所得⑥（負債の利子）", imp:"A", diff:"易"},
+    {id:"s10-7", name:"問題10－７　譲渡所得⑦（みなし譲渡①（譲渡時の取扱い））", imp:"B", diff:"普"},
+    {id:"s10-8", name:"問題10－８　譲渡所得⑧（みなし譲渡②（取得時の取扱い））", imp:"B", diff:"普"},
+    {id:"s10-9", name:"問題10－９　譲渡所得⑨（国外転出時課税等）", imp:"B", diff:"普"},
+    {id:"s10-10", name:"問題10－10　譲渡所得⑩（特定口座）", imp:"B", diff:"難"},
+  ]},
+  {ch:"第11章", chName:"一時所得", items:[
+    {id:"s11-1", name:"問題11－１　一時所得①（所得の分類）", imp:"B", diff:"普"},
+    {id:"s11-2", name:"問題11－２　一時所得②（基本的な計算）", imp:"B", diff:"普"},
+    {id:"s11-3", name:"問題11－３　一時所得③（生命保険契約）", imp:"B", diff:"普"},
+  ]},
+  {ch:"第12章", chName:"雑所得", items:[
+    {id:"s12-1", name:"問題12－１　雑所得①（所得の分類）", imp:"B", diff:"普"},
+    {id:"s12-2", name:"問題12－２　雑所得②（基本的な計算）", imp:"B", diff:"普"},
+    {id:"s12-3", name:"問題12－３　雑所得③（生命保険契約等に基づく年金）", imp:"B", diff:"普"},
+    {id:"s12-4", name:"問題12－４　雑所得④（暗号資産）", imp:"B", diff:"普"},
+  ]},
+  {ch:"第13章", chName:"課税標準", items:[
+    {id:"s13-1", name:"問題13－１　損益通算①（通算手順）", imp:"A", diff:"普"},
+    {id:"s13-2", name:"問題13－２　損益通算②（生活に通常必要でない資産に係る所得の金額の計算上生じた損失）", imp:"A", diff:"普"},
+    {id:"s13-3", name:"問題13－３　損益通算③（上場株式等に係る損益通算）", imp:"B", diff:"普"},
+    {id:"s13-4", name:"問題13－４　損益通算④（不動産所得に係る損益通算の特例）", imp:"C+", diff:"普"},
+  ]},
+  {ch:"第14章", chName:"所得控除", items:[
+    {id:"s14-1", name:"問題14－１　雑損控除①（雑損控除の適用範囲）", imp:"B", diff:"普"},
+    {id:"s14-2", name:"問題14－２　雑損控除②（適用判定）", imp:"B", diff:"普"},
+    {id:"s14-3", name:"問題14－３　医療費控除①（支出医療費の範囲）", imp:"A", diff:"普"},
+    {id:"s14-4", name:"問題14－４　医療費控除②（原則）", imp:"B", diff:"普"},
+    {id:"s14-5", name:"問題14－５　医療費控除③（特例）", imp:"B", diff:"普"},
+    {id:"s14-6", name:"問題14－６　社会保険料控除・小規模企業共済等掛金控除", imp:"B", diff:"難"},
+    {id:"s14-7", name:"問題14－７　生命保険料控除①（旧契約・新契約のみ）", imp:"B", diff:"普"},
+    {id:"s14-8", name:"問題14－８　生命保険料控除②（旧契約・新契約の両方を契約）", imp:"B", diff:"普"},
+    {id:"s14-9", name:"問題14－９　地震保険料控除", imp:"B", diff:"普"},
+    {id:"s14-10", name:"問題14－10　寄附金控除", imp:"B", diff:"普"},
+    {id:"s14-11", name:"問題14－11　人的控除①", imp:"B", diff:"普"},
+    {id:"s14-12", name:"問題14－12　人的控除②", imp:"B", diff:"難"},
+    {id:"s14-13", name:"問題14－13　障害者控除（障害者の範囲）", imp:"C+", diff:"普"},
+    {id:"s14-15", name:"問題14－15　ひとり親控除・寡婦控除", imp:"C+", diff:"普"},
+  ]},
+  {ch:"第15章", chName:"税額計算", items:[
+    {id:"s15-1", name:"問題15－１　配当控除①（一連の流れ）", imp:"A", diff:"易"},
+    {id:"s15-2", name:"問題15－２　配当控除②", imp:"A", diff:"易"},
+    {id:"s15-3", name:"問題15－３　源泉徴収制度", imp:"B", diff:"普"},
+  ]},
+];
+
+const FULL_DAYS = {
+  'A': { '易': { o: 14, x: 3 }, '普': { o: 10, x: 5 }, '難': { o: 8,  x: 8  } },
+  'B': { '易': { o: 20, x: 5 }, '普': { o: 14, x: 8 }, '難': { o: 10, x: 12 } },
+  'C': { '易': { o: 35, x: 10}, '普': { o: 28, x: 14}, '難': { o: 20, x: 20 } },
+};
+
+// ── STATE ──
+let itemState = {}, chState = {}, appState = {rounds:[{label:'第1回', scope:'all', deadline:null}], currentRound:0};
+let showingWeakness = false;
+
+function load() {
+  try {
+    const i = localStorage.getItem('shotoku-item');
+    const c = localStorage.getItem('shotoku-ch');
+    const a = localStorage.getItem('shotoku-app');
+    if (i) itemState = JSON.parse(i);
+    if (c) chState = JSON.parse(c);
+    if (a) appState = JSON.parse(a);
+  } catch(e) {}
+}
+
+function save() {
+  try {
+    localStorage.setItem('shotoku-item', JSON.stringify(itemState));
+    localStorage.setItem('shotoku-ch', JSON.stringify(chState));
+    localStorage.setItem('shotoku-app', JSON.stringify(appState));
+  } catch(e) {}
+}
+
+function today() { return new Date().toISOString().split('T')[0]; }
+function curRound() { return appState.currentRound; }
+function curScope() { return (appState.rounds[curRound()] || {}).scope || 'all'; }
+function curDeadline() { return (appState.rounds[curRound()] || {}).deadline || null; }
+
+function itemInScope(item) {
+  const scope = curScope();
+  if (scope === 'all') return true;
+  if (scope === 'A') return item.imp === 'A';
+  if (scope === 'B') return item.imp === 'A' || item.imp === 'B';
+  return true;
+}
+
+function scopedItems() { return DATA.flatMap(c => c.items).filter(itemInScope); }
+
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  return Math.ceil((new Date(dateStr).getTime() - Date.now()) / 86400000);
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const p = dateStr.split('-');
+  if (p.length < 3) return dateStr;
+  return `${parseInt(p[1])}月${parseInt(p[2])}日`;
+}
+
+function getItemR(id, round) {
+  const r = round !== undefined ? round : curRound();
+  return (itemState[id] || {})[r] || {};
+}
+
+function setItemR(id, data) {
+  if (!itemState[id]) itemState[id] = {};
+  itemState[id][curRound()] = data;
+}
+
+function getChR(key) { return (chState[String(key)] || {})[curRound()] || {}; }
+
+function setChR(key, data) {
+  const k = String(key);
+  if (!chState[k]) chState[k] = {};
+  chState[k][curRound()] = data;
+}
+
+function chKey(ch) {
+  return ch.ch
+    .replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))
+    .replace(/[^0-9]/g, '');
+}
+
+function calcUrgency(itemId) {
+  const r = getItemR(itemId);
+  if (!r.u || !r.date) return null;
+  const item = DATA.flatMap(c => c.items).find(i => i.id === itemId);
+  if (!item || !itemInScope(item)) return null;
+
+  const impKey = item.imp === 'C+' ? 'C' : item.imp;
+  const diffKey = item.diff;
+  const resultKey = r.u === 'o' ? 'o' : 'x';
+  const table = FULL_DAYS[impKey] || FULL_DAYS['B'];
+  const diffTable = table[diffKey] || table['普'];
+  const fullDays = diffTable[resultKey] || 10;
+
+  const diff = Math.floor((Date.now() - new Date(r.date).getTime()) / 86400000);
+  return Math.min(100, Math.round(diff / fullDays * 100));
+}
+
+function urgencyColor(score) {
+  if (score >= 80) return '#c0392b';
+  if (score >= 55) return '#e67e22';
+  if (score >= 30) return '#d4a017';
+  return '#1a7a4a';
+}
+
+let curViewTab = 'all';
+
+function setViewTab(tab, btn) {
+  curViewTab = tab;
+  document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilter();
+}
+
+function applyFilter() {
+  DATA.forEach(ch => {
+    const key = chKey(ch);
+    const card = document.getElementById('chcard-' + key);
+    if (!card) return;
+    let anyVisible = false;
+    ch.items.forEach(item => {
+      const row = document.getElementById('irow-' + item.id);
+      if (!row) return;
+      if (!itemInScope(item)) { row.style.display = 'none'; return; }
+      const u = getItemR(item.id).u;
+      let show = true;
+      if (curViewTab === 'wrong') show = u === 'x' || u === 'xx';
+      else if (curViewTab === 'urgent') { const s = calcUrgency(item.id); show = s !== null && s >= 70; }
+      row.style.display = show ? '' : 'none';
+      if (show) anyVisible = true;
+    });
+    card.classList.toggle('hidden', !anyVisible);
+  });
+}
+
+function render() {
+  const ct = document.getElementById('content');
+  ct.innerHTML = '';
+  DATA.forEach(ch => {
+    const el = buildChCard(ch);
+    if (el) ct.appendChild(el);
+  });
+  renderRoundTabs();
+  updateProgress();
+  applyFilter();
+  updateNextRoundBtn();
+}
+
+function buildChCard(ch) {
+  const key = chKey(ch);
+  const r = getChR(key);
+  const scopedChItems = ch.items.filter(itemInScope);
+  const total = scopedChItems.length;
+  const done = scopedChItems.filter(i => getItemR(i.id).u).length;
+  const isDone = done === total && total > 0;
+
+  if (total === 0) return null;
+
+  const card = document.createElement('div');
+  card.className = 'ch-card';
+  card.id = 'chcard-' + key;
+
+  const hd = document.createElement('div');
+  hd.className = 'ch-header';
+  hd.onclick = () => card.classList.toggle('open');
+  hd.innerHTML = `
+    <span class="ch-chevron">▶</span>
+    <div class="ch-info">
+      <div class="ch-name">${ch.ch}　${ch.chName}</div>
+      <div class="ch-sub">${ch.items.filter(i=>i.imp==='A').length}A · ${ch.items.filter(i=>i.imp==='B').length}B · ${ch.items.filter(i=>i.imp==='C+').length}C+</div>
+    </div>
+    <span class="ch-badge ${isDone ? 'done' : ''}" id="chprog-${key}">${done}/${total}</span>`;
+  card.appendChild(hd);
+
+  const iw = document.createElement('div');
+  iw.className = 'items-wrap';
+  let idx = 0;
+  ch.items.forEach(item => {
+    if (!itemInScope(item)) return;
+    idx++;
+    iw.appendChild(buildItemRow(item, idx));
+  });
+  card.appendChild(iw);
+
+  const ft = document.createElement('div');
+  ft.className = 'ch-footer';
+  ft.id = 'chfoot-' + key;
+  ft.innerHTML = buildChFooter(key, r);
+  card.appendChild(ft);
+
+  return card;
+}
+
+function buildChFooter(key, r) {
+  let statHTML = '';
+  if (r.date) statHTML += `<span class="ch-stat"><span class="ch-stat-lbl">実施日</span>${formatDate(r.date)}</span>`;
+  if (r.time) statHTML += `<span class="ch-stat"><span class="ch-stat-lbl">所要時間</span>${r.time} 分</span>`;
+  return `
+    <div class="ch-footer-row">
+      ${statHTML}
+      <button class="ch-record-btn" onclick="toggleRecordForm('${key}')">実施記録</button>
+    </div>
+    <div class="ch-record-form" id="chform-${key}">
+      <div class="ch-record-form-row">
+        <div>
+          <label class="ch-record-form-lbl">実施日</label>
+          <input type="date" class="ch-record-input" id="ch-date-${key}" value="${r.date || ''}">
+        </div>
+        <div>
+          <label class="ch-record-form-lbl">所要時間（分）</label>
+          <input type="text" inputmode="numeric" pattern="[0-9]*" class="ch-record-input" id="ch-time-${key}" placeholder="例: 30" value="${r.time || ''}">
+        </div>
+      </div>
+      <div class="ch-record-form-btns">
+        <button class="ch-record-cancel" onclick="toggleRecordForm('${key}')">キャンセル</button>
+        <button class="ch-record-save" onclick="saveRecord('${key}')">保存</button>
+      </div>
+    </div>`;
+}
+
+function toggleRecordForm(key) {
+  const form = document.getElementById('chform-' + key);
+  if (!form) return;
+  const isOpen = form.classList.contains('open');
+  document.querySelectorAll('.ch-record-form.open').forEach(f => f.classList.remove('open'));
+  if (!isOpen) form.classList.add('open');
+}
+
+function saveRecord(key) {
+  const dateEl = document.getElementById('ch-date-' + key);
+  const timeEl = document.getElementById('ch-time-' + key);
+  if (!dateEl || !timeEl) return;
+  const dateVal = dateEl.value;
+  const timeVal = timeEl.value;
+  if (!chState[key]) chState[key] = {};
+  chState[key][curRound()] = { date: dateVal, time: timeVal };
+  save();
+  const foot = document.getElementById('chfoot-' + key);
+  if (foot) foot.innerHTML = buildChFooter(key, { date: dateVal, time: timeVal });
+}
+
+function buildItemRow(item, num) {
+  const r = getItemR(item.id);
+  const u = r.u || null;
+
+  const totalRounds = appState.rounds.length;
+  let histHTML = '';
+  if (totalRounds > 1) {
+    histHTML = `<div class="item-history">`;
+    for (let ri = 0; ri < totalRounds; ri++) {
+      const rd = getItemR(item.id, ri);
+      const ru = rd.u || null;
+      const label = (appState.rounds[ri].label || '').replace('第','').replace('回','');
+      const cls = ru === 'o' ? 'dot-o' : ru === 'x' ? 'dot-x' : '';
+      const sym = ru === 'o' ? '○' : ru === 'x' ? '×' : '–';
+      histHTML += `<div class="hist-dot-wrap"><div class="hist-label">${label}回</div><div class="hist-dot ${cls}">${sym}</div></div>`;
+    }
+    histHTML += `</div>`;
+  }
+
+  const urgency = calcUrgency(item.id);
+  const reviewed = r.reviewed || false;
+  const urgencyHTML = urgency !== null ? `
+    <div class="urgency-wrap${reviewed ? ' reviewed' : ''}" id="urg-${item.id}">
+      <span class="urgency-score" style="color:${reviewed ? '' : urgencyColor(urgency)}">${urgency}</span>
+      <div class="urgency-track"><div class="urgency-fill" style="width:${urgency}%;background:${reviewed ? '' : urgencyColor(urgency)}"></div></div>
+      ${reviewed
+        ? `<span class="reviewed-badge">復習済</span><button class="review-btn done" onclick="toggleReview('${item.id}')">取消</button>`
+        : `<button class="review-btn" onclick="toggleReview('${item.id}')">復習済にする</button>`}
+    </div>` : '';
+
+  const impCls = item.imp === 'A' ? 'imp-A' : item.imp === 'B' ? 'imp-B' : item.imp === 'C+' ? 'imp-Cplus' : 'imp-C';
+  const diffCls = `diff-${item.diff}`;
+
+  const row = document.createElement('div');
+  row.className = 'item-row';
+  row.id = 'irow-' + item.id;
+  row.innerHTML = `
+    <div class="item-top">
+      <span class="item-name">${item.name}</span>
+      <div class="item-badges">
+        <span class="imp-badge ${impCls}">${item.imp}</span>
+        <span class="diff-badge ${diffCls}">${item.diff}</span>
+        <div class="u-btns">
+          <button class="ub ${u==='o'?'sel-o':''}" onclick="setU('${item.id}','o')">○</button>
+          <button class="ub ${u==='x'?'sel-x':''}" onclick="setU('${item.id}','x')">×</button>
+        </div>
+      </div>
+    </div>
+    ${urgencyHTML}
+    ${histHTML}
+    <textarea class="item-memo" placeholder="間違えた箇所・メモ..." rows="1"
+      onchange="saveMemo('${item.id}',this.value)"
+      oninput="autoResize(this)">${r.memo||''}</textarea>`;
+  return row;
+}
+
+function renderRoundTabs() {
+  const tabs = document.getElementById('round-tabs');
+  tabs.innerHTML = '';
+  appState.rounds.forEach((rd, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'tab' + (i === curRound() ? ' active' : '');
+    const scopeTag = rd.scope === 'A' ? '(A)' : rd.scope === 'B' ? '(A·B)' : '(全)';
+    btn.textContent = (rd.label || `第${i+1}回`) + scopeTag;
+    btn.onclick = () => switchRound(i);
+    tabs.appendChild(btn);
+  });
+}
+
+function switchRound(i) {
+  appState.currentRound = i;
+  save();
+  render();
+}
+
+function updateProgress() {
+  const items = scopedItems();
+  const total = items.length;
+  const done = items.filter(i => getItemR(i.id).u).length;
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-lbl').textContent = `${done} / ${total} 完了`;
+  document.getElementById('prog-bar').style.width = pct + '%';
+  updateRoundInfoBar(pct);
+}
+
+function updateRoundInfoBar(pct) {
+  const bar = document.getElementById('round-info-bar');
+  if (!bar) return;
+  const rd = appState.rounds[curRound()] || {};
+  const scopeLabel = rd.scope === 'A' ? 'A のみ' : rd.scope === 'B' ? 'A・B' : '全部';
+  const dl = rd.deadline;
+  const days = daysUntil(dl);
+  const daysStr = days === null ? '未設定' : days < 0 ? `${Math.abs(days)}日超過` : `残り${days}日`;
+  const daysClass = days === null ? '' : days <= 3 ? 'warn' : days <= 7 ? 'warn' : 'ok';
+
+  bar.innerHTML = `
+    <div class="ri-item"><span class="ri-lbl">回</span><span class="ri-val">${rd.label || ''}</span></div>
+    <div class="ri-item"><span class="ri-lbl">対象</span><button class="ri-deadline-btn" onclick="openScopeModal(curRound()===0)">${scopeLabel}</button></div>
+    <div class="ri-item"><span class="ri-lbl">期限</span><button class="ri-deadline-btn" onclick="openDeadlineModal()">${dl ? formatDate(dl) : '未設定'}</button></div>
+    <div class="ri-item"><span class="ri-lbl">残り</span><span class="ri-val ${daysClass}">${daysStr}</span></div>
+    <div class="ri-item"><span class="ri-lbl">進捗</span><span class="ri-val">${pct}%</span></div>`;
+}
+
+function updateNextRoundBtn() {
+  const items = scopedItems();
+  const total = items.length;
+  const done = items.filter(i => getItemR(i.id).u).length;
+  const pct = total ? done / total * 100 : 0;
+  document.getElementById('next-round-wrap').style.display = pct >= 70 ? 'block' : 'none';
+}
+
+function setU(itemId, type) {
+  const r = getItemR(itemId);
+  if (r.u === type) { r.u = null; r.date = null; }
+  else { r.u = type; r.date = today(); }
+  setItemR(itemId, r);
+  save();
+  refreshItem(itemId);
+  refreshChProg(itemId);
+  updateProgress();
+  updateNextRoundBtn();
+}
+
+function saveMemo(itemId, val) {
+  const r = getItemR(itemId);
+  r.memo = val;
+  setItemR(itemId, r);
+  save();
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+
+function toggleReview(itemId) {
+  const r = getItemR(itemId);
+  r.reviewed = !r.reviewed;
+  setItemR(itemId, r);
+  save();
+  const urgency = calcUrgency(itemId);
+  const wrap = document.getElementById('urg-' + itemId);
+  if (!wrap || urgency === null) return;
+  const reviewed = r.reviewed;
+  wrap.className = 'urgency-wrap' + (reviewed ? ' reviewed' : '');
+  wrap.querySelector('.urgency-score').style.color = reviewed ? '' : urgencyColor(urgency);
+  wrap.querySelector('.urgency-fill').style.background = reviewed ? '' : urgencyColor(urgency);
+  const oldBtns = wrap.querySelectorAll('.reviewed-badge, .review-btn');
+  oldBtns.forEach(el => el.remove());
+  if (reviewed) {
+    wrap.insertAdjacentHTML('beforeend', `<span class="reviewed-badge">復習済</span><button class="review-btn done" onclick="toggleReview('${itemId}')">取消</button>`);
+  } else {
+    wrap.insertAdjacentHTML('beforeend', `<button class="review-btn" onclick="toggleReview('${itemId}')">復習済にする</button>`);
+  }
+}
+
+function refreshItem(itemId) {
+  const r = getItemR(itemId);
+  const row = document.getElementById('irow-' + itemId);
+  if (!row) return;
+  ['o','x'].forEach(t => {
+    const btn = row.querySelector(`.ub[onclick*="'${t}'"]`);
+    if (!btn) return;
+    btn.classList.remove('sel-o','sel-x');
+    if (r.u === t) btn.classList.add('sel-' + t);
+  });
+  const urgency = calcUrgency(itemId);
+  const reviewed = r.reviewed || false;
+  const wrap = row.querySelector('.urgency-wrap');
+
+  function buildUrgencyEl(urgency, reviewed, itemId) {
+    const color = urgencyColor(urgency);
+    const div = document.createElement('div');
+    div.className = 'urgency-wrap' + (reviewed ? ' reviewed' : '');
+    div.id = 'urg-' + itemId;
+    div.innerHTML = `
+      <span class="urgency-score" style="color:${reviewed ? '' : color}">${urgency}</span>
+      <div class="urgency-track"><div class="urgency-fill" style="width:${urgency}%;background:${reviewed ? '' : color}"></div></div>
+      ${reviewed
+        ? `<span class="reviewed-badge">復習済</span><button class="review-btn done" onclick="toggleReview('${itemId}')">取消</button>`
+        : `<button class="review-btn" onclick="toggleReview('${itemId}')">復習済にする</button>`}`;
+    return div;
+  }
+
+  if (urgency !== null) {
+    if (wrap) { wrap.replaceWith(buildUrgencyEl(urgency, reviewed, itemId)); }
+    else {
+      const topEl = row.querySelector('.item-top');
+      if (topEl) topEl.insertAdjacentElement('afterend', buildUrgencyEl(urgency, reviewed, itemId));
+    }
+  } else if (wrap) { wrap.remove(); }
+}
+
+function refreshChProg(itemId) {
+  const ch = DATA.find(c => c.items.find(i => i.id === itemId));
+  if (!ch) return;
+  const key = chKey(ch);
+  const scoped = ch.items.filter(itemInScope);
+  const total = scoped.length;
+  const done = scoped.filter(i => getItemR(i.id).u).length;
+  const isDone = done === total && total > 0;
+  const el = document.getElementById('chprog-' + key);
+  if (el) {
+    el.textContent = `${done}/${total}`;
+    el.className = 'ch-badge' + (isDone ? ' done' : '');
+  }
+}
+
+function toggleWeaknessPage() {
+  showingWeakness = !showingWeakness;
+  document.getElementById('main-view').style.display = showingWeakness ? 'none' : 'block';
+  document.getElementById('weakness-view').style.display = showingWeakness ? 'block' : 'none';
+  document.getElementById('view-tabs').style.display = showingWeakness ? 'none' : 'flex';
+  document.getElementById('weakness-btn').classList.toggle('active', showingWeakness);
+  if (showingWeakness) renderWeaknessPage();
+}
+
+function renderWeaknessPage() {
+  const view = document.getElementById('weakness-view');
+  const xItems = [], consXItems = [];
+
+  DATA.forEach(ch => {
+    ch.items.forEach(item => {
+      const cur = curRound();
+      const r = getItemR(item.id);
+      if (!r.u) return;
+      const hist = [];
+      for (let i = 0; i <= cur; i++) {
+        const rd = (itemState[item.id] || {})[i];
+        hist.push(rd ? (rd.u || null) : null);
+      }
+      if (r.u === 'x') {
+        const prevR = cur >= 1 ? (itemState[item.id] || {})[cur-1] : null;
+        if (prevR && prevR.u === 'x') consXItems.push({item, ch, hist});
+        else xItems.push({item, ch, hist});
+      }
+    });
+  });
+
+  let html = `<div class="weakness-header">
+    <div class="weakness-title">弱点一覧</div>
+    <div class="weakness-subtitle">全問題横断 · 直近の結果で分類</div>
+  </div>`;
+
+  if (consXItems.length === 0 && xItems.length === 0) {
+    html += `<div class="empty-state">まだ不正解の記録がありません。</div>`;
+  } else {
+    if (consXItems.length > 0) {
+      html += `<div class="weakness-section">
+        <div class="weakness-section-title">× 連続（要重点復習）${consXItems.length}件</div>
+        ${consXItems.map(d => weaknessItemHTML(d)).join('')}
+      </div>`;
+    }
+    if (xItems.length > 0) {
+      html += `<div class="weakness-section">
+        <div class="weakness-section-title">直近 × ${xItems.length}件</div>
+        ${xItems.map(d => weaknessItemHTML(d)).join('')}
+      </div>`;
+    }
+  }
+  view.innerHTML = html;
+}
+
+function weaknessItemHTML({item, ch, hist}) {
+  const impCls = item.imp === 'A' ? 'imp-A' : item.imp === 'B' ? 'imp-B' : item.imp === 'C+' ? 'imp-Cplus' : 'imp-C';
+  const diffCls = `diff-${item.diff}`;
+  const dotsHTML = hist.map((h, i) => {
+    const label = (appState.rounds[i] || {}).label || `第${i+1}回`;
+    const roundNum = label.replace('第','').replace('回','');
+    const cls = h === 'o' ? 'dot-o' : h === 'x' ? 'dot-x' : '';
+    const sym = h === 'o' ? '○' : h === 'x' ? '×' : '–';
+    return `<div class="hist-dot-wrap"><div class="hist-label">${roundNum}回</div><div class="hist-dot ${cls}">${sym}</div></div>`;
+  }).join('');
+  return `<div class="weakness-item">
+    <div class="weakness-item-top">
+      <span class="weakness-ch">${ch.ch}</span>
+      <span class="weakness-name">${item.name}</span>
+      <span class="imp-badge ${impCls}">${item.imp}</span>
+      <span class="diff-badge ${diffCls}">${item.diff}</span>
+    </div>
+    <div class="weakness-history">${dotsHTML}</div>
+  </div>`;
+}
+
+let pendingScope = null;
+let pendingScopeIsFirst = false;
+
+function openScopeModal(isFirst) {
+  pendingScope = null;
+  pendingScopeIsFirst = isFirst || false;
+  const n = pendingScopeIsFirst ? 1 : appState.rounds.length + 1;
+  document.getElementById('scope-modal-title').textContent = `第${n}回を始める`;
+  if (pendingScopeIsFirst) {
+    const cur = appState.rounds[0] || {};
+    document.getElementById('scope-deadline').value = cur.deadline || '';
+    const curS = cur.scope || null;
+    document.querySelectorAll('.scope-opt').forEach(b => b.classList.remove('sel'));
+    if (curS) {
+      const idx = curS === 'all' ? 0 : curS === 'A' ? 1 : 2;
+      document.querySelectorAll('.scope-opt')[idx].classList.add('sel');
+      pendingScope = curS;
+      document.getElementById('scope-confirm-btn').style.opacity = '1';
+      document.getElementById('scope-confirm-btn').style.pointerEvents = 'auto';
+    } else {
+      document.getElementById('scope-confirm-btn').style.opacity = '.4';
+      document.getElementById('scope-confirm-btn').style.pointerEvents = 'none';
+    }
+  } else {
+    document.getElementById('scope-deadline').value = '';
+    document.querySelectorAll('.scope-opt').forEach(b => b.classList.remove('sel'));
+    document.getElementById('scope-confirm-btn').style.opacity = '.4';
+    document.getElementById('scope-confirm-btn').style.pointerEvents = 'none';
+  }
+  document.getElementById('scope-overlay').classList.add('open');
+}
+
+function selectScope(scope) {
+  pendingScope = scope;
+  document.querySelectorAll('.scope-opt').forEach(b => b.classList.remove('sel'));
+  const idx = scope === 'all' ? 0 : scope === 'A' ? 1 : 2;
+  document.querySelectorAll('.scope-opt')[idx].classList.add('sel');
+  document.getElementById('scope-confirm-btn').style.opacity = '1';
+  document.getElementById('scope-confirm-btn').style.pointerEvents = 'auto';
+}
+
+document.getElementById('scope-confirm-btn').onclick = function() {
+  if (!pendingScope) return;
+  const deadline = document.getElementById('scope-deadline').value || null;
+  if (pendingScopeIsFirst) {
+    appState.rounds[0].scope = pendingScope;
+    appState.rounds[0].deadline = deadline;
+  } else {
+    const n = appState.rounds.length + 1;
+    appState.rounds.push({label: `第${n}回`, scope: pendingScope, deadline});
+    appState.currentRound = appState.rounds.length - 1;
+  }
+  save();
+  document.getElementById('scope-overlay').classList.remove('open');
+  render();
+};
+
+document.getElementById('scope-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('scope-overlay'))
+    document.getElementById('scope-overlay').classList.remove('open');
+});
+
+function openDeadlineModal() {
+  document.getElementById('deadline-input').value = curDeadline() || '';
+  document.getElementById('deadline-overlay').classList.add('open');
+}
+function closeDeadlineModal() {
+  document.getElementById('deadline-overlay').classList.remove('open');
+}
+function saveDeadline() {
+  appState.rounds[curRound()].deadline = document.getElementById('deadline-input').value || null;
+  save();
+  closeDeadlineModal();
+  updateProgress();
+}
+document.getElementById('deadline-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('deadline-overlay')) closeDeadlineModal();
+});
+
+load();
+render();
+</script>
+</body>
+</html>
