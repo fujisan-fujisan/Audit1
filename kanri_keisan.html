@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>管理会計論（計算） 復習管理</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="管理計算">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Maru+Gothic:wght@700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f9f9f8;
+  --surface: #ffffff;
+  --border: #e8e8e5;
+  --border-strong: #d0d0cb;
+  --text: #111111;
+  --text-2: #666666;
+  --text-3: #aaaaaa;
+  --accent: #111111;
+  --accent-bg: #f0f0ee;
+  --o-color: #1a7a4a;
+  --o-bg: #edf7f2;
+  --x-color: #c0392b;
+  --x-bg: #fdf0ee;
+  --A-color: #c0392b;
+  --A-bg: #fdf0ee;
+  --B-color: #7c5c00;
+  --B-bg: #fdf4e3;
+  --C-color: #1a7a4a;
+  --C-bg: #edf7f2;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 100px; font-size: 14px; line-height: 1.5; }
+
+.header { position: sticky; top: 0; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--border); }
+.header-top { padding: 14px 16px 12px; }
+.header-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.app-title { font-size: 11px; font-weight: 700; letter-spacing: .12em; color: var(--text-3); text-transform: uppercase; }
+.header-actions { display: flex; gap: 6px; }
+.btn-icon { padding: 5px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: transparent; color: var(--text-2); font-size: 11px; font-family: 'Noto Sans JP', sans-serif; font-weight: 500; cursor: pointer; transition: all .15s; white-space: nowrap; }
+.btn-icon:hover, .btn-icon.active { background: var(--text); border-color: var(--text); color: #fff; }
+.progress-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 7px; }
+.prog-num { font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 500; color: var(--text); line-height: 1; }
+.prog-label { font-size: 11px; color: var(--text-3); }
+.prog-track { height: 3px; background: var(--border); border-radius: 999px; overflow: hidden; }
+.prog-fill { height: 100%; background: var(--text); border-radius: 999px; transition: width .4s ease; }
+
+.tabs { display: flex; overflow-x: auto; scrollbar-width: none; border-top: 1px solid var(--border); padding: 0 4px; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { padding: 10px 14px; font-size: 12px; font-weight: 700; font-family: 'Noto Sans JP', sans-serif; background: transparent; border: none; cursor: pointer; color: var(--text-3); border-bottom: 2px solid transparent; white-space: nowrap; transition: all .15s; }
+.tab.active { color: var(--text); border-bottom-color: var(--text); }
+
+.view-tabs { display: flex; border-top: 1px solid var(--border); background: var(--surface); }
+.vtab { flex: 1; padding: 9px 8px; font-size: 12px; font-weight: 700; font-family: 'Noto Sans JP', sans-serif; background: transparent; border: none; cursor: pointer; color: var(--text-3); border-bottom: 2px solid transparent; transition: all .15s; letter-spacing: .02em; }
+.vtab.active { color: var(--text); border-bottom-color: var(--text); }
+
+.content { padding: 12px 14px; max-width: 700px; margin: 0 auto; }
+
+.ch-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 8px; overflow: hidden; }
+.ch-card.hidden { display: none; }
+.ch-header { padding: 12px 14px; cursor: pointer; display: flex; align-items: center; gap: 10px; user-select: none; }
+.ch-header:active { background: var(--bg); }
+.ch-chevron { font-size: 9px; color: var(--text-3); transition: transform .2s; flex-shrink: 0; width: 12px; }
+.ch-card.open .ch-chevron { transform: rotate(90deg); }
+.ch-info { flex: 1; min-width: 0; }
+.ch-name { font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ch-sub { font-size: 10px; color: var(--text-3); margin-top: 1px; font-family: 'DM Mono', monospace; }
+.ch-badge { font-size: 10px; font-family: 'DM Mono', monospace; font-weight: 500; padding: 3px 8px; border-radius: var(--radius-sm); background: var(--bg); border: 1px solid var(--border); color: var(--text-2); flex-shrink: 0; transition: all .2s; }
+.ch-badge.done { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
+
+.items-wrap { display: none; border-top: 1px solid var(--border); }
+.ch-card.open .items-wrap { display: block; }
+
+.item-row { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
+.item-row:last-child { border-bottom: none; }
+.item-row.hidden { display: none; }
+.item-top { display: flex; align-items: flex-start; gap: 7px; }
+.item-name { flex: 1; font-size: 12px; line-height: 1.5; color: var(--text); }
+.imp-badge { font-size: 9px; font-weight: 700; font-family: 'DM Mono', monospace; padding: 2px 5px; border-radius: 4px; flex-shrink: 0; margin-top: 2px; }
+.imp-A { background: var(--A-bg); color: var(--A-color); }
+.imp-B { background: var(--B-bg); color: var(--B-color); }
+.imp-C { background: var(--C-bg); color: var(--C-color); }
+
+.u-btns { display: flex; gap: 3px; flex-shrink: 0; }
+.ub { min-width: 34px; height: 32px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--bg); font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s; color: var(--text-3); font-family: 'Noto Sans JP', sans-serif; white-space: nowrap; padding: 0 4px; }
+.ub:active { transform: scale(.88); }
+.ub.sel-oo { background: #e8f7f0; border-color: #1a7a4a; color: #1a7a4a; }
+.ub.sel-o  { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
+.ub.sel-n  { background: #f0f0ee; border-color: #999; color: #555; }
+.ub.sel-x  { background: var(--x-bg); border-color: var(--x-color); color: var(--x-color); }
+.ub.sel-xx { background: #fde; border-color: #900; color: #900; font-weight: 700; }
+
+/* ── 復習評価ボタン（要復習タブ用）── */
+.review-eval-btns { display: flex; gap: 3px; flex-shrink: 0; align-items: center; }
+.ub-rev { width: 34px; height: 26px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--bg); font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s; color: var(--text-3); font-family: 'Noto Sans JP', sans-serif; }
+.ub-rev:active { transform: scale(.88); }
+.ub-rev.sel-o { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
+.ub-rev.sel-x { background: var(--x-bg); border-color: var(--x-color); color: var(--x-color); }
+
+.item-history { display: flex; gap: 4px; align-items: center; }
+.hist-dot-wrap { display: flex; align-items: center; gap: 2px; }
+.hist-label { font-size: 9px; color: var(--text-3); font-family: 'DM Mono', monospace; min-width: 20px; }
+.hist-dot { min-width: 22px; height: 18px; border-radius: 4px; font-size: 9px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg); color: var(--text-3); font-family: 'Noto Sans JP', sans-serif; font-weight: 700; padding: 0 2px; }
+.hist-dot.dot-oo { background: #e8f7f0; border-color: #1a7a4a; color: #1a7a4a; }
+.hist-dot.dot-o  { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
+.hist-dot.dot-n  { background: #f0f0ee; border-color: #999; color: #555; }
+.hist-dot.dot-x  { background: var(--x-bg); border-color: var(--x-color); color: var(--x-color); }
+.hist-dot.dot-xx { background: #fde; border-color: #900; color: #900; }
+
+.item-memo { width: 100%; font-size: 11px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 6px 9px; color: var(--text); font-family: 'Noto Sans JP', sans-serif; resize: none; outline: none; min-height: 28px; line-height: 1.5; transition: border-color .15s; }
+.item-memo:focus { border-color: var(--text); }
+.item-memo::placeholder { color: var(--text-3); }
+
+.urgency-wrap { display: flex; align-items: center; gap: 7px; }
+.urgency-score { font-size: 11px; font-weight: 700; font-family: 'DM Mono', monospace; min-width: 32px; flex-shrink: 0; }
+.urgency-track { flex: 1; height: 5px; background: var(--border); border-radius: 999px; overflow: hidden; }
+.urgency-fill { height: 100%; border-radius: 999px; transition: width .4s ease, background .4s ease; }
+
+.ch-footer { border-top: 1px solid var(--border); background: var(--bg); }
+.ch-footer-row { padding: 8px 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ch-stat { font-size: 20px; font-weight: 700; color: #1a3a6e; font-family: 'Zen Maru Gothic', sans-serif; letter-spacing: .02em; }
+.ch-stat-lbl { font-size: 9px; font-weight: 500; color: #7a8fa8; font-family: 'Noto Sans JP', sans-serif; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 1px; }
+.ch-record-btn { font-size: 11px; padding: 4px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-2); cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: all .15s; white-space: nowrap; }
+.ch-record-btn:hover { border-color: var(--text); color: var(--text); }
+.ch-record-form { display: none; padding: 10px 14px 14px; border-top: 1px solid var(--border); gap: 8px; flex-direction: column; }
+.ch-record-form.open { display: flex; }
+.ch-record-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ch-record-form-lbl { font-size: 10px; font-weight: 700; color: var(--text-2); display: block; margin-bottom: 3px; }
+.ch-record-input { width: 100%; background: var(--surface); border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text); font-family: 'Noto Sans JP', sans-serif; font-size: 13px; padding: 8px 10px; outline: none; -webkit-appearance: none; appearance: none; }
+.ch-record-input:focus { border-color: var(--text); }
+.ch-record-form-btns { display: flex; gap: 6px; }
+.ch-record-save { flex: 1; padding: 10px; border-radius: var(--radius-sm); border: none; background: var(--text); color: #fff; font-family: 'Noto Sans JP', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; }
+.ch-record-cancel { padding: 10px 14px; border-radius: var(--radius-sm); border: 1.5px solid var(--border-strong); background: transparent; color: var(--text-2); font-family: 'Noto Sans JP', sans-serif; font-size: 13px; cursor: pointer; }
+
+.next-round-wrap { padding: 14px; text-align: center; max-width: 700px; margin: 0 auto; }
+.next-round-btn { background: var(--text); color: #fff; border: none; border-radius: var(--radius); padding: 13px 28px; font-size: 13px; font-weight: 700; font-family: 'Noto Sans JP', sans-serif; cursor: pointer; letter-spacing: .04em; }
+
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 200; align-items: flex-end; justify-content: center; }
+.overlay.open { display: flex; }
+.scope-modal { background: var(--surface); border-radius: 16px 16px 0 0; padding: 20px 16px 44px; width: 100%; max-width: 700px; max-height: 80vh; overflow-y: auto; }
+.modal-handle { width: 32px; height: 3px; background: var(--border-strong); border-radius: 999px; margin: 0 auto 14px; }
+.scope-options { display: flex; flex-direction: column; gap: 8px; margin: 14px 0; }
+.scope-opt { padding: 13px 14px; border-radius: var(--radius); border: 1.5px solid var(--border-strong); background: var(--bg); font-size: 14px; font-weight: 700; font-family: 'Noto Sans JP', sans-serif; cursor: pointer; text-align: left; transition: all .15s; color: var(--text); }
+.scope-opt:hover { border-color: var(--text); }
+.scope-opt.sel { background: var(--text); color: #fff; border-color: var(--text); }
+.scope-opt .scope-sub { font-size: 11px; font-weight: 400; color: inherit; opacity: .7; display: block; margin-top: 2px; }
+.form-lbl { font-size: 11px; font-weight: 700; color: var(--text-2); display: block; margin-bottom: 4px; }
+.empty-state { text-align: center; padding: 48px 16px; color: var(--text-3); font-size: 13px; }
+
+.round-info-bar { display: flex; align-items: center; gap: 0; padding: 6px 16px 4px; border-top: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; }
+.round-info-bar::-webkit-scrollbar { display: none; }
+.ri-item { display: flex; flex-direction: column; align-items: flex-start; padding: 4px 12px 4px 0; min-width: 0; flex-shrink: 0; }
+.ri-item + .ri-item { border-left: 1px solid var(--border); padding-left: 12px; }
+.ri-lbl { font-size: 9px; font-weight: 700; color: var(--text-3); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 1px; }
+.ri-val { font-size: 13px; font-weight: 700; color: var(--text); font-family: 'DM Mono', monospace; white-space: nowrap; }
+.ri-val.warn { color: var(--x-color); }
+.ri-val.ok { color: var(--o-color); }
+.ri-deadline-btn { background: none; border: none; padding: 0; cursor: pointer; font-size: 13px; font-weight: 700; color: var(--text); font-family: 'DM Mono', monospace; text-decoration: underline dotted; text-underline-offset: 3px; }
+
+.hist-page-header { padding: 14px 0 10px; }
+.hist-page-title { font-size: 12px; font-weight: 700; color: var(--text-2); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 4px; }
+.hist-page-subtitle { font-size: 11px; color: var(--text-3); }
+.hist-chapter-block { margin-bottom: 20px; }
+.hist-chapter-title { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); padding: 6px 0; border-bottom: 1px solid var(--border); margin-bottom: 0; }
+.hist-table { width: 100%; border-collapse: collapse; }
+.hist-table tr { border-bottom: 1px solid var(--border); }
+.hist-table tr:last-child { border-bottom: none; }
+.hist-name-cell { padding: 8px 8px 8px 0; font-size: 11px; color: var(--text); line-height: 1.4; min-width: 0; width: 100%; }
+.hist-name-inner { display: flex; align-items: center; gap: 5px; }
+.hist-rounds-cell { padding: 6px 0 6px 8px; white-space: nowrap; }
+.hist-rounds-wrap { display: flex; gap: 4px; align-items: center; }
+.hist-round-col { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 36px; }
+.hist-round-lbl { font-size: 8px; color: var(--text-3); font-family: 'DM Mono', monospace; white-space: nowrap; }
+.hist-round-date { font-size: 7px; color: var(--text-3); font-family: 'DM Mono', monospace; white-space: nowrap; }
+.hist-round-chip { min-width: 32px; height: 22px; border-radius: 5px; font-size: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg); color: var(--text-3); font-family: 'Noto Sans JP', sans-serif; font-weight: 700; padding: 0 3px; }
+.hist-round-chip.chip-oo { background: #e8f7f0; border-color: #1a7a4a; color: #1a7a4a; }
+.hist-round-chip.chip-o  { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
+.hist-round-chip.chip-n  { background: #f0f0ee; border-color: #999; color: #555; }
+.hist-round-chip.chip-x  { background: var(--x-bg); border-color: var(--x-color); color: var(--x-color); }
+.hist-round-chip.chip-xx { background: #fde; border-color: #900; color: #900; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="header-meta">
+      <div class="app-title">管理会計論（計算）復習管理</div>
+      <div class="header-actions">
+        <button class="btn-icon" onclick="exportData()">バックアップ</button>
+        <button class="btn-icon" onclick="document.getElementById('import-input').click()">復元</button>
+        <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)">
+        <button class="btn-icon" id="weakness-btn" onclick="toggleWeaknessPage()">履歴一覧</button>
+      </div>
+    </div>
+    <div class="progress-row">
+      <div class="prog-num" id="prog-pct">0%</div>
+      <div class="prog-label" id="prog-lbl">0 / 0 完了</div>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="prog-bar" style="width:0%"></div></div>
+  </div>
+  <div class="tabs" id="round-tabs"></div>
+  <div class="round-info-bar" id="round-info-bar"></div>
+  <div class="view-tabs" id="view-tabs">
+    <button class="vtab active" onclick="setViewTab('all',this)">全問題</button>
+    <button class="vtab" onclick="setViewTab('wrong',this)">不正解</button>
+    <button class="vtab" onclick="setViewTab('urgent',this)">要復習</button>
+  </div>
+</div>
+
+<div id="main-view">
+  <div class="content" id="content"></div>
+  <div class="next-round-wrap" id="next-round-wrap" style="display:none;">
+    <button class="next-round-btn" onclick="openScopeModal()">次の回を始める →</button>
+  </div>
+</div>
+
+<div id="weakness-view" class="content" style="display:none;"></div>
+
+<div class="overlay" id="scope-overlay">
+  <div class="scope-modal">
+    <div class="modal-handle"></div>
+    <h2 id="scope-modal-title" style="font-size:14px;font-weight:700;margin-bottom:3px;"></h2>
+    <div style="font-size:11px;color:var(--text-2);margin-bottom:4px;">対象の重要度を選んでください</div>
+    <div class="scope-options">
+      <button class="scope-opt" onclick="selectScope('all')">全部（A・B）<span class="scope-sub">すべての問題を対象にする</span></button>
+      <button class="scope-opt" onclick="selectScope('A')">重要度 A のみ<span class="scope-sub">重点的にAを復習する</span></button>
+      <button class="scope-opt" onclick="selectScope('B')">重要度 A・B<span class="scope-sub">A・Bを対象にする</span></button>
+    </div>
+    <div style="margin-bottom:8px;">
+      <label class="form-lbl">開始日</label>
+      <input type="date" class="ch-record-input" id="scope-startdate" style="width:100%;" oninput="checkScopeConfirmBtn()">
+    </div>
+    <div style="margin-bottom:8px;">
+      <label class="form-lbl">期限（任意）</label>
+      <input type="date" class="ch-record-input" id="scope-deadline" style="width:100%;">
+    </div>
+    <button class="ch-record-save" id="scope-confirm-btn" style="width:100%;opacity:.4;pointer-events:none;">この設定で始める</button>
+  </div>
+</div>
+
+<div class="overlay" id="deadline-overlay">
+  <div class="scope-modal">
+    <div class="modal-handle"></div>
+    <h2 style="font-size:14px;font-weight:700;margin-bottom:12px;">期限を変更</h2>
+    <input type="date" class="ch-record-input" id="deadline-input" style="width:100%;margin-bottom:12px;">
+    <div style="display:flex;gap:8px;">
+      <button class="ch-record-cancel" onclick="closeDeadlineModal()" style="flex:1;">キャンセル</button>
+      <button class="ch-record-save" onclick="saveDeadline()" style="flex:2;">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA = [
+  {ch:"第1章", chName:"部門別計算", items:[
+    {id:"q1",  name:"Q-1　部門別計算", imp:"A"},
+  ]},
+  {ch:"第2章", chName:"個別原価計算", items:[
+    {id:"q2",  name:"Q-2　個別原価計算⑴", imp:"A"},
+    {id:"q3",  name:"Q-3　個別原価計算⑵", imp:"A"},
+    {id:"q4",  name:"Q-4　個別原価計算⑶", imp:"B"},
+  ]},
+  {ch:"第3章", chName:"総合原価計算", items:[
+    {id:"q5",  name:"Q-5　総合原価計算⑴", imp:"A"},
+    {id:"q6",  name:"Q-6　総合原価計算⑵", imp:"A"},
+    {id:"q7",  name:"Q-7　総合原価計算⑶", imp:"B"},
+    {id:"q8",  name:"Q-8　総合原価計算⑷", imp:"B"},
+    {id:"q9",  name:"Q-9　総合原価計算⑸", imp:"B"},
+    {id:"q10", name:"Q-10　総合原価計算⑹", imp:"B"},
+  ]},
+  {ch:"第4章", chName:"標準原価計算", items:[
+    {id:"q11", name:"Q-11　標準原価計算⑴", imp:"A"},
+    {id:"q12", name:"Q-12　標準原価計算⑵", imp:"A"},
+    {id:"q13", name:"Q-13　標準原価計算⑶", imp:"A"},
+    {id:"q14", name:"Q-14　標準原価計算⑷", imp:"A"},
+    {id:"q15", name:"Q-15　標準原価計算⑸", imp:"B"},
+    {id:"q16", name:"Q-16　標準原価計算⑹", imp:"A"},
+    {id:"q17", name:"Q-17　標準原価計算⑺", imp:"B"},
+    {id:"q18", name:"Q-18　標準原価計算⑻", imp:"C"},
+  ]},
+  {ch:"第5章", chName:"予算管理", items:[
+    {id:"q19", name:"Q-19　予算管理⑴", imp:"A"},
+    {id:"q20", name:"Q-20　予算管理⑵", imp:"B"},
+  ]},
+  {ch:"第6章", chName:"資金管理", items:[
+    {id:"q21", name:"Q-21　資金管理とキャッシュ・フロー管理⑴", imp:"A"},
+    {id:"q22", name:"Q-22　資金管理とキャッシュ・フロー管理⑵", imp:"B"},
+    {id:"q23", name:"Q-23　資金管理とキャッシュ・フロー管理⑶", imp:"B"},
+  ]},
+  {ch:"第7章", chName:"差額原価収益分析", items:[
+    {id:"q24", name:"Q-24　差額原価収益分析⑴", imp:"B"},
+    {id:"q25", name:"Q-25　差額原価収益分析⑵", imp:"C"},
+    {id:"q26", name:"Q-26　差額原価収益分析⑶", imp:"A"},
+  ]},
+  {ch:"第8章", chName:"設備投資の経済性計算", items:[
+    {id:"q27", name:"Q-27　設備投資の経済性計算⑴", imp:"A"},
+    {id:"q28", name:"Q-28　設備投資の経済性計算⑵", imp:"A"},
+    {id:"q29", name:"Q-29　設備投資の経済性計算⑶", imp:"A"},
+    {id:"q30", name:"Q-30　設備投資の経済性計算⑷", imp:"A"},
+  ]},
+  {ch:"第9章", chName:"原価管理", items:[
+    {id:"q31", name:"Q-31　原価管理⑴", imp:"A"},
+    {id:"q32", name:"Q-32　原価管理⑵", imp:"C"},
+    {id:"q33", name:"Q-33　原価管理⑶", imp:"C"},
+  ]},
+  {ch:"第10章", chName:"ABC", items:[
+    {id:"q34", name:"Q-34　ABC⑴", imp:"A"},
+    {id:"q35", name:"Q-35　ABC⑵", imp:"A"},
+    {id:"q36", name:"Q-36　ABC⑶", imp:"C"},
+  ]},
+  {ch:"第11章", chName:"分権組織とグループ経営", items:[
+    {id:"q37", name:"Q-37　分権組織とグループ経営の管理会計⑴", imp:"A"},
+    {id:"q38", name:"Q-38　分権組織とグループ経営の管理会計⑵", imp:"A"},
+    {id:"q39", name:"Q-39　分権組織とグループ経営の管理会計⑶", imp:"B"},
+  ]},
+  {ch:"第12章", chName:"財務情報分析", items:[
+    {id:"q40", name:"Q-40　財務情報分析", imp:"B"},
+  ]},
+];
+
+const STORE_KEY = 'kanri-keisan';
+let itemState = {}, chState = {}, appState = {rounds:[{label:'第1回', scope:'all', deadline:null, startDate:null}], currentRound:0};
+let showingWeakness = false;
+
+function load() {
+  try {
+    const i = localStorage.getItem(STORE_KEY + '-item');
+    const c = localStorage.getItem(STORE_KEY + '-ch');
+    const a = localStorage.getItem(STORE_KEY + '-app');
+    if (i) itemState = JSON.parse(i);
+    if (c) chState = JSON.parse(c);
+    if (a) appState = JSON.parse(a);
+  } catch(e) {}
+}
+
+function save() {
+  try {
+    localStorage.setItem(STORE_KEY + '-item', JSON.stringify(itemState));
+    localStorage.setItem(STORE_KEY + '-ch', JSON.stringify(chState));
+    localStorage.setItem(STORE_KEY + '-app', JSON.stringify(appState));
+  } catch(e) {}
+}
+
+function today() { return new Date().toISOString().split('T')[0]; }
+function curRound() { return appState.currentRound; }
+function curScope() { return (appState.rounds[curRound()] || {}).scope || 'all'; }
+function curDeadline() { return (appState.rounds[curRound()] || {}).deadline || null; }
+
+function itemInScope(item) {
+  if (item.imp === 'C') return false;
+  const scope = curScope();
+  if (scope === 'all') return true;
+  if (scope === 'A') return item.imp === 'A';
+  if (scope === 'B') return item.imp === 'A' || item.imp === 'B';
+  return true;
+}
+
+function scopedItems() { return DATA.flatMap(c => c.items).filter(itemInScope); }
+
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  return Math.ceil((new Date(dateStr).getTime() - Date.now()) / 86400000);
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const p = dateStr.split('-');
+  if (p.length < 3) return dateStr;
+  return `${parseInt(p[1])}月${parseInt(p[2])}日`;
+}
+
+function getItemR(id, round) {
+  const r = round !== undefined ? round : curRound();
+  return (itemState[id] || {})[r] || {};
+}
+
+function setItemR(id, data) {
+  if (!itemState[id]) itemState[id] = {};
+  itemState[id][curRound()] = data;
+}
+
+function getChR(key) { return (chState[String(key)] || {})[curRound()] || {}; }
+
+function chKey(ch) {
+  const n = ch.ch.match(/\d+/);
+  return n ? 'ch' + n[0] : ch.ch;
+}
+
+function calcUrgency(itemId) {
+  const r = getItemR(itemId);
+  // 復習○済みなら要復習から外す
+  if (r.reviewPassed === true) return null;
+  if (!r.u || !r.date) return null;
+  const item = DATA.flatMap(c => c.items).find(i => i.id === itemId);
+  if (!item || !itemInScope(item)) return null;
+
+  const impKey = item.imp === 'A' ? 'A' : 'B';
+
+  // 復習×後は復習専用日数で再カウント
+  if (r.reviewDate) {
+    const reviewDays = { 'A': 6, 'B': 13 };
+    const days = reviewDays[impKey];
+    const diff = Math.floor((Date.now() - new Date(r.reviewDate).getTime()) / 86400000);
+    return Math.min(100, Math.round(diff / days * 100));
+  }
+
+  // 学習時スコア別日数（この日数で80になる設定）
+  const LEARN_DAYS = {
+    'A': { 'oo': 13, 'o': 9, 'n': 6, 'x': 4, 'xx': 3 },
+    'B': { 'oo': 18, 'o': 14, 'n': 11, 'x': 9, 'xx': 6 },
+  };
+  const days = (LEARN_DAYS[impKey] || LEARN_DAYS['B'])[r.u] || 11;
+  const diff = Math.floor((Date.now() - new Date(r.date).getTime()) / 86400000);
+  return Math.min(100, Math.round(diff / days * 100));
+}
+
+function urgencyColor(score) {
+  if (score >= 80) return '#c0392b';
+  if (score >= 55) return '#e67e22';
+  if (score >= 30) return '#d4a017';
+  return '#1a7a4a';
+}
+
+let curViewTab = 'all';
+
+function setViewTab(tab, btn) {
+  curViewTab = tab;
+  document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updateItemTopButtons();
+  applyFilter();
+}
+
+// 全問題のitem-topボタンを現在のタブに合わせて切り替え
+function updateItemTopButtons() {
+  DATA.forEach(ch => {
+    ch.items.forEach(item => {
+      if (!itemInScope(item)) return;
+      const row = document.getElementById('irow-' + item.id);
+      if (!row) return;
+      const r = getItemR(item.id);
+      const urgency = calcUrgency(item.id);
+      const showRev = urgency !== null && curViewTab === 'urgent';
+      const rpR = r.reviewPassed === true;
+      const hasRXR = !rpR && !!r.reviewDate;
+      const uBtns = row.querySelector('.u-btns');
+      const revBtns = row.querySelector('.review-eval-btns');
+      if (showRev) {
+        if (uBtns) uBtns.style.display = 'none';
+        if (revBtns) {
+          revBtns.style.display = 'flex';
+          const [oBtn, xBtn] = revBtns.querySelectorAll('.ub-rev');
+          if (oBtn) oBtn.className = 'ub-rev' + (rpR ? ' sel-o' : '');
+          if (xBtn) xBtn.className = 'ub-rev' + (hasRXR ? ' sel-x' : '');
+        }
+      } else {
+        if (uBtns) uBtns.style.display = 'flex';
+        if (revBtns) revBtns.style.display = 'none';
+      }
+    });
+  });
+}
+
+function applyFilter() {
+  DATA.forEach(ch => {
+    const key = chKey(ch);
+    const card = document.getElementById('chcard-' + key);
+    if (!card) return;
+    let anyVisible = false;
+    ch.items.forEach(item => {
+      const row = document.getElementById('irow-' + item.id);
+      if (!row) return;
+      if (!itemInScope(item)) { row.style.display = 'none'; return; }
+      const u = getItemR(item.id).u;
+      let show = true;
+      if (curViewTab === 'wrong') show = u === 'x' || u === 'xx' || u === 'n';
+      else if (curViewTab === 'urgent') { const s = calcUrgency(item.id); show = s !== null && s >= 70; }
+      row.style.display = show ? '' : 'none';
+      if (show) anyVisible = true;
+    });
+    card.classList.toggle('hidden', !anyVisible);
+  });
+}
+
+function render() {
+  const ct = document.getElementById('content');
+  ct.innerHTML = '';
+  DATA.forEach(ch => {
+    const el = buildChCard(ch);
+    if (el) ct.appendChild(el);
+  });
+  renderRoundTabs();
+  updateProgress();
+  applyFilter();
+  updateNextRoundBtn();
+}
+
+function buildChCard(ch) {
+  const key = chKey(ch);
+  const r = getChR(key);
+  const scopedChItems = ch.items.filter(itemInScope);
+  const total = scopedChItems.length;
+  const done = scopedChItems.filter(i => getItemR(i.id).u).length;
+  const isDone = done === total && total > 0;
+  if (total === 0) return null;
+
+  const card = document.createElement('div');
+  card.className = 'ch-card';
+  card.id = 'chcard-' + key;
+
+  const aCount = ch.items.filter(i => i.imp === 'A').length;
+  const bCount = ch.items.filter(i => i.imp === 'B').length;
+  const cCount = ch.items.filter(i => i.imp === 'C').length;
+
+  const hd = document.createElement('div');
+  hd.className = 'ch-header';
+  hd.onclick = () => card.classList.toggle('open');
+  hd.innerHTML = `
+    <span class="ch-chevron">▶</span>
+    <div class="ch-info">
+      <div class="ch-name">${ch.ch}　${ch.chName}</div>
+      <div class="ch-sub">A:${aCount} B:${bCount} C:${cCount}</div>
+    </div>
+    <span class="ch-badge ${isDone ? 'done' : ''}" id="chprog-${key}">${done}/${total}</span>`;
+  card.appendChild(hd);
+
+  const iw = document.createElement('div');
+  iw.className = 'items-wrap';
+  ch.items.forEach(item => {
+    if (!itemInScope(item)) return;
+    iw.appendChild(buildItemRow(item));
+  });
+  card.appendChild(iw);
+
+  const ft = document.createElement('div');
+  ft.className = 'ch-footer';
+  ft.id = 'chfoot-' + key;
+  ft.innerHTML = buildChFooter(key, r);
+  card.appendChild(ft);
+
+  return card;
+}
+
+function buildChFooter(key, r) {
+  let statHTML = '';
+  if (r.date) statHTML += `<span class="ch-stat"><span class="ch-stat-lbl">実施日</span>${formatDate(r.date)}</span>`;
+  if (r.time) statHTML += `<span class="ch-stat"><span class="ch-stat-lbl">所要時間</span>${r.time} 分</span>`;
+  return `
+    <div class="ch-footer-row">
+      ${statHTML}
+      <button class="ch-record-btn" onclick="toggleRecordForm('${key}')">実施記録</button>
+    </div>
+    <div class="ch-record-form" id="chform-${key}">
+      <div class="ch-record-form-row">
+        <div>
+          <label class="ch-record-form-lbl">実施日</label>
+          <input type="date" class="ch-record-input" id="ch-date-${key}" value="${r.date || ''}">
+        </div>
+        <div>
+          <label class="ch-record-form-lbl">所要時間（分）</label>
+          <input type="text" inputmode="numeric" pattern="[0-9]*" class="ch-record-input" id="ch-time-${key}" placeholder="例: 45" value="${r.time || ''}">
+        </div>
+      </div>
+      <div class="ch-record-form-btns">
+        <button class="ch-record-cancel" onclick="toggleRecordForm('${key}')">キャンセル</button>
+        <button class="ch-record-save" onclick="saveRecord('${key}')">保存</button>
+      </div>
+    </div>`;
+}
+
+function toggleRecordForm(key) {
+  const form = document.getElementById('chform-' + key);
+  if (!form) return;
+  const isOpen = form.classList.contains('open');
+  document.querySelectorAll('.ch-record-form.open').forEach(f => f.classList.remove('open'));
+  if (!isOpen) form.classList.add('open');
+}
+
+function saveRecord(key) {
+  const dateEl = document.getElementById('ch-date-' + key);
+  const timeEl = document.getElementById('ch-time-' + key);
+  if (!dateEl || !timeEl) return;
+  const dateVal = dateEl.value;
+  const timeVal = timeEl.value;
+  if (!chState[key]) chState[key] = {};
+  chState[key][curRound()] = { date: dateVal, time: timeVal };
+  save();
+  const foot = document.getElementById('chfoot-' + key);
+  if (foot) foot.innerHTML = buildChFooter(key, { date: dateVal, time: timeVal });
+}
+
+function buildItemRow(item) {
+  const r = getItemR(item.id);
+  const u = r.u || null;
+
+  const totalRounds = appState.rounds.length;
+  let histHTML = '';
+  if (totalRounds > 1) {
+    histHTML = `<div class="item-history">`;
+    for (let ri = 0; ri < totalRounds; ri++) {
+      const rd = getItemR(item.id, ri);
+      const ru = rd.u || null;
+      const label = (appState.rounds[ri].label || '').replace('第','').replace('回','');
+      const cls = ru ? 'dot-' + ru : '';
+      const sym = ru === 'oo' ? '○○' : ru === 'o' ? '○' : ru === 'n' ? 'ー' : ru === 'x' ? '×' : ru === 'xx' ? '××' : '–';
+      histHTML += `<div class="hist-dot-wrap"><div class="hist-label">${label}回</div><div class="hist-dot ${cls}">${sym}</div></div>`;
+    }
+    histHTML += `</div>`;
+  }
+
+  const urgency = calcUrgency(item.id);
+  const rp = r.reviewPassed === true;
+  const hasReviewX = !rp && !!r.reviewDate;
+  const showReviewEval = urgency !== null && curViewTab === 'urgent';
+
+  const urgencyHTML = urgency !== null ? `
+    <div class="urgency-wrap" id="urg-${item.id}">
+      <span class="urgency-score" style="color:${urgencyColor(urgency)}">${urgency}</span>
+      <div class="urgency-track"><div class="urgency-fill" style="width:${urgency}%;background:${urgencyColor(urgency)}"></div></div>
+    </div>` : '';
+
+  const row = document.createElement('div');
+  row.className = 'item-row';
+  row.id = 'irow-' + item.id;
+  row.innerHTML = `
+    <div class="item-top">
+      <span class="item-name">${item.name}</span>
+      <span class="imp-badge imp-${item.imp}">${item.imp}</span>
+      <div class="u-btns" style="${showReviewEval ? 'display:none' : ''}">
+        <button class="ub ${u==='oo'?'sel-oo':''}" onclick="setU('${item.id}','oo')">○○</button>
+        <button class="ub ${u==='o' ?'sel-o' :''}" onclick="setU('${item.id}','o')" >○</button>
+        <button class="ub ${u==='n' ?'sel-n' :''}" onclick="setU('${item.id}','n')" >ー</button>
+        <button class="ub ${u==='x' ?'sel-x' :''}" onclick="setU('${item.id}','x')" >×</button>
+        <button class="ub ${u==='xx'?'sel-xx':''}" onclick="setU('${item.id}','xx')">××</button>
+      </div>
+      <div class="review-eval-btns" style="${showReviewEval ? '' : 'display:none'}">
+        <button class="ub-rev${rp ? ' sel-o' : ''}" onclick="reviewItem('${item.id}','o')">○</button>
+        <button class="ub-rev${hasReviewX ? ' sel-x' : ''}" onclick="reviewItem('${item.id}','x')">×</button>
+      </div>
+    </div>
+    ${urgencyHTML}
+    ${histHTML}
+    <textarea class="item-memo" placeholder="間違えた箇所・メモ..." rows="1"
+      onchange="saveMemo('${item.id}',this.value)"
+      oninput="autoResize(this)">${r.memo||''}</textarea>`;
+  return row;
+}
+
+function getRoundStats(roundIdx) {
+  let totalMins = 0;
+  Object.keys(chState).forEach(key => {
+    const rec = (chState[key] || {})[roundIdx];
+    if (rec && rec.time) totalMins += parseInt(rec.time) || 0;
+  });
+  let lastDate = null;
+  Object.keys(chState).forEach(key => {
+    const rec = (chState[key] || {})[roundIdx];
+    if (rec && rec.date) {
+      if (!lastDate || rec.date > lastDate) lastDate = rec.date;
+    }
+  });
+  const rd = appState.rounds[roundIdx] || {};
+  let dayCount = null;
+  if (rd.startDate && lastDate) {
+    const d1 = new Date(rd.startDate);
+    const d2 = new Date(lastDate);
+    dayCount = Math.round((d2 - d1) / 86400000) + 1;
+  }
+  return { totalMins, dayCount };
+}
+
+function fmtTime(mins) {
+  if (mins === 0) return null;
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return h > 0 ? `${h}時間${m > 0 ? m + '分' : ''}` : `${m}分`;
+}
+
+function renderRoundTabs() {
+  const tabs = document.getElementById('round-tabs');
+  tabs.innerHTML = '';
+  appState.rounds.forEach((rd, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'tab' + (i === curRound() ? ' active' : '');
+    const scopeTag = rd.scope === 'A' ? '(A)' : rd.scope === 'B' ? '(A·B)' : '(全)';
+    const stats = getRoundStats(i);
+    const timePart = fmtTime(stats.totalMins);
+    const dayPart = stats.dayCount !== null ? `${stats.dayCount}日` : null;
+    const statStr = (dayPart || timePart) ? ' · ' + [dayPart, timePart].filter(Boolean).join(' ') : '';
+    btn.textContent = (rd.label || `第${i+1}回`) + scopeTag + statStr;
+    btn.onclick = () => switchRound(i);
+    tabs.appendChild(btn);
+  });
+}
+
+function switchRound(i) {
+  appState.currentRound = i;
+  save();
+  render();
+}
+
+function updateProgress() {
+  const items = scopedItems();
+  const total = items.length;
+  const done = items.filter(i => getItemR(i.id).u).length;
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-lbl').textContent = `${done} / ${total} 完了`;
+  document.getElementById('prog-bar').style.width = pct + '%';
+  updateRoundInfoBar(pct);
+}
+
+function updateRoundInfoBar(pct) {
+  const bar = document.getElementById('round-info-bar');
+  if (!bar) return;
+  const rd = appState.rounds[curRound()] || {};
+  const scopeLabel = rd.scope === 'A' ? 'A のみ' : rd.scope === 'B' ? 'A・B' : '全部';
+  const dl = rd.deadline;
+  const days = daysUntil(dl);
+  const daysStr = days === null ? '未設定' : days < 0 ? `${Math.abs(days)}日超過` : `残り${days}日`;
+  const daysClass = days === null ? '' : days <= 7 ? 'warn' : 'ok';
+
+  const items = scopedItems();
+  const remaining = items.filter(i => !getItemR(i.id).u).length;
+  let paceHTML = '';
+  if (days !== null && days > 0) {
+    const perDay = remaining / days;
+    const basePace = rd.basePace || (items.length / days);
+    const ratio = perDay / basePace;
+    const paceClass = ratio > 1.2 ? 'warn' : ratio > 1.0 ? '' : 'ok';
+    const perDayStr = perDay >= 10 ? Math.round(perDay) + '問' : perDay.toFixed(1) + '問';
+    const diff = perDay - basePace;
+    const diffStr = diff > 0.05 ? '+' + diff.toFixed(1) + '問/日' : diff < -0.05 ? diff.toFixed(1) + '問/日' : '基準通り';
+    const diffStyle = diff > 0.05 ? 'color:var(--x-color)' : diff < -0.05 ? 'color:var(--o-color)' : 'color:var(--text-3)';
+    paceHTML = `<div class="ri-item"><span class="ri-lbl">1日ペース</span><span class="ri-val ${paceClass}">${perDayStr}<span style="font-size:10px;font-weight:500;margin-left:4px;${diffStyle}">(${diffStr})</span></span></div>`;
+  } else if (days !== null && days <= 0) {
+    paceHTML = `<div class="ri-item"><span class="ri-lbl">1日ペース</span><span class="ri-val warn">期限超過</span></div>`;
+  }
+
+  bar.innerHTML = `
+    <div class="ri-item"><span class="ri-lbl">回</span><span class="ri-val">${rd.label || ''}</span></div>
+    <div class="ri-item"><span class="ri-lbl">対象</span><button class="ri-deadline-btn" onclick="openScopeModal(curRound()===0)">${scopeLabel}</button></div>
+    <div class="ri-item"><span class="ri-lbl">期限</span><button class="ri-deadline-btn" onclick="openDeadlineModal()">${dl ? formatDate(dl) : '未設定'}</button></div>
+    <div class="ri-item"><span class="ri-lbl">残り</span><span class="ri-val ${daysClass}">${daysStr}</span></div>
+    <div class="ri-item"><span class="ri-lbl">進捗</span><span class="ri-val">${pct}%</span></div>
+    ${paceHTML}`;
+}
+
+function updateNextRoundBtn() {
+  const items = scopedItems();
+  const total = items.length;
+  const done = items.filter(i => getItemR(i.id).u).length;
+  const pct = total ? done / total * 100 : 0;
+  document.getElementById('next-round-wrap').style.display = pct >= 70 ? 'block' : 'none';
+}
+
+function setU(itemId, type) {
+  const r = getItemR(itemId);
+  if (r.u === type) { r.u = null; r.date = null; }
+  else { r.u = type; r.date = today(); }
+  setItemR(itemId, r);
+  save();
+  refreshItem(itemId);
+  refreshChProg(itemId);
+  updateProgress();
+  updateNextRoundBtn();
+}
+
+function saveMemo(itemId, val) {
+  const r = getItemR(itemId);
+  r.memo = val;
+  setItemR(itemId, r);
+  save();
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+
+// ── 復習評価（要復習タブ専用）──
+// ○: 定着済み → 要復習タブから除外（reviewPassed = true）
+// ×: 再復習 → reviewDate をリセットして緊急度を再カウント開始
+function reviewItem(itemId, type) {
+  const r = getItemR(itemId);
+  if (type === 'o') {
+    r.reviewPassed = true;
+    r.reviewDate = today();
+  } else {
+    r.reviewPassed = false;
+    r.reviewDate = today();
+  }
+  setItemR(itemId, r);
+  save();
+  refreshItem(itemId);
+  applyFilter();
+}
+
+function refreshItem(itemId) {
+  const r = getItemR(itemId);
+  const row = document.getElementById('irow-' + itemId);
+  if (!row) return;
+
+  // 採点ボタンの状態更新
+  ['oo','o','n','x','xx'].forEach(t => {
+    const btn = row.querySelector(`.ub[onclick*="'${t}'"]`);
+    if (!btn) return;
+    btn.classList.remove('sel-oo','sel-o','sel-n','sel-x','sel-xx');
+    if (r.u === t) btn.classList.add('sel-' + t);
+  });
+
+  // 要復習タブ中かどうかでボタン切り替え
+  const urgency = calcUrgency(itemId);
+  const showReviewEvalR = urgency !== null && curViewTab === 'urgent';
+  const rpR = r.reviewPassed === true;
+  const hasRXR = !rpR && !!r.reviewDate;
+  const uBtns = row.querySelector('.u-btns');
+  const revBtns = row.querySelector('.review-eval-btns');
+  if (showReviewEvalR) {
+    if (uBtns) uBtns.style.display = 'none';
+    if (revBtns) {
+      revBtns.style.display = 'flex';
+      const [oBtn, xBtn] = revBtns.querySelectorAll('.ub-rev');
+      if (oBtn) oBtn.className = 'ub-rev' + (rpR ? ' sel-o' : '');
+      if (xBtn) xBtn.className = 'ub-rev' + (hasRXR ? ' sel-x' : '');
+    }
+  } else {
+    if (uBtns) uBtns.style.display = 'flex';
+    if (revBtns) revBtns.style.display = 'none';
+  }
+
+  // 緊急度バーの更新
+  const wrap = row.querySelector('.urgency-wrap');
+  function buildUrgencyEl(urgency, itemId) {
+    const color = urgencyColor(urgency);
+    const div = document.createElement('div');
+    div.className = 'urgency-wrap';
+    div.id = 'urg-' + itemId;
+    div.innerHTML = `
+      <span class="urgency-score" style="color:${color}">${urgency}</span>
+      <div class="urgency-track"><div class="urgency-fill" style="width:${urgency}%;background:${color}"></div></div>`;
+    return div;
+  }
+  if (urgency !== null) {
+    if (wrap) { wrap.replaceWith(buildUrgencyEl(urgency, itemId)); }
+    else {
+      const topEl = row.querySelector('.item-top');
+      if (topEl) topEl.insertAdjacentElement('afterend', buildUrgencyEl(urgency, itemId));
+    }
+  } else if (wrap) { wrap.remove(); }
+}
+
+function refreshChProg(itemId) {
+  const ch = DATA.find(c => c.items.find(i => i.id === itemId));
+  if (!ch) return;
+  const key = chKey(ch);
+  const scoped = ch.items.filter(itemInScope);
+  const total = scoped.length;
+  const done = scoped.filter(i => getItemR(i.id).u).length;
+  const isDone = done === total && total > 0;
+  const el = document.getElementById('chprog-' + key);
+  if (el) {
+    el.textContent = `${done}/${total}`;
+    el.className = 'ch-badge' + (isDone ? ' done' : '');
+  }
+}
+
+function toggleWeaknessPage() {
+  showingWeakness = !showingWeakness;
+  document.getElementById('main-view').style.display = showingWeakness ? 'none' : 'block';
+  document.getElementById('weakness-view').style.display = showingWeakness ? 'block' : 'none';
+  document.getElementById('view-tabs').style.display = showingWeakness ? 'none' : 'flex';
+  document.getElementById('weakness-btn').classList.toggle('active', showingWeakness);
+  if (showingWeakness) renderHistoryPage();
+}
+
+function renderHistoryPage() {
+  const view = document.getElementById('weakness-view');
+  const totalRounds = appState.rounds.length;
+  const roundHeaders = Array.from({length: totalRounds}, (_, i) => {
+    const rd = appState.rounds[i] || {};
+    return rd.label || `第${i+1}回`;
+  });
+  const roundStats = roundHeaders.map((label, i) => {
+    const stats = getRoundStats(i);
+    const rd = appState.rounds[i] || {};
+    const timePart = fmtTime(stats.totalMins);
+    const dayPart = stats.dayCount !== null ? `${stats.dayCount}日` : null;
+    const statStr = [dayPart, timePart].filter(Boolean).join(' / ');
+    const scopeTag = rd.scope === 'A' ? 'A' : rd.scope === 'B' ? 'A·B' : '全';
+    return { label, statStr, scopeTag };
+  });
+
+  let html = `<div class="hist-page-header">
+    <div class="hist-page-title">履歴一覧</div>
+    <div class="hist-page-subtitle">問題ごとの回答履歴 · 横に回が進む</div>
+  </div>`;
+  html += `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">`;
+  roundStats.forEach(({label, statStr, scopeTag}, i) => {
+    const isActive = i === curRound();
+    html += `<div style="background:${isActive ? 'var(--text)' : 'var(--surface)'};color:${isActive ? '#fff' : 'var(--text)'};border:1px solid ${isActive ? 'var(--text)' : 'var(--border)'};border-radius:var(--radius);padding:8px 12px;min-width:0;">
+      <div style="font-size:10px;font-weight:700;font-family:'DM Mono',monospace;margin-bottom:3px;opacity:${isActive ? '1' : '0.7'}">${label}（${scopeTag}）</div>
+      ${statStr ? `<div style="font-size:11px;font-family:'DM Mono',monospace;">${statStr}</div>` : `<div style="font-size:10px;opacity:0.5;">記録なし</div>`}
+    </div>`;
+  });
+  html += `</div>`;
+
+  DATA.forEach(ch => {
+    const scopedChItems = ch.items.filter(itemInScope);
+    if (scopedChItems.length === 0) return;
+    html += `<div class="hist-chapter-block">
+      <div class="hist-chapter-title">${ch.ch}　${ch.chName}</div>
+      <table class="hist-table"><tbody>`;
+    scopedChItems.forEach(item => {
+      const impCls = `imp-${item.imp}`;
+      const roundCols = roundHeaders.map((label, i) => {
+        const rd = (itemState[item.id] || {})[i] || {};
+        const u = rd.u || null;
+        const chipCls = u ? `chip-${u}` : '';
+        const sym = u === 'oo' ? '○○' : u === 'o' ? '○' : u === 'n' ? 'ー' : u === 'x' ? '×' : u === 'xx' ? '××' : '–';
+        const roundNum = label.replace('第','').replace('回','');
+        let dateStr = '';
+        if (rd.date) { const p = rd.date.split('-'); if (p.length === 3) dateStr = `${parseInt(p[1])}/${parseInt(p[2])}`; }
+        return `<div class="hist-round-col"><span class="hist-round-lbl">${roundNum}回</span><div class="hist-round-chip ${chipCls}">${sym}</div><span class="hist-round-date">${dateStr}</span></div>`;
+      }).join('');
+      html += `<tr>
+        <td class="hist-name-cell"><div class="hist-name-inner"><span class="imp-badge ${impCls}">${item.imp}</span><span>${item.name}</span></div></td>
+        <td class="hist-rounds-cell"><div class="hist-rounds-wrap">${roundCols}</div></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>`;
+  });
+  view.innerHTML = html;
+}
+
+let pendingScope = null;
+let pendingScopeIsFirst = false;
+
+function openScopeModal(isFirst) {
+  pendingScope = null;
+  pendingScopeIsFirst = isFirst || false;
+  const n = pendingScopeIsFirst ? 1 : appState.rounds.length + 1;
+  document.getElementById('scope-modal-title').textContent = `第${n}回を始める`;
+  if (pendingScopeIsFirst) {
+    const cur = appState.rounds[0] || {};
+    document.getElementById('scope-startdate').value = cur.startDate || today();
+    document.getElementById('scope-deadline').value = cur.deadline || '';
+    const curS = cur.scope || null;
+    document.querySelectorAll('.scope-opt').forEach(b => b.classList.remove('sel'));
+    if (curS) {
+      const idx = curS === 'all' ? 0 : curS === 'A' ? 1 : 2;
+      document.querySelectorAll('.scope-opt')[idx].classList.add('sel');
+      pendingScope = curS;
+      document.getElementById('scope-confirm-btn').style.opacity = '1';
+      document.getElementById('scope-confirm-btn').style.pointerEvents = 'auto';
+    } else {
+      document.getElementById('scope-confirm-btn').style.opacity = '.4';
+      document.getElementById('scope-confirm-btn').style.pointerEvents = 'none';
+    }
+  } else {
+    document.getElementById('scope-startdate').value = today();
+    document.getElementById('scope-deadline').value = '';
+    document.querySelectorAll('.scope-opt').forEach(b => b.classList.remove('sel'));
+    document.getElementById('scope-confirm-btn').style.opacity = '.4';
+    document.getElementById('scope-confirm-btn').style.pointerEvents = 'none';
+  }
+  document.getElementById('scope-overlay').classList.add('open');
+}
+
+function checkScopeConfirmBtn() {
+  const hasScope = !!pendingScope;
+  const hasStart = !!(document.getElementById('scope-startdate') && document.getElementById('scope-startdate').value);
+  const ok = hasScope && hasStart;
+  document.getElementById('scope-confirm-btn').style.opacity = ok ? '1' : '.4';
+  document.getElementById('scope-confirm-btn').style.pointerEvents = ok ? 'auto' : 'none';
+}
+
+function selectScope(scope) {
+  pendingScope = scope;
+  document.querySelectorAll('.scope-opt').forEach(b => b.classList.remove('sel'));
+  const idx = scope === 'all' ? 0 : scope === 'A' ? 1 : 2;
+  document.querySelectorAll('.scope-opt')[idx].classList.add('sel');
+  checkScopeConfirmBtn();
+}
+
+document.getElementById('scope-confirm-btn').onclick = function() {
+  if (!pendingScope) return;
+  const startDate = document.getElementById('scope-startdate').value || today();
+  const deadline = document.getElementById('scope-deadline').value || null;
+  const baseDays = deadline ? daysUntil(deadline) : null;
+  const baseTotal = DATA.flatMap(c => c.items).filter(item => {
+    if (item.imp === 'C') return false;
+    if (pendingScope === 'A') return item.imp === 'A';
+    if (pendingScope === 'B') return item.imp === 'A' || item.imp === 'B';
+    return true;
+  }).length;
+  const basePace = (baseDays && baseDays > 0) ? baseTotal / baseDays : null;
+  if (pendingScopeIsFirst) {
+    appState.rounds[0].scope = pendingScope;
+    appState.rounds[0].startDate = startDate;
+    appState.rounds[0].deadline = deadline;
+    appState.rounds[0].basePace = basePace;
+  } else {
+    const n = appState.rounds.length + 1;
+    appState.rounds.push({label: `第${n}回`, scope: pendingScope, startDate, deadline, basePace});
+    appState.currentRound = appState.rounds.length - 1;
+  }
+  save();
+  document.getElementById('scope-overlay').classList.remove('open');
+  render();
+};
+
+document.getElementById('scope-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('scope-overlay')) document.getElementById('scope-overlay').classList.remove('open');
+});
+
+function openDeadlineModal() {
+  document.getElementById('deadline-input').value = curDeadline() || '';
+  document.getElementById('deadline-overlay').classList.add('open');
+}
+function closeDeadlineModal() { document.getElementById('deadline-overlay').classList.remove('open'); }
+function saveDeadline() {
+  const newDeadline = document.getElementById('deadline-input').value || null;
+  const rd = appState.rounds[curRound()];
+  rd.deadline = newDeadline;
+  const baseDays = newDeadline ? daysUntil(newDeadline) : null;
+  const baseTotal = scopedItems().length;
+  rd.basePace = (baseDays && baseDays > 0) ? baseTotal / baseDays : null;
+  save();
+  closeDeadlineModal();
+  updateProgress();
+}
+document.getElementById('deadline-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('deadline-overlay')) closeDeadlineModal();
+});
+
+load();
+render();
+if (!appState.rounds[0].startDate) {
+  openScopeModal(true);
+}
+
+function exportData() {
+  const data = {
+    version: 1, label: '管理会計論（計算）', exportedAt: new Date().toISOString(),
+    itemState: JSON.parse(localStorage.getItem(STORE_KEY + '-item') || '{}'),
+    chState: JSON.parse(localStorage.getItem(STORE_KEY + '-ch') || '{}'),
+    appState: JSON.parse(localStorage.getItem(STORE_KEY + '-app') || '{}'),
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'kanri_keisan_backup.json'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.itemState || !data.appState) throw new Error('invalid');
+      if (!confirm('現在のデータを上書きして復元しますか？')) return;
+      localStorage.setItem(STORE_KEY + '-item', JSON.stringify(data.itemState));
+      localStorage.setItem(STORE_KEY + '-ch', JSON.stringify(data.chState || {}));
+      localStorage.setItem(STORE_KEY + '-app', JSON.stringify(data.appState));
+      location.reload();
+    } catch(err) { alert('ファイルの読み込みに失敗しました。'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+</script>
+</body>
+</html>
