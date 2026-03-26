@@ -722,7 +722,7 @@ function calcUrgency(itemId) {
 
   // 学習時スコア別日数
   const LEARN_DAYS = {
-    'A': { 'oo': 13, 'o': 9, 'n': 6, 'x': 4, 'xx': 3 },
+    'A': { 'oo': 13, 'o': 9, 'n': 6, 'x': 4, 'xx': 2.85 },
     'B': { 'oo': 18, 'o': 14, 'n': 11, 'x': 9, 'xx': 6 },
   };
   const days = (LEARN_DAYS[impKey] || LEARN_DAYS['B'])[r.u] || 11;
