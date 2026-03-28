@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>財務会計論（計算）復習管理</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="財務計算">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="zaimu-manifest.json">
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/zaimu-sw.js');
+  }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Maru+Gothic:wght@700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f9f9f8;
+  --surface: #ffffff;
+  --border: #e8e8e5;
+  --border-strong: #d0d0cb;
+  --text: #111111;
+  --text-2: #666666;
+  --text-3: #aaaaaa;
+  --o-color: #1a7a4a;
+  --o-bg: #edf7f2;
+  --x-color: #c0392b;
+  --x-bg: #fdf0ee;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: var(--bg); color: var(--text);
+  min-height: 100vh; padding-bottom: 80px;
+  font-size: 14px; line-height: 1.5;
+}
+
+/* HEADER */
+.header { position: sticky; top: 0; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--border); }
+.header-top { padding: 12px 16px 10px; display: flex; justify-content: space-between; align-items: center; }
+.app-title { font-size: 11px; font-weight: 700; letter-spacing: .12em; color: var(--text-3); text-transform: uppercase; }
+.header-actions { display: flex; gap: 6px; }
+.btn-sm { padding: 5px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: transparent; color: var(--text-2); font-size: 11px; font-family: 'Noto Sans JP', sans-serif; font-weight: 500; cursor: pointer; transition: all .15s; }
+.btn-sm:hover, .btn-sm.active { background: var(--text); border-color: var(--text); color: #fff; }
+
+
+.imp-badge { font-size: 13px; font-weight: 700; font-family: 'Zen Maru Gothic', sans-serif; padding: 3px 8px; border-radius: 6px; flex-shrink: 0; }
+.imp-A { background: #fdf0ee; color: #c0392b; }
+.imp-B { background: #fdf4e3; color: #7c5c00; }
+.imp-hidden { display: none; }
+.tabs { display: flex; border-top: 1px solid var(--border); }
+.tab { flex: 1; padding: 10px 8px; font-size: 12px; font-weight: 700; font-family: 'Noto Sans JP', sans-serif; background: transparent; border: none; cursor: pointer; color: var(--text-3); border-bottom: 2px solid transparent; transition: all .15s; }
+.tab.active { color: var(--text); border-bottom-color: var(--text); }
+
+/* CONTENT */
+.content { padding: 12px 14px; max-width: 700px; margin: 0 auto; }
+
+/* CHAPTER GROUP */
+.ch-group { margin-bottom: 10px; }
+.ch-group-header { display: flex; align-items: center; gap: 8px; padding: 12px 14px; cursor: pointer; user-select: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+.ch-group.open .ch-group-header { border-radius: var(--radius) var(--radius) 0 0; background: var(--text); }
+.ch-group.open .ch-group-title { color: #fff; }
+.ch-group.open .ch-group-count { color: rgba(255,255,255,0.6); }
+.ch-group.open .ch-group-chevron { color: rgba(255,255,255,0.7); }
+.ch-group-header:active { background: var(--bg); }
+.ch-group-title { font-size: 15px; font-weight: 700; color: var(--text); flex: 1; }
+.ch-group-body { display: none; margin-left: 12px; border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--radius) var(--radius); overflow: hidden; }
+.ch-group.open .ch-group-body { display: block; }
+.ch-group-body .prob-card { border-radius: 0; border-left: none; border-right: none; border-top: none; margin-bottom: 0; }
+.ch-group-body .prob-card:last-child { border-bottom: none; }
+
+/* PROBLEM CARD */
+.prob-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 8px; overflow: hidden; }
+.prob-header { padding: 12px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+.prob-header:active { background: var(--bg); }
+
+/* 左側：タイトル + 問題番号 */
+.prob-left { flex: 1; min-width: 0; }
+.prob-title { font-size: 13px; font-weight: 700; }
+.prob-id-sub { font-size: 10px; color: var(--text-3); font-family: 'DM Mono', monospace; margin-top: 1px; }
+
+/* 右側：実施情報 横並び */
+.prob-right { display: flex; flex-direction: row; align-items: center; gap: 4px; flex-shrink: 0; }
+.prob-right-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.prob-right-item:nth-child(1) { min-width: 52px; }
+.prob-right-item:nth-child(2) { min-width: 48px; }
+.prob-right-item:nth-child(3) { min-width: 40px; }
+.prob-right-val { font-size: 17px; font-weight: 700; font-family: 'Zen Maru Gothic', sans-serif; line-height: 1; color: #1a3a6e; text-align: center; }
+.prob-right-eval-val { font-size: 17px; font-weight: 700; font-family: 'Zen Maru Gothic', sans-serif; line-height: 1; text-align: center; }
+.prob-right-lbl { font-size: 8px; color: var(--text-3); letter-spacing: .06em; text-transform: uppercase; font-family: 'DM Mono', monospace; }
+.eval-oo { color: #1a7a4a; }
+.eval-o  { color: var(--o-color); }
+.eval-n  { color: #777; }
+.eval-x  { color: var(--x-color); }
+.eval-xx { color: #900; }
+.eval-none { color: var(--text-3); }
+
+/* PROB DETAIL MODAL */
+.prob-detail-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 150; align-items: center; justify-content: center; padding: 20px; }
+.prob-detail-overlay.open { display: flex; }
+.prob-detail-modal { background: var(--surface); border-radius: 14px; width: 100%; max-width: 560px; max-height: 85vh; overflow-y: auto; box-shadow: 0 8px 40px rgba(0,0,0,.25); }
+.prob-detail-header { background: var(--bg); border-radius: 14px 14px 0 0; padding: 16px 16px 14px; position: sticky; top: 0; z-index: 1; border-bottom: 1px solid var(--border); }
+.prob-detail-title { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.4; margin-bottom: 10px; }
+.prob-detail-meta { display: flex; gap: 16px; align-items: center; }
+.prob-detail-close { position: absolute; top: 14px; right: 14px; background: rgba(0,0,0,0.08); border: none; color: var(--text-2); width: 28px; height: 28px; border-radius: 50%; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.prob-detail-body { padding: 0; }
+.prob-detail-hist { padding: 14px 16px; border-bottom: 1px solid var(--border); background: var(--bg); }
+.prob-detail-actions { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.prob-detail-sub { padding: 10px 16px; display: flex; gap: 6px; align-items: center; }
+.prob-detail-delete { padding: 10px 16px 16px; }
+
+/* 記録するボタン */
+.btn-record { width: 100%; padding: 13px; border-radius: var(--radius-sm); border: none; background: var(--text); color: #fff; font-family: 'Noto Sans JP', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; letter-spacing: .04em; }
+.btn-record:active { opacity: .85; }
+
+/* [修正2] hist-entry 系CSSの重複を削除し、1つにまとめた */
+.hist-empty { font-size: 11px; color: var(--text-3); text-align: center; padding: 10px 0; }
+.hist-entry { border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; overflow: hidden; }
+.hist-entry-header { padding: 8px 12px; display: flex; gap: 8px; align-items: center; background: var(--bg); }
+.hist-entry-num { font-size: 10px; font-weight: 700; color: var(--text-3); font-family: 'DM Mono', monospace; min-width: 20px; }
+.hist-entry-date { font-size: 10px; color: var(--text-3); font-family: 'DM Mono', monospace; }
+.hist-entry-time { font-size: 10px; color: var(--text-3); font-family: 'DM Mono', monospace; }
+.hist-entry-body { padding: 8px 12px; display: flex; flex-direction: column; gap: 4px; }
+.hist-ronten-row { display: flex; align-items: center; gap: 6px; }
+.hist-ronten-name { font-size: 11px; color: var(--text); flex: 1; line-height: 1.4; }
+
+.prob-meta-badge { font-size: 13px; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-family: 'Zen Maru Gothic', sans-serif; }
+.badge-oo { background: #e8f7f0; color: #1a7a4a; }
+.badge-o  { background: var(--o-bg); color: var(--o-color); }
+.badge-n  { background: #f0f0ee; color: #555; }
+.badge-x  { background: var(--x-bg); color: var(--x-color); }
+.badge-xx { background: #fde; color: #900; }
+.badge-none { background: var(--bg); color: var(--text-3); border: 1px solid var(--border); }
+
+/* サブコントロール */
+.prob-sub-controls { padding: 10px 14px 10px 24px; display: flex; gap: 6px; align-items: center; }
+.btn-sub { padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: transparent; color: var(--text-2); font-family: 'Noto Sans JP', sans-serif; font-size: 11px; cursor: pointer; white-space: nowrap; transition: all .15s; }
+.btn-sub:hover { border-color: var(--text); color: var(--text); }
+.move-btns { display: flex; gap: 2px; margin-left: auto; }
+.move-btn { width: 28px; height: 28px; border-radius: 4px; border: 1px solid var(--border-strong); background: var(--bg); color: var(--text-3); font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s; }
+.move-btn:hover { background: var(--text); color: #fff; border-color: var(--text); }
+.move-btn:disabled { opacity: .3; cursor: default; }
+.move-btn:disabled:hover { background: var(--bg); color: var(--text-3); border-color: var(--border-strong); }
+.del-btn { width: 28px; height: 28px; border-radius: 4px; border: 1px solid var(--border-strong); background: var(--bg); color: var(--text-3); font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s; }
+.del-btn:hover { background: var(--x-bg); color: var(--x-color); border-color: var(--x-color); }
+
+/* MODAL */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 300; align-items: flex-end; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--surface); border-radius: 16px 16px 0 0; padding: 20px 16px 44px; width: 100%; max-width: 700px; max-height: 85vh; overflow-y: auto; }
+.modal-handle { width: 32px; height: 3px; background: var(--border-strong); border-radius: 999px; margin: 0 auto 16px; }
+.modal-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.modal-subtitle { font-size: 11px; color: var(--text-2); margin-bottom: 16px; }
+.modal-step { display: none; }
+.modal-step.active { display: block; }
+
+/* step indicator */
+.step-indicator { display: flex; gap: 6px; align-items: center; margin-bottom: 16px; }
+.step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-strong); transition: background .2s; }
+.step-dot.active { background: var(--text); }
+.step-label { font-size: 11px; color: var(--text-3); font-family: 'DM Mono', monospace; }
+
+/* form elements */
+.form-section { margin-bottom: 14px; }
+.form-label { font-size: 11px; font-weight: 700; color: var(--text-2); display: block; margin-bottom: 5px; letter-spacing: .04em; }
+.form-input { width: 100%; background: var(--surface); border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text); font-family: 'Noto Sans JP', sans-serif; font-size: 13px; padding: 8px 10px; outline: none; -webkit-appearance: none; appearance: none; }
+.form-input:focus { border-color: var(--text); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* eval buttons */
+.u-btns { display: flex; gap: 3px; flex-wrap: wrap; }
+.ub { min-width: 44px; height: 34px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--bg); font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s; color: var(--text-3); font-family: 'Noto Sans JP', sans-serif; padding: 0 6px; }
+.ub:active { transform: scale(.9); }
+.ub.sel-oo { background: #e8f7f0; border-color: #1a7a4a; color: #1a7a4a; }
+.ub.sel-o  { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
+.ub.sel-n  { background: #f0f0ee; border-color: #999; color: #555; }
+.ub.sel-x  { background: var(--x-bg); border-color: var(--x-color); color: var(--x-color); }
+.ub.sel-xx { background: #fde; border-color: #900; color: #900; }
+.rb { min-width: 38px; height: 28px; border-radius: 4px; border: 1px solid var(--border-strong); background: var(--bg); font-size: 10px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s; color: var(--text-3); font-family: 'Noto Sans JP', sans-serif; padding: 0 4px; }
+.rb:active { transform: scale(.9); }
+.rb.sel-oo { background: #e8f7f0; border-color: #1a7a4a; color: #1a7a4a; }
+.rb.sel-o  { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
+.rb.sel-n  { background: #f0f0ee; border-color: #999; color: #555; }
+.rb.sel-x  { background: var(--x-bg); border-color: var(--x-color); color: var(--x-color); }
+.rb.sel-xx { background: #fde; border-color: #900; color: #900; }
+
+/* ronten item in modal */
+.modal-ronten-item { padding: 10px 0; border-bottom: 1px solid var(--border); }
+.modal-ronten-item:last-child { border-bottom: none; }
+.modal-ronten-name { font-size: 12px; color: var(--text); margin-bottom: 6px; line-height: 1.5; }
+
+/* modal buttons */
+.modal-btns { display: flex; gap: 8px; margin-top: 16px; }
+.btn-cancel { flex: 1; padding: 11px; border-radius: var(--radius-sm); border: 1.5px solid var(--border-strong); background: transparent; color: var(--text-2); font-family: 'Noto Sans JP', sans-serif; font-size: 13px; cursor: pointer; }
+.btn-next { flex: 2; padding: 11px; border-radius: var(--radius-sm); border: none; background: var(--text); color: #fff; font-family: 'Noto Sans JP', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; }
+.btn-next:disabled { opacity: .4; pointer-events: none; }
+
+/* RONTEN EDIT MODAL */
+.ronten-edit-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.ronten-edit-item { display: flex; align-items: center; gap: 6px; padding: 8px 10px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.ronten-edit-name { flex: 1; font-size: 12px; }
+.ronten-edit-del { width: 24px; height: 24px; border-radius: 4px; border: 1px solid var(--border-strong); background: transparent; color: var(--text-3); font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.ronten-edit-del:hover { background: var(--x-bg); color: var(--x-color); border-color: var(--x-color); }
+.ronten-add-row { display: flex; gap: 6px; }
+.ronten-add-input { flex: 1; background: var(--surface); border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text); font-family: 'Noto Sans JP', sans-serif; font-size: 12px; padding: 7px 10px; outline: none; }
+.ronten-add-input:focus { border-color: var(--text); }
+.btn-add-ronten { padding: 7px 12px; border-radius: var(--radius-sm); border: none; background: var(--text); color: #fff; font-family: 'Noto Sans JP', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+
+/* ADD PROBLEM */
+.add-section { background: var(--surface); border: 1px dashed var(--border-strong); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 8px; }
+.add-select { flex: 1; background: var(--surface); border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text); font-family: 'Noto Sans JP', sans-serif; font-size: 12px; padding: 7px 10px; outline: none; -webkit-appearance: none; appearance: none; }
+.btn-add { padding: 7px 14px; border-radius: var(--radius-sm); border: none; background: var(--text); color: #fff; font-family: 'Noto Sans JP', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+
+.ronten-ch-group { margin-bottom: 10px; }
+.ronten-ch-group-body { display: none; margin-left: 12px; border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--radius) var(--radius); overflow: hidden; }
+.ronten-ch-group.open .ronten-ch-group-body { display: block; }
+.ronten-ch-group .ch-group-header { border-radius: var(--radius); }
+.ronten-ch-group.open .ch-group-header { border-radius: var(--radius) var(--radius) 0 0; background: var(--text); }
+.ronten-ch-group.open .ch-group-title { color: #fff; }
+.ronten-ch-group.open .ch-group-count { color: rgba(255,255,255,0.6); }
+.ronten-ch-group.open .ch-group-chevron { color: rgba(255,255,255,0.7); }
+.ronten-ch-group-body .ronten-row { border-radius: 0; border-left: none; border-right: none; border-top: none; margin-bottom: 0; }
+.ronten-ch-group-body .ronten-row:last-child { border-bottom: none; }
+.ronten-row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 6px; overflow: hidden; }
+.ronten-row-header { padding: 8px 12px; display: flex; align-items: flex-start; gap: 8px; cursor: pointer; }
+.ronten-row-header:active { background: var(--bg); }
+.ronten-row-name { flex: 1; font-size: 12px; font-weight: 500; line-height: 1.4; }
+.ronten-row-latest { flex-shrink: 0; }
+.ronten-avg-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.ronten-avg-num { font-size: 9px; color: var(--text-3); font-family: 'DM Mono', monospace; }
+.ronten-row-body { display: none; border-top: 1px solid var(--border); padding: 8px 12px; overflow-x: auto; }
+.ronten-row.open .ronten-row-body { display: block; }
+.ronten-hist-table { display: flex; gap: 6px; }
+.ronten-hist-col { display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 52px; }
+.ronten-hist-prob { font-size: 9px; color: var(--text-3); font-family: 'DM Mono', monospace; text-align: center; white-space: nowrap; }
+.ronten-hist-date { font-size: 8px; color: var(--text-3); font-family: 'DM Mono', monospace; }
+.ronten-hist-chip { min-width: 36px; height: 22px; border-radius: 4px; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; font-family: 'Noto Sans JP', sans-serif; }
+.chip-oo { background: #e8f7f0; color: #1a7a4a; }
+.chip-o  { background: var(--o-bg); color: var(--o-color); }
+.chip-n  { background: #f0f0ee; color: #555; }
+.chip-x  { background: var(--x-bg); color: var(--x-color); }
+.chip-xx { background: #fde; color: #900; }
+.chip-none { background: var(--bg); color: var(--text-3); border: 1px solid var(--border); }
+
+/* URGENT TAB */
+.urgent-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 8px; }
+.urgent-review-btns { display: flex; gap: 8px; }
+.ub-rev { flex: 1; height: 38px; border-radius: var(--radius-sm); border: 1.5px solid var(--border-strong); background: var(--bg); font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s; color: var(--text-3); font-family: 'Noto Sans JP', sans-serif; }
+.ub-rev:active { transform: scale(.95); }
+.ub-rev.sel-x { background: var(--x-bg); border-color: var(--x-color); color: var(--x-color); }
+.ub-rev.sel-o-btn { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
+.urgency-wrap { display: flex; align-items: center; gap: 7px; margin-top: 6px; }
+.urgency-score { font-size: 11px; font-weight: 700; font-family: 'DM Mono', monospace; min-width: 32px; flex-shrink: 0; }
+.urgency-track { flex: 1; height: 5px; background: var(--border); border-radius: 999px; overflow: hidden; }
+.urgency-fill { height: 100%; border-radius: 999px; transition: width .4s ease; }
+.empty-state { text-align: center; padding: 48px 16px; color: var(--text-3); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="app-title">財務会計論（計算）復習管理</div>
+    <div class="header-actions">
+      <button class="btn-sm" onclick="exportData()">バックアップ</button>
+      <button class="btn-sm" onclick="document.getElementById('import-input').click()">復元</button>
+      <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)">
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="setTab('problems',this)">問題</button>
+    <button class="tab" onclick="setTab('ronten',this)">論点</button>
+    <button class="tab" onclick="setTab('urgent',this)">要復習</button>
+  </div>
+</div>
+
+<div id="tab-problems" class="content"></div>
+<div id="tab-ronten" class="content" style="display:none"></div>
+<div id="tab-urgent" class="content" style="display:none"></div>
+
+<!-- RECORD MODAL -->
+<div class="modal-overlay" id="record-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-subtitle" id="modal-subtitle"></div>
+    <div class="step-indicator">
+      <div class="step-dot active" id="step-dot-1"></div>
+      <div class="step-dot" id="step-dot-2"></div>
+      <div class="step-label" id="step-label">ステップ 1 / 2</div>
+    </div>
+
+    <!-- STEP 1: 問題評価 -->
+    <div class="modal-step active" id="modal-step1">
+      <div class="form-section">
+        <label class="form-label">問題の評価</label>
+        <div class="u-btns" id="modal-prob-btns">
+          <button class="ub" onclick="selectModalEval('oo')">○○</button>
+          <button class="ub" onclick="selectModalEval('o')">○</button>
+          <button class="ub" onclick="selectModalEval('n')">ー</button>
+          <button class="ub" onclick="selectModalEval('x')">×</button>
+          <button class="ub" onclick="selectModalEval('xx')">××</button>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-section">
+          <label class="form-label">実施日</label>
+          <input type="date" class="form-input" id="modal-date">
+        </div>
+        <div class="form-section">
+          <label class="form-label">所要時間（分）</label>
+          <input type="text" inputmode="numeric" class="form-input" id="modal-time" placeholder="例: 30">
+        </div>
+      </div>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeModal()">キャンセル</button>
+        <button class="btn-next" id="step1-next" onclick="goStep2()" disabled>次へ →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: 論点評価 -->
+    <div class="modal-step" id="modal-step2">
+      <div id="modal-ronten-list"></div>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="goStep1()">← 戻る</button>
+        <button class="btn-next" onclick="saveRecord()">記録する</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RONTEN EDIT MODAL -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="edit-modal-title"></div>
+    <div class="modal-subtitle" style="font-size:11px;color:var(--text-2);margin-bottom:14px;">論点を追加・削除できます（章の論点プールから選択）</div>
+    <div class="ronten-edit-list" id="ronten-edit-list"></div>
+    <div class="ronten-add-row">
+      <select class="add-select" id="ronten-add-select" style="flex:1;font-size:12px;padding:7px 10px;">
+        <option value="">論点を選択して追加...</option>
+      </select>
+      <button class="btn-add-ronten" onclick="addRonten()">追加</button>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeEditModal()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROB DETAIL MODAL -->
+<div class="prob-detail-overlay" id="prob-detail-overlay" onclick="closeProbDetail(event)">
+  <div class="prob-detail-modal">
+    <div class="prob-detail-header">
+      <button class="prob-detail-close" onclick="closeProbDetailDirect()">✕</button>
+      <div class="prob-detail-title" id="pd-title"></div>
+      <div class="prob-detail-meta" id="pd-meta"></div>
+    </div>
+    <div class="prob-detail-body">
+      <div class="prob-detail-hist" id="pd-hist"></div>
+      <div class="prob-detail-actions">
+        <button class="btn-record" id="pd-record-btn">記録する</button>
+      </div>
+      <div class="prob-detail-sub" id="pd-sub"></div>
+      <div class="prob-detail-delete" id="pd-delete"></div>
+    </div>
+  </div>
+</div>
+
+<!-- NEW PROBLEM MODAL -->
+<div class="modal-overlay" id="new-prob-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">問題を追加</div>
+    <div class="modal-subtitle" style="font-size:11px;color:var(--text-2);margin-bottom:14px;">章・問題名・論点を設定して追加します</div>
+
+    <div class="form-section">
+      <label class="form-label">章</label>
+      <select class="form-input" id="new-prob-ch" onchange="onNewProbChChange()">
+        <option value="">章を選択...</option>
+      </select>
+    </div>
+    <div class="form-section">
+      <label class="form-label">問題番号（任意）</label>
+      <input type="text" class="form-input" id="new-prob-num" placeholder="例：1-6、2-1 など">
+    </div>
+    <div class="form-section">
+      <label class="form-label">問題名</label>
+      <input type="text" class="form-input" id="new-prob-title" placeholder="例：有価証券の決算整理" oninput="checkNewProbBtn()">
+    </div>
+    <div class="form-section">
+      <label class="form-label">論点（章の論点プールから選択）</label>
+      <div class="ronten-edit-list" id="new-prob-ronten-list" style="margin-bottom:8px;"></div>
+      <div class="ronten-add-row">
+        <select class="add-select" id="new-prob-ronten-select" style="flex:1;font-size:12px;padding:7px 10px;">
+          <option value="">まず章を選択してください</option>
+        </select>
+        <button class="btn-add-ronten" onclick="addNewProbRonten()">追加</button>
+      </div>
+    </div>
+
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeNewProbModal()">キャンセル</button>
+      <button class="btn-next" id="new-prob-confirm" onclick="saveNewProblem()" style="opacity:.4;pointer-events:none;">追加する</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── 章ごとの論点プール（論点目次から） ──
+const CHAPTER_RONTEN_POOL = {
+  "第1章 有価証券": [
+    "有価証券の取得・売却","株式分割・株式併合","端数利息",
+    "その他資本剰余金の処分による配当を受けた場合","新株予約権付社債",
+    "売買目的有価証券の分類と評価","満期保有目的の債券の分類と評価",
+    "子会社株式及び関連会社株式の分類と評価",
+    "その他有価証券（全部純資産直入法）","その他有価証券（部分純資産直入法）",
+    "評価・換算差額等に係る税効果","貸借対照表の表示区分",
+    "償却原価法（利息法）","償却原価法（定額法）","市場価格のない株式等",
+    "有価証券の減損処理（市場価格のない株式等以外）","有価証券の減損処理（市場価格のない株式等）",
+    "損益計算書の表示（売却損益）","損益計算書の表示（評価損益）",
+    "損益計算書の表示（減損処理による評価損）","親会社株式",
+    "有価証券の保有目的区分の変更",
+  ],
+  "第2章 貸倒引当金": [
+    "一般債権","貸倒懸念債権","破産更生債権等",
+    "財務内容評価法","キャッシュ・フロー見積法",
+    "発生年度ごとの貸倒実績率の平均値による方法",
+    "合計残高ごとの貸倒実績率の平均値による方法",
+    "貸倒引当金の繰入れと取崩し","相殺適状",
+    "損益計算書の表示","貸借対照表の表示",
+  ],
+  "第5章 社債": [
+    "貸借対照表価額","貸借対照表の表示",
+    "償却原価法（利息法）","償却原価法（定額法）",
+    "一括償還社債（満期償還）","一括償還社債（買入償還）",
+    "分割償還社債（定時償還・抽選償還）","分割償還社債（繰上償還）",
+  ],
+  "第6章 純資産": [
+    "新株の発行等",
+    "剰余金の配当の原資と剰余金の配当に伴う準備金の積立て","現物配当",
+    "株主資本の計数の変動",
+    "自己株式の会計処理","自己株式の処分と新株の発行を同時に行った場合",
+    "その他資本剰余金の残高が負の値になった場合",
+    "評価・換算差額等の会計処理","土地再評価差額金",
+    "新株予約権の会計処理（発行者側）","自己新株予約権の会計処理",
+    "転換社債型新株予約権付社債","その他の新株予約権付社債",
+  ],
+  "第9章 外貨換算会計": [
+    "取引発生時の処理（通常の取引）","取引発生時の処理（前渡金・前受金を含む取引）",
+    "決済時の処理","決算時の処理（外貨建資産・負債の換算）",
+    "外貨建新株予約権","外貨建新株予約権付社債","換算差額・決済差額の表示",
+    "外貨建有価証券の評価（売買目的有価証券）",
+    "外貨建有価証券の評価（満期保有目的の債券）",
+    "外貨建有価証券の評価（子会社株式及び関連会社株式）",
+    "外貨建有価証券の評価（その他有価証券・債券以外）",
+    "外貨建有価証券の評価（その他有価証券・債券）",
+    "外貨建有価証券の評価（市場価格のない株式等）",
+    "外貨建有価証券の評価（貸借対照表の表示区分）",
+    "外貨建有価証券の減損処理（市場価格のない株式等以外）",
+    "外貨建有価証券の減損処理（市場価格のない株式等）",
+    "為替予約の振当処理（非資金取引・取引発生時以前）",
+    "為替予約の振当処理（非資金取引・取引発生時以後）",
+    "為替予約の振当処理（資金取引・取引発生時以前）",
+    "為替予約の振当処理（資金取引・取引発生時以後）",
+    "振当処理の適用範囲",
+    "外貨建債券等を外貨による非貨幣性資産等に再投資する場合",
+    "在外支店の外貨表示財務諸表項目の換算",
+  ],
+  "第10章 ストック・オプション等": [
+    "各会計期間における費用計上額の算定",
+    "複数の権利確定条件が付されている場合",
+    "段階的に権利行使が可能となるストック・オプション",
+    "権利行使された場合","権利不行使による失効が生じた場合",
+    "公正な評価単価を変動させる条件変更",
+    "ストック・オプション数を変動させる条件変更",
+    "費用の合理的な計上期間を変動させる条件変更",
+    "取締役の報酬等として株式を無償交付する取引（事前交付型・新株の発行）",
+    "取締役の報酬等として株式を無償交付する取引（事前交付型・自己株式の処分）",
+    "取締役の報酬等として株式を無償交付する取引（事後交付型・新株の発行）",
+    "取締役の報酬等として株式を無償交付する取引（事後交付型・自己株式の処分）",
+    "有償ストック・オプション（費用計上額の算定）",
+    "有償ストック・オプション（新株予約権の会計処理）",
+    "有償ストック・オプション（権利不確定による失効が生じた場合）",
+  ],
+  "第11章 資産除去債務": [
+    "資産除去債務の基本的な会計処理",
+    "割引前将来キャッシュ・フローの見積り","割引率の選択",
+    "割引前将来キャッシュ・フローが増加する場合",
+    "割引前将来キャッシュ・フローが減少する場合",
+    "資産除去債務が複数の有形固定資産から構成される場合",
+    "資産除去債務が使用の都度発生する場合",
+    "賃借契約に関連して敷金を支出している場合の容認処理",
+  ],
+  "第12章 収益認識": [
+    "契約変更",
+    "財またはサービスに対する保証","本人と代理人の区分",
+    "追加の財またはサービスを取得するオプションの付与",
+    "顧客により行使されない権利（非行使部分）",
+    "第三者のために回収する額","変動対価","契約における重要な金融要素",
+    "顧客に支払われる対価","返品権付きの販売",
+    "値引きの配分","変動対価の配分",
+    "一定の期間にわたり充足される履行義務",
+    "一時点で充足される履行義務",
+    "買戻契約","委託販売契約","請求済未出荷契約","工事損失引当金",
+    "契約資産・契約負債及び顧客との契約から生じた債権",
+  ],
+  "第13章 金融商品会計": [
+    "金融資産及び金融負債の発生の認識",
+    "財務構成要素アプローチ","ローン・パーティシペーション",
+    "消滅に該当しない取引（クロス取引・有価証券の現先取引）","消滅の会計処理",
+    "ゴルフ会員権","運用目的の金銭の信託",
+    "コマーシャル・ペーパー（CP）","譲渡性預金（CD）",
+    "未収利息の不計上","有価証券の空売り","有価証券の貸借","建設協力金",
+  ],
+  "第14章 デリバティブ取引・ヘッジ会計": [
+    "先物取引・先渡取引","オプション取引","スワップ取引",
+    "ヘッジ会計（繰延ヘッジ）","ヘッジ会計（時価ヘッジ）",
+    "ヘッジ会計の中止","ヘッジ会計の終了",
+    "金利スワップの特例処理","予定取引",
+  ],
+  "第15章 リース会計（旧基準）": [
+    "リース取引の分類",
+    "所有権移転ファイナンス・リース（借手）",
+    "所有権移転外ファイナンス・リース（借手）",
+    "リース資産・リース債務計上額の算定",
+    "利息相当額の計算（利息法）","利息相当額の計算（定額法）",
+    "維持管理費用相当額","割安購入選択権","残価保証",
+    "ファイナンス・リース取引の中途解約","貸借対照表の表示（借手）",
+    "貸手の会計処理（所有権移転・リース取引開始日に売上高と売上原価を計上）",
+    "貸手の会計処理（所有権移転・リース料受取時に売上高と売上原価を計上）",
+    "貸手の会計処理（所有権移転・売上高を計上せずに利息相当額を各期へ配分）",
+    "貸手の会計処理（所有権移転外・リース取引開始日に売上高と売上原価を計上）",
+    "貸手の会計処理（所有権移転外・リース料受取時に売上高と売上原価を計上）",
+    "貸手の会計処理（所有権移転外・売上高を計上せずに利息相当額を各期へ配分）",
+    "見積残存価額",
+    "貸手の製作価額または現金購入価額と借手に対する現金販売価額に差がある場合",
+    "貸借対照表の表示（貸手）",
+    "セール・アンド・リースバック取引","転リース取引",
+  ],
+  "第15-2章 リース会計（新基準）": [
+    "リースを構成する部分とリースを構成しない部分の区分","リース期間",
+    "使用権資産・リース負債計上額の算定",
+    "使用権資産の減価償却（所有権が借手に移転すると認められるリース）",
+    "使用権資産の減価償却（所有権が借手に移転すると認められるリース以外）",
+    "変動リース料","残価保証","購入オプション",
+    "リースの契約条件の変更（独立したリースとして会計処理を行うケース）",
+    "リースの契約条件の変更（リース負債の計上額の見直しを行うケース）",
+    "リースの契約条件を伴わないリース負債の見直し","貸借対照表の表示（借手）",
+    "貸手のリースの分類",
+    "所有権移転ファイナンス・リース（製造または販売を事業とする貸手）",
+    "所有権移転ファイナンス・リース（製造または販売以外を事業とする貸手）",
+    "所有権移転外ファイナンス・リース（製造または販売を事業とする貸手）",
+    "所有権移転外ファイナンス・リース（製造または販売以外を事業とする貸手）",
+    "所有権移転外ファイナンス・リース（事業の一環以外で行うリース）",
+    "所有権移転外ファイナンス・リース（残価保証）","貸借対照表の表示（貸手）",
+    "セール・アンド・リースバック取引","サブリース取引","転リース取引","建設協力金",
+  ],
+  "第16章 退職給付会計（個別財務諸表）": [
+    "退職給付見込額の配分方法（期間定額基準）",
+    "退職給付見込額の配分方法（給付算定式基準）",
+    "退職給付債務の見積り","前払年金費用の計上","退職給付費用の算定",
+    "従業員拠出がある企業年金制度","数理計算上の差異","過去勤務費用",
+    "退職給付信託","年金資産の返還","簡便法","退職給付制度の終了","退職給付債務の増減",
+  ],
+  "第17章 固定資産の減損会計": [
+    "減損会計の手続一巡","減損損失の配分",
+    "将来キャッシュ・フローの見積り方法",
+    "固定資産の減損会計における将来キャッシュ・フローの見積りと資産除去債務",
+    "割引前将来キャッシュ・フローの見積期間（経済的残存使用年数≦20年）",
+    "割引前将来キャッシュ・フローの見積期間（経済的残存使用年数＞20年）",
+    "他の構成資産に係るキャッシュ・フロー","使用価値の算定",
+    "共用資産の減損処理（通常のケース）",
+    "共用資産の減損処理（帳簿価額と正味売却価額の差額を超過するケース）",
+    "共用資産の帳簿価額を各資産または資産グループに配分する方法",
+    "のれんの帳簿価額の分割","のれんの減損処理（通常のケース）",
+    "のれんの減損処理（のれんの帳簿価額を超過するケース）",
+    "のれんの帳簿価額を各資産または資産グループに配分する方法",
+  ],
+  "第18章 研究開発費・ソフトウェア": [
+    "研究開発費の会計処理","特定の研究開発目的資産",
+    "市場販売目的のソフトウェア（資産計上額の算定）",
+    "市場販売目的のソフトウェア（減価償却）",
+    "自社利用のソフトウェア（導入費用）","自社利用のソフトウェア（減価償却）",
+  ],
+  "第19章 税効果会計（個別財務諸表）": [
+    "法定実効税率","将来減算一時差異","将来加算一時差異","繰越欠損金",
+    "繰延税金資産及び繰延税金負債の計上（評価・換算差額等以外）",
+    "繰延税金資産及び繰延税金負債の計上（評価・換算差額等）",
+    "貸借対照表の表示","税率の変更",
+    "繰延税金資産の回収可能性（簡便的な計算）",
+    "繰延税金資産の回収可能性（スケジューリング）",
+    "繰延税金資産の回収可能性（繰越欠損金等）",
+  ],
+  "第20章 株主資本等変動計算書": [
+    "株主資本の各項目",
+    "株主資本以外の各項目（原則・当期変動額を純額で表示）",
+    "株主資本以外の各項目（容認・当期変動額について主な変動事由ごとにその金額を表示）",
+  ],
+  "第21章 包括利益計算書（個別財務諸表）": [
+    "株主資本等変動計算書（株主資本の各項目）",
+    "株主資本等変動計算書（株主資本以外の各項目・原則）",
+    "株主資本等変動計算書（株主資本以外の各項目・容認）",
+    "包括利益計算書の様式（2計算書方式）","包括利益計算書の様式（1計算書方式）",
+    "その他の包括利益の算定",
+    "その他の包括利益の内訳に係る注記（当期発生額）",
+    "その他の包括利益の内訳に係る注記（組替調整額）",
+  ],
+  "第22章 会計上の変更及び誤謬の訂正": [
+    "会計方針の変更（会計処理）","会計方針の変更（比較情報）","表示方法の変更",
+    "会計上の見積りの変更（変更期間のみに影響する場合）",
+    "会計上の見積りの変更（将来の期間にも影響する場合）",
+    "会計方針の変更を会計上の見積りの変更と区別することが困難な場合の取扱い",
+    "過去の誤謬の訂正（会計処理）","過去の誤謬の訂正（比較情報）",
+    "会計上の見積りの変更と過去の誤謬の訂正の区別",
+  ],
+  "第23章 中間財務諸表": [
+    "原価差異の繰延","税金費用の計算","簡便的な会計処理",
+  ],
+  "第1章 連結会計基礎": [
+    "連結財務諸表の作成",
+    "追加取得","一部売却","段階取得による子会社化","持分法から連結への移行",
+    "連結から持分法への移行","連結除外",
+    "追加取得（その他の包括利益累計額あり）",
+    "一部売却（その他の包括利益累計額あり）",
+    "段階取得による子会社化（その他の包括利益累計額あり）",
+    "持分法から連結への移行（その他の包括利益累計額あり）",
+    "付随費用（支配獲得時）","付随費用（追加取得）","付随費用（一部売却）",
+    "付随費用（段階取得による子会社化）","付随費用（持分法から連結への移行）",
+    "評価差額の実現","アップ・ストリームと持分変動","子会社の増資",
+    "子会社の自己株式","子会社の新株予約権","負ののれん",
+    "資本剰余金が負の値となる場合","識別可能無形資産","条件付取得対価",
+    "のれんの一時償却","子会社の欠損","権利落ち株式",
+    "取引高・債権債務の相殺消去（営業取引）",
+    "取引高・債権債務の相殺消去（社債取引）",
+    "取引高・債権債務の相殺消去（その他）","未達取引",
+    "貸倒引当金の修正（アップ・ストリーム）","貸倒引当金の修正（ダウン・ストリーム）",
+    "未実現利益の消去・棚卸資産（アップ・ストリーム）",
+    "未実現利益の消去・棚卸資産（ダウン・ストリーム）",
+    "未実現利益の消去・償却性資産（アップ・ストリーム）",
+    "未実現利益の消去・償却性資産（ダウン・ストリーム）",
+    "未実現利益の消去・その他（アップ・ストリーム）",
+    "未実現利益の消去・その他（ダウン・ストリーム）",
+    "税効果・評価差額","税効果・未実現利益の消去","税効果・貸倒引当金の修正",
+    "税効果・社債償還損益","税効果・退職給付に係る調整累計額",
+    "税効果・子会社への投資に係る税効果","税効果・税率の変更","税効果・貸借対照表の表示",
+    "連結財務諸表における退職給付会計（未認識差異がないケース）",
+    "連結財務諸表における退職給付会計（未認識差異があるケース）",
+    "間接所有の子会社",
+    "在外子会社（持分変動・追加取得）","在外子会社（持分変動・一部売却）",
+    "在外子会社（未実現利益の消去）","子会社が保有する親会社株式",
+    "連結財務諸表における1株当たり情報","決算日の異なる子会社",
+    "持分法（基本的処理）",
+    "持分法・追加取得","持分法・一部売却","持分法・段階取得による関連会社化",
+    "持分法・その他の包括利益累計額（追加取得）",
+    "持分法・その他の包括利益累計額（一部売却）",
+    "持分法・その他の包括利益累計額（段階取得による関連会社化）",
+    "持分法・負ののれん","持分法・未実現利益の消去","持分法・付随費用",
+    "包括利益計算書（2計算書方式）","包括利益計算書（1計算書方式）",
+    "その他の包括利益（その他有価証券評価差額金）",
+    "その他の包括利益（退職給付に係る調整額）",
+    "その他の包括利益（為替換算調整勘定）",
+    "その他の包括利益（持分法適用会社に対する持分相当額）",
+    "その他の包括利益の内訳に係る注記（当期発生額）",
+    "その他の包括利益の内訳に係る注記（組替調整額）",
+  ],
+  "第9章 個別キャッシュ・フロー計算書": [
+    "資金の範囲",
+    "営業活動によるキャッシュ・フロー・直接法",
+    "営業活動によるキャッシュ・フロー・間接法",
+    "利息及び配当金の表示区分（損益計算の観点）",
+    "利息及び配当金の表示区分（活動区分の観点）",
+    "連結CF計算書・原則法（直接法）","連結CF計算書・原則法（間接法）",
+    "連結CF計算書・簡便法（間接法）",
+    "在外子会社の外貨表示キャッシュ・フローの換算",
+    "在外子会社を含む連結CF計算書・原則法（直接法）",
+    "在外子会社を含む連結CF計算書・原則法（間接法）",
+    "在外子会社を含む連結CF計算書・簡便法（間接法）",
+  ],
+  "第11章 企業結合①（取得）": [
+    "取得企業の決定",
+    "取得原価の算定（段階取得以外）","取得原価の算定（段階取得）",
+    "取得関連費用の取扱い","識別可能無形資産","企業結合に係る特定勘定",
+    "合併（通常の取得）","合併（逆取得）",
+    "株式交換（通常の取得）","株式交換（逆取得）","株式移転","合併比率等の算定",
+    "共通支配下・親会社による子会社の合併",
+    "共通支配下・親会社と子会社による株式交換",
+    "共通支配下・親会社と子会社による株式移転",
+    "共通支配下・子会社同士の合併（対価が株式のみ）",
+    "共通支配下・子会社同士の合併（対価が現金等の財産のみ）",
+    "共同支配企業の形成・完全子会社同士の合併",
+    "共同支配企業の形成・共同新設分割",
+  ],
+  "第13章 事業分離等": [
+    "事業分離（受取対価が現金等・分離先が子会社）",
+    "事業分離（受取対価が現金等・分離先が子会社・関連会社以外）",
+    "事業分離（受取対価が株式のみ・分離先が子会社）",
+    "事業分離（受取対価が株式のみ・分離先が新たに子会社・段階取得以外）",
+    "事業分離（受取対価が株式のみ・分離先が新たに子会社・段階取得）",
+    "事業分離（受取対価が株式のみ・分離先が新たに関連会社）",
+    "事業分離（受取対価が株式のみ・分離先が子会社・関連会社以外）",
+    "事業分離（受取対価が現金等の財産と株式・分離先が子会社）",
+    "共同新設分割（分離先が子会社になるケース）",
+    "共同新設分割（分離先が共同支配企業になるケース）",
+    "結合当事企業の株主の会計処理",
+  ],
+};
+
+// ── MASTER DATA ──
+const ALL_PROBLEMS = [
+  // 第1章 有価証券
+  { id:"1-1", ch:"第1章 有価証券", title:"有価証券の売買等①", imp:"B",
+    defaultRonten:["有価証券の取得・売却","株式分割・株式併合","その他資本剰余金の処分による配当を受けた場合"] },
+  { id:"1-2", ch:"第1章 有価証券", title:"有価証券の売買等②", imp:"B",
+    defaultRonten:["有価証券の取得・売却","端数利息","新株予約権付社債"] },
+  { id:"1-3", ch:"第1章 有価証券", title:"有価証券の評価①", imp:"A",
+    defaultRonten:["売買目的有価証券の分類と評価","満期保有目的の債券の分類と評価","子会社株式及び関連会社株式の分類と評価","その他有価証券（全部純資産直入法）","その他有価証券（部分純資産直入法）","評価・換算差額等に係る税効果","貸借対照表の表示区分"] },
+  { id:"1-4", ch:"第1章 有価証券", title:"有価証券の評価②", imp:"A",
+    defaultRonten:["その他有価証券（全部純資産直入法）","償却原価法（利息法）","償却原価法（定額法）","市場価格のない株式等","有価証券の減損処理（市場価格のない株式等以外）","有価証券の減損処理（市場価格のない株式等）","損益計算書の表示（売却損益）","損益計算書の表示（評価損益）","損益計算書の表示（減損処理による評価損）"] },
+  { id:"1-5", ch:"第1章 有価証券", title:"有価証券の保有目的区分の変更", imp:"B",
+    defaultRonten:["有価証券の保有目的区分の変更","その他有価証券（部分純資産直入法）","償却原価法（定額法）"] },
+
+  // 第2章 貸倒引当金
+  { id:"2-1", ch:"第2章 貸倒引当金", title:"貸倒引当金の会計処理①", imp:"B",
+    defaultRonten:["一般債権","貸倒懸念債権","破産更生債権等","財務内容評価法","キャッシュ・フロー見積法","貸倒引当金の繰入れと取崩し","損益計算書の表示","貸借対照表の表示"] },
+
+  // 第5章 社債
+  { id:"5-1", ch:"第5章 社債", title:"利息法による社債の償却・買入償還", imp:"B",
+    defaultRonten:["貸借対照表価額","償却原価法（利息法）","一括償還社債（買入償還）"] },
+
+  // 第6章 純資産
+  { id:"6-1", ch:"第6章 純資産", title:"株主資本・土地再評価差額金の仕訳", imp:"A",
+    defaultRonten:["新株の発行等","剰余金の配当の原資と剰余金の配当に伴う準備金の積立て","現物配当","株主資本の計数の変動","土地再評価差額金"] },
+  { id:"6-2", ch:"第6章 純資産", title:"自己株式", imp:"A",
+    defaultRonten:["自己株式の会計処理","自己株式の処分と新株の発行を同時に行った場合","その他資本剰余金の残高が負の値になった場合"] },
+  { id:"6-3", ch:"第6章 純資産", title:"新株予約権・自己新株予約権の仕訳", imp:"B",
+    defaultRonten:["新株予約権の会計処理（発行者側）","自己新株予約権の会計処理"] },
+  { id:"6-4", ch:"第6章 純資産", title:"新株予約権付社債", imp:"B",
+    defaultRonten:["転換社債型新株予約権付社債","その他の新株予約権付社債"] },
+  { id:"6-5", ch:"第6章 純資産", title:"純資産の総合問題", imp:"B",
+    defaultRonten:["新株の発行等","剰余金の配当の原資と剰余金の配当に伴う準備金の積立て","株主資本の計数の変動","自己株式の会計処理","評価・換算差額等の会計処理"] },
+
+  // 第9章 外貨換算会計
+  { id:"9-1", ch:"第9章 外貨換算会計", title:"取引発生時・決済時・決算時の処理", imp:"A",
+    defaultRonten:["取引発生時の処理（通常の取引）","取引発生時の処理（前渡金・前受金を含む取引）","決済時の処理","決算時の処理（外貨建資産・負債の換算）","外貨建新株予約権","換算差額・決済差額の表示"] },
+  { id:"9-2", ch:"第9章 外貨換算会計", title:"外貨建有価証券", imp:"A",
+    defaultRonten:["外貨建有価証券の評価（売買目的有価証券）","外貨建有価証券の評価（満期保有目的の債券）","外貨建有価証券の評価（子会社株式及び関連会社株式）","外貨建有価証券の評価（その他有価証券・債券以外）","外貨建有価証券の評価（その他有価証券・債券）","外貨建有価証券の評価（市場価格のない株式等）","外貨建有価証券の評価（貸借対照表の表示区分）","外貨建有価証券の減損処理（市場価格のない株式等以外）","外貨建有価証券の減損処理（市場価格のない株式等）"] },
+  { id:"9-3", ch:"第9章 外貨換算会計", title:"為替予約の振当処理", imp:"B",
+    defaultRonten:["為替予約の振当処理（非資金取引・取引発生時以前）","為替予約の振当処理（非資金取引・取引発生時以後）","為替予約の振当処理（資金取引・取引発生時以前）","為替予約の振当処理（資金取引・取引発生時以後）","振当処理の適用範囲"] },
+  { id:"9-4", ch:"第9章 外貨換算会計", title:"外貨建取引の総合問題", imp:"B",
+    defaultRonten:["取引発生時の処理（通常の取引）","決算時の処理（外貨建資産・負債の換算）","外貨建新株予約権付社債","外貨建債券等を外貨による非貨幣性資産等に再投資する場合","換算差額・決済差額の表示"] },
+  { id:"9-5", ch:"第9章 外貨換算会計", title:"在外支店の外貨表示財務諸表項目の換算", imp:"B",
+    defaultRonten:["在外支店の外貨表示財務諸表項目の換算"] },
+
+  // 第10章 ストック・オプション等
+  { id:"10-1", ch:"第10章 ストック・オプション等", title:"ストック・オプションの基本的会計処理", imp:"B",
+    defaultRonten:["各会計期間における費用計上額の算定","権利行使された場合","権利不行使による失効が生じた場合"] },
+  { id:"10-4", ch:"第10章 ストック・オプション等", title:"公正な評価単価を変動させる条件変更①", imp:"B",
+    defaultRonten:["公正な評価単価を変動させる条件変更","権利行使された場合"] },
+  { id:"10-5", ch:"第10章 ストック・オプション等", title:"公正な評価単価を変動させる条件変更②・費用の合理的な計上期間を変動させる条件変更", imp:"B",
+    defaultRonten:["公正な評価単価を変動させる条件変更","費用の合理的な計上期間を変動させる条件変更"] },
+
+  // 第11章 資産除去債務
+  { id:"11-1", ch:"第11章 資産除去債務", title:"資産除去債務の基本的会計処理", imp:"A",
+    defaultRonten:["資産除去債務の基本的な会計処理","割引前将来キャッシュ・フローの見積り","割引率の選択"] },
+
+  // 第12章 収益認識
+  { id:"12-1", ch:"第12章 収益認識", title:"収益認識の仕訳問題", imp:"A",
+    defaultRonten:["一定の期間にわたり充足される履行義務","一時点で充足される履行義務","買戻契約","委託販売契約","請求済未出荷契約","契約資産・契約負債及び顧客との契約から生じた債権"] },
+  { id:"12-2", ch:"第12章 収益認識", title:"収益の額の算定", imp:"A",
+    defaultRonten:["財またはサービスに対する保証","本人と代理人の区分","追加の財またはサービスを取得するオプションの付与","顧客により行使されない権利（非行使部分）","変動対価","顧客に支払われる対価","値引きの配分"] },
+  { id:"12-3", ch:"第12章 収益認識", title:"ポイント制度", imp:"A",
+    defaultRonten:["追加の財またはサービスを取得するオプションの付与","顧客により行使されない権利（非行使部分）"] },
+  { id:"12-4", ch:"第12章 収益認識", title:"返品権付き販売", imp:"A",
+    defaultRonten:["返品権付きの販売"] },
+  { id:"12-5", ch:"第12章 収益認識", title:"一定の期間にわたり充足される履行義務", imp:"A",
+    defaultRonten:["一定の期間にわたり充足される履行義務","契約資産・契約負債及び顧客との契約から生じた債権"] },
+  { id:"12-6", ch:"第12章 収益認識", title:"一時点で充足される履行義務・重要な金融要素", imp:"A",
+    defaultRonten:["一時点で充足される履行義務","契約における重要な金融要素"] },
+  { id:"12-7", ch:"第12章 収益認識", title:"契約変更", imp:"A",
+    defaultRonten:["契約変更","一定の期間にわたり充足される履行義務"] },
+  { id:"12-8", ch:"第12章 収益認識", title:"工事損失引当金", imp:"A",
+    defaultRonten:["工事損失引当金","一定の期間にわたり充足される履行義務","契約変更"] },
+
+  // 第13章 金融商品会計
+  { id:"13-1", ch:"第13章 金融商品会計", title:"金融資産及び金融負債の発生及び消滅の認識", imp:"B",
+    defaultRonten:["金融資産及び金融負債の発生の認識","財務構成要素アプローチ","ローン・パーティシペーション","消滅に該当しない取引（クロス取引・有価証券の現先取引）","消滅の会計処理"] },
+
+  // 第14章 デリバティブ取引・ヘッジ会計
+  { id:"14-1", ch:"第14章 デリバティブ取引・ヘッジ会計", title:"デリバティブ取引・ヘッジ会計の仕訳①", imp:"B",
+    defaultRonten:["先物取引・先渡取引","スワップ取引","ヘッジ会計（繰延ヘッジ）","ヘッジ会計（時価ヘッジ）","金利スワップの特例処理"] },
+
+  // 第15章 リース会計（旧基準）
+  { id:"15-1", ch:"第15章 リース会計（旧基準）", title:"リース取引の分類", imp:"A",
+    defaultRonten:["リース取引の分類","所有権移転ファイナンス・リース（借手）","所有権移転外ファイナンス・リース（借手）","リース資産・リース債務計上額の算定"] },
+  { id:"15-2", ch:"第15章 リース会計（旧基準）", title:"ファイナンス・リース取引に係る借手の会計処理", imp:"A",
+    defaultRonten:["所有権移転ファイナンス・リース（借手）","所有権移転外ファイナンス・リース（借手）","リース資産・リース債務計上額の算定","利息相当額の計算（利息法）","利息相当額の計算（定額法）","維持管理費用相当額","割安購入選択権","残価保証","貸借対照表の表示（借手）"] },
+  { id:"15-5", ch:"第15章 リース会計（旧基準）", title:"ファイナンス・リース取引に係る貸手の会計処理", imp:"A",
+    defaultRonten:["貸手の会計処理（所有権移転・リース取引開始日に売上高と売上原価を計上）","貸手の会計処理（所有権移転・リース料受取時に売上高と売上原価を計上）","貸手の会計処理（所有権移転・売上高を計上せずに利息相当額を各期へ配分）","貸手の会計処理（所有権移転外・リース取引開始日に売上高と売上原価を計上）","貸手の会計処理（所有権移転外・リース料受取時に売上高と売上原価を計上）","貸手の会計処理（所有権移転外・売上高を計上せずに利息相当額を各期へ配分）","見積残存価額","貸手の製作価額または現金購入価額と借手に対する現金販売価額に差がある場合","貸借対照表の表示（貸手）"] },
+  { id:"15-6", ch:"第15章 リース会計（旧基準）", title:"セール・アンド・リースバック取引", imp:"A",
+    defaultRonten:["セール・アンド・リースバック取引"] },
+  { id:"15-7", ch:"第15章 リース会計（旧基準）", title:"中途解約・転リース取引", imp:"B",
+    defaultRonten:["ファイナンス・リース取引の中途解約","転リース取引"] },
+
+  // 第15-2章 リース会計（新基準）
+  { id:"15-2-1", ch:"第15-2章 リース会計（新基準）", title:"リースを構成する部分とリースを構成しない部分", imp:"A",
+    defaultRonten:["リースを構成する部分とリースを構成しない部分の区分","リース期間"] },
+  { id:"15-2-2", ch:"第15-2章 リース会計（新基準）", title:"リースの借手の会計処理①", imp:"A",
+    defaultRonten:["使用権資産・リース負債計上額の算定","使用権資産の減価償却（所有権が借手に移転すると認められるリース）","使用権資産の減価償却（所有権が借手に移転すると認められるリース以外）","残価保証","購入オプション","貸借対照表の表示（借手）"] },
+  { id:"15-2-3", ch:"第15-2章 リース会計（新基準）", title:"リースの借手の会計処理②", imp:"A",
+    defaultRonten:["使用権資産・リース負債計上額の算定","使用権資産の減価償却（所有権が借手に移転すると認められるリース）","使用権資産の減価償却（所有権が借手に移転すると認められるリース以外）","貸借対照表の表示（借手）"] },
+  { id:"15-2-4", ch:"第15-2章 リース会計（新基準）", title:"事後的な変更", imp:"A",
+    defaultRonten:["変動リース料","リースの契約条件の変更（独立したリースとして会計処理を行うケース）","リースの契約条件の変更（リース負債の計上額の見直しを行うケース）","リースの契約条件を伴わないリース負債の見直し"] },
+  { id:"15-2-5", ch:"第15-2章 リース会計（新基準）", title:"リースの貸手の会計処理", imp:"A",
+    defaultRonten:["貸手のリースの分類","所有権移転ファイナンス・リース（製造または販売を事業とする貸手）","所有権移転ファイナンス・リース（製造または販売以外を事業とする貸手）","所有権移転外ファイナンス・リース（製造または販売を事業とする貸手）","所有権移転外ファイナンス・リース（製造または販売以外を事業とする貸手）","所有権移転外ファイナンス・リース（残価保証）","貸借対照表の表示（貸手）"] },
+  { id:"15-2-6", ch:"第15-2章 リース会計（新基準）", title:"セール・アンド・リースバック取引", imp:"A",
+    defaultRonten:["セール・アンド・リースバック取引"] },
+  { id:"15-2-7", ch:"第15-2章 リース会計（新基準）", title:"サブリース取引", imp:"A",
+    defaultRonten:["サブリース取引","転リース取引"] },
+  { id:"15-2-8", ch:"第15-2章 リース会計（新基準）", title:"建設協力金", imp:"A",
+    defaultRonten:["建設協力金"] },
+
+  // 第16章 退職給付会計（個別財務諸表）
+  { id:"16-1", ch:"第16章 退職給付会計（個別財務諸表）", title:"退職給付見込額の配分方法①", imp:"B",
+    defaultRonten:["退職給付見込額の配分方法（期間定額基準）","退職給付見込額の配分方法（給付算定式基準）"] },
+  { id:"16-2", ch:"第16章 退職給付会計（個別財務諸表）", title:"退職給付見込額の配分方法②", imp:"B",
+    defaultRonten:["退職給付見込額の配分方法（期間定額基準）","退職給付見込額の配分方法（給付算定式基準）","退職給付債務の見積り"] },
+  { id:"16-3", ch:"第16章 退職給付会計（個別財務諸表）", title:"確定給付制度の基本的な会計処理・退職給付信託", imp:"A",
+    defaultRonten:["退職給付費用の算定","数理計算上の差異","過去勤務費用","退職給付信託","従業員拠出がある企業年金制度"] },
+  { id:"16-4", ch:"第16章 退職給付会計（個別財務諸表）", title:"確定給付制度の開示・確定拠出制度の会計処理", imp:"B",
+    defaultRonten:["退職給付費用の算定","数理計算上の差異","前払年金費用の計上","退職給付債務の増減"] },
+
+  // 第17章 固定資産の減損会計
+  { id:"17-1", ch:"第17章 固定資産の減損会計", title:"割引前将来キャッシュ・フローの算定①", imp:"B",
+    defaultRonten:["将来キャッシュ・フローの見積り方法","割引前将来キャッシュ・フローの見積期間（経済的残存使用年数≦20年）","割引前将来キャッシュ・フローの見積期間（経済的残存使用年数＞20年）","他の構成資産に係るキャッシュ・フロー"] },
+  { id:"17-2", ch:"第17章 固定資産の減損会計", title:"割引前将来キャッシュ・フローの算定②", imp:"B",
+    defaultRonten:["将来キャッシュ・フローの見積り方法","固定資産の減損会計における将来キャッシュ・フローの見積りと資産除去債務"] },
+  { id:"17-3", ch:"第17章 固定資産の減損会計", title:"使用価値の算定", imp:"A",
+    defaultRonten:["使用価値の算定","減損会計の手続一巡"] },
+  { id:"17-4", ch:"第17章 固定資産の減損会計", title:"共用資産の減損処理①", imp:"A",
+    defaultRonten:["共用資産の減損処理（通常のケース）","共用資産の帳簿価額を各資産または資産グループに配分する方法","減損損失の配分"] },
+  { id:"17-5", ch:"第17章 固定資産の減損会計", title:"共用資産の減損処理②", imp:"A",
+    defaultRonten:["共用資産の減損処理（帳簿価額と正味売却価額の差額を超過するケース）","共用資産の帳簿価額を各資産または資産グループに配分する方法"] },
+  { id:"17-6", ch:"第17章 固定資産の減損会計", title:"のれんの減損処理", imp:"A",
+    defaultRonten:["のれんの帳簿価額の分割","のれんの減損処理（通常のケース）","のれんの減損処理（のれんの帳簿価額を超過するケース）","のれんの帳簿価額を各資産または資産グループに配分する方法","減損損失の配分"] },
+
+  // 第18章 研究開発費・ソフトウェア
+  { id:"18-1", ch:"第18章 研究開発費・ソフトウェア", title:"研究開発費", imp:"B",
+    defaultRonten:["研究開発費の会計処理","特定の研究開発目的資産"] },
+  { id:"18-2", ch:"第18章 研究開発費・ソフトウェア", title:"市場販売目的のソフトウェア①", imp:"B",
+    defaultRonten:["市場販売目的のソフトウェア（資産計上額の算定）","市場販売目的のソフトウェア（減価償却）"] },
+  { id:"18-3", ch:"第18章 研究開発費・ソフトウェア", title:"市場販売目的のソフトウェア②・自社利用のソフトウェア", imp:"B",
+    defaultRonten:["市場販売目的のソフトウェア（資産計上額の算定）","市場販売目的のソフトウェア（減価償却）","自社利用のソフトウェア（導入費用）","自社利用のソフトウェア（減価償却）"] },
+
+  // 第19章 税効果会計（個別財務諸表）
+  { id:"19-1", ch:"第19章 税効果会計（個別財務諸表）", title:"税効果会計の基本問題", imp:"A",
+    defaultRonten:["将来減算一時差異","将来加算一時差異","繰越欠損金","繰延税金資産及び繰延税金負債の計上（評価・換算差額等以外）","繰延税金資産及び繰延税金負債の計上（評価・換算差額等）","貸借対照表の表示","税率の変更"] },
+  { id:"19-3", ch:"第19章 税効果会計（個別財務諸表）", title:"繰延税金資産の回収可能性①", imp:"B",
+    defaultRonten:["繰延税金資産の回収可能性（スケジューリング）","将来減算一時差異"] },
+
+  // 第20章 株主資本等変動計算書
+  { id:"20-1", ch:"第20章 株主資本等変動計算書", title:"株主資本等変動計算書", imp:"A",
+    defaultRonten:["株主資本の各項目","株主資本以外の各項目（原則・当期変動額を純額で表示）","株主資本以外の各項目（容認・当期変動額について主な変動事由ごとにその金額を表示）"] },
+
+  // 第21章 包括利益計算書（個別財務諸表）
+  { id:"21-1", ch:"第21章 包括利益計算書（個別財務諸表）", title:"株主資本等変動計算書・包括利益計算書", imp:"A",
+    defaultRonten:["包括利益計算書の様式（2計算書方式）","その他の包括利益の算定","その他の包括利益の内訳に係る注記（当期発生額）","その他の包括利益の内訳に係る注記（組替調整額）"] },
+
+  // 第22章 会計上の変更及び誤謬の訂正
+  { id:"22-1", ch:"第22章 会計上の変更及び誤謬の訂正", title:"会計方針の変更・会計上の見積りの変更・過去の誤謬の訂正", imp:"B",
+    defaultRonten:["会計方針の変更（会計処理）","会計方針の変更（比較情報）","会計上の見積りの変更（変更期間のみに影響する場合）","会計上の見積りの変更（将来の期間にも影響する場合）","過去の誤謬の訂正（会計処理）","過去の誤謬の訂正（比較情報）"] },
+  { id:"22-2", ch:"第22章 会計上の変更及び誤謬の訂正", title:"会計方針の変更・過去の誤謬の訂正", imp:"B",
+    defaultRonten:["会計方針の変更（会計処理）","会計方針の変更（比較情報）","過去の誤謬の訂正（会計処理）","会計上の見積りの変更と過去の誤謬の訂正の区別"] },
+
+  // 第23章 中間財務諸表
+  { id:"23-1", ch:"第23章 中間財務諸表", title:"中間特有の会計処理", imp:"B",
+    defaultRonten:["原価差異の繰延","税金費用の計算","簡便的な会計処理"] },
+
+  // 第1章 連結会計基礎
+  { id:"c1-1", ch:"第1章 連結会計基礎", title:"連結財務諸表作成の基本問題", imp:"A",
+    defaultRonten:["連結財務諸表の作成","取引高・債権債務の相殺消去（営業取引）","未実現利益の消去・棚卸資産（ダウン・ストリーム）","未実現利益の消去・償却性資産（ダウン・ストリーム）","税効果・評価差額","税効果・未実現利益の消去","税効果・貸倒引当金の修正"] },
+  { id:"c2-1", ch:"第1章 連結会計基礎", title:"追加取得", imp:"A",
+    defaultRonten:["追加取得","税効果・評価差額","持分法（基本的処理）"] },
+  { id:"c2-2", ch:"第1章 連結会計基礎", title:"一部売却", imp:"A",
+    defaultRonten:["一部売却","税効果・評価差額"] },
+  { id:"c2-3", ch:"第1章 連結会計基礎", title:"段階取得・持分法から連結への移行", imp:"A",
+    defaultRonten:["段階取得による子会社化","持分法から連結への移行","税効果・評価差額"] },
+  { id:"c2-4", ch:"第1章 連結会計基礎", title:"連結から持分法への移行・連結除外", imp:"B",
+    defaultRonten:["連結から持分法への移行","連結除外"] },
+  { id:"c3-1", ch:"第1章 連結会計基礎", title:"その他の包括利益累計額①－追加取得", imp:"A",
+    defaultRonten:["追加取得（その他の包括利益累計額あり）","その他の包括利益（その他有価証券評価差額金）","持分法・その他の包括利益累計額（追加取得）","包括利益計算書（2計算書方式）"] },
+  { id:"c3-2", ch:"第1章 連結会計基礎", title:"その他の包括利益累計額②－一部売却", imp:"A",
+    defaultRonten:["一部売却（その他の包括利益累計額あり）","その他の包括利益（その他有価証券評価差額金）","持分法・その他の包括利益累計額（一部売却）","包括利益計算書（2計算書方式）"] },
+  { id:"c3-3", ch:"第1章 連結会計基礎", title:"その他の包括利益累計額③－段階取得・持分法から連結への移行", imp:"B",
+    defaultRonten:["段階取得による子会社化（その他の包括利益累計額あり）","持分法から連結への移行（その他の包括利益累計額あり）"] },
+  { id:"c4-1", ch:"第1章 連結会計基礎", title:"評価差額の実現", imp:"A",
+    defaultRonten:["評価差額の実現","税効果・評価差額"] },
+  { id:"c4-2", ch:"第1章 連結会計基礎", title:"アップ・ストリームと持分変動", imp:"B",
+    defaultRonten:["アップ・ストリームと持分変動","未実現利益の消去・棚卸資産（アップ・ストリーム）","未実現利益の消去・償却性資産（アップ・ストリーム）"] },
+  { id:"c4-3", ch:"第1章 連結会計基礎", title:"子会社の増資", imp:"B",
+    defaultRonten:["子会社の増資"] },
+  { id:"c4-4", ch:"第1章 連結会計基礎", title:"子会社の自己株式", imp:"B",
+    defaultRonten:["子会社の自己株式"] },
+  { id:"c4-7", ch:"第1章 連結会計基礎", title:"識別可能無形資産・条件付取得対価", imp:"A",
+    defaultRonten:["識別可能無形資産","条件付取得対価","税効果・評価差額"] },
+  { id:"c4-8", ch:"第1章 連結会計基礎", title:"のれんの一時償却", imp:"B",
+    defaultRonten:["のれんの一時償却"] },
+  { id:"c5-1", ch:"第1章 連結会計基礎", title:"連結財務諸表における退職給付会計", imp:"A",
+    defaultRonten:["連結財務諸表における退職給付会計（未認識差異がないケース）","その他の包括利益（退職給付に係る調整額）","その他の包括利益の内訳に係る注記（当期発生額）","その他の包括利益の内訳に係る注記（組替調整額）"] },
+  { id:"c5-2", ch:"第1章 連結会計基礎", title:"支配獲得時に子会社に未認識差異があるケース", imp:"B",
+    defaultRonten:["連結財務諸表における退職給付会計（未認識差異があるケース）"] },
+  { id:"c6-1", ch:"第1章 連結会計基礎", title:"間接所有の子会社", imp:"B",
+    defaultRonten:["間接所有の子会社","税効果・評価差額"] },
+  { id:"c7-1", ch:"第1章 連結会計基礎", title:"在外子会社", imp:"A",
+    defaultRonten:["在外子会社（持分変動・追加取得）","在外子会社（持分変動・一部売却）","在外子会社（未実現利益の消去）","その他の包括利益（為替換算調整勘定）"] },
+
+  // 第9章 個別キャッシュ・フロー計算書
+  { id:"cf9-1", ch:"第9章 個別キャッシュ・フロー計算書", title:"個別キャッシュ・フロー計算書①", imp:"B",
+    defaultRonten:["資金の範囲","営業活動によるキャッシュ・フロー・直接法","営業活動によるキャッシュ・フロー・間接法","利息及び配当金の表示区分（活動区分の観点）"] },
+  { id:"cf9-2", ch:"第9章 個別キャッシュ・フロー計算書", title:"個別キャッシュ・フロー計算書②－直接法", imp:"B",
+    defaultRonten:["営業活動によるキャッシュ・フロー・直接法","利息及び配当金の表示区分（損益計算の観点）","利息及び配当金の表示区分（活動区分の観点）"] },
+  { id:"cf9-3", ch:"第9章 個別キャッシュ・フロー計算書", title:"個別キャッシュ・フロー計算書③－間接法", imp:"A",
+    defaultRonten:["営業活動によるキャッシュ・フロー・間接法","利息及び配当金の表示区分（損益計算の観点）","利息及び配当金の表示区分（活動区分の観点）"] },
+  { id:"cf9-4", ch:"第9章 個別キャッシュ・フロー計算書", title:"在外子会社の外貨表示キャッシュ・フローの換算", imp:"B",
+    defaultRonten:["在外子会社の外貨表示キャッシュ・フローの換算","連結CF計算書・原則法（間接法）","連結CF計算書・簡便法（間接法）"] },
+
+  // 第11章 企業結合①（取得）
+  { id:"m11-1", ch:"第11章 企業結合①（取得）", title:"取得①－基本形（合併・株式交換・株式移転）", imp:"A",
+    defaultRonten:["取得企業の決定","取得原価の算定（段階取得以外）","識別可能無形資産","企業結合に係る特定勘定","合併（通常の取得）","株式交換（通常の取得）","株式移転"] },
+  { id:"m11-3", ch:"第11章 企業結合①（取得）", title:"取得③－合併", imp:"A",
+    defaultRonten:["取得原価の算定（段階取得以外）","取得関連費用の取扱い","識別可能無形資産","企業結合に係る特定勘定","合併（通常の取得）","合併（逆取得）"] },
+  { id:"m11-4", ch:"第11章 企業結合①（取得）", title:"取得④－株式交換", imp:"B",
+    defaultRonten:["取得原価の算定（段階取得）","取得関連費用の取扱い","株式交換（通常の取得）","株式交換（逆取得）"] },
+  { id:"m12-1", ch:"第11章 企業結合①（取得）", title:"共通支配下の取引等①", imp:"B",
+    defaultRonten:["共通支配下・親会社による子会社の合併","共通支配下・親会社と子会社による株式交換","共通支配下・親会社と子会社による株式移転"] },
+  { id:"m12-2", ch:"第11章 企業結合①（取得）", title:"共通支配下の取引等②－子会社同士の合併", imp:"B",
+    defaultRonten:["共通支配下・子会社同士の合併（対価が株式のみ）","共通支配下・子会社同士の合併（対価が現金等の財産のみ）"] },
+  { id:"m12-3", ch:"第11章 企業結合①（取得）", title:"共同支配企業の形成", imp:"B",
+    defaultRonten:["共同支配企業の形成・完全子会社同士の合併","共同支配企業の形成・共同新設分割"] },
+
+  // 第13章 事業分離等
+  { id:"m13-1", ch:"第13章 事業分離等", title:"事業分離①－基本的な問題", imp:"A",
+    defaultRonten:["事業分離（受取対価が現金等・分離先が子会社）","事業分離（受取対価が現金等・分離先が子会社・関連会社以外）","事業分離（受取対価が株式のみ・分離先が子会社）","事業分離（受取対価が株式のみ・分離先が新たに子会社・段階取得以外）","事業分離（受取対価が株式のみ・分離先が子会社・関連会社以外）"] },
+  { id:"m13-2", ch:"第13章 事業分離等", title:"事業分離②－分離先企業が子会社のケース", imp:"B",
+    defaultRonten:["事業分離（受取対価が株式のみ・分離先が子会社）"] },
+  { id:"m13-3", ch:"第13章 事業分離等", title:"事業分離③－分離先企業が子会社になるケース", imp:"B",
+    defaultRonten:["事業分離（受取対価が株式のみ・分離先が新たに子会社・段階取得以外）","事業分離（受取対価が株式のみ・分離先が新たに子会社・段階取得）"] },
+  { id:"m13-4", ch:"第13章 事業分離等", title:"事業分離④－分離先企業が関連会社になるケース", imp:"B",
+    defaultRonten:["事業分離（受取対価が株式のみ・分離先が新たに関連会社）"] },
+  { id:"m13-6", ch:"第13章 事業分離等", title:"事業分離⑥－共同新設分割", imp:"B",
+    defaultRonten:["共同新設分割（分離先が子会社になるケース）","共同新設分割（分離先が共同支配企業になるケース）"] },
+];
+
+const STORE_KEY = 'zaimu-keisan-v2';
+const EVAL_LABELS = { oo:'○○', o:'○', n:'ー', x:'×', xx:'××' };
+const LEARN_DAYS = { oo:14, o:10, n:7, x:4, xx:2 };
+
+let state = { problems: ALL_PROBLEMS.map(p=>p.id), ronten: {}, history: {} };
+
+function load() {
+  try { const s = localStorage.getItem(STORE_KEY); if(s) state = JSON.parse(s); } catch(e){}
+}
+function save() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch(e){}
+}
+function today() { return new Date().toISOString().split('T')[0]; }
+function getProbById(id) {
+  return ALL_PROBLEMS.find(p=>p.id===id)
+    || (state.customProblems || []).find(p=>p.id===id);
+}
+function getRonten(probId) {
+  if (state.ronten[probId]) return state.ronten[probId];
+  return getProbById(probId)?.defaultRonten || [];
+}
+function getHistory(probId) { return state.history[probId] || []; }
+function getLatest(probId) {
+  const h = getHistory(probId);
+  return h.length > 0 ? h[h.length-1] : null;
+}
+function fmtDate(dateStr) {
+  if (!dateStr) return '';
+  const p = dateStr.split('-');
+  if (p.length < 3) return dateStr;
+  return `${parseInt(p[1])}/${parseInt(p[2])}`;
+}
+function calcUrgency(probId) {
+  const latest = getLatest(probId);
+  if (!latest || !latest.eval || !latest.date) return null;
+
+  if (latest.reviewDate && !latest.reviewPassed) {
+    const reviewDays = { oo:7, o:5, n:3, x:2, xx:1 };
+    const days = reviewDays[latest.eval] || 3;
+    const diff = Math.floor((Date.now() - new Date(latest.reviewDate).getTime()) / 86400000);
+    return Math.min(100, Math.round(diff / days * 100));
+  }
+
+  if (latest.reviewPassed === true) return null;
+
+  const days = LEARN_DAYS[latest.eval] || 7;
+  const diff = Math.floor((Date.now() - new Date(latest.date).getTime()) / 86400000);
+  return Math.min(100, Math.round(diff / days * 100));
+}
+function urgencyColor(score) {
+  if (score >= 80) return '#c0392b';
+  if (score >= 55) return '#e67e22';
+  if (score >= 30) return '#d4a017';
+  return '#1a7a4a';
+}
+
+// ── TAB ──
+let curTab = 'problems';
+function setTab(tab, btn) {
+  curTab = tab;
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  ['problems','ronten','urgent'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===tab ? 'block' : 'none';
+  });
+  if (tab==='problems') renderProblems();
+  if (tab==='ronten') renderRonten();
+  if (tab==='urgent') renderUrgent();
+}
+
+// ── PROBLEMS TAB ──
+function renderProblems() {
+  const ct = document.getElementById('tab-problems');
+  const openChapters = new Set();
+  document.querySelectorAll('.ch-group.open').forEach(el => openChapters.add(el.dataset.ch));
+
+  ct.innerHTML = '';
+
+  const chapters = {};
+  const chapterOrder = [];
+  state.problems.forEach(probId => {
+    const prob = getProbById(probId);
+    if (!prob) return;
+    if (!chapters[prob.ch]) { chapters[prob.ch] = []; chapterOrder.push(prob.ch); }
+    chapters[prob.ch].push(probId);
+  });
+
+  chapterOrder.forEach(ch => {
+    const probIds = chapters[ch];
+    const chDisplay = ch.replace('第', '').replace(' ', '　');
+
+    const group = document.createElement('div');
+    group.className = 'ch-group' + (openChapters.has(ch) ? ' open' : '');
+    group.dataset.ch = ch;
+
+    const groupHeader = document.createElement('div');
+    groupHeader.className = 'ch-group-header';
+    groupHeader.onclick = () => group.classList.toggle('open');
+    groupHeader.innerHTML = `
+      <span class="ch-group-title">${chDisplay}</span>`;
+    group.appendChild(groupHeader);
+
+    const groupBody = document.createElement('div');
+    groupBody.className = 'ch-group-body';
+
+    probIds.forEach((probId) => {
+      const prob = getProbById(probId);
+      if (!prob) return;
+      const latest = getLatest(probId);
+      const evalVal = latest?.eval || null;
+      const evalLabel = evalVal ? EVAL_LABELS[evalVal] : null;
+
+      let daysStr = '';
+      if (latest?.date) {
+        const diff = Math.floor((Date.now() - new Date(latest.date).getTime()) / 86400000);
+        daysStr = diff === 0 ? '今日' : `${diff}日前`;
+      }
+
+      const rightHtml = latest ? `
+        <div class="prob-right">
+          <div class="prob-right-item"><span class="prob-right-val">${daysStr}</span></div>
+          <div class="prob-right-item"><span class="prob-right-val">${latest.time ? latest.time+'分' : '–'}</span></div>
+          <div class="prob-right-item"><span class="prob-right-eval-val eval-${evalVal || 'none'}">${evalLabel || '–'}</span></div>
+        </div>` : `
+        <div class="prob-right"><span style="font-size:11px;color:var(--text-3);">未実施</span></div>`;
+
+      const impClass = prob.imp === 'A' ? 'imp-badge imp-A'
+        : prob.imp === 'B' ? 'imp-badge imp-B'
+        : 'imp-badge imp-hidden';
+      const impText = (prob.imp === 'A' || prob.imp === 'B') ? prob.imp : '';
+
+      const card = document.createElement('div');
+      card.className = 'prob-card';
+      card.dataset.probId = probId;
+
+      card.innerHTML = `
+        <div class="prob-header" onclick="openProbDetail('${probId}')">
+          <span class="${impClass}">${impText}</span>
+          <div class="prob-left">
+            <div class="prob-title">${prob.title}</div>
+            <div class="prob-id-sub">${prob.id.startsWith('custom-') ? (prob.num || '') : prob.id}</div>
+          </div>
+          ${rightHtml}
+        </div>`;
+
+      groupBody.appendChild(card);
+    });
+
+    group.appendChild(groupBody);
+    ct.appendChild(group);
+  });
+
+  const addDiv = document.createElement('div');
+  addDiv.className = 'add-section';
+  addDiv.innerHTML = `<button class="btn-add" style="width:100%;padding:10px;" onclick="openNewProbModal()">＋ 問題を追加する</button>`;
+  ct.appendChild(addDiv);
+
+}
+
+function openProbDetail(probId) {
+  const prob = getProbById(probId);
+  const hist = getHistory(probId);
+  const latest = getLatest(probId);
+  const idxInAll = state.problems.indexOf(probId);
+  if (!prob) return;
+
+  const idLabel = prob.num || (prob.id.startsWith('custom-') ? '' : prob.id);
+  document.getElementById('pd-title').textContent = prob.title;
+
+  const evalVal = latest?.eval || null;
+  const evalLabel = evalVal ? EVAL_LABELS[evalVal] : null;
+  let daysStr = '未実施';
+  if (latest?.date) {
+    const diff = Math.floor((Date.now() - new Date(latest.date).getTime()) / 86400000);
+    daysStr = diff === 0 ? '今日' : `${diff}日前`;
+  }
+  document.getElementById('pd-meta').innerHTML = latest ? `
+    <span style="font-family:'Zen Maru Gothic',sans-serif;font-size:16px;font-weight:700;color:#1a3a6e;">${daysStr}</span>
+    <span style="font-family:'Zen Maru Gothic',sans-serif;font-size:16px;font-weight:700;color:#1a3a6e;">${latest.time ? latest.time+'分' : '–'}</span>
+    <span style="font-family:'Zen Maru Gothic',sans-serif;font-size:16px;font-weight:700;color:#1a3a6e;">${evalLabel || '–'}</span>
+    ${idLabel ? `<span style="font-size:10px;color:var(--text-3);font-family:'DM Mono',monospace;margin-left:auto;">${idLabel}</span>` : ''}
+  ` : `<span style="font-size:12px;color:var(--text-3);">未実施</span>`;
+
+  const histHtml = hist.length === 0
+    ? `<div class="hist-empty">まだ記録がありません</div>`
+    : [...hist].reverse().map((entry, i) => {
+        const num = hist.length - i;
+        const rontenRows = Object.entries(entry.ronten || {}).map(([name, val]) => `
+          <div class="hist-ronten-row">
+            <span class="hist-ronten-name">${name}</span>
+            ${val ? `<span class="prob-meta-badge badge-${val}">${EVAL_LABELS[val]}</span>` : ''}
+          </div>`).join('');
+        return `
+          <div class="hist-entry">
+            <div class="hist-entry-header">
+              <span class="hist-entry-num">#${num}</span>
+              <span class="prob-meta-badge badge-${entry.eval}">${EVAL_LABELS[entry.eval]}</span>
+              ${entry.date ? `<span class="hist-entry-date">${fmtDate(entry.date)}</span>` : ''}
+              ${entry.time ? `<span class="hist-entry-time">${entry.time}分</span>` : ''}
+            </div>
+            ${rontenRows ? `<div class="hist-entry-body">${rontenRows}</div>` : ''}
+          </div>`;
+      }).join('');
+  document.getElementById('pd-hist').innerHTML = histHtml;
+
+  document.getElementById('pd-record-btn').onclick = () => {
+    closeProbDetailDirect();
+    openModal(probId);
+  };
+
+  document.getElementById('pd-sub').innerHTML = `
+    <button class="btn-sub" onclick="closeProbDetailDirect();openEditModal('${probId}')">論点を編集する</button>
+    <div class="move-btns" style="margin-left:auto;">
+      <button class="move-btn" onclick="moveProblem('${probId}',-1)" ${idxInAll===0?'disabled':''}>↑</button>
+      <button class="move-btn" onclick="moveProblem('${probId}',1)" ${idxInAll===state.problems.length-1?'disabled':''}>↓</button>
+    </div>`;
+
+  document.getElementById('pd-delete').innerHTML = `
+    <button onclick="closeProbDetailDirect();deleteProblem('${probId}')" style="width:100%;padding:10px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);background:transparent;color:var(--text-3);font-family:'Noto Sans JP',sans-serif;font-size:12px;cursor:pointer;">この問題を削除する</button>`;
+
+  document.getElementById('prob-detail-overlay').classList.add('open');
+}
+
+function closeProbDetail(e) {
+  if (e.target === document.getElementById('prob-detail-overlay')) closeProbDetailDirect();
+}
+function closeProbDetailDirect() {
+  document.getElementById('prob-detail-overlay').classList.remove('open');
+}
+
+function moveProblem(probId, dir) {
+  const idx = state.problems.indexOf(probId);
+  if (idx < 0) return;
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= state.problems.length) return;
+  state.problems.splice(idx, 1);
+  state.problems.splice(newIdx, 0, probId);
+  save(); renderProblems();
+}
+function deleteProblem(probId) {
+  const prob = getProbById(probId);
+  if (!confirm(`「${prob?.title}」を一覧から削除しますか？\n（評価データは保持されます）`)) return;
+  state.problems = state.problems.filter(id=>id!==probId);
+  save(); renderProblems();
+}
+
+// ── RECORD MODAL ──
+let modalProbId = null;
+let modalEval = null;
+let modalRontenEvals = {};
+
+function openModal(probId) {
+  modalProbId = probId;
+  modalEval = null;
+  modalRontenEvals = {};
+  const prob = getProbById(probId);
+  document.getElementById('modal-title').textContent = `[${probId}] ${prob.title}`;
+  document.getElementById('modal-subtitle').textContent = '問題の評価と論点を記録します';
+  document.getElementById('modal-date').value = today();
+  document.getElementById('modal-time').value = '';
+
+  document.querySelectorAll('#modal-prob-btns .ub').forEach(b=>b.className='ub');
+  document.getElementById('step1-next').disabled = true;
+
+  goStep1();
+  document.getElementById('record-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('record-modal').classList.remove('open');
+}
+
+function selectModalEval(val) {
+  modalEval = val;
+  document.querySelectorAll('#modal-prob-btns .ub').forEach((b,i) => {
+    const v = ['oo','o','n','x','xx'][i];
+    b.className = 'ub' + (v===val ? ' sel-'+v : '');
+  });
+  document.getElementById('step1-next').disabled = false;
+}
+
+function goStep1() {
+  document.getElementById('modal-step1').classList.add('active');
+  document.getElementById('modal-step2').classList.remove('active');
+  document.getElementById('step-dot-1').classList.add('active');
+  document.getElementById('step-dot-2').classList.remove('active');
+  document.getElementById('step-label').textContent = 'ステップ 1 / 2';
+}
+
+function goStep2() {
+  if (!modalEval) return;
+  const rontenList = getRonten(modalProbId);
+  const listEl = document.getElementById('modal-ronten-list');
+  listEl.innerHTML = rontenList.map(name => {
+    const vals = ['oo','o','n','x','xx'];
+    const labels = ['○○','○','ー','×','××'];
+    return `
+      <div class="modal-ronten-item">
+        <div class="modal-ronten-name">${name}</div>
+        <div class="u-btns">
+          ${vals.map((v,i)=>`<button class="rb" data-name="${name}" data-val="${v}" onclick="selectRontenEval(this,'${name}','${v}')">${labels[i]}</button>`).join('')}
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('modal-step1').classList.remove('active');
+  document.getElementById('modal-step2').classList.add('active');
+  document.getElementById('step-dot-1').classList.remove('active');
+  document.getElementById('step-dot-2').classList.add('active');
+  document.getElementById('step-label').textContent = 'ステップ 2 / 2';
+}
+
+function selectRontenEval(btn, name, val) {
+  if (modalRontenEvals[name] === val) {
+    modalRontenEvals[name] = null;
+    btn.closest('.u-btns').querySelectorAll('.rb').forEach(b => b.className = 'rb');
+    return;
+  }
+  modalRontenEvals[name] = val;
+  btn.closest('.u-btns').querySelectorAll('.rb').forEach(b => {
+    const bv = b.dataset.val;
+    b.className = 'rb' + (bv===val ? ' sel-'+val : '');
+  });
+}
+
+function saveRecord() {
+  if (!modalProbId || !modalEval) return;
+  const date = document.getElementById('modal-date').value || today();
+  const time = document.getElementById('modal-time').value || '';
+  const entry = {
+    id: Date.now(),
+    eval: modalEval,
+    date,
+    time,
+    ronten: { ...modalRontenEvals }
+  };
+  if (!state.history[modalProbId]) state.history[modalProbId] = [];
+  state.history[modalProbId].push(entry);
+  save();
+  closeModal();
+  renderProblems();
+  if (curTab === 'ronten') renderRonten();
+  if (curTab === 'urgent') renderUrgent();
+}
+
+// ── RONTEN EDIT MODAL ──
+let editProbId = null;
+
+function openEditModal(probId) {
+  editProbId = probId;
+  const prob = getProbById(probId);
+  document.getElementById('edit-modal-title').textContent = `[${probId}] 論点を編集`;
+  renderEditList();
+  renderEditSelect();
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function closeEditModal() {
+  document.getElementById('edit-modal').classList.remove('open');
+  editProbId = null;
+  renderProblems();
+}
+
+function renderEditList() {
+  const list = getRonten(editProbId);
+  const el = document.getElementById('ronten-edit-list');
+  el.innerHTML = list.length === 0
+    ? `<div style="font-size:11px;color:var(--text-3);text-align:center;padding:10px 0;">論点が設定されていません</div>`
+    : list.map((name, idx) => `
+      <div class="ronten-edit-item">
+        <span class="ronten-edit-name">${name}</span>
+        <button class="ronten-edit-del" onclick="deleteRonten(${idx})">✕</button>
+      </div>`).join('');
+}
+
+function renderEditSelect() {
+  const prob = getProbById(editProbId);
+  const ch = prob?.ch;
+  const pool = CHAPTER_RONTEN_POOL[ch] || [];
+  const current = getRonten(editProbId);
+  const available = pool.filter(name => !current.includes(name));
+  const sel = document.getElementById('ronten-add-select');
+  sel.innerHTML = available.length === 0
+    ? `<option value="">追加できる論点がありません</option>`
+    : `<option value="">論点を選択して追加...</option>`
+      + available.map(name => `<option value="${name}">${name}</option>`).join('');
+}
+
+function deleteRonten(idx) {
+  const list = [...getRonten(editProbId)];
+  list.splice(idx, 1);
+  state.ronten[editProbId] = list;
+  save(); renderEditList(); renderEditSelect();
+}
+
+function addRonten() {
+  const sel = document.getElementById('ronten-add-select');
+  const val = sel.value;
+  if (!val) return;
+  const list = [...getRonten(editProbId)];
+  if (list.includes(val)) return;
+  list.push(val);
+  state.ronten[editProbId] = list;
+  save(); renderEditList(); renderEditSelect();
+}
+
+// ── RONTEN TAB ──
+function renderRonten() {
+  const ct = document.getElementById('tab-ronten');
+  ct.innerHTML = '';
+
+  const rontenMap = {};
+  state.problems.forEach(probId => {
+    const hist = getHistory(probId);
+    const rontenList = getRonten(probId);
+    rontenList.forEach(name => {
+      if (!rontenMap[name]) rontenMap[name] = [];
+      hist.forEach(entry => {
+        const val = (entry.ronten || {})[name];
+        if (val) {
+          rontenMap[name].push({ probId, probTitle: getProbById(probId)?.title || probId, date: entry.date, eval: val });
+        }
+      });
+    });
+  });
+
+  const chapterRonten = {};
+  state.problems.forEach(probId => {
+    const prob = getProbById(probId);
+    if (!prob) return;
+    const rontenList = getRonten(probId);
+    rontenList.forEach(name => {
+      if (!chapterRonten[prob.ch]) chapterRonten[prob.ch] = new Set();
+      chapterRonten[prob.ch].add(name);
+    });
+  });
+
+  const EVAL_SCORE = { oo: 5, o: 4, n: 3, x: 2, xx: 1 };
+  const SCORE_LABEL = (avg) => {
+    if (avg === null) return { label: '–', cls: 'badge-none' };
+    if (avg >= 4.5) return { label: '○○', cls: 'badge-oo' };
+    if (avg >= 3.5) return { label: '○',  cls: 'badge-o'  };
+    if (avg >= 2.5) return { label: 'ー', cls: 'badge-n'  };
+    if (avg >= 1.5) return { label: '×',  cls: 'badge-x'  };
+    return               { label: '××', cls: 'badge-xx' };
+  };
+
+  const openChs = new Set();
+  document.querySelectorAll('.ronten-ch-group.open').forEach(el => openChs.add(el.dataset.ch));
+
+  Object.entries(chapterRonten).forEach(([ch, rontenSet]) => {
+    const chDisplay = ch.replace('第', '').replace(' ', '　');
+    const rontenCount = rontenSet.size;
+
+    const group = document.createElement('div');
+    group.className = 'ronten-ch-group' + (openChs.has(ch) ? ' open' : '');
+    group.dataset.ch = ch;
+
+    const groupHeader = document.createElement('div');
+    groupHeader.className = 'ch-group-header';
+    groupHeader.onclick = () => group.classList.toggle('open');
+    groupHeader.innerHTML = `
+      <span class="ch-group-title">${chDisplay}</span>`;
+    group.appendChild(groupHeader);
+
+    const groupBody = document.createElement('div');
+    groupBody.className = 'ronten-ch-group-body';
+
+    [...rontenSet].forEach(name => {
+      const entries = rontenMap[name] || [];
+      const scores = entries.map(e => EVAL_SCORE[e.eval]).filter(Boolean);
+      const avg = scores.length > 0 ? scores.reduce((a,b) => a+b, 0) / scores.length : null;
+      const { label: avgLabel, cls: avgCls } = SCORE_LABEL(avg);
+
+      const row = document.createElement('div');
+      row.className = 'ronten-row';
+
+      const histCols = entries.map(e => {
+        const label = EVAL_LABELS[e.eval] || '–';
+        const probShort = e.probId;
+        const dateShort = fmtDate(e.date);
+        return `
+          <div class="ronten-hist-col">
+            <span class="ronten-hist-prob">${probShort}</span>
+            <div class="ronten-hist-chip chip-${e.eval}">${label}</div>
+            <span class="ronten-hist-date">${dateShort}</span>
+          </div>`;
+      }).join('');
+
+      const avgBadge = `<span class="prob-meta-badge ${avgCls}">${avgLabel}</span>`;
+
+      row.innerHTML = `
+        <div class="ronten-row-header" onclick="this.parentElement.classList.toggle('open')">
+          <div class="ronten-row-name">${name}</div>
+          <div class="ronten-row-latest">${avgBadge}</div>
+        </div>
+        <div class="ronten-row-body">
+          ${entries.length === 0
+            ? '<div style="font-size:11px;color:var(--text-3);">まだ記録がありません</div>'
+            : `<div class="ronten-hist-table">${histCols}</div>`}
+        </div>`;
+
+      groupBody.appendChild(row);
+    });
+
+    group.appendChild(groupBody);
+    ct.appendChild(group);
+  });
+}
+
+// ── URGENT TAB ──
+function renderUrgent() {
+  const ct = document.getElementById('tab-urgent');
+  ct.innerHTML = '';
+
+  const urgent = state.problems
+    .map(id => ({ id, score: calcUrgency(id) }))
+    .filter(x => x.score !== null && x.score >= 70)
+    .sort((a,b) => b.score - a.score);
+
+  if (urgent.length === 0) {
+    ct.innerHTML = '<div class="empty-state">要復習の問題はありません 🎉</div>';
+    return;
+  }
+
+  urgent.forEach(({ id, score }) => {
+    const prob = getProbById(id);
+    const latest = getLatest(id);
+    if (!prob || !latest) return;
+    const color = urgencyColor(score);
+    const hasReviewX = !!latest.reviewDate && !latest.reviewPassed;
+
+    const card = document.createElement('div');
+    card.className = 'urgent-card';
+    card.dataset.probId = id;
+    card.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div style="flex:1;font-size:13px;font-weight:700;">${prob.title}</div>
+        <span class="prob-meta-badge badge-${latest.eval}">${EVAL_LABELS[latest.eval]}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-3)">${prob.num || (prob.id.startsWith('custom-') ? '' : prob.id)}</span>
+      </div>
+      <div class="urgency-wrap" style="margin-bottom:12px;">
+        <span class="urgency-score" style="color:${color}">${score}</span>
+        <div class="urgency-track"><div class="urgency-fill" style="width:${score}%;background:${color}"></div></div>
+      </div>
+      <div class="urgent-review-btns">
+        <button class="ub-rev${hasReviewX ? ' sel-x' : ''}" onclick="reviewItem('${id}','x')">× もう一度</button>
+        <button class="ub-rev${latest.reviewPassed ? ' sel-o-btn' : ''}" onclick="reviewItem('${id}','o')">○ 覚えた</button>
+      </div>`;
+    ct.appendChild(card);
+  });
+}
+
+function reviewItem(probId, type) {
+  const hist = state.history[probId];
+  if (!hist || hist.length === 0) return;
+  const entry = hist[hist.length - 1];
+  if (type === 'o') {
+    entry.reviewPassed = true;
+    entry.reviewDate = today();
+  } else {
+    entry.reviewPassed = false;
+    entry.reviewDate = today();
+  }
+  save();
+  renderUrgent();
+}
+
+// ── BACKUP / RESTORE ──
+function exportData() {
+  const data = { version:2, label:'財務会計論（計算）', exportedAt: new Date().toISOString(), state };
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='zaimu_keisan_backup.json'; a.click();
+  URL.revokeObjectURL(url);
+}
+function importData(e) {
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.state) throw new Error('invalid');
+      if (!confirm('現在のデータを上書きして復元しますか？')) return;
+      state = data.state;
+      localStorage.setItem(STORE_KEY, JSON.stringify(state));
+      location.reload();
+    } catch(err) { alert('ファイルの読み込みに失敗しました。'); }
+  };
+  reader.readAsText(file); e.target.value='';
+}
+
+// ── NEW PROBLEM MODAL ──
+let newProbRonten = [];
+
+function openNewProbModal() {
+  newProbRonten = [];
+  document.getElementById('new-prob-title').value = '';
+  document.getElementById('new-prob-num').value = '';
+  document.getElementById('new-prob-ronten-list').innerHTML = '';
+
+  const chSel = document.getElementById('new-prob-ch');
+  chSel.innerHTML = '<option value="">章を選択...</option>'
+    + Object.keys(CHAPTER_RONTEN_POOL).map(ch => `<option value="${ch}">${ch}</option>`).join('');
+
+  document.getElementById('new-prob-ronten-select').innerHTML = '<option value="">まず章を選択してください</option>';
+
+  document.getElementById('new-prob-confirm').style.opacity = '.4';
+  document.getElementById('new-prob-confirm').style.pointerEvents = 'none';
+  document.getElementById('new-prob-modal').classList.add('open');
+}
+
+function closeNewProbModal() {
+  document.getElementById('new-prob-modal').classList.remove('open');
+}
+
+function onNewProbChChange() {
+  newProbRonten = [];
+  renderNewProbRontenList();
+  renderNewProbRontenSelect();
+  checkNewProbBtn();
+}
+
+function renderNewProbRontenList() {
+  const el = document.getElementById('new-prob-ronten-list');
+  el.innerHTML = newProbRonten.length === 0
+    ? `<div style="font-size:11px;color:var(--text-3);padding:4px 0;">論点未設定（後で編集も可能）</div>`
+    : newProbRonten.map((name, idx) => `
+        <div class="ronten-edit-item">
+          <span class="ronten-edit-name">${name}</span>
+          <button class="ronten-edit-del" onclick="removeNewProbRonten(${idx})">✕</button>
+        </div>`).join('');
+}
+
+function renderNewProbRontenSelect() {
+  const ch = document.getElementById('new-prob-ch').value;
+  const pool = CHAPTER_RONTEN_POOL[ch] || [];
+  const available = pool.filter(n => !newProbRonten.includes(n));
+  const sel = document.getElementById('new-prob-ronten-select');
+  sel.innerHTML = available.length === 0
+    ? `<option value="">追加できる論点がありません</option>`
+    : `<option value="">論点を選択して追加...</option>`
+      + available.map(n => `<option value="${n}">${n}</option>`).join('');
+}
+
+function addNewProbRonten() {
+  const sel = document.getElementById('new-prob-ronten-select');
+  if (!sel.value) return;
+  newProbRonten.push(sel.value);
+  renderNewProbRontenList();
+  renderNewProbRontenSelect();
+}
+
+function removeNewProbRonten(idx) {
+  newProbRonten.splice(idx, 1);
+  renderNewProbRontenList();
+  renderNewProbRontenSelect();
+}
+
+function checkNewProbBtn() {
+  const ch = document.getElementById('new-prob-ch').value;
+  const title = document.getElementById('new-prob-title').value.trim();
+  const ok = !!ch && !!title;
+  document.getElementById('new-prob-confirm').style.opacity = ok ? '1' : '.4';
+  document.getElementById('new-prob-confirm').style.pointerEvents = ok ? 'auto' : 'none';
+}
+
+function saveNewProblem() {
+  const ch = document.getElementById('new-prob-ch').value;
+  const title = document.getElementById('new-prob-title').value.trim();
+  const num = document.getElementById('new-prob-num').value.trim();
+  if (!ch || !title) return;
+  const newId = 'custom-' + Date.now();
+  if (!state.customProblems) state.customProblems = [];
+  state.customProblems.push({ id: newId, ch, title, num: num || null, defaultRonten: [...newProbRonten] });
+  state.problems.push(newId);
+  save();
+  closeNewProbModal();
+  renderProblems();
+}
+
+document.getElementById('new-prob-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('new-prob-modal')) closeNewProbModal();
+});
+
+// ── INIT ──
+load();
+renderProblems();
+</script>
+</body>
+</html>
