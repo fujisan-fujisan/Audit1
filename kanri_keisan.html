@@ -1237,7 +1237,16 @@ function renderTopicsView() {
           if (e && e.u) entries.push({ri,qid,u:e.u,date:e.date||''});
         });
       }
-      const qsLabel = t.qs.length>0 ? t.qs.map(q=>q.replace('q','Q-')).join(', ') : '–';
+      const allLinkedQids = getLinkedQidsForTopic(t.id);
+const qsLabel = allLinkedQids.length > 0
+  ? allLinkedQids.map(qid => {
+      if (qid.startsWith('custom-')) {
+        const cp = (appState.customProblems || []).find(p => p.id === qid);
+        return cp ? (cp.num || cp.name.slice(0,6) + '…') : qid.slice(0,8);
+      }
+      return qid.replace('q','Q-');
+    }).join(', ')
+  : '–';
       let chipsHTML = '';
       if (entries.length > 0) {
         chipsHTML = '<div class="topic-hist-chips">' + entries.map(({qid,u,date}) => {
@@ -1498,7 +1507,7 @@ function renderWeaknessPage() {
       const allEntries=[];
       for (let ri=0;ri<totalRounds;ri++) {
         const rn=roundHeaders[ri].replace('第','').replace('回','');
-        t.qs.forEach(qid=>{
+        getLinkedQidsForTopic(t.id).forEach(qid=>{
           const e=getTopicEntry(t.id,ri,qid);
           if(e.u){const sym=e.u==='oo'?'○○':e.u==='o'?'○':e.u==='n'?'ー':e.u==='x'?'×':e.u==='xx'?'××':'–';allEntries.push({lbl:`${rn}回/${qidToLabel(qid)}`,u:e.u,sym,ds:fmtDateShort(e.date||'')});}
         });
