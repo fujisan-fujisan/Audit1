@@ -757,6 +757,15 @@ TOPICS.forEach(cat => cat.items.forEach(t => {
   TOPIC_BY_ID[t.id] = t;
   TOPIC_ORDER[t.id] = _topicOrderIdx++;
 }));
+function getLinkedQidsForTopic(tid) {
+  const t = TOPIC_BY_ID[tid];
+  const staticQs = t ? [...t.qs] : [];
+  const customQs = (appState.customProblems || [])
+    .filter(p => (p.topicIds || []).includes(tid))
+    .map(p => p.id);
+  return [...new Set([...staticQs, ...customQs])];
+}
+
 
 // qidから表示ラベルを生成
 function qidToLabel(qid) {
@@ -1180,7 +1189,7 @@ function renderTopicsView() {
   const allItems = TOPICS.flatMap(cat=>cat.items);
   const doneEntries = allItems.reduce((acc,t) => {
     for (let ri=0; ri<totalRounds; ri++) {
-      const qids = [...t.qs, '_direct'];
+      const qids = [...getLinkedQidsForTopic(t.id), '_direct'];
       qids.forEach(qid => { if (getTopicEntry(t.id,ri,qid).u) acc++; });
     }
     return acc;
@@ -1197,7 +1206,7 @@ function renderTopicsView() {
     const catScores = [];
     cat.items.forEach(t => {
       for (let ri=0; ri<totalRounds; ri++) {
-        [...t.qs,'_direct'].forEach(qid => {
+        [...getLinkedQidsForTopic(t.id),'_direct'].forEach(qid => {
           const e = getTopicEntry(t.id,ri,qid);
           if (e.u && EVAL_SCORE[e.u]) catScores.push(EVAL_SCORE[e.u]);
         });
