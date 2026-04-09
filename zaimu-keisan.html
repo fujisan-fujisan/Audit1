@@ -1406,16 +1406,16 @@ function renderRonten() {
   });
 
   const chapterRonten = {};
-  state.problems.forEach(probId => {
-    const prob = getProbById(probId);
-    if (!prob) return;
-    const rontenList = getRonten(probId);
-    rontenList.forEach(name => {
-      if (!chapterRonten[prob.ch]) chapterRonten[prob.ch] = [];
-      if (!chapterRonten[prob.ch].includes(name)) chapterRonten[prob.ch].push(name);
-    });
+state.problems.forEach(probId => {
+  const prob = getProbById(probId);
+  if (!prob) return;
+  const pool = CHAPTER_RONTEN_POOL[prob.ch] || [];
+  pool.forEach(name => {
+    if (!chapterRonten[prob.ch]) chapterRonten[prob.ch] = [];
+    if (!chapterRonten[prob.ch].includes(name)) chapterRonten[prob.ch].push(name);
   });
-  // 各章の論点をプール順にソート
+});
+    // 各章の論点をプール順にソート
   Object.keys(chapterRonten).forEach(ch => {
     const pool = CHAPTER_RONTEN_POOL[ch] || [];
     chapterRonten[ch].sort((a, b) => {
