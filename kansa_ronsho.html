@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>監査論 問題ツール</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f9f9f8;
+  --surface: #ffffff;
+  --surface2: #f2f2f0;
+  --border: #e8e8e5;
+  --border2: #d0d0cb;
+  --text: #111111;
+  --text2: #666666;
+  --text3: #aaaaaa;
+  --ok: #1a7a4a;
+  --ok-dim: #edf7f2;
+  --ng: #c0392b;
+  --ng-dim: #fdf0ee;
+  --radius: 10px;
+  --radius-sm: 6px;
+  /* 5段階評価カラー */
+  --oo: #0a5c35; --oo-bg: #d6f0e3;
+  --o:  #1a7a4a; --o-bg:  #edf7f2;
+  --n:  #666666; --n-bg:  #f0f0ee;
+  --x:  #c0392b; --x-bg:  #fdf0ee;
+  --xx: #8b0000; --xx-bg: #fde8e8;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6;overflow-x:hidden}
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex;flex-direction:column}
+
+/* ── START ── */
+#screen-start{align-items:center;justify-content:center;padding:60px 24px}
+.start-btns{display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px}
+.btn-primary{background:var(--text);color:#fff;border:none;border-radius:var(--radius);padding:15px 24px;font-size:14px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:all .12s}
+.btn-primary:active{transform:scale(.97)}
+.btn-secondary{background:var(--surface);color:var(--text2);border:1.5px solid var(--border2);border-radius:var(--radius);padding:13px 24px;font-size:14px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:all .12s}
+.btn-secondary:hover{border-color:var(--text2);color:var(--text)}
+.btn-secondary:active{transform:scale(.97)}
+.btn-main{background:var(--text);color:#fff;border:none;border-radius:var(--radius);padding:28px 24px;font-size:16px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:all .12s;width:100%}
+.btn-main:active{transform:scale(.97)}
+.btn-mid{background:var(--surface);color:var(--text2);border:1.5px solid var(--border2);border-radius:var(--radius);padding:14px 24px;font-size:14px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:all .12s;width:100%}
+.btn-mid:hover{border-color:var(--text2);color:var(--text)}
+.btn-mid:active{transform:scale(.97)}
+.btn-small{background:var(--surface);color:var(--text3);border:1.5px solid var(--border);border-radius:var(--radius);padding:10px 8px;font-size:12px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:all .12s;flex:1}
+.btn-small:hover{border-color:var(--border2);color:var(--text2)}
+.btn-small:active{transform:scale(.97)}
+.start-btn-row{display:flex;gap:8px;width:100%}
+
+/* ── COMMON HEADER ── */
+.page-header{padding:18px 16px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0}
+.back-btn{background:none;border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text2);font-size:12px;padding:5px 10px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.back-btn:hover{border-color:var(--text2);color:var(--text)}
+.page-header-info{flex:1;min-width:0}
+.page-header-title{font-size:15px;font-weight:700}
+.page-header-sub{font-size:11px;color:var(--text2);margin-top:1px}
+
+/* ── CHAPTER SELECT ── */
+.chapter-list{padding:12px 14px 40px;display:flex;flex-direction:column;gap:8px;overflow-y:auto}
+.ch-btn{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px 14px;text-align:left;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px;font-family:'Noto Sans JP',sans-serif;width:100%}
+.ch-btn:hover{border-color:var(--border2);background:var(--surface2)}
+.ch-btn:active{transform:scale(.98)}
+.ch-btn-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);min-width:26px}
+.ch-btn-info{flex:1;min-width:0}
+.ch-btn-name{font-size:13px;font-weight:700;color:var(--text)}
+.ch-btn-sub{font-size:10px;color:var(--text2);margin-top:2px;font-family:'DM Mono',monospace}
+.ch-btn-hist{font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);text-align:right;flex-shrink:0}
+.ch-btn-hist .best{color:var(--ok);font-weight:700}
+
+/* ── QUIZ ── */
+.quiz-header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--border);padding:12px 16px;flex-shrink:0}
+.quiz-header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px}
+.quiz-chapter-name{font-size:12px;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.quiz-progress-text{font-family:'DM Mono',monospace;font-size:12px;color:var(--text2);white-space:nowrap;flex-shrink:0}
+.prog-track{height:3px;background:var(--border);border-radius:999px;overflow:hidden}
+.prog-fill{height:100%;background:var(--text);border-radius:999px;transition:width .4s ease}
+.quiz-content{padding:14px;max-width:600px;margin:0 auto;width:100%;padding-bottom:40px;overflow-y:auto}
+
+/* 論点カード */
+.ronten-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+.ronten-label{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.ronten-name{font-size:16px;font-weight:700;line-height:1.4;color:var(--text)}
+
+/* 解答入力 */
+.answer-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px}
+.answer-card-title{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+.answer-input{width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:13px;padding:10px 12px;outline:none;transition:border-color .15s;resize:vertical;min-height:100px}
+.answer-input:focus{border-color:var(--text)}
+.btn-submit{width:100%;padding:12px;border-radius:var(--radius-sm);border:none;background:var(--text);color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .12s;margin-top:8px}
+.btn-submit:active{transform:scale(.97)}
+
+/* キーワード評価 */
+.kw-eval-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px}
+.kw-eval-title{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px}
+.kw-no-keywords{font-size:12px;color:var(--text3);padding:8px 0}
+.kw-item{margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.kw-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.kw-item-word{font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;line-height:1.5}
+.kw-item-word .kw-tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;margin-right:4px;vertical-align:middle}
+.kw-score-btns{display:flex;gap:4px}
+.ksb{flex:1;padding:7px 4px;border-radius:var(--radius-sm);border:1.5px solid var(--border2);background:var(--surface2);font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:all .12s;text-align:center;color:var(--text2)}
+.ksb:active{transform:scale(.92)}
+.ksb.sel-oo{background:var(--oo-bg);border-color:var(--oo);color:var(--oo)}
+.ksb.sel-o{background:var(--o-bg);border-color:var(--o);color:var(--o)}
+.ksb.sel-n{background:var(--n-bg);border-color:var(--n);color:var(--n)}
+.ksb.sel-x{background:var(--x-bg);border-color:var(--x);color:var(--x)}
+.ksb.sel-xx{background:var(--xx-bg);border-color:var(--xx);color:var(--xx)}
+
+/* 理解度表示 */
+.understanding-bar{display:flex;align-items:center;gap:10px;margin-top:14px;padding:12px 14px;background:var(--surface2);border-radius:var(--radius-sm)}
+.understanding-label{font-size:11px;color:var(--text2);flex-shrink:0}
+.u-track{flex:1;height:6px;background:var(--border);border-radius:999px;overflow:hidden}
+.u-fill{height:100%;border-radius:999px;transition:width .4s ease}
+.understanding-pct{font-family:'DM Mono',monospace;font-size:12px;font-weight:700;min-width:36px;text-align:right;flex-shrink:0}
+
+.btn-next{width:100%;padding:13px;border-radius:var(--radius-sm);border:none;background:var(--text);color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-top:14px;transition:all .12s}
+.btn-next:active{transform:scale(.97)}
+.btn-skip{width:100%;padding:11px;border-radius:var(--radius-sm);border:1.5px solid var(--border2);background:transparent;color:var(--text2);font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-top:8px;transition:all .15s}
+.btn-skip:hover{border-color:var(--text2);color:var(--text)}
+
+/* ── RESULT ── */
+#screen-result{align-items:stretch}
+.result-inner{padding:28px 18px 60px;max-width:600px;margin:0 auto;width:100%}
+.result-top{text-align:center;margin-bottom:28px}
+.result-ch-lbl{font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}
+.result-big{font-family:'DM Mono',monospace;font-size:60px;font-weight:500;color:var(--text);line-height:1;margin-bottom:4px}
+.result-big span{font-size:22px;color:var(--text2)}
+.result-total-lbl{font-size:12px;color:var(--text2);margin-bottom:14px}
+.result-breakdown{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:24px}
+.bd-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;text-align:center}
+.bd-num{font-family:'DM Mono',monospace;font-size:20px;font-weight:500}
+.bd-lbl{font-size:9px;color:var(--text3);margin-top:3px;letter-spacing:.06em;text-transform:uppercase}
+.result-detail-title{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.result-ronten-item{padding:10px 0;border-bottom:1px solid var(--border)}
+.result-ronten-item:last-child{border-bottom:none}
+.rri-name{font-size:12px;font-weight:700;color:var(--text);margin-bottom:5px;line-height:1.4}
+.rri-bar-row{display:flex;align-items:center;gap:8px}
+.rri-bar-track{flex:1;height:5px;background:var(--border);border-radius:999px;overflow:hidden}
+.rri-bar-fill{height:100%;border-radius:999px}
+.rri-pct{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);min-width:32px;text-align:right}
+.result-btns{display:flex;flex-direction:column;gap:8px;margin-top:24px}
+.btn-retry{background:var(--text);color:#fff;border:none;border-radius:var(--radius-sm);padding:14px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .12s}
+.btn-retry:active{transform:scale(.97)}
+.btn-back{background:transparent;color:var(--text2);border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:13px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
+.btn-back:hover{border-color:var(--text2);color:var(--text)}
+
+/* ── MANAGE ── */
+#screen-manage{padding:0}
+.manage-tabs{display:flex;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);padding:0 4px;flex-shrink:0}
+.manage-tabs::-webkit-scrollbar{display:none}
+.mctab{padding:10px 12px;font-size:12px;font-weight:700;font-family:'Noto Sans JP',sans-serif;background:transparent;border:none;cursor:pointer;color:var(--text3);border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s}
+.mctab.active{color:var(--text);border-bottom-color:var(--text)}
+.manage-content{padding:12px 14px 60px;max-width:600px;margin:0 auto;overflow-y:auto}
+.manage-item-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden}
+.manage-item-header{padding:11px 13px;display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.manage-item-header:active{background:var(--surface2)}
+.manage-item-name{flex:1;font-size:12px;font-weight:700;color:var(--text);line-height:1.4}
+.manage-item-kw-count{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);flex-shrink:0}
+.manage-item-kw-count.has-kw{color:var(--ok)}
+.manage-item-body{display:none;border-top:1px solid var(--border);padding:12px 13px}
+.manage-item-card.open .manage-item-body{display:block}
+.manage-section-title{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.manage-kw-list{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.manage-kw-row{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 10px}
+.manage-kw-text{flex:1;font-size:12px;color:var(--text);line-height:1.4}
+.manage-kw-del{background:none;border:none;color:var(--text3);font-size:14px;cursor:pointer;padding:0 2px;flex-shrink:0;transition:color .12s}
+.manage-kw-del:hover{color:var(--ng)}
+.manage-add-row{display:flex;gap:6px;align-items:flex-start}
+.manage-add-input{width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:12px;padding:8px 10px;outline:none;resize:vertical;min-height:50px;transition:border-color .15s}
+.manage-add-row .manage-add-input{width:auto;flex:1}
+.manage-add-input:focus{border-color:var(--text)}
+.manage-add-input::placeholder{color:var(--text3)}
+.manage-add-btn{padding:8px 12px;border-radius:var(--radius-sm);border:1.5px solid var(--border2);background:var(--surface);color:var(--text2);font-size:12px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.manage-add-btn:hover{border-color:var(--text);color:var(--text)}
+
+/* ── RESUME / SUSPEND ── */
+.resume-row{margin-top:32px;width:100%;max-width:320px;text-align:center}
+.btn-resume{background:none;border:none;font-size:12px;color:var(--text3);cursor:pointer;font-family:'Noto Sans JP',sans-serif;text-decoration:underline dotted;text-underline-offset:3px;padding:4px 8px;transition:color .15s}
+.btn-resume:hover{color:var(--text2)}
+.btn-suspend{width:100%;padding:10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--text3);font-family:'Noto Sans JP',sans-serif;font-size:12px;cursor:pointer;margin-top:10px;transition:all .15s}
+.btn-suspend:hover{border-color:var(--border2);color:var(--text2)}
+
+/* ── IMPORTANCE BADGE ── */
+.imp-badge{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:6px;vertical-align:middle;font-family:'DM Mono',monospace}
+.imp-A{background:#fff3cd;color:#856404}
+.imp-B{background:#e8f0fe;color:#1a4a8a}
+.imp-C{background:#f0f0ee;color:#666}
+
+/* ── IMPORT ── */
+#screen-import{padding:0}
+.import-content{padding:16px 14px 60px;max-width:600px;margin:0 auto;overflow-y:auto}
+.import-section{margin-bottom:20px}
+.import-section-title{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+.import-select{width:100%;background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:13px;padding:10px 12px;outline:none;appearance:none;-webkit-appearance:none;transition:border-color .15s}
+.import-select:focus{border-color:var(--text)}
+.import-chapter-preview{margin-top:8px;font-size:12px;color:var(--text2);min-height:18px}
+.import-drop-area{border:2px dashed var(--border2);border-radius:var(--radius);padding:28px 16px;text-align:center;cursor:pointer;transition:all .15s;background:var(--surface)}
+.import-drop-area:hover{border-color:var(--text2);background:var(--surface2)}
+.import-drop-icon{font-size:28px;margin-bottom:8px}
+.import-drop-text{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.import-drop-sub{font-size:11px;color:var(--text3)}
+.import-preview-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px}
+.import-preview-item{font-size:12px;padding:6px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+.import-preview-item:last-child{border-bottom:none}
+.import-preview-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);min-width:24px;padding-top:1px}
+.import-preview-name{flex:1;color:var(--text)}
+.import-template-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-size:11px;color:var(--text2);line-height:1.7;white-space:pre-wrap;font-family:'DM Mono',monospace;word-break:break-all}
+
+/* ── MODEL ANSWER ── */
+.model-answer-card{background:#f0f7ff;border-color:#b8d4f0}
+.model-answer-card .answer-card-title{color:#1a4a7a}
+
+/* ── RECORD ── */
+.record-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden}
+.record-item-header{display:flex;align-items:center;gap:10px;padding:11px 13px;cursor:pointer;user-select:none}
+.record-item-header:active{background:var(--surface2)}
+.record-item-name{flex:1;font-size:12px;font-weight:700;color:var(--text);line-height:1.4}
+.record-score{font-family:'DM Mono',monospace;font-size:12px;font-weight:700;flex-shrink:0}
+.record-u-track{width:50px;height:5px;background:var(--border);border-radius:999px;overflow:hidden;flex-shrink:0}
+.record-u-fill{height:100%;border-radius:999px}
+.record-item-body{display:none;border-top:1px solid var(--border);padding:10px 13px}
+.record-item.open .record-item-body{display:block}
+.record-kw-table{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.record-kw-table table{border-collapse:collapse;min-width:100%}
+.record-kw-table th{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);padding:4px 8px;text-align:center;white-space:nowrap;font-weight:400;border-bottom:1px solid var(--border)}
+.record-kw-table th.kw-name-col{text-align:left;font-size:11px;min-width:120px;max-width:200px}
+.record-kw-table td{font-size:11px;padding:5px 8px;text-align:center;white-space:nowrap}
+.record-kw-table td.kw-name-col{text-align:left;font-size:11px;color:var(--text);line-height:1.4;white-space:normal;min-width:120px;max-width:200px}
+.record-kw-table tr:nth-child(odd) td{background:var(--surface)}
+.record-kw-table tr:nth-child(even) td{background:var(--surface2)}
+.record-no-kw{font-size:11px;color:var(--text3);padding:4px 0}
+</style>
+</head>
+<body>
+
+<!-- START -->
+<div class="screen active" id="screen-start">
+  <div class="start-btns">
+    <button class="btn-main" onclick="goChapter()">問題を解く →</button>
+    <button class="btn-mid" onclick="goRecord()">過去の記録を確認する</button>
+    <div class="start-btn-row">
+      <button class="btn-small" onclick="goManage()">管理</button>
+      <button class="btn-small" onclick="goImport()">問題追加</button>
+    </div>
+  </div>
+  <div class="resume-row">
+    <button class="btn-resume" onclick="document.getElementById('resume-input').click()">再開する</button>
+    <input type="file" id="resume-input" accept=".json" style="display:none" onchange="resumeSession(event)">
+  </div>
+</div>
+
+<!-- CHAPTER -->
+<div class="screen" id="screen-chapter">
+  <div class="page-header">
+    <button class="back-btn" onclick="goStart()">← トップ</button>
+    <div class="page-header-info">
+      <div class="page-header-title">章・節を選択</div>
+    </div>
+  </div>
+  <div class="chapter-list" id="chapter-list"></div>
+</div>
+
+<!-- QUIZ -->
+<div class="screen" id="screen-quiz">
+  <div class="quiz-header">
+    <div class="quiz-header-top">
+      <div class="quiz-chapter-name" id="quiz-chapter-name"></div>
+      <div class="quiz-progress-text" id="quiz-progress-text"></div>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="quiz-content" id="quiz-content"></div>
+</div>
+
+<!-- RESULT -->
+<div class="screen" id="screen-result">
+  <div class="result-inner">
+    <div class="result-top">
+      <div class="result-ch-lbl" id="result-ch-lbl"></div>
+      <div class="result-big" id="result-big">0<span>%</span></div>
+      <div class="result-total-lbl" id="result-total-lbl">平均理解度</div>
+    </div>
+    <div class="result-breakdown">
+      <div class="bd-card"><div class="bd-num" id="bd-answered">0</div><div class="bd-lbl">回答済み</div></div>
+      <div class="bd-card"><div class="bd-num" id="bd-skipped">0</div><div class="bd-lbl">スキップ</div></div>
+    </div>
+    <div class="result-detail-title">論点別 理解度</div>
+    <div id="result-detail-items"></div>
+    <div class="result-btns">
+      <button class="btn-retry" onclick="retryChapter()">同じ章でもう一度</button>
+      <button class="btn-back" onclick="goStart()">トップに戻る</button>
+    </div>
+  </div>
+</div>
+
+<!-- MANAGE -->
+<div class="screen" id="screen-manage">
+  <div class="page-header">
+    <button class="back-btn" onclick="goStart()">← トップ</button>
+    <div class="page-header-info">
+      <div class="page-header-title">キーワードを管理</div>
+      <div class="page-header-sub">論点ごとに必須キーワードを登録します</div>
+    </div>
+  </div>
+  <div class="manage-tabs" id="manage-tabs"></div>
+  <div class="manage-content" id="manage-content"></div>
+</div>
+
+<!-- RECORD -->
+<div class="screen" id="screen-record">
+  <div class="page-header">
+    <button class="back-btn" onclick="goStart()">← トップ</button>
+    <div class="page-header-info">
+      <div class="page-header-title">過去の記録</div>
+      <div class="page-header-sub">論点ごとの理解度履歴</div>
+    </div>
+  </div>
+  <div class="manage-tabs" id="record-tabs"></div>
+  <div class="manage-content" id="record-content"></div>
+</div>
+
+<!-- IMPORT -->
+<div class="screen" id="screen-import">
+  <div class="page-header">
+    <button class="back-btn" onclick="goStart()">← トップ</button>
+    <div class="page-header-info">
+      <div class="page-header-title">問題を追加する</div>
+      <div class="page-header-sub">JSONファイルを読み込んで問題を追加します</div>
+    </div>
+  </div>
+  <div class="import-content">
+
+    <div class="import-section">
+      <div class="import-section-title">① 追加先の章・節を選択</div>
+      <select class="import-select" id="import-chapter-select" onchange="onImportChapterChange()">
+        <option value="">-- 章・節を選択してください --</option>
+      </select>
+      <div class="import-chapter-preview" id="import-chapter-preview"></div>
+    </div>
+
+    <div class="import-section">
+      <div class="import-section-title">② JSONファイルを読み込む</div>
+      <div class="import-drop-area" id="import-drop-area" onclick="document.getElementById('import-file-input').click()">
+        <div class="import-drop-icon">📂</div>
+        <div class="import-drop-text">タップしてファイルを選択</div>
+        <div class="import-drop-sub">Claudeに出力させたJSONファイル（.json）</div>
+      </div>
+      <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="onImportFileSelected(event)">
+    </div>
+
+    <div class="import-preview-area" id="import-preview-area" style="display:none">
+      <div class="import-section">
+        <div class="import-section-title">③ 内容を確認して追加</div>
+        <div class="import-preview-card" id="import-preview-card"></div>
+        <button class="btn-submit" id="import-confirm-btn" onclick="confirmImport()" style="margin-top:12px">この内容で追加する</button>
+      </div>
+    </div>
+
+    <div class="import-section" style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border)">
+      <div class="import-section-title" style="margin-bottom:8px">Claudeへの指示テンプレート</div>
+      <div class="import-template-box" id="import-template-box">以下のNotionの内容から、暗記が必要な論点と模範解答を抽出してJSONを作成してください。
+
+【出力形式】
+{
+  "importance": "【節全体の重要度：A/B/C】",
+  "items": [
+    {
+      "id": "【章節コード_連番】（例：c2_1_1）",
+      "name": "【論点名】",
+      "answer": "【模範解答】"
+    }
+  ]
+}
+
+【ルール】
+・「論点」と「解答」があるものを抽出する（「回答」欄は空でも対象に含める）
+・回答した日付などの管理情報は除外する
+・idは c【章番号】_【節番号】_【連番】 の形式（例：第2章第1節の1問目 → c2_1_1）
+・importanceは節全体で1つ（A/B/Cのいずれか）
+・answerは改行を \n で表現する
+
+【Notionの内容】
+（ここにNotionのコピーを貼り付けてください）</div>
+      <button class="manage-add-btn" style="margin-top:8px;width:100%" onclick="copyTemplate()">テンプレートをコピー</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── CHAPTER MASTER（全章節） ──
+const CHAPTER_MASTER = [
+  { ch: "第1章第1節", chName: "監査総論" },
+  { ch: "第1章第2節", chName: "監査基準論" },
+  { ch: "第2章第1節", chName: "監査主体論" },
+  { ch: "第2章第2節", chName: "監査の品質管理" },
+  { ch: "第3章第1節", chName: "監査実施論－総論" },
+  { ch: "第3章第2節", chName: "確認" },
+  { ch: "第3章第3節", chName: "分析的手続" },
+  { ch: "第3章第4節", chName: "内部統制" },
+  { ch: "第3章第5節", chName: "リスク・アプローチ監査－総論" },
+  { ch: "第3章第6節", chName: "重要な虚偽表示リスクの識別と評価" },
+  { ch: "第3章第7節", chName: "評価した重要な虚偽表示リスクへの対応" },
+  { ch: "第3章第8節", chName: "リスク・アプローチに関するその他の論点" },
+  { ch: "第3章第9節", chName: "監査の計画及び実施における重要性" },
+  { ch: "第3章第10節", chName: "監査の過程で識別した虚偽表示の評価" },
+  { ch: "第3章第11節", chName: "監査計画" },
+  { ch: "第3章第12節", chName: "監査調書" },
+  { ch: "第3章第13節", chName: "監査サンプリング" },
+  { ch: "第3章第14節", chName: "会計上の見積りの監査" },
+  { ch: "第3章第15節", chName: "特定項目の監査証拠の入手" },
+  { ch: "第3章第16節", chName: "勘定別の監査手続" },
+  { ch: "第3章第17節", chName: "経営者確認書" },
+  { ch: "第4章第1節", chName: "監査意見－総論" },
+  { ch: "第4章第2節", chName: "監査報告書－総論" },
+  { ch: "第4章第3節", chName: "監査報告書の基本形" },
+  { ch: "第4章第4節", chName: "除外事項付意見を表明する場合の監査報告書" },
+  { ch: "第4章第5節", chName: "監査上の主要な検討事項" },
+  { ch: "第4章第6節", chName: "その他の記載内容" },
+  { ch: "第4章第7節", chName: "追記情報" },
+  { ch: "第4章第8節", chName: "監査報告に関するその他の論点" },
+  { ch: "第5章第1節", chName: "グループ監査における特別な考慮事項" },
+  { ch: "第5章第2節", chName: "専門家の業務の利用" },
+  { ch: "第5章第3節", chName: "内部監査の利用" },
+  { ch: "第6章第1節", chName: "継続企業の前提に関する開示と監査" },
+  { ch: "第6章第2節", chName: "財務諸表監査における不正への対応" },
+  { ch: "第6章第3節", chName: "不正リスク対応基準" },
+  { ch: "第6章第4節", chName: "財務諸表監査における法令の検討" },
+  { ch: "第6章第5節", chName: "監査役等とのコミュニケーション" },
+  { ch: "第6章第6節", chName: "内部統制の不備に関するコミュニケーション" },
+  { ch: "第6章第7節", chName: "監査人の交代" },
+  { ch: "第6章第8節", chName: "初年度監査の期首残高の検討" },
+  { ch: "第6章第9節", chName: "関連当事者の監査" },
+  { ch: "第7章第1節", chName: "財務情報等に係る保証業務の概念的枠組み" },
+  { ch: "第7章第2節", chName: "期中レビュー" },
+  { ch: "第7章第3節", chName: "財務報告に係る内部統制の報告と監査" },
+  { ch: "第7章第4節", chName: "中間監査" },
+  { ch: "第8章第1節", chName: "特別目的の財務諸表の監査と準拠性の意見の表明" },
+  { ch: "第8章第2節", chName: "個別の財務表又は財務諸表項目等に対する監査" },
+  { ch: "第8章第3節", chName: "要約財務諸表に関する報告業務" },
+  { ch: "第9章第1節", chName: "IT環境下の監査" },
+  { ch: "第9章第2節", chName: "業務を委託している企業の監査上の留意事項" },
+  { ch: "第9章第3節", chName: "監査業務の契約条件の合意" },
+  { ch: "第10章第1節", chName: "金融商品取引法" },
+  { ch: "第10章第2節", chName: "会社法" },
+  { ch: "第10章第3節", chName: "公認会計士法" },
+  { ch: "第10章第4節", chName: "倫理規則" },
+];
+
+// ── DATA ──
+const DATA = [
+  {
+    ch: "第1章第1節", chName: "監査総論", importance: "A",
+    items: [
+      { id: "k1", importance: "A", name: "財務報告の枠組みが有する機能" },
+      { id: "k2", importance: "A", name: "一般目的の財務報告の枠組みが通常，適正表示の枠組みである理由" },
+      { id: "k3", importance: "A", name: "特別目的の財務報告の枠組みが通常，準拠性の枠組みである理由" },
+      { id: "k4", importance: "A", name: "財務報告の枠組みが有する限界" },
+      { id: "k5", importance: "A", name: "離脱容認規定について認めるべき・認めないべきとする見解" },
+      { id: "k6", importance: "A", name: "財務諸表監査制度が必要とされる理由" },
+      { id: "k7", importance: "A", name: "適正性監査の目的" },
+      { id: "k8", importance: "A", name: "監査意見が財務諸表全体に対することを明示している背景" },
+      { id: "k9", importance: "A", name: "あらゆる虚偽表示の有無を保証するものでないことを明示している理由" },
+      { id: "k10", importance: "A", name: "監査基準に財務諸表監査の目的を明文化した理由" },
+      { id: "k11", importance: "A", name: "監査リスクはゼロにできない理由" },
+      { id: "k12", importance: "A", name: "二重責任の原則の定義" },
+      { id: "k13", importance: "A", name: "二重責任の原則の必要性" },
+      { id: "k14", importance: "A", name: "監査人と経営者の協力責任" },
+      { id: "k15", importance: "A", name: "監査実施の前提の確認の時点と目的" },
+      { id: "k16", importance: "A", name: "監査の被監査会社に対する機能（定義・必要性）" },
+      { id: "k17", importance: "A", name: "監査の利害関係者に対する機能（定義・必要性）" },
+      { id: "k18", importance: "A", name: "指導的機能の発揮における二重責任の原則の問題" },
+      { id: "k19", importance: "A", name: "利害関係者にもたらす効果" },
+      { id: "k20", importance: "A", name: "被監査会社にもたらす効果" },
+    ]
+  }
+];
+
+// ── STORAGE ──
+const KW_KEY   = 'kansa-kw-v1';
+const REC_KEY  = 'kansa-rec-v1';
+const ANS_KEY  = 'kansa-ans-v1';
+let kwData  = {}; // { itemId: [string, ...] }
+let recData = {}; // { itemId: [{date, scores, understanding}] }
+let ansData = {}; // { itemId: string } 模範解答
+
+function loadStorage(){
+  try{ const k=localStorage.getItem(KW_KEY);  if(k) kwData=JSON.parse(k);  }catch(e){}
+  try{ const r=localStorage.getItem(REC_KEY); if(r) recData=JSON.parse(r); }catch(e){}
+  try{ const a=localStorage.getItem(ANS_KEY); if(a) ansData=JSON.parse(a); }catch(e){}
+}
+function saveKw(){  try{ localStorage.setItem(KW_KEY, JSON.stringify(kwData));  }catch(e){} }
+
+// 初期解答データ（未登録の場合のみ投入）
+const INITIAL_ANSWERS = {"k1": "【経営者にとっての機能】\n事実と慣習と判断の総合的産物である財務諸表の作成を経営者の自由にゆだねると，恣意的な財務諸表が作成されるおそれがあるため，財務諸表の作成に関する規範を設ける必要がある。財務諸表の作成規準として機能する。\n\n【監査人にとっての機能】\n財務諸表監査の社会的信頼性を確保するため、財務諸表の適否に関する監査人の判断の客観性・統一性を担保する必要がある。", "k2": "一般目的の財務報告の枠組みは，広範囲の利用者に共通するニーズに基づく汎用性のある枠組み。\nこのような財務報告の枠組みにおいては，適用される全ての事業体に必要な注記を網羅的に定めることは不可能であることから，個々の状況に応じて追加的な注記を求める規定を定めることが多い。", "k3": "特別目的の財務報告の枠組みは，特定の利用者の個別の財務情報に対するニーズに対応する枠組み。\n一般目的の財務報告の枠組みに比べ，提供される情報が限定されていることが多く，また，財務諸表が示すべき内容を個別具体的に規定することが可能であることから，追加的な注記の規定を設ける必要性が乏しい。", "k4": "【適時性の限界】\n財務報告の枠組みは，あくまで一定時点における会計慣行や財務諸表利用者の情報要求を満たすべく規範化したものであり，新たな会計慣行や情報要求に適時弾力的に対応できない。\n\n【網羅性の限界】\n財務報告の枠組みは，あくまで一般的に想定される取引や会計事象に係る会計処理や注記を規範化したものであり，あらゆる取引や会計事象に係る会計処理や注記を規定していない。", "k5": "【認めるべき見解】\n企業の実態をより適切に反映した財務諸表が作成・開示されるようになる。\n離脱容認規定を採用している諸外国と足並みを揃えることで、会計の国際的調和化を図ることができる。\n\n【認めないべき見解】\n財務報告の枠組みが有する財務諸表の作成規準としての機能が曖昧になるため，粉飾決算を誘発する虞がある。\n財務報告の枠組みが有する財務諸表の適否判断規準としての機能が曖昧になるため，監査人の責任が曖昧になる虞がある。", "k6": "経営者と利害関係者との間に存在する潜在的・顕在的な利害対立関係から，経営者は，自らに有利となるように財務諸表を歪める潜在的な動機を有し，利害関係者は，経営者の作成した財務諸表の信頼性に疑念を抱く。\nさらに財務諸表は「事実と慣習と判断の総合的表現」であり，経営者の偏った判断や慣習の悪用によって歪められやすい。\n財務諸表は利害関係者の意思決定にとって極めて重要であることから，財務諸表の信頼性に対する疑念がさらに増大する。これら財務諸表の相対的性格と財務諸表の影響の重大性から経営者が作成した財務諸表の信頼性を検証する必要がある。\nしかし、財務諸表の作成過程は複雑であり，その信頼性の検証には高度な専門能力が必要となる。加えて、企業と利害関係者の間には，物理的・地理的な距離，また，法律的・制度的な距離がある。そのため利害関係者自らが，財務諸表の信頼性を検証することはできない。\n【結論】以上から必要十分な専門能力と，企業からの独立性を有した監査人による財務諸表監査が必要となる。", "k7": "監査人が、財務諸表全体としての重要な虚偽表示の有無について合理的な保証を得た上で、経営者の作成した財務諸表が適正に表示しているかどうかについて意見を表明すること", "k8": "監査意見は、財務諸表全体に対して表明されるものであり、財務諸表項目や注記ごとに個別に表明されるものではない。\nそのため、監査人が発見した虚偽表示が、個々の財務諸表項目や注記にとって重要であるとしても、財務諸表全体にとっては重要ではない場合には、監査人は当該財務諸表が適正である旨の意見を表明することができることを明示している。", "k9": "【利害関係者保護の観点】\n不測の損害を被る可能性から利害関係者を保護する観点から、財務諸表の信頼性を保証する上で問題とする虚偽表示は、利害関係者の経済的意思決定に影響を及ぼす重要な虚偽表示のみである。\n\n【監査資源の制約の観点】\n監査資源の制約の観点から、軽微な虚偽表示を含めた全ての虚偽表示を発見する責任を監査人に課すことは現実的に困難であり、また、監査人の責任を過重なものとするおそれがある。", "k10": "【期待ギャップの解消】\n改訂前の監査基準では、監査それ自体の目的が明確にされていなかったため、監査の役割について種々の理解（誤解）を与える結果となり、いわゆる期待ギャップを醸成させている点が指摘されていた。\n\n【監査基準の枠組みの明確化】\n監査基準において監査の目的を明確にすることにより、監査基準の枠組みが自ずと決まるようになる。", "k11": "監査には固有の限界があるため、監査人が結論を導き、意見表明の基礎となる監査証拠の大部分は、絶対的というより心証的なものとなる。\nそのため、監査人は、監査リスクをゼロに抑えることを期待されているわけではなく、また、ゼロにすることは不可能（絶対的な保証を得ることは不可能）である。", "k12": "財務諸表の作成に関する責任は経営者が負い、当該財務諸表に対して表明した監査意見に関する責任は監査人が負うという責任分担原則である。", "k13": "二重原則がなく、経営者と監査人の責任分担が曖昧な場合には経営者と利害関係者が財務諸表に関する責任分担について適切に認識・理解することができず、財務諸表の作成責任の一部または全部が監査人にあるという誤解を持つおそれがある。\nそうなると、経営者が自らの財務諸表の作成責任を適切に果たせなくなる可能性があり、利害関係者が監査人に対して不当な責任追及を行なったり、監査人による自己監査の疑いを抱き、監査制度に対する信頼が失墜する可能性があるためである。", "k14": "経営者は、監査に必要な全ての資料をいかなる制約もなく提供することで、監査人が監査を円滑に実施できるように協力する。\n監査人は、監査の過程で識別した虚偽表示等について指導的機能を発揮することで、経営者が重要な虚偽表示のない財務諸表を作成できるように協力する。", "k15": "【監査契約の新規の締結または更新時＝監査契約書】\n経営者が、監査実施の基礎となる経営者の責任を自ら認識・理解していることは、監査人が効果的かつ効率的に監査を実施し、意見表明の基礎を得るための前提的事項と言える。\nそのため、監査契約の新規の締結または更新時において、あらかじめ意見表明の基礎が得られることが合理的に見込まれることを確かめるために、監査契約書において事前合意する。\n\n【意見表明時＝経営者確認書】\n監査実施の基礎となる経営者の責任について事前合意が得られていたとしても、監査人が入手した監査証拠が意見表明の基礎を形成するための十分かつ適切なものであるかどうかは、当該責任が実際に果たされたかどうかにより影響を受ける。\nそのため、意見表明時に、経営者が責任を果たしたことを正式に認めさせるために、経営者確認書において事後確認が必要となる。", "k16": "〈批判的機能〉－本質的機能\n定義：財務諸表の適否を適用される財務諸表の枠組みに照らして批判的に検証し、その結果を意見として表明すること。\n必要性：経営者が作成した財務諸表について意見を表明するという監査の目的を果たすため。\n\n〈指導的機能〉－副次的機能\n定義：会社に対して必要な助言勧告を行い、重要な虚偽表示のない財務諸表の作成を指導すること。\n必要性：重要な虚偽表示のない財務諸表の利用を前提とした企業内容開示制度の実効性を担保するため。意思決定に有用な財務諸表の開示を要求する利害関係者を保護するため。", "k17": "〈保証機能〉－本質的機能\n定義：財務諸表の適否に関する意見を表明することによって、意思決定情報としての財務諸表の信頼性を保証すること。\n必要性：誤った財務諸表に基づいて意思決定を行うことによる不測の損害を被る可能性から利害関係者を保護するため。\n\n〈情報提供機能〉－副次的機能\n定義：企業の状況に関する利害関係者の判断に有用な補足的情報を提供すること。\n必要性：経済的意思決定に資する追加的な情報の提供を望む利害関係者の期待に応え、期待ギャップを解消するため。", "k18": "監査人の指導を受け入れるか否かは、財務諸表の最終の作成責任を負う経営者が決定するため、監査人は修正を強制することはできない。また、仮に経営者が監査人の指導を受け入れて、財務諸表を修正した場合であっても、経営者の決定に基づいて修正が行われる以上、修正した内容も含め、財務諸表の作成に関する責任は全て経営者に帰属し、監査人に転嫁されることはない。\n以上により、指導的機能の発揮によっても、二重責任の原則に抵触しない。", "k19": "（1）不測の損害を被る可能性からの保護\n財務諸表監査が実施されることにより，経営者が作成する財務諸表の信頼性が明らかとなる。これにより，利害関係者は，誤った財務諸表に基づいて意思決定を行うことにより不測の損害を被る可能性から保護されることになる。\n\n（2）補足的な情報の入手", "k20": "（1）資金調達の容易化\n企業は，財務諸表監査を受けることで，自ら作成・開示した財務諸表について利害関係者からの信頼を得ることができる。これにより，企業は，一般投資家や金融機関から容易に資金を調達することが可能となる。\n\n（2）内部統制の改善\n\n（3）不正・誤謬の発生抑制"};
+function initAnswers(){
+  let updated = false;
+  Object.entries(INITIAL_ANSWERS).forEach(([id, ans]) => {
+    if(!ansData[id]) { ansData[id] = ans; updated = true; }
+  });
+  if(updated) saveAns();
+}
+function saveRec(){ try{ localStorage.setItem(REC_KEY, JSON.stringify(recData)); }catch(e){} }
+function saveAns(){ try{ localStorage.setItem(ANS_KEY, JSON.stringify(ansData)); }catch(e){} }
+function getAns(id){ return ansData[id]||''; }
+function setAns(id, val){ ansData[id]=val; saveAns(); }
+
+function getKws(id){ return kwData[id]||[]; }
+function addKw(id, word){
+  if(!word.trim()) return;
+  if(!kwData[id]) kwData[id]=[];
+  kwData[id].push(word.trim());
+  saveKw();
+}
+function deleteKw(id, idx){
+  if(!kwData[id]) return;
+  kwData[id].splice(idx,1);
+  saveKw();
+}
+
+// 理解度計算: oo=100, o=75, n=50, x=25, xx=0
+const SCORE_MAP = {oo:100, o:75, n:50, x:25, xx:0};
+function calcUnderstanding(scores){
+  const vals = Object.values(scores);
+  if(!vals.length) return null;
+  return Math.round(vals.reduce((s,v)=>s+(SCORE_MAP[v]||0),0)/vals.length);
+}
+function uColor(u){
+  if(u===null) return 'var(--text3)';
+  if(u>=80) return 'var(--ok)';
+  if(u>=50) return '#c07000';
+  return 'var(--ng)';
+}
+function getLastUnderstanding(id){
+  const recs = recData[id]||[];
+  if(!recs.length) return null;
+  return recs[recs.length-1].understanding;
+}
+
+// ── SCREENS ──
+function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById('screen-'+id).classList.add('active'); window.scrollTo(0,0); }
+function goStart(){ showScreen('start'); }
+function goChapter(){ renderChapterList(); showScreen('chapter'); }
+function goManage(){ renderManage(0); showScreen('manage'); }
+function goRecord(){ renderRecord(0); showScreen('record'); }
+
+// ── CHAPTER ──
+function renderChapterList(){
+  document.getElementById('chapter-list').innerHTML = DATA.map((ch,i)=>{
+    const recs = ch.items.map(it=>getLastUnderstanding(it.id)).filter(u=>u!==null);
+    const avg = recs.length ? Math.round(recs.reduce((s,v)=>s+v,0)/recs.length) : null;
+    const histHTML = avg!==null
+      ? `<div class="ch-btn-hist">平均 <span class="best">${avg}%</span></div>`
+      : `<div class="ch-btn-hist" style="color:var(--text3)">未挑戦</div>`;
+    return `<button class="ch-btn" onclick="startQuiz(${i})">
+      <div class="ch-btn-num">${i+1}</div>
+      <div class="ch-btn-info">
+        <div class="ch-btn-name">${ch.chName}${ch.importance?`<span class="imp-badge imp-${ch.importance}">${ch.importance}</span>`:''}</div>
+        <div class="ch-btn-sub">${ch.ch} · ${ch.items.length}論点</div>
+      </div>
+      ${histHTML}
+    </button>`;
+  }).join('');
+}
+
+// ── QUIZ ──
+let quizState = {
+  chIndex: null,
+  items: [],
+  currentIdx: 0,
+  phase: 'input', // 'input' | 'eval'
+  userAnswer: '',
+  scores: {},     // kwIdx -> 'oo'|'o'|'n'|'x'|'xx'
+  results: [],    // {id, understanding, skipped}
+};
+
+function startQuiz(chIndex){
+  const ch = DATA[chIndex];
+  quizState = {
+    chIndex,
+    items: [...ch.items],
+    currentIdx: 0,
+    phase: 'input',
+    userAnswer: '',
+    scores: {},
+    results: [],
+  };
+  document.getElementById('quiz-chapter-name').textContent = `${ch.ch}　${ch.chName}`;
+  renderQuizScreen();
+  showScreen('quiz');
+}
+
+function renderQuizScreen(){
+  const { items, currentIdx, phase } = quizState;
+  if(currentIdx >= items.length){ finishQuiz(); return; }
+  const item = items[currentIdx];
+  const total = items.length;
+  const pct = Math.round(currentIdx/total*100);
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('quiz-progress-text').textContent = `${currentIdx+1} / ${total}`;
+
+  const kws = getKws(item.id);
+  const content = document.getElementById('quiz-content');
+
+  if(phase === 'input'){
+    content.innerHTML = `
+      <div class="ronten-card">
+        <div class="ronten-label">論点</div>
+        <div class="ronten-name">${escHtml(item.name)}</div>
+      </div>
+      <div class="answer-card">
+        <div class="answer-card-title">解答を入力</div>
+        <textarea class="answer-input" id="answer-input" placeholder=""></textarea>
+        <button class="btn-submit" onclick="submitAnswer()">採点へ →</button>
+      </div>
+      <button class="btn-skip" onclick="skipItem()">この論点をスキップ</button>
+      <button class="btn-suspend" onclick="suspendSession()">中断する</button>`;
+  } else {
+    // eval phase
+    const kwsHTML = kws.length === 0
+      ? `<div class="kw-no-keywords">キーワードが登録されていません。管理画面から追加してください。</div>`
+      : kws.map((kw,i)=>{
+          const sel = quizState.scores[i]||null;
+          return `<div class="kw-item">
+            <div class="kw-item-word">${escHtml(kw)}</div>
+            <div class="kw-score-btns">
+              <button class="ksb${sel==='oo'?' sel-oo':''}" onclick="setScore(${i},'oo')">○○</button>
+              <button class="ksb${sel==='o'?' sel-o':''}" onclick="setScore(${i},'o')">○</button>
+              <button class="ksb${sel==='n'?' sel-n':''}" onclick="setScore(${i},'n')">ー</button>
+              <button class="ksb${sel==='x'?' sel-x':''}" onclick="setScore(${i},'x')">×</button>
+              <button class="ksb${sel==='xx'?' sel-xx':''}" onclick="setScore(${i},'xx')">××</button>
+            </div>
+          </div>`;
+        }).join('');
+
+    const u = calcUnderstanding(quizState.scores);
+    const uDisp = u!==null ? u+'%' : '–';
+    const uPct = u||0;
+    const uCol = uColor(u);
+
+    const modelAns = getAns(item.id);
+    const modelHTML = modelAns
+      ? `<div class="answer-card model-answer-card">
+          <div class="answer-card-title">模範解答</div>
+          <div style="font-size:12px;line-height:1.8;color:var(--text);white-space:pre-wrap">${escHtml(modelAns)}</div>
+        </div>`
+      : '';
+
+    content.innerHTML = `
+      <div class="ronten-card">
+        <div class="ronten-label">論点</div>
+        <div class="ronten-name">${escHtml(item.name)}</div>
+      </div>
+      <div class="answer-card" style="background:var(--surface2);border-color:var(--border)">
+        <div class="answer-card-title">あなたの解答</div>
+        <div style="font-size:12px;line-height:1.7;color:var(--text);white-space:pre-wrap">${escHtml(quizState.userAnswer)||'（未入力）'}</div>
+      </div>
+      ${modelHTML}
+      <div class="kw-eval-card">
+        <div class="kw-eval-title">キーワード自己評価</div>
+        ${kwsHTML}
+        ${kws.length>0?`<div class="understanding-bar">
+          <div class="understanding-label">理解度</div>
+          <div class="u-track"><div class="u-fill" id="u-fill" style="width:${uPct}%;background:${uCol}"></div></div>
+          <div class="understanding-pct" id="u-pct" style="color:${uCol}">${uDisp}</div>
+        </div>`:''}
+      </div>
+      <button class="btn-next" onclick="nextItem()">次の論点 →</button>
+      <button class="btn-suspend" onclick="suspendSession()">中断する</button>`;
+  }
+  window.scrollTo(0,0);
+}
+
+function submitAnswer(){
+  const val = document.getElementById('answer-input')?.value || '';
+  quizState.userAnswer = val;
+  quizState.phase = 'eval';
+  quizState.scores = {};
+  renderQuizScreen();
+}
+
+function setScore(kwIdx, val){
+  quizState.scores[kwIdx] = val;
+  // ボタンの見た目を更新
+  const kws = getKws(quizState.items[quizState.currentIdx].id);
+  const allBtns = document.querySelectorAll('.kw-item');
+  allBtns.forEach((el,i)=>{
+    if(i!==kwIdx) return;
+    const btns = el.querySelectorAll('.ksb');
+    const types = ['oo','o','n','x','xx'];
+    btns.forEach((btn,j)=>{
+      btn.className = 'ksb' + (quizState.scores[kwIdx]===types[j]?' sel-'+types[j]:'');
+    });
+  });
+  // 理解度更新
+  const u = calcUnderstanding(quizState.scores);
+  const uFill = document.getElementById('u-fill');
+  const uPct = document.getElementById('u-pct');
+  if(uFill && uPct && u!==null){
+    const col = uColor(u);
+    uFill.style.width = u+'%';
+    uFill.style.background = col;
+    uPct.textContent = u+'%';
+    uPct.style.color = col;
+  }
+}
+
+function nextItem(){
+  const item = quizState.items[quizState.currentIdx];
+  const kws = getKws(item.id);
+  const u = kws.length>0 ? calcUnderstanding(quizState.scores) : null;
+  // 記録保存
+  if(!recData[item.id]) recData[item.id]=[];
+  recData[item.id].push({
+    date: new Date().toLocaleDateString('ja-JP'),
+    scores: {...quizState.scores},
+    understanding: u
+  });
+  saveRec();
+  quizState.results.push({id:item.id, understanding:u, skipped:false});
+  quizState.currentIdx++;
+  quizState.phase = 'input';
+  quizState.userAnswer = '';
+  quizState.scores = {};
+  renderQuizScreen();
+}
+
+function skipItem(){
+  const item = quizState.items[quizState.currentIdx];
+  quizState.results.push({id:item.id, understanding:null, skipped:true});
+  quizState.currentIdx++;
+  quizState.phase = 'input';
+  quizState.userAnswer = '';
+  quizState.scores = {};
+  renderQuizScreen();
+}
+
+function finishQuiz(){
+  const ch = DATA[quizState.chIndex];
+  const answered = quizState.results.filter(r=>!r.skipped);
+  const skipped  = quizState.results.filter(r=>r.skipped);
+  const us = answered.map(r=>r.understanding).filter(u=>u!==null);
+  const avg = us.length ? Math.round(us.reduce((s,v)=>s+v,0)/us.length) : null;
+
+  document.getElementById('result-ch-lbl').textContent = `${ch.ch}　${ch.chName}`;
+  document.getElementById('result-big').innerHTML = avg!==null ? `${avg}<span>%</span>` : `–<span></span>`;
+  document.getElementById('bd-answered').textContent = answered.length;
+  document.getElementById('bd-skipped').textContent  = skipped.length;
+
+  document.getElementById('result-detail-items').innerHTML = quizState.results.map(r=>{
+    const item = ch.items.find(it=>it.id===r.id);
+    const name = item?item.name:r.id;
+    const u = r.understanding;
+    const col = uColor(u);
+    const pct = u||0;
+    if(r.skipped) return `<div class="result-ronten-item">
+      <div class="rri-name">${escHtml(name)}</div>
+      <div style="font-size:10px;color:var(--text3)">スキップ</div>
+    </div>`;
+    return `<div class="result-ronten-item">
+      <div class="rri-name">${escHtml(name)}</div>
+      <div class="rri-bar-row">
+        <div class="rri-bar-track"><div class="rri-bar-fill" style="width:${pct}%;background:${col}"></div></div>
+        <div class="rri-pct" style="color:${col}">${u!==null?u+'%':'–'}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  showScreen('result');
+}
+
+function retryChapter(){ startQuiz(quizState.chIndex); }
+
+// ── MANAGE ──
+function renderManage(chIndex){
+  document.getElementById('manage-tabs').innerHTML = DATA.map((ch,i)=>`<button class="mctab${i===chIndex?' active':''}" onclick="renderManage(${i})">${ch.ch}</button>`).join('');
+  const ch = DATA[chIndex];
+  document.getElementById('manage-content').innerHTML = ch.items.map(item=>{
+    const kws = getKws(item.id);
+    return `<div class="manage-item-card" id="mc-${item.id}">
+      <div class="manage-item-header" onclick="toggleManageItem('${item.id}')">
+        <div class="manage-item-name">${escHtml(item.name)}</div>
+        <div class="manage-item-kw-count${kws.length?' has-kw':''}">${kws.length?kws.length+'件':'未登録'}</div>
+      </div>
+      <div class="manage-item-body">
+        <div class="manage-section-title">模範解答</div>
+        <textarea class="manage-add-input" id="ansinput-${item.id}" rows="4" placeholder="模範解答を入力...">${escHtml(getAns(item.id))}</textarea>
+        <button class="manage-add-btn" style="width:100%;margin-top:6px;margin-bottom:14px" onclick="commitAns('${item.id}')">保存</button>
+        <div class="manage-section-title">必須キーワード</div>
+        <div class="manage-kw-list" id="kwlist-${item.id}">
+          ${kws.map((kw,i)=>`<div class="manage-kw-row">
+            <div class="manage-kw-text">${escHtml(kw)}</div>
+            <button class="manage-kw-del" onclick="deleteKw('${item.id}',${i});refreshManageItem('${item.id}')">✕</button>
+          </div>`).join('')}
+        </div>
+        <div class="manage-add-row">
+          <textarea class="manage-add-input" id="kwinput-${item.id}" rows="2" placeholder="キーワードや必須フレーズを入力..."></textarea>
+          <button class="manage-add-btn" onclick="commitKw('${item.id}')">追加</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleManageItem(id){
+  document.getElementById('mc-'+id)?.classList.toggle('open');
+}
+function commitAns(id){
+  const input = document.getElementById('ansinput-'+id);
+  if(!input) return;
+  setAns(id, input.value.trim());
+  // 保存完了の視覚フィードバック
+  const btn = input.nextElementSibling;
+  if(btn){ btn.textContent='保存しました'; setTimeout(()=>{ btn.textContent='保存'; },1200); }
+}
+function commitKw(id){
+  const input = document.getElementById('kwinput-'+id);
+  if(!input) return;
+  const val = input.value.trim();
+  if(!val) return;
+  addKw(id, val);
+  input.value='';
+  refreshManageItem(id);
+}
+function refreshManageItem(id){
+  const kws = getKws(id);
+  const list = document.getElementById('kwlist-'+id);
+  if(list) list.innerHTML = kws.map((kw,i)=>`<div class="manage-kw-row">
+    <div class="manage-kw-text">${escHtml(kw)}</div>
+    <button class="manage-kw-del" onclick="deleteKw('${id}',${i});refreshManageItem('${id}')">✕</button>
+  </div>`).join('');
+  const cnt = document.querySelector(`#mc-${id} .manage-item-kw-count`);
+  if(cnt){ cnt.textContent=kws.length?kws.length+'件':'未登録'; cnt.className='manage-item-kw-count'+(kws.length?' has-kw':''); }
+}
+
+// ── RECORD ──
+const SCORE_LABEL = {oo:'○○', o:'○', n:'ー', x:'×', xx:'××'};
+const SCORE_COLOR = {oo:'var(--oo)', o:'var(--o)', n:'var(--n)', x:'var(--x)', xx:'var(--xx)'};
+
+function renderRecord(chIndex){
+  document.getElementById('record-tabs').innerHTML = DATA.map((ch,i)=>`<button class="mctab${i===chIndex?' active':''}" onclick="renderRecord(${i})">${ch.ch}</button>`).join('');
+  const ch = DATA[chIndex];
+  document.getElementById('record-content').innerHTML = ch.items.map(item=>{
+    const recs = recData[item.id]||[];
+    const last = recs.length ? recs[recs.length-1] : null;
+    const u = last ? last.understanding : null;
+    const col = uColor(u);
+    const pct = u||0;
+    const total = recs.length;
+    const kws = getKws(item.id);
+
+    // 展開エリア：キーワード×日付のテーブル（古い→新しい順、左→右）
+    let bodyHTML;
+    if(recs.length === 0){
+      bodyHTML = '<div class="record-no-kw">記録がありません</div>';
+    } else if(kws.length === 0){
+      bodyHTML = '<div class="record-no-kw">キーワード未登録のため詳細を表示できません</div>';
+    } else {
+      // 日付ヘッダー行（古い順＝左から）
+      const dateHeaders = recs.map(rec =>
+        `<th>${escHtml(rec.date)}</th>`
+      ).join('');
+
+      // キーワードごとの行
+      const kwRows = kws.map((kw, kwIdx) => {
+        const cells = recs.map(rec => {
+          const s = rec.scores?.[kwIdx] || null;
+          const label = s ? SCORE_LABEL[s] : '–';
+          const color = s ? SCORE_COLOR[s] : 'var(--text3)';
+          return `<td style="color:${color};font-weight:700">${label}</td>`;
+        }).join('');
+        return `<tr><td class="kw-name-col">${escHtml(kw)}</td>${cells}</tr>`;
+      }).join('');
+
+      bodyHTML = `<div class="record-kw-table">
+        <table>
+          <thead><tr><th class="kw-name-col"></th>${dateHeaders}</tr></thead>
+          <tbody>${kwRows}</tbody>
+        </table>
+      </div>`;
+    }
+
+    return `<div class="record-item" id="ri-${item.id}">
+      <div class="record-item-header" onclick="toggleRecordItem('${item.id}')">
+        <div class="record-item-name">${escHtml(item.name)}</div>
+        <div class="record-u-track"><div class="record-u-fill" style="width:${pct}%;background:${col}"></div></div>
+        <div class="record-score" style="color:${col}">${u!==null?u+'%':'–'}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0">${total?total+'回':'–'}</div>
+      </div>
+      <div class="record-item-body">${bodyHTML}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleRecordItem(id){
+  document.getElementById('ri-'+id)?.classList.toggle('open');
+}
+
+// ── UTILS ──
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── SUSPEND / RESUME ──
+function suspendSession(){
+  // quizStateをシリアライズ（SetはArrayに変換）
+  const state = {
+    ...quizState,
+    answeredIds: undefined,
+    lockedIds: undefined,
+  };
+  const d = {
+    version: 1,
+    type: 'session',
+    savedAt: new Date().toISOString(),
+    quizState: {
+      chIndex:    quizState.chIndex,
+      currentIdx: quizState.currentIdx,
+      phase:      quizState.phase,
+      userAnswer: quizState.userAnswer,
+      scores:     quizState.scores,
+      results:    quizState.results,
+    }
+  };
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));
+  a.download = 'kansa_session_' + new Date().toISOString().slice(0,16).replace('T','_').replace(':','') + '.json';
+  a.click();
+}
+function resumeSession(e){
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    try{
+      const d = JSON.parse(ev.target.result);
+      if(d.type !== 'session' || !d.quizState) throw new Error('invalid');
+      const qs = d.quizState;
+      const ch = DATA[qs.chIndex];
+      if(!ch) throw new Error('chapter not found');
+      quizState = {
+        chIndex:    qs.chIndex,
+        items:      ch.items,
+        currentIdx: qs.currentIdx,
+        phase:      qs.phase,
+        userAnswer: qs.userAnswer||'',
+        scores:     qs.scores||{},
+        results:    qs.results||[],
+      };
+      document.getElementById('quiz-chapter-name').textContent = `${ch.ch}　${ch.chName}`;
+      renderQuizScreen();
+      showScreen('quiz');
+    } catch(err){ alert('ファイルの読み込みに失敗しました。'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ── IMPORT ──
+let importParsed = null; // 読み込んだJSONの中身
+let importTargetCh = null; // 追加先章節
+
+function goImport(){
+  renderImportScreen();
+  showScreen('import');
+}
+
+function renderImportScreen(){
+  const sel = document.getElementById('import-chapter-select');
+  sel.innerHTML = '<option value="">-- 章・節を選択してください --</option>';
+  CHAPTER_MASTER.forEach((cm, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = `${cm.ch}　${cm.chName}`;
+    sel.appendChild(opt);
+  });
+  importParsed = null;
+  importTargetCh = null;
+  document.getElementById('import-preview-area').style.display = 'none';
+  document.getElementById('import-chapter-preview').textContent = '';
+  document.getElementById('import-file-input').value = '';
+}
+
+function onImportChapterChange(){
+  const sel = document.getElementById('import-chapter-select');
+  const idx = sel.value;
+  if(idx === ''){
+    importTargetCh = null;
+    document.getElementById('import-chapter-preview').textContent = '';
+    return;
+  }
+  importTargetCh = CHAPTER_MASTER[parseInt(idx)];
+  // 既存データに同じ章節があるか確認
+  const existing = DATA.find(d => d.ch === importTargetCh.ch);
+  const preview = document.getElementById('import-chapter-preview');
+  if(existing){
+    preview.innerHTML = `<span style="color:var(--ng)">⚠ 既に ${existing.items.length} 論点が登録されています。追加すると既存論点に追記されます。</span>`;
+  } else {
+    preview.innerHTML = `<span style="color:var(--ok)">✓ 新規追加されます</span>`;
+  }
+}
+
+function onImportFileSelected(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    try{
+      const d = JSON.parse(ev.target.result);
+      // items配列があればOK
+      if(!d.items || !Array.isArray(d.items)) throw new Error('items not found');
+      if(d.items.length === 0) throw new Error('empty');
+      importParsed = d;
+      renderImportPreview(d.items);
+    } catch(err){
+      alert('JSONの読み込みに失敗しました。形式を確認してください。\n\nエラー: ' + err.message);
+      importParsed = null;
+      document.getElementById('import-preview-area').style.display = 'none';
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function renderImportPreview(items){
+  const card = document.getElementById('import-preview-card');
+  card.innerHTML = `<div style="font-size:11px;color:var(--text2);margin-bottom:10px">${items.length} 論点が読み込まれました</div>` +
+    items.map((item, i) => `<div class="import-preview-item">
+      <div class="import-preview-num">${i+1}</div>
+      <div class="import-preview-name">${escHtml(item.name)}${item.importance?`<span class="imp-badge imp-${item.importance}">${item.importance}</span>`:''}</div>
+    </div>`).join('');
+  document.getElementById('import-preview-area').style.display = 'block';
+}
+
+function confirmImport(){
+  if(!importTargetCh){
+    alert('追加先の章・節を選択してください。');
+    return;
+  }
+  if(!importParsed || !importParsed.items || importParsed.items.length === 0){
+    alert('JSONファイルを読み込んでください。');
+    return;
+  }
+
+  const existing = DATA.find(d => d.ch === importTargetCh.ch);
+  const newItems = importParsed.items.map(item => ({
+    id: item.id,
+    importance: item.importance || '',
+    name: item.name,
+  }));
+
+  if(existing){
+    // 重複IDを除いて追記
+    const existingIds = new Set(existing.items.map(it => it.id));
+    const toAdd = newItems.filter(it => !existingIds.has(it.id));
+    existing.items.push(...toAdd);
+    if(importParsed.importance) existing.importance = importParsed.importance;
+    const skipped = newItems.length - toAdd.length;
+    alert(`追加完了！\n${toAdd.length} 論点を追加しました。${skipped > 0 ? `\n（${skipped} 件はID重複のためスキップ）` : ''}`);
+  } else {
+    DATA.push({
+      ch: importTargetCh.ch,
+      chName: importTargetCh.chName,
+      importance: importParsed.importance || '',
+      items: newItems,
+    });
+    alert(`追加完了！\n${newItems.length} 論点を ${importTargetCh.ch} として追加しました。`);
+  }
+
+  // 模範解答をansDataに投入
+  importParsed.items.forEach(item => {
+    if(item.answer && !ansData[item.id]){
+      ansData[item.id] = item.answer;
+    }
+  });
+  saveAns();
+
+  importParsed = null;
+  importTargetCh = null;
+  document.getElementById('import-preview-area').style.display = 'none';
+  document.getElementById('import-chapter-select').value = '';
+  document.getElementById('import-chapter-preview').textContent = '';
+}
+
+function copyTemplate(){
+  const text = document.getElementById('import-template-box').textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = event.target;
+    btn.textContent = 'コピーしました！';
+    setTimeout(()=>{ btn.textContent = 'テンプレートをコピー'; }, 1500);
+  }).catch(()=>{
+    // フォールバック
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    const btn = event.target;
+    btn.textContent = 'コピーしました！';
+    setTimeout(()=>{ btn.textContent = 'テンプレートをコピー'; }, 1500);
+  });
+}
+
+// ── INIT ──
+loadStorage();
+initAnswers();
+</script>
+</body>
+</html>
