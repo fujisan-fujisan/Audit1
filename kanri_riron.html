@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>管理会計論（理論） 復習管理</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="管理理論">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Maru+Gothic:wght@700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f9f8;--surface:#fff;--border:#e8e8e5;--border-strong:#d0d0cb;
+  --text:#111;--text-2:#666;--text-3:#aaa;
+  --o-color:#1a7a4a;--o-bg:#edf7f2;--x-color:#c0392b;--x-bg:#fdf0ee;
+  --A-color:#c0392b;--A-bg:#fdf0ee;--B-color:#7c5c00;--B-bg:#fdf4e3;
+  --C-color:#1a7a4a;--C-bg:#edf7f2;--radius:10px;--radius-sm:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:100px;font-size:14px;line-height:1.5}
+.header{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border)}
+.header-top{padding:14px 16px 12px}
+.header-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.app-title{font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--text-3);text-transform:uppercase}
+.header-actions{display:flex;gap:6px}
+.btn-icon{padding:5px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);background:transparent;color:var(--text-2);font-size:11px;font-family:'Noto Sans JP',sans-serif;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-icon:hover,.btn-icon.active{background:var(--text);border-color:var(--text);color:#fff}
+.progress-row{display:flex;align-items:baseline;gap:8px;margin-bottom:7px}
+.prog-num{font-family:'DM Mono',monospace;font-size:28px;font-weight:500;color:var(--text);line-height:1}
+.prog-label{font-size:11px;color:var(--text-3)}
+.prog-track{height:3px;background:var(--border);border-radius:999px;overflow:hidden}
+.prog-fill{height:100%;background:var(--text);border-radius:999px;transition:width .4s ease}
+.tabs{display:flex;overflow-x:auto;scrollbar-width:none;border-top:1px solid var(--border);padding:0 4px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:10px 14px;font-size:12px;font-weight:700;font-family:'Noto Sans JP',sans-serif;background:transparent;border:none;cursor:pointer;color:var(--text-3);border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s}
+.tab.active{color:var(--text);border-bottom-color:var(--text)}
+.round-info-bar{display:flex;align-items:center;padding:6px 16px 4px;border-top:1px solid var(--border);overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap;gap:0}
+.round-info-bar::-webkit-scrollbar{display:none}
+.ri-item{display:flex;flex-direction:column;align-items:flex-start;padding:4px 12px 4px 0;min-width:0;flex-shrink:0}
+.ri-item+.ri-item{border-left:1px solid var(--border);padding-left:12px}
+.ri-lbl{font-size:9px;font-weight:700;color:var(--text-3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:1px}
+.ri-val{font-size:13px;font-weight:700;color:var(--text);font-family:'DM Mono',monospace;white-space:nowrap}
+.ri-val.warn{color:var(--x-color)}.ri-val.ok{color:var(--o-color)}
+.ri-deadline-btn{background:none;border:none;padding:0;cursor:pointer;font-size:13px;font-weight:700;color:var(--text);font-family:'DM Mono',monospace;text-decoration:underline dotted;text-underline-offset:3px}
+.view-tabs{display:flex;border-top:1px solid var(--border);background:var(--surface)}
+.vtab{flex:1;padding:9px 8px;font-size:12px;font-weight:700;font-family:'Noto Sans JP',sans-serif;background:transparent;border:none;cursor:pointer;color:var(--text-3);border-bottom:2px solid transparent;transition:all .15s;letter-spacing:.02em}
+.vtab.active{color:var(--text);border-bottom-color:var(--text)}
+.content{padding:12px 14px;max-width:700px;margin:0 auto}
+.ch-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden}
+.ch-card.hidden{display:none}
+.ch-header{padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;user-select:none}
+.ch-header:active{background:var(--bg)}
+.ch-chevron{font-size:9px;color:var(--text-3);transition:transform .2s;flex-shrink:0;width:12px}
+.ch-card.open .ch-chevron{transform:rotate(90deg)}
+.ch-info{flex:1;min-width:0}
+.ch-name{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch-sub{font-size:10px;color:var(--text-3);margin-top:1px;font-family:'DM Mono',monospace}
+.ch-badge{font-size:10px;font-family:'DM Mono',monospace;font-weight:500;padding:3px 8px;border-radius:var(--radius-sm);background:var(--bg);border:1px solid var(--border);color:var(--text-2);flex-shrink:0;transition:all .2s}
+.ch-badge.done{background:var(--o-bg);border-color:var(--o-color);color:var(--o-color)}
+.items-wrap{display:none;border-top:1px solid var(--border)}
+.ch-card.open .items-wrap{display:block}
+.item-row{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
+.item-row:last-child{border-bottom:none}
+.item-row.hidden{display:none}
+.item-top{display:flex;align-items:flex-start;gap:7px}
+.item-name{flex:1;font-size:12px;line-height:1.5;color:var(--text)}
+.imp-badge{font-size:9px;font-weight:700;font-family:'DM Mono',monospace;padding:2px 5px;border-radius:4px;flex-shrink:0;margin-top:2px}
+.imp-A{background:var(--A-bg);color:var(--A-color)}
+.imp-B{background:var(--B-bg);color:var(--B-color)}
+.imp-C{background:var(--C-bg);color:var(--C-color)}
+.u-btns{display:flex;gap:3px;flex-shrink:0}
+.ub{min-width:34px;height:32px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);background:var(--bg);font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;color:var(--text-3);font-family:'Noto Sans JP',sans-serif;white-space:nowrap;padding:0 4px}
+.ub:active{transform:scale(.88)}
+.ub.sel-oo{background:#e8f7f0;border-color:#1a7a4a;color:#1a7a4a}
+.ub.sel-o{background:var(--o-bg);border-color:var(--o-color);color:var(--o-color)}
+.ub.sel-n{background:#f0f0ee;border-color:#999;color:#555}
+.ub.sel-x{background:var(--x-bg);border-color:var(--x-color);color:var(--x-color)}
+.ub.sel-xx{background:#fde;border-color:#900;color:#900;font-weight:700}
+.review-eval-btns{display:flex;gap:3px;flex-shrink:0;align-items:center}
+.ub-rev{width:34px;height:26px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);background:var(--bg);font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;color:var(--text-3);font-family:'Noto Sans JP',sans-serif}
+.ub-rev:active{transform:scale(.88)}
+.ub-rev.sel-o{background:var(--o-bg);border-color:var(--o-color);color:var(--o-color)}
+.ub-rev.sel-x{background:var(--x-bg);border-color:var(--x-color);color:var(--x-color)}
+.item-history{display:flex;gap:4px;align-items:center}
+.hist-dot-wrap{display:flex;align-items:center;gap:2px}
+.hist-label{font-size:9px;color:var(--text-3);font-family:'DM Mono',monospace;min-width:20px}
+.hist-dot{min-width:22px;height:18px;border-radius:4px;font-size:9px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);background:var(--bg);color:var(--text-3);font-family:'Noto Sans JP',sans-serif;font-weight:700;padding:0 2px}
+.hist-dot.dot-oo{background:#e8f7f0;border-color:#1a7a4a;color:#1a7a4a}
+.hist-dot.dot-o{background:var(--o-bg);border-color:var(--o-color);color:var(--o-color)}
+.hist-dot.dot-n{background:#f0f0ee;border-color:#999;color:#555}
+.hist-dot.dot-x{background:var(--x-bg);border-color:var(--x-color);color:var(--x-color)}
+.hist-dot.dot-xx{background:#fde;border-color:#900;color:#900}
+.urgency-wrap{display:flex;align-items:center;gap:7px}
+.urgency-score{font-size:11px;font-weight:700;font-family:'DM Mono',monospace;min-width:32px;flex-shrink:0}
+.urgency-track{flex:1;height:5px;background:var(--border);border-radius:999px;overflow:hidden}
+.urgency-fill{height:100%;border-radius:999px;transition:width .4s ease,background .4s ease}
+
+/* ── キーワード ── */
+.kw-reveal-btn{display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--text-3);background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:5px 0;width:100%;cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:all .15s}
+.kw-reveal-btn.active{color:var(--text-2);border-color:var(--border-strong);background:var(--bg)}
+.kw-section{overflow:hidden;max-height:0;transition:max-height .28s ease,opacity .2s ease;opacity:0}
+.kw-section.kw-open{max-height:800px;opacity:1}
+.kw-inner{display:flex;flex-direction:column;gap:5px;padding-top:2px}
+.kw-list{display:flex;flex-direction:column;gap:3px}
+.kw-row{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:5px 8px;transition:border-color .15s,background .15s}
+.kw-row.kw-passed{border-color:var(--o-color);background:var(--o-bg)}
+.kw-row.kw-failed{border-color:var(--x-color);background:var(--x-bg)}
+.kw-text{flex:1;font-size:11px;font-weight:700;color:var(--text);font-family:'Noto Sans JP',sans-serif;line-height:1.4}
+.kw-eval-btns{display:flex;gap:3px;flex-shrink:0}
+.kw-btn{width:28px;height:24px;border-radius:5px;border:1px solid var(--border-strong);background:var(--surface);font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;color:var(--text-3)}
+.kw-btn:active{transform:scale(.85)}
+.kw-btn.kw-sel-o{background:var(--o-bg);border-color:var(--o-color);color:var(--o-color)}
+.kw-btn.kw-sel-x{background:var(--x-bg);border-color:var(--x-color);color:var(--x-color)}
+.kw-del{width:20px;height:20px;border-radius:4px;border:none;background:transparent;color:var(--text-3);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;transition:color .12s}
+.kw-del:hover{color:var(--x-color)}
+.kw-footer{display:flex;align-items:center;justify-content:space-between}
+.kw-stats{font-size:9px;font-family:'DM Mono',monospace;color:var(--text-3)}
+.kw-stats .ks-ok{color:var(--o-color);font-weight:700}
+.kw-stats .ks-ng{color:var(--x-color);font-weight:700}
+.kw-add-open-btn{font-size:10px;font-weight:700;color:var(--text-3);background:none;border:none;cursor:pointer;padding:0;font-family:'Noto Sans JP',sans-serif;transition:color .15s}
+.kw-add-open-btn:hover{color:var(--text-2)}
+.kw-add-row{display:flex;gap:6px;align-items:center}
+.kw-input{flex:1;font-size:11px;background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:5px 8px;color:var(--text);font-family:'Noto Sans JP',sans-serif;outline:none;transition:border-color .15s}
+.kw-input:focus{border-color:var(--text)}
+.kw-input::placeholder{color:var(--text-3)}
+.kw-add-confirm-btn{padding:4px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);background:var(--surface);color:var(--text-2);font-size:11px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;white-space:nowrap;transition:all .15s}
+.kw-add-confirm-btn:hover{border-color:var(--text);color:var(--text)}
+.kw-close-btn{font-size:11px;font-weight:700;color:var(--text-3);background:none;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;padding:5px 0;width:100%;font-family:'Noto Sans JP',sans-serif;transition:all .15s}
+.kw-close-btn:hover{color:var(--text-2);border-color:var(--border-strong)}
+
+/* ── キーワード評価ポップアップ ── */
+.kw-eval-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;align-items:flex-end;justify-content:center}
+.kw-eval-overlay.open{display:flex}
+.kw-eval-modal{background:var(--surface);border-radius:16px 16px 0 0;padding:20px 16px 44px;width:100%;max-width:700px;max-height:75vh;overflow-y:auto}
+.kw-eval-handle{width:32px;height:3px;background:var(--border-strong);border-radius:999px;margin:0 auto 14px}
+.kw-eval-title{font-size:11px;font-weight:700;color:var(--text-3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+.kw-eval-subtitle{font-size:12px;color:var(--text);font-weight:700;margin-bottom:14px;line-height:1.4}
+.kw-eval-list{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.kw-eval-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);transition:border-color .15s,background .15s}
+.kw-eval-row.ep{border-color:var(--o-color);background:var(--o-bg)}
+.kw-eval-row.ef{border-color:var(--x-color);background:var(--x-bg)}
+.kw-eval-word{flex:1;font-size:13px;font-weight:700;color:var(--text)}
+.kw-eval-btns2{display:flex;gap:4px;flex-shrink:0}
+.kw-ebtn{width:38px;height:32px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);background:var(--surface);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;color:var(--text-3)}
+.kw-ebtn:active{transform:scale(.88)}
+.kw-ebtn.ep{background:var(--o-bg);border-color:var(--o-color);color:var(--o-color)}
+.kw-ebtn.ef{background:var(--x-bg);border-color:var(--x-color);color:var(--x-color)}
+.kw-eval-done-btn{width:100%;padding:12px;border-radius:var(--radius-sm);border:none;background:var(--text);color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer}
+
+.ch-footer{border-top:1px solid var(--border);background:var(--bg)}
+.ch-footer-row{padding:8px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ch-stat{font-size:20px;font-weight:700;color:#1a3a6e;font-family:'Zen Maru Gothic',sans-serif;letter-spacing:.02em}
+.ch-stat-lbl{font-size:9px;font-weight:500;color:#7a8fa8;font-family:'Noto Sans JP',sans-serif;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:1px}
+.ch-record-btn{font-size:11px;padding:4px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);background:var(--surface);color:var(--text-2);cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:all .15s;white-space:nowrap}
+.ch-record-btn:hover{border-color:var(--text);color:var(--text)}
+.ch-record-form{display:none;padding:10px 14px 14px;border-top:1px solid var(--border);gap:8px;flex-direction:column}
+.ch-record-form.open{display:flex}
+.ch-record-form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ch-record-form-lbl{font-size:10px;font-weight:700;color:var(--text-2);display:block;margin-bottom:3px}
+.ch-record-input{width:100%;background:var(--surface);border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:13px;padding:8px 10px;outline:none;-webkit-appearance:none;appearance:none}
+.ch-record-input:focus{border-color:var(--text)}
+.ch-record-form-btns{display:flex;gap:6px}
+.ch-record-save{flex:1;padding:10px;border-radius:var(--radius-sm);border:none;background:var(--text);color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer}
+.ch-record-cancel{padding:10px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--border-strong);background:transparent;color:var(--text-2);font-family:'Noto Sans JP',sans-serif;font-size:13px;cursor:pointer}
+.next-round-wrap{padding:14px;text-align:center;max-width:700px;margin:0 auto}
+.next-round-btn{background:var(--text);color:#fff;border:none;border-radius:var(--radius);padding:13px 28px;font-size:13px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;letter-spacing:.04em}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:200;align-items:flex-end;justify-content:center}
+.overlay.open{display:flex}
+.scope-modal{background:var(--surface);border-radius:16px 16px 0 0;padding:20px 16px 44px;width:100%;max-width:700px;max-height:80vh;overflow-y:auto}
+.modal-handle{width:32px;height:3px;background:var(--border-strong);border-radius:999px;margin:0 auto 14px}
+.scope-options{display:flex;flex-direction:column;gap:8px;margin:14px 0}
+.scope-opt{padding:13px 14px;border-radius:var(--radius);border:1.5px solid var(--border-strong);background:var(--bg);font-size:14px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;text-align:left;transition:all .15s;color:var(--text)}
+.scope-opt:hover{border-color:var(--text)}
+.scope-opt.sel{background:var(--text);color:#fff;border-color:var(--text)}
+.scope-opt .scope-sub{font-size:11px;font-weight:400;color:inherit;opacity:.7;display:block;margin-top:2px}
+.form-lbl{font-size:11px;font-weight:700;color:var(--text-2);display:block;margin-bottom:4px}
+/* ── 履歴一覧 ── */
+#hist-ch-tabs::-webkit-scrollbar{display:none}
+.hist-page-header{padding:14px 0 10px}
+.hist-page-title{font-size:12px;font-weight:700;color:var(--text-2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+.hist-page-subtitle{font-size:11px;color:var(--text-3)}
+.rec-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden}
+.rec-item-header{display:flex;align-items:center;gap:8px;padding:11px 13px;cursor:pointer;user-select:none}
+.rec-item-header:active{background:var(--bg)}
+.rec-item-name{flex:1;font-size:12px;font-weight:700;color:var(--text);line-height:1.4}
+.rec-imp{font-size:9px;font-weight:700;font-family:'DM Mono',monospace;padding:2px 5px;border-radius:4px;flex-shrink:0}
+.rec-u-track{width:44px;height:5px;background:var(--border);border-radius:999px;overflow:hidden;flex-shrink:0}
+.rec-u-fill{height:100%;border-radius:999px}
+.rec-score{font-family:'DM Mono',monospace;font-size:12px;font-weight:700;flex-shrink:0;min-width:36px;text-align:right}
+.rec-count{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-3);flex-shrink:0}
+.rec-item-body{display:none;border-top:1px solid var(--border);padding:10px 13px}
+.rec-item.open .rec-item-body{display:block}
+.rec-kw-table{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.rec-kw-table table{border-collapse:collapse;min-width:100%}
+.rec-kw-table th{font-size:10px;font-family:'DM Mono',monospace;color:var(--text-3);padding:4px 8px;text-align:center;white-space:nowrap;font-weight:400;border-bottom:1px solid var(--border)}
+.rec-kw-table th.kw-name-col{text-align:left;font-size:10px;min-width:100px}
+.rec-kw-table td{font-size:11px;padding:5px 8px;text-align:center;white-space:nowrap}
+.rec-kw-table td.kw-name-col{text-align:left;font-size:11px;color:var(--text);line-height:1.4;white-space:normal;min-width:100px}
+.rec-kw-table tr:nth-child(odd) td{background:var(--surface)}
+.rec-kw-table tr:nth-child(even) td{background:var(--bg)}
+.rec-no-kw{font-size:11px;color:var(--text-3);padding:4px 0}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-top">
+    <div class="header-meta">
+      <div class="app-title">管理会計論（理論）復習管理</div>
+      <div class="header-actions">
+        <button class="btn-icon" onclick="exportData()">バックアップ</button>
+        <button class="btn-icon" onclick="document.getElementById('import-input').click()">復元</button>
+        <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)">
+        <button class="btn-icon" id="weakness-btn" onclick="toggleWeaknessPage()">履歴一覧</button>
+      </div>
+    </div>
+    <div class="progress-row">
+      <div class="prog-num" id="prog-pct">0%</div>
+      <div class="prog-label" id="prog-lbl">0 / 0 完了</div>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="prog-bar" style="width:0%"></div></div>
+  </div>
+  <div class="tabs" id="round-tabs"></div>
+  <div class="round-info-bar" id="round-info-bar"></div>
+  <div class="view-tabs" id="view-tabs">
+    <button class="vtab active" onclick="setViewTab('all',this)">全問題</button>
+    <button class="vtab" onclick="setViewTab('urgent',this)">要復習</button>
+  </div>
+</div>
+<div id="main-view">
+  <div class="content" id="content"></div>
+  <div class="next-round-wrap" id="next-round-wrap" style="display:none">
+    <button class="next-round-btn" onclick="openScopeModal()">次の回を始める →</button>
+  </div>
+</div>
+<div id="weakness-view" class="content" style="display:none"></div>
+
+<div class="overlay" id="scope-overlay">
+  <div class="scope-modal">
+    <div class="modal-handle"></div>
+    <h2 id="scope-modal-title" style="font-size:14px;font-weight:700;margin-bottom:3px"></h2>
+    <div style="font-size:11px;color:var(--text-2);margin-bottom:4px">対象の重要度を選んでください</div>
+    <div class="scope-options">
+      <button class="scope-opt" onclick="selectScope('all')">全部（A・B）<span class="scope-sub">すべての問題を対象にする</span></button>
+      <button class="scope-opt" onclick="selectScope('A')">重要度 A のみ<span class="scope-sub">重点的にAを復習する</span></button>
+      <button class="scope-opt" onclick="selectScope('B')">重要度 A・B<span class="scope-sub">A・Bを対象にする</span></button>
+    </div>
+    <div style="margin-bottom:8px"><label class="form-lbl">開始日</label><input type="date" class="ch-record-input" id="scope-startdate" style="width:100%" oninput="checkScopeConfirmBtn()"></div>
+    <div style="margin-bottom:8px"><label class="form-lbl">期限（任意）</label><input type="date" class="ch-record-input" id="scope-deadline" style="width:100%"></div>
+    <button class="ch-record-save" id="scope-confirm-btn" style="width:100%;opacity:.4;pointer-events:none">この設定で始める</button>
+  </div>
+</div>
+<div class="overlay" id="deadline-overlay">
+  <div class="scope-modal">
+    <div class="modal-handle"></div>
+    <h2 style="font-size:14px;font-weight:700;margin-bottom:12px">期限を変更</h2>
+    <input type="date" class="ch-record-input" id="deadline-input" style="width:100%;margin-bottom:12px">
+    <div style="display:flex;gap:8px">
+      <button class="ch-record-cancel" onclick="closeDeadlineModal()" style="flex:1">キャンセル</button>
+      <button class="ch-record-save" onclick="saveDeadline()" style="flex:2">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="kw-eval-overlay" id="kw-eval-overlay">
+  <div class="kw-eval-modal">
+    <div class="kw-eval-handle"></div>
+    <div class="kw-eval-title">キーワード確認</div>
+    <div class="kw-eval-subtitle" id="kw-eval-subtitle"></div>
+    <div class="kw-eval-list" id="kw-eval-list"></div>
+    <button class="kw-eval-done-btn" onclick="closeKwEvalPopup()">完了</button>
+  </div>
+</div>
+
+<script>
+const DATA=[
+  {ch:"第1章",chName:"費目別計算・製造間接費",items:[
+    {id:"t1-1",name:"問題1-1　購入原価に算入する付随費用の範囲",imp:"C"},
+    {id:"t1-2",name:"問題1-2　購入原価に算入しない付随費用の処理",imp:"C"},
+    {id:"t1-3",name:"問題1-3　継続記録法のメリット",imp:"B"},
+    {id:"t1-4",name:"問題1-4　棚卸法の利用",imp:"C"},
+    {id:"t1-5",name:"問題1-5　費目別計算における予定価格等の利用",imp:"B"},
+    {id:"t1-6",name:"問題1-6　予定消費価格と予定受入価格の相違",imp:"B"},
+    {id:"t1-7",name:"問題1-7　望ましい消費量測定",imp:"C"},
+    {id:"t1-8",name:"問題1-8　定時外作業手当の会計処理",imp:"B"},
+    {id:"t1-9",name:"問題1-9　製造間接費の配賦基準の選択",imp:"B"},
+    {id:"t1-10",name:"問題1-10　製造間接費実際配賦の問題点",imp:"A"},
+    {id:"t1-11",name:"問題1-11　製造間接費正常配賦の理論",imp:"B"},
+    {id:"t1-12",name:"問題1-12　基準操業度の選択",imp:"B"},
+    {id:"t1-13",name:"問題1-13　製造間接費予算の設定",imp:"B"},
+    {id:"t1-14",name:"問題1-14　固定予算の問題点",imp:"A"},
+    {id:"t1-15",name:"問題1-15　複式簿記変動予算の限界",imp:"B"},
+    {id:"t1-16",name:"問題1-16　操業度差異の計算方法",imp:"B"},
+    {id:"t1-17",name:"問題1-17　操業度差異分析の意義",imp:"B"},
+    {id:"t1-18",name:"問題1-18　有利な操業度差異の解釈",imp:"A"},
+    {id:"t1-19",name:"問題1-19　操業度差異の理論的会計処理",imp:"B"},
+  ]},
+  {ch:"第2章",chName:"部門別計算・個別原価計算",items:[
+    {id:"t2-1",name:"問題2-1　一括配賦法の問題点",imp:"A"},
+    {id:"t2-2",name:"問題2-2　原価部門の設定",imp:"A"},
+    {id:"t2-3",name:"問題2-3　部門別計算の手順",imp:"B"},
+    {id:"t2-4",name:"問題2-4　製造部門に集計する原価要素の範囲",imp:"B"},
+    {id:"t2-5",name:"問題2-5　第1次集計の新傾向",imp:"B"},
+    {id:"t2-6",name:"問題2-6　補助部門費を製造部門に配賦する理由",imp:"B"},
+    {id:"t2-7",name:"問題2-7　直接配賦法と相互配賦法の選択",imp:"B"},
+    {id:"t2-8",name:"問題2-8　複数基準配賦法の内容と論拠",imp:"A"},
+    {id:"t2-9",name:"問題2-9　補助部門費の配賦と責任会計",imp:"A"},
+    {id:"t2-10",name:"問題2-10　製造部門費と補助部門費の予定配賦の相違",imp:"A"},
+    {id:"t2-11",name:"問題2-11　仕損費の計算",imp:"B"},
+    {id:"t2-12",name:"問題2-12　個別原価計算における仕損費の処理",imp:"B"},
+    {id:"t2-13",name:"問題2-13　ハイブリッド・システム",imp:"B"},
+  ]},
+  {ch:"第3章",chName:"総合原価計算",items:[
+    {id:"t3-1",name:"問題3-1　原価配分法の選択",imp:"C"},
+    {id:"t3-2",name:"問題3-2　無価値法の妥当性",imp:"C"},
+    {id:"t3-3",name:"問題3-3　度外視法と原価計算基準の関係",imp:"C"},
+    {id:"t3-4",name:"問題3-4　度外視法と非度外視法の計算結果が相違する理由",imp:"B"},
+    {id:"t3-5",name:"問題3-5　仕損・減損の発生態様と原価配分法の関係",imp:"B"},
+    {id:"t3-6",name:"問題3-6　非度外視法を採用する意義",imp:"A"},
+    {id:"t3-7",name:"問題3-7　正常仕損と異常仕損の関係",imp:"B"},
+    {id:"t3-8",name:"問題3-8　正常仕損費の計算方法",imp:"C"},
+    {id:"t3-9",name:"問題3-9　検査点の増設が原価に与える影響",imp:"B"},
+    {id:"t3-10",name:"問題3-10　加算法と非加算法の計算結果が相違する理由",imp:"C"},
+    {id:"t3-11",name:"問題3-11　加算法と先入先出法の関係",imp:"C"},
+    {id:"t3-12",name:"問題3-12　非加算法と後入法の関係",imp:"C"},
+    {id:"t3-13",name:"問題3-13　加算法の問題点と改善策",imp:"A"},
+    {id:"t3-14",name:"問題3-14　非加算法のメリット",imp:"B"},
+    {id:"t3-15",name:"問題3-15　工程別標準総合原価計算の簡略化を図る方法",imp:"C"},
+    {id:"t3-16",name:"問題3-16　加工費法の適用要件",imp:"B"},
+    {id:"t3-17",name:"問題3-17　個別原価計算と組別総合原価計算の相違",imp:"A"},
+    {id:"t3-18",name:"問題3-18　等級別総合原価計算の方法",imp:"B"},
+    {id:"t3-19",name:"問題3-19　組別総合原価計算と等級別総合原価計算の選択",imp:"A"},
+    {id:"t3-20",name:"問題3-20　連産品の原価計算方法の相違",imp:"B"},
+    {id:"t3-21",name:"問題3-21　副産物の計算の意義と妥当性",imp:"B"},
+    {id:"t3-22",name:"問題3-22　副産物の計算と等級別総合原価計算の相違",imp:"A"},
+  ]},
+  {ch:"第4章",chName:"標準原価計算",items:[
+    {id:"t4-1",name:"問題4-1　見積原価計算と標準原価計算",imp:"B"},
+    {id:"t4-2",name:"問題4-2　標準原価計算と原価管理",imp:"A"},
+    {id:"t4-3",name:"問題4-3　標準原価計算制度と計算・記帳の簡略化・迅速化",imp:"A"},
+    {id:"t4-4",name:"問題4-4　標準原価管理のサイクル",imp:"B"},
+    {id:"t4-5",name:"問題4-5　理想標準原価が制度上認められない理由",imp:"A"},
+    {id:"t4-6",name:"問題4-6　現実的標準原価が原価管理に役立つ理由",imp:"A"},
+    {id:"t4-7",name:"問題4-7　理想標準原価を原価管理に使用する意義",imp:"A"},
+    {id:"t4-8",name:"問題4-8　原価標準に正常仕損費を組み込む方法",imp:"B"},
+    {id:"t4-9",name:"問題4-9　標準原価の製造予算への利用",imp:"A"},
+    {id:"t4-10",name:"問題4-10　改訂頻度に基づく標準原価の分類",imp:"B"},
+    {id:"t4-11",name:"問題4-11　直接費と間接費の標準の相違",imp:"A"},
+    {id:"t4-12",name:"問題4-12　標準原価計算制度における勘定記入法",imp:"A"},
+    {id:"t4-13",name:"問題4-13　修正パーシャル・プランのメリット",imp:"B"},
+    {id:"t4-14",name:"問題4-14　パーシャル・プランの問題点",imp:"C"},
+    {id:"t4-15",name:"問題4-15　原価差異の把握方法",imp:"A"},
+    {id:"t4-16",name:"問題4-16　原価差異の把握方法と生産形態の関係",imp:"B"},
+    {id:"t4-17",name:"問題4-17　原価差異の把握方法と勘定記入法の関係",imp:"B"},
+    {id:"t4-18",name:"問題4-18　原価差異の相互依存性",imp:"A"},
+    {id:"t4-19",name:"問題4-19　混合差異の取り扱い",imp:"A"},
+    {id:"t4-20",name:"問題4-20　価格差異の管理可能性",imp:"B"},
+    {id:"t4-21",name:"問題4-21　配合差異の分析方法の検討",imp:"B"},
+    {id:"t4-22",name:"問題4-22　労働歩留差異分析の必要性",imp:"B"},
+    {id:"t4-23",name:"問題4-23　固定給制のもとでの直接労務費の管理",imp:"B"},
+    {id:"t4-24",name:"問題4-24　固定費能率差異の取り扱い",imp:"B"},
+    {id:"t4-25",name:"問題4-25　操業度差異を製造部門の責任とすることの問題点",imp:"B"},
+    {id:"t4-26",name:"問題4-26　工程別標準総合原価計算",imp:"B"},
+    {id:"t4-27",name:"問題4-27　材料受入価格差異以外の原価差異の処理⑴",imp:"A"},
+    {id:"t4-28",name:"問題4-28　材料受入価格差異以外の原価差異の処理⑵",imp:"A"},
+    {id:"t4-29",name:"問題4-29　材料受入価格差異の処理",imp:"B"},
+  ]},
+  {ch:"第5章",chName:"直接原価計算・短期利益計画のための管理会計",items:[
+    {id:"t5-1",name:"問題5-1　全部原価と部分原価",imp:"B"},
+    {id:"t5-2",name:"問題5-2　全部原価計算と直接原価計算の営業利益が相違する理由",imp:"C"},
+    {id:"t5-3",name:"問題5-3　全部原価計算と直接原価計算の営業利益の関係",imp:"C"},
+    {id:"t5-4",name:"問題5-4　全部原価計算の問題点",imp:"C"},
+    {id:"t5-5",name:"問題5-5　直接原価計算の外部報告上の問題点",imp:"C"},
+    {id:"t5-6",name:"問題5-6　直接原価計算の利用パターン",imp:"C"},
+    {id:"t5-7",name:"問題5-7　固定費の管理思考",imp:"B"},
+    {id:"t5-8",name:"問題5-8　キャパシティ・コストの管理",imp:"B"},
+    {id:"t5-9",name:"問題5-9　直接原価計算と原価管理の関係",imp:"B"},
+    {id:"t5-10",name:"問題5-10　直接原価計算と差額原価収益分析の関係",imp:"B"},
+    {id:"t5-11",name:"問題5-11　短期利益計画に役立つ損益計算方式",imp:"B"},
+    {id:"t5-12",name:"問題5-12　CVP分析の一般的仮定",imp:"A"},
+    {id:"t5-13",name:"問題5-13　複数製品を扱う場合の損益分岐点分析",imp:"B"},
+    {id:"t5-14",name:"問題5-14　固定費と経営リスク",imp:"A"},
+    {id:"t5-15",name:"問題5-15　経営レバレッジと経営行動",imp:"A"},
+    {id:"t5-16",name:"問題5-16　IE法と実績データに基づく方法の相違",imp:"B"},
+    {id:"t5-17",name:"問題5-17　実績データに基づく線形原価関数の妥当性",imp:"B"},
+    {id:"t5-18",name:"問題5-18　実績データに基づく線形原価関数の正確性",imp:"B"},
+  ]},
+  {ch:"第6章",chName:"予算管理",items:[
+    {id:"t6-1",name:"問題6-1　会社全体の予算をキャッシュ・フローとして把握する意義",imp:"A"},
+    {id:"t6-2",name:"問題6-2　予算の役割",imp:"B"},
+    {id:"t6-3",name:"問題6-3　予算編成の方法",imp:"A"},
+    {id:"t6-4",name:"問題6-4　参加型予算の問題",imp:"A"},
+    {id:"t6-5",name:"問題6-5　予算管理のプロセス",imp:"B"},
+    {id:"t6-6",name:"問題6-6　予算統制差異の分析と変動予算を利用する意義",imp:"B"},
+    {id:"t6-7",name:"問題6-7　標準原価計算方法の製造間接費差異の分析方法",imp:"B"},
+    {id:"t6-8",name:"問題6-8　セールス・ミックス差異の分析方法の意義",imp:"C"},
+    {id:"t6-9",name:"問題6-9　市場規模差異と市場占有率差異の分析",imp:"B"},
+    {id:"t6-10",name:"問題6-10　ローリング方式の予算編成",imp:"B"},
+    {id:"t6-11",name:"問題6-11　予算スラックの構成",imp:"A"},
+    {id:"t6-12",name:"問題6-12　予算スラックを解消する方法",imp:"A"},
+    {id:"t6-13",name:"問題6-13　予算目標の設定基準",imp:"A"},
+    {id:"t6-14",name:"問題6-14　脱予算管理",imp:"B"},
+  ]},
+  {ch:"第7章",chName:"資金管理とキャッシュ・フロー管理",items:[
+    {id:"t7-1",name:"問題7-1　資金管理の目的",imp:"A"},
+    {id:"t7-2",name:"問題7-2　キャッシュ・コンバージョン・サイクルの管理",imp:"A"},
+    {id:"t7-3",name:"問題7-3　オペレーティング・サイクルと収益性の関係",imp:"B"},
+    {id:"t7-4",name:"問題7-4　取引先のキャッシュ・コンバージョン・サイクルの解釈",imp:"B"},
+    {id:"t7-5",name:"問題7-5　回転差資金",imp:"B"},
+    {id:"t7-6",name:"問題7-6　運転資金の管理",imp:"A"},
+    {id:"t7-7",name:"問題7-7　現金資金の管理",imp:"B"},
+    {id:"t7-8",name:"問題7-8　資金計算書の作成方法",imp:"C"},
+    {id:"t7-9",name:"問題7-9　資金移動表・資金運用表とキャッシュ・フロー計算書の関係",imp:"C"},
+    {id:"t7-10",name:"問題7-10　事業の発展ステージとキャッシュ・フローの関係",imp:"B"},
+  ]},
+  {ch:"第8章",chName:"差額原価収益分析",items:[
+    {id:"t8-1",name:"問題8-1　差額原価と埋没原価",imp:"A"},
+    {id:"t8-2",name:"問題8-2　機会原価と機会損失の意義",imp:"B"},
+    {id:"t8-3",name:"問題8-3　全部法と差額法",imp:"B"},
+    {id:"t8-4",name:"問題8-4　差額原価収益分析と原価計算目的の関係",imp:"B"},
+    {id:"t8-5",name:"問題8-5　差額原価収益分析と固定費の取扱いの関係",imp:"B"},
+    {id:"t8-6",name:"問題8-6　差額原価収益分析と遊休設備利用の関係",imp:"B"},
+    {id:"t8-7",name:"問題8-7　内製か外注かの意思決定に対しての批判",imp:"A"},
+    {id:"t8-8",name:"問題8-8　製品廃棄・製品ライン削除の意思決定に対しての批判",imp:"B"},
+    {id:"t8-9",name:"問題8-9　追加加工の意思決定に対しての批判",imp:"B"},
+    {id:"t8-10",name:"問題8-10　制約が生じる場合の差額原価収益分析",imp:"B"},
+    {id:"t8-11",name:"問題8-11　TOCモデルの批判的考察",imp:"B"},
+    {id:"t8-12",name:"問題8-12　意思決定のフォローアップ",imp:"B"},
+    {id:"t8-13",name:"問題8-13　コストドライバーの意思決定の意義",imp:"B"},
+  ]},
+  {ch:"第9章",chName:"設備投資の経済性計算",items:[
+    {id:"t9-1",name:"問題9-1　キャッシュ・フロー計算における減価償却費の取り扱い",imp:"A"},
+    {id:"t9-2",name:"問題9-2　回収期間法の問題点",imp:"A"},
+    {id:"t9-3",name:"問題9-3　修正回収期間法と正味現在価値法の関係",imp:"C"},
+    {id:"t9-4",name:"問題9-4　投下資本利益率法の問題点",imp:"B"},
+    {id:"t9-5",name:"問題9-5　正味現在価値と内部収益率の関係",imp:"A"},
+    {id:"t9-6",name:"問題9-6　キャッシュ・フローのタイミングと正味現在価値の関係",imp:"A"},
+    {id:"t9-7",name:"問題9-7　価値加法性",imp:"A"},
+    {id:"t9-8",name:"問題9-8　割引率の設定",imp:"A"},
+    {id:"t9-9",name:"問題9-9　クロスオーバー・ポイントを持つ相互排他的投資案の割り付け",imp:"B"},
+    {id:"t9-10",name:"問題9-10　修正キャッシュ・フロー法の問題点",imp:"A"},
+    {id:"t9-11",name:"問題9-11　日本企業が回収期間法を選好する理由",imp:"B"},
+    {id:"t9-12",name:"問題9-12　米国企業が内部収益率法を選好する理由",imp:"B"},
+    {id:"t9-13",name:"問題9-13　差額法による撤退投資の意思決定",imp:"B"},
+    {id:"t9-14",name:"問題9-14　撤退投資における未償却残高の取り扱い",imp:"B"},
+    {id:"t9-15",name:"問題9-15　将来キャッシュ・フローの取り扱いⅠ",imp:"B"},
+    {id:"t9-16",name:"問題9-16　将来キャッシュ・フローの取り扱いⅡ",imp:"C"},
+    {id:"t9-17",name:"問題9-17　修正キャッシュ・フロー法にリスクを取り込む方法",imp:"B"},
+    {id:"t9-18",name:"問題9-18　修正キャッシュ・フロー法による企業価値評価の方法",imp:"B"},
+    {id:"t9-19",name:"問題9-19　修正キャッシュ・フロー法による企業価値評価の問題点",imp:"B"},
+  ]},
+  {ch:"第10章",chName:"原価管理",items:[
+    {id:"t10-1",name:"問題10-1　標準原価計算の現代的意義",imp:"A"},
+    {id:"t10-2",name:"問題10-2　原価低減と源流管理の重要性",imp:"A"},
+    {id:"t10-3",name:"問題10-3　原価管理の体系",imp:"A"},
+    {id:"t10-4",name:"問題10-4　日米で異なるコスト・マネジメントが台頭した理由",imp:"B"},
+    {id:"t10-5",name:"問題10-5　原価企画の目的",imp:"A"},
+    {id:"t10-6",name:"問題10-6　目標原価の設定方法",imp:"A"},
+    {id:"t10-7",name:"問題10-7　ライフサイクル・コストと原価企画の関係",imp:"C"},
+    {id:"t10-8",name:"問題10-8　ラグビー方式の製品開発",imp:"A"},
+    {id:"t10-9",name:"問題10-9　原価企画におけるサプライヤー関係",imp:"A"},
+    {id:"t10-10",name:"問題10-10　VEの適用方法",imp:"B"},
+    {id:"t10-11",name:"問題10-11　目標原価が未達成でも量産体制に移行する理由",imp:"B"},
+    {id:"t10-12",name:"問題10-12　原価企画における販売活動の重要性",imp:"B"},
+    {id:"t10-13",name:"問題10-13　原価企画の逆機能",imp:"A"},
+    {id:"t10-14",name:"問題10-14　原価改善の種類",imp:"A"},
+    {id:"t10-15",name:"問題10-15　原価維持と期別原価改善の関係",imp:"A"},
+    {id:"t10-16",name:"問題10-16　品質コストの分類",imp:"B"},
+    {id:"t10-17",name:"問題10-17　品質コストの相互関係",imp:"B"},
+    {id:"t10-18",name:"問題10-18　品質コスト・マネジメントのあり方",imp:"B"},
+  ]},
+  {ch:"第11章",chName:"ABC・ABM",items:[
+    {id:"t11-1",name:"問題11-1　伝統的原価計算の問題点",imp:"A"},
+    {id:"t11-2",name:"問題11-2　ABCの意義",imp:"A"},
+    {id:"t11-3",name:"問題11-3　伝統的原価計算とABCの計算結果の相違",imp:"A"},
+    {id:"t11-4",name:"問題11-4　活動ごとの活動原価の同質性",imp:"A"},
+    {id:"t11-5",name:"問題11-5　伝統的原価計算とABCの計算結果が相違する原因",imp:"A"},
+    {id:"t11-6",name:"問題11-6　長期変動費",imp:"A"},
+    {id:"t11-7",name:"問題11-7　活動ドライバーの種類と適用",imp:"B"},
+    {id:"t11-8",name:"問題11-8　ABCの限界",imp:"B"},
+    {id:"t11-9",name:"問題11-9　ABCとABMの相違",imp:"B"},
+  ]},
+  {ch:"第12章",chName:"分権組織とグループ経営の管理会計",items:[
+    {id:"t12-1",name:"問題12-1　集権と分権",imp:"B"},
+    {id:"t12-2",name:"問題12-2　事業部の責任会計上の位置付け⑴",imp:"A"},
+    {id:"t12-3",name:"問題12-3　事業部の責任会計上の位置付け⑵",imp:"A"},
+    {id:"t12-4",name:"問題12-4　カンパニー制の特徴",imp:"C"},
+    {id:"t12-5",name:"問題12-5　投資利益率と残余利益の比較⑴",imp:"A"},
+    {id:"t12-6",name:"問題12-6　投資利益率と残余利益の比較⑵",imp:"B"},
+    {id:"t12-7",name:"問題12-7　残余利益と投資意思決定の関係",imp:"A"},
+    {id:"t12-8",name:"問題12-8　事業部制の業績測定の２つの側面",imp:"A"},
+    {id:"t12-9",name:"問題12-9　本社費を配賦する理由",imp:"A"},
+    {id:"t12-10",name:"問題12-10　EVAを改善する方策",imp:"B"},
+    {id:"t12-11",name:"問題12-11　EVAによる業績測定の特徴⑴",imp:"B"},
+    {id:"t12-12",name:"問題12-12　EVAによる業績測定の特徴⑵",imp:"B"},
+    {id:"t12-13",name:"問題12-13　社内金利制度と社内資本金制度",imp:"B"},
+    {id:"t12-14",name:"問題12-14　社内資本金制度の機能",imp:"B"},
+    {id:"t12-15",name:"問題12-15　多角化企業における業績測定上の留意点",imp:"B"},
+    {id:"t12-16",name:"問題12-16　内部振替価格の設定目的",imp:"B"},
+    {id:"t12-17",name:"問題12-17　市価基準の振替価格の適用",imp:"B"},
+    {id:"t12-18",name:"問題12-18　原価基準の振替価格の適用⑴",imp:"A"},
+    {id:"t12-19",name:"問題12-19　原価基準の振替価格の適用⑵",imp:"A"},
+    {id:"t12-20",name:"問題12-20　原価基準の振替価格の適用⑶",imp:"B"},
+    {id:"t12-21",name:"問題12-21　内部振替価格の決定方式と本社の役割",imp:"B"},
+    {id:"t12-22",name:"問題12-22　シェアードサービス",imp:"B"},
+    {id:"t12-23",name:"問題12-23　移転価格の設定",imp:"B"},
+    {id:"t12-24",name:"問題12-24　EBITDAの特徴",imp:"B"},
+  ]},
+];
+
+const STORE_KEY='kanri-riron';
+let itemState={},chState={},appState={rounds:[{label:'第1回',scope:'all',deadline:null,startDate:null}],currentRound:0};
+let kwState={};
+let showingWeakness=false;
+
+function load(){
+  try{
+    const i=localStorage.getItem(STORE_KEY+'-item');
+    const c=localStorage.getItem(STORE_KEY+'-ch');
+    const a=localStorage.getItem(STORE_KEY+'-app');
+    const k=localStorage.getItem(STORE_KEY+'-kw');
+    if(i)itemState=JSON.parse(i);
+    if(c)chState=JSON.parse(c);
+    if(a)appState=JSON.parse(a);
+    if(k)kwState=JSON.parse(k);
+  }catch(e){}
+}
+function save(){
+  try{
+    localStorage.setItem(STORE_KEY+'-item',JSON.stringify(itemState));
+    localStorage.setItem(STORE_KEY+'-ch',JSON.stringify(chState));
+    localStorage.setItem(STORE_KEY+'-app',JSON.stringify(appState));
+    localStorage.setItem(STORE_KEY+'-kw',JSON.stringify(kwState));
+  }catch(e){}
+}
+
+function today(){return new Date().toISOString().split('T')[0]}
+function curRound(){return appState.currentRound}
+function curScope(){return(appState.rounds[curRound()]||{}).scope||'all'}
+function curDeadline(){return(appState.rounds[curRound()]||{}).deadline||null}
+
+function itemInScope(item){
+  if(item.imp==='C')return false;
+  const s=curScope();
+  if(s==='all')return true;
+  if(s==='A')return item.imp==='A';
+  if(s==='B')return item.imp==='A'||item.imp==='B';
+  return true;
+}
+function scopedItems(){return DATA.flatMap(c=>c.items).filter(itemInScope)}
+
+function daysUntil(d){if(!d)return null;return Math.ceil((new Date(d).getTime()-Date.now())/86400000)}
+function formatDate(d){if(!d)return'';const p=d.split('-');return p.length<3?d:`${parseInt(p[1])}月${parseInt(p[2])}日`}
+
+function getItemR(id,round){const r=round!==undefined?round:curRound();return(itemState[id]||{})[r]||{}}
+function setItemR(id,data){if(!itemState[id])itemState[id]={};itemState[id][curRound()]=data}
+function getChR(key){return(chState[String(key)]||{})[curRound()]||{}}
+function chKey(ch){const n=ch.ch.match(/\d+/);return n?'ch'+n[0]:ch.ch}
+
+/* ── キーワード ── */
+function getKeywords(id){return kwState[id]||[]}
+function addKeyword(id,word){
+  if(!word.trim())return;
+  if(!kwState[id])kwState[id]=[];
+  if(kwState[id].some(k=>k.word===word.trim()))return;
+  kwState[id].push({word:word.trim(),results:[]});
+  save();
+}
+function deleteKeyword(id,idx){
+  if(!kwState[id])return;
+  kwState[id].splice(idx,1);
+  save();
+}
+function setKwResult(id,idx,result){
+  if(!kwState[id]||!kwState[id][idx])return;
+  const kw=kwState[id][idx];
+  const round=curRound();
+  const ex=kw.results.findIndex(r=>r.round===round);
+  if(ex>=0){
+    if(kw.results[ex].result===result)kw.results.splice(ex,1);
+    else kw.results[ex]={round,result,date:today()};
+  }else{
+    kw.results.push({round,result,date:today()});
+  }
+  save();
+}
+function getKwResult(id,idx){
+  const kws=kwState[id];if(!kws||!kws[idx])return null;
+  const r=kws[idx].results.find(r=>r.round===curRound());
+  return r?r.result:null;
+}
+function kwStats(id){
+  const kws=kwState[id];if(!kws||!kws.length)return null;
+  let ok=0,ng=0,none=0;
+  kws.forEach(kw=>{const r=kw.results.find(r=>r.round===curRound());if(!r)none++;else if(r.result==='o')ok++;else ng++;});
+  return{ok,ng,none,total:kws.length};
+}
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+/* buildKwSection: 全体を #kwwrap-{id} で囲む（これが差し替えの単位） */
+function buildKwSection(item){
+  const kws=getKeywords(item.id);
+  const stats=kwStats(item.id);
+  let statsHTML='';
+  if(stats){
+    const p=[];
+    if(stats.ok>0)p.push(`<span class="ks-ok">○${stats.ok}</span>`);
+    if(stats.ng>0)p.push(`<span class="ks-ng">×${stats.ng}</span>`);
+    if(stats.none>0)p.push(`<span>${stats.none}未</span>`);
+    if(p.length)statsHTML=`<span class="kw-stats">${p.join(' ')}</span>`;
+  }
+  const btnLabel='キーワード';
+  const kwListHTML=kws.map((kw,idx)=>{
+    const res=getKwResult(item.id,idx);
+    const rc=res==='o'?'kw-row kw-passed':res==='x'?'kw-row kw-failed':'kw-row';
+    return `<div class="${rc}">
+      <span class="kw-text">${escHtml(kw.word)}</span>
+      <button class="kw-del" onclick="removeKw('${item.id}',${idx})">&#x2715;</button>
+    </div>`;
+  }).join('');
+
+  return `<div id="kwwrap-${item.id}">
+    <button class="kw-reveal-btn" id="kwreveal-${item.id}" onclick="toggleKwSection('${item.id}')">キーワード</button>
+    <div class="kw-section" id="kwsec-${item.id}">
+      <div class="kw-inner">
+        ${kws.length?`<div class="kw-list">${kwListHTML}</div>`:''}
+        <div class="kw-add-row" id="kwinput-${item.id}">
+          <input class="kw-input" id="kwfield-${item.id}" type="text" placeholder="＋ キーワードを追加..." maxlength="30"
+            oncompositionstart="this.dataset.ime='1'"
+            oncompositionend="this.dataset.ime='0'"
+            onkeyup="if(event.key==='Enter'&&this.dataset.ime!=='1'){event.preventDefault();commitKw('${item.id}')}">
+          <button class="kw-add-confirm-btn" onclick="commitKw('${item.id}')">追加</button>
+        </div>
+        <button class="kw-close-btn" onclick="toggleKwSection('${item.id}')">閉じる</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* refreshKwSection: #kwwrap-{id} を丸ごと差し替え → DOM 操作が1回で完結しエラーなし */
+function refreshKwSection(id,keepOpen){
+  const wrap=document.getElementById('kwwrap-'+id);
+  if(!wrap)return;
+  const wasOpen=wrap.querySelector('.kw-section')?.classList.contains('kw-open');
+  const inputVisible=wrap.querySelector('.kw-add-row')?.style.display!=='none';
+
+  const item=DATA.flatMap(c=>c.items).find(i=>i.id===id);
+  if(!item)return;
+
+  const tmp=document.createElement('div');
+  tmp.innerHTML=buildKwSection(item);
+  const newWrap=tmp.firstElementChild;
+  wrap.replaceWith(newWrap);
+
+  if(keepOpen&&wasOpen){
+    newWrap.querySelector('.kw-section')?.classList.add('kw-open');
+    const btn=newWrap.querySelector('.kw-reveal-btn');
+    if(btn)btn.style.display='none';
+  }
+  if(inputVisible){
+    const inp=newWrap.querySelector('.kw-add-row');
+    if(inp)inp.style.display='flex';
+  }
+}
+
+function toggleKwSection(id){
+  const wrap=document.getElementById('kwwrap-'+id);
+  if(!wrap)return;
+  const btn=wrap.querySelector('.kw-reveal-btn');
+  const sec=wrap.querySelector('.kw-section');
+  if(!btn||!sec)return;
+  const isOpen=sec.classList.contains('kw-open');
+  if(isOpen){
+    sec.classList.remove('kw-open');
+    btn.style.display='';
+    // 入力欄をクリア
+    const f=wrap.querySelector('.kw-input');if(f)f.value='';
+  }else{
+    sec.classList.add('kw-open');
+    btn.style.display='none';
+  }
+}
+function toggleKwInput(id){
+  const row=document.getElementById('kwinput-'+id);if(!row)return;
+  const vis=row.style.display!=='none';
+  row.style.display=vis?'none':'flex';
+  if(!vis){const f=document.getElementById('kwfield-'+id);if(f){f.value='';f.focus();}}
+}
+let _commitGuard=false;
+function commitKw(id){
+  if(_commitGuard)return;
+  const f=document.getElementById('kwfield-'+id);if(!f)return;
+  const w=f.value.trim();if(!w)return;
+  _commitGuard=true;
+  addKeyword(id,w);f.value='';
+  refreshKwSection(id,true);
+  setTimeout(()=>{_commitGuard=false;},300);
+}
+function removeKw(id,idx){deleteKeyword(id,idx);refreshKwSection(id,true)}
+/* ── キーワード評価ポップアップ ── */
+let kwEvalItemId=null;
+
+function openKwEvalPopup(id){
+  const kws=getKeywords(id);
+  if(!kws.length)return;
+  kwEvalItemId=id;
+  const item=DATA.flatMap(c=>c.items).find(i=>i.id===id);
+  document.getElementById('kw-eval-subtitle').textContent=item?item.name:'';
+  renderKwEvalList();
+  document.getElementById('kw-eval-overlay').classList.add('open');
+}
+
+function renderKwEvalList(){
+  const id=kwEvalItemId;
+  const kws=getKeywords(id);
+  const list=document.getElementById('kw-eval-list');
+  list.innerHTML='';
+  kws.forEach((kw,idx)=>{
+    const res=getKwResult(id,idx);
+    const row=document.createElement('div');
+    row.className='kw-eval-row'+(res==='o'?' ep':res==='x'?' ef':'');
+    row.id='kw-eval-row-'+idx;
+    row.innerHTML=`<span class="kw-eval-word">${escHtml(kw.word)}</span>
+      <div class="kw-eval-btns2">
+        <button class="kw-ebtn${res==='o'?' ep':''}" onclick="evalKwPopup(${idx},'o')">○</button>
+        <button class="kw-ebtn${res==='x'?' ef':''}" onclick="evalKwPopup(${idx},'x')">&#x2715;</button>
+      </div>`;
+    list.appendChild(row);
+  });
+}
+
+function evalKwPopup(idx,result){
+  setKwResult(kwEvalItemId,idx,result);
+  renderKwEvalList();
+  // キーワードセクションも更新（開いていれば）
+  refreshKwSection(kwEvalItemId,true);
+}
+
+function closeKwEvalPopup(){
+  document.getElementById('kw-eval-overlay').classList.remove('open');
+  kwEvalItemId=null;
+}
+
+document.getElementById('kw-eval-overlay').addEventListener('click',e=>{
+  if(e.target===document.getElementById('kw-eval-overlay'))closeKwEvalPopup();
+});
+
+/* ── urgency ── */
+function calcUrgency(id){
+  const r=getItemR(id);
+  if(r.reviewPassed===true)return null;
+  if(!r.u||!r.date)return null;
+  const item=DATA.flatMap(c=>c.items).find(i=>i.id===id);
+  if(!item||!itemInScope(item))return null;
+  const K=item.imp==='A'?'A':'B';
+  if(r.reviewDate){
+    const days={A:6,B:13}[K];
+    return Math.min(100,Math.round(Math.floor((Date.now()-new Date(r.reviewDate).getTime())/86400000)/days*100));
+  }
+  const DAYS={A:{oo:13,o:9,n:6,x:4,xx:3},B:{oo:18,o:14,n:11,x:9,xx:6}};
+  const days=(DAYS[K]||DAYS.B)[r.u]||11;
+  return Math.min(100,Math.round(Math.floor((Date.now()-new Date(r.date).getTime())/86400000)/days*100));
+}
+function urgencyColor(s){return s>=80?'#c0392b':s>=55?'#e67e22':s>=30?'#d4a017':'#1a7a4a'}
+
+let curViewTab='all';
+function setViewTab(tab,btn){
+  curViewTab=tab;
+  document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  updateItemTopButtons();applyFilter();
+}
+function updateItemTopButtons(){
+  DATA.forEach(ch=>ch.items.forEach(item=>{
+    if(!itemInScope(item))return;
+    const row=document.getElementById('irow-'+item.id);if(!row)return;
+    const r=getItemR(item.id);
+    const urg=calcUrgency(item.id);
+    const showRev=urg!==null&&curViewTab==='urgent';
+    const rp=r.reviewPassed===true,hasRX=!rp&&!!r.reviewDate;
+    const uB=row.querySelector('.u-btns'),revB=row.querySelector('.review-eval-btns');
+    if(showRev){
+      if(uB)uB.style.display='none';
+      if(revB){revB.style.display='flex';
+        const[o,x]=revB.querySelectorAll('.ub-rev');
+        if(o)o.className='ub-rev'+(rp?' sel-o':'');
+        if(x)x.className='ub-rev'+(hasRX?' sel-x':'');
+      }
+    }else{if(uB)uB.style.display='flex';if(revB)revB.style.display='none';}
+  }));
+}
+function applyFilter(){
+  DATA.forEach(ch=>{
+    const key=chKey(ch);
+    const card=document.getElementById('chcard-'+key);if(!card)return;
+    let any=false;
+    ch.items.forEach(item=>{
+      const row=document.getElementById('irow-'+item.id);if(!row)return;
+      if(!itemInScope(item)){row.style.display='none';return;}
+      let show=true;
+      if(curViewTab==='urgent'){const s=calcUrgency(item.id);show=s!==null&&s>=70;}
+      row.style.display=show?'':'none';
+      if(show)any=true;
+    });
+    card.classList.toggle('hidden',!any);
+  });
+}
+
+function render(){
+  const ct=document.getElementById('content');ct.innerHTML='';
+  DATA.forEach(ch=>{const el=buildChCard(ch);if(el)ct.appendChild(el);});
+  renderRoundTabs();updateProgress();applyFilter();updateNextRoundBtn();
+}
+
+function buildChCard(ch){
+  const key=chKey(ch);const r=getChR(key);
+  const scoped=ch.items.filter(itemInScope);
+  const total=scoped.length,done=scoped.filter(i=>getItemR(i.id).u).length;
+  if(!total)return null;
+  const card=document.createElement('div');
+  card.className='ch-card';card.id='chcard-'+key;
+  const aC=ch.items.filter(i=>i.imp==='A').length,bC=ch.items.filter(i=>i.imp==='B').length,cC=ch.items.filter(i=>i.imp==='C').length;
+  const hd=document.createElement('div');hd.className='ch-header';hd.onclick=()=>card.classList.toggle('open');
+  hd.innerHTML=`<span class="ch-chevron">▶</span>
+    <div class="ch-info"><div class="ch-name">${ch.ch}　${ch.chName}</div><div class="ch-sub">A:${aC} B:${bC} C:${cC}</div></div>
+    <span class="ch-badge${done===total&&total>0?' done':''}" id="chprog-${key}">${done}/${total}</span>`;
+  card.appendChild(hd);
+  const iw=document.createElement('div');iw.className='items-wrap';
+  ch.items.forEach(item=>{if(!itemInScope(item))return;iw.appendChild(buildItemRow(item));});
+  card.appendChild(iw);
+  const ft=document.createElement('div');ft.className='ch-footer';ft.id='chfoot-'+key;ft.innerHTML=buildChFooter(key,r);
+  card.appendChild(ft);
+  return card;
+}
+
+function buildChFooter(key,r){
+  let s='';
+  if(r.date)s+=`<span class="ch-stat"><span class="ch-stat-lbl">実施日</span>${formatDate(r.date)}</span>`;
+  if(r.time)s+=`<span class="ch-stat"><span class="ch-stat-lbl">所要時間</span>${r.time} 分</span>`;
+  return`<div class="ch-footer-row">${s}<button class="ch-record-btn" onclick="toggleRecordForm('${key}')">実施記録</button></div>
+    <div class="ch-record-form" id="chform-${key}">
+      <div class="ch-record-form-row">
+        <div><label class="ch-record-form-lbl">実施日</label><input type="date" class="ch-record-input" id="ch-date-${key}" value="${r.date||''}"></div>
+        <div><label class="ch-record-form-lbl">所要時間（分）</label><input type="text" inputmode="numeric" class="ch-record-input" id="ch-time-${key}" placeholder="例: 45" value="${r.time||''}"></div>
+      </div>
+      <div class="ch-record-form-btns">
+        <button class="ch-record-cancel" onclick="toggleRecordForm('${key}')">キャンセル</button>
+        <button class="ch-record-save" onclick="saveRecord('${key}')">保存</button>
+      </div>
+    </div>`;
+}
+function toggleRecordForm(key){
+  const f=document.getElementById('chform-'+key);if(!f)return;
+  const open=f.classList.contains('open');
+  document.querySelectorAll('.ch-record-form.open').forEach(x=>x.classList.remove('open'));
+  if(!open)f.classList.add('open');
+}
+function saveRecord(key){
+  const d=document.getElementById('ch-date-'+key),t=document.getElementById('ch-time-'+key);if(!d||!t)return;
+  if(!chState[key])chState[key]={};
+  chState[key][curRound()]={date:d.value,time:t.value};save();
+  const ft=document.getElementById('chfoot-'+key);if(ft)ft.innerHTML=buildChFooter(key,{date:d.value,time:t.value});
+}
+
+function buildItemRow(item){
+  const r=getItemR(item.id),u=r.u||null;
+  const totalR=appState.rounds.length;
+  let histHTML='';
+  if(totalR>1){
+    histHTML='<div class="item-history">';
+    for(let ri=0;ri<totalR;ri++){
+      const rd=getItemR(item.id,ri),ru=rd.u||null;
+      const lbl=(appState.rounds[ri].label||'').replace('第','').replace('回','');
+      const sym=ru==='oo'?'○○':ru==='o'?'○':ru==='n'?'ー':ru==='x'?'×':ru==='xx'?'××':'–';
+      histHTML+=`<div class="hist-dot-wrap"><div class="hist-label">${lbl}回</div><div class="hist-dot${ru?' dot-'+ru:''}">${sym}</div></div>`;
+    }
+    histHTML+='</div>';
+  }
+  const urg=calcUrgency(item.id),rp=r.reviewPassed===true,hasRX=!rp&&!!r.reviewDate;
+  const showRev=urg!==null&&curViewTab==='urgent';
+  const urgHTML=urg!==null?`<div class="urgency-wrap" id="urg-${item.id}">
+    <span class="urgency-score" style="color:${urgencyColor(urg)}">${urg}</span>
+    <div class="urgency-track"><div class="urgency-fill" style="width:${urg}%;background:${urgencyColor(urg)}"></div></div>
+  </div>`:'';
+  const row=document.createElement('div');row.className='item-row';row.id='irow-'+item.id;
+  // キーワードセクション以外を innerHTML で構築
+  row.innerHTML=`
+    <div class="item-top">
+      <span class="item-name">${item.name}</span>
+      <span class="imp-badge imp-${item.imp}">${item.imp}</span>
+      <div class="u-btns"${showRev?' style="display:none"':''}>
+        <button class="ub${u==='oo'?' sel-oo':''}" onclick="setU('${item.id}','oo')">○○</button>
+        <button class="ub${u==='o'?' sel-o':''}" onclick="setU('${item.id}','o')">○</button>
+        <button class="ub${u==='n'?' sel-n':''}" onclick="setU('${item.id}','n')">ー</button>
+        <button class="ub${u==='x'?' sel-x':''}" onclick="setU('${item.id}','x')">×</button>
+        <button class="ub${u==='xx'?' sel-xx':''}" onclick="setU('${item.id}','xx')">××</button>
+      </div>
+      <div class="review-eval-btns"${showRev?'':' style="display:none"'}>
+        <button class="ub-rev${rp?' sel-o':''}" onclick="reviewItem('${item.id}','o')">○</button>
+        <button class="ub-rev${hasRX?' sel-x':''}" onclick="reviewItem('${item.id}','x')">×</button>
+      </div>
+    </div>
+    ${urgHTML}${histHTML}`;
+  // キーワードセクションは appendChild で安全に追加（× 文字が innerHTML を壊さないよう）
+  const kwTmp=document.createElement('div');
+  kwTmp.innerHTML=buildKwSection(item);
+  row.appendChild(kwTmp.firstElementChild);
+  return row;
+}
+
+function setU(id,type){
+  const r=getItemR(id);
+  if(r.u===type){r.u=null;r.date=null;}else{r.u=type;r.date=today();}
+  setItemR(id,r);save();
+  refreshItem(id);refreshChProg(id);updateProgress();updateNextRoundBtn();
+  // 採点した（解除でない）かつキーワードがあればポップアップ
+  if(r.u&&getKeywords(id).length>0){
+    openKwEvalPopup(id);
+  }
+}
+function reviewItem(id,type){
+  const r=getItemR(id);
+  if(type==='o'){r.reviewPassed=true;r.reviewDate=today();}
+  else{r.reviewPassed=false;r.reviewDate=today();}
+  setItemR(id,r);save();refreshItem(id);applyFilter();
+}
+function refreshItem(id){
+  const r=getItemR(id),row=document.getElementById('irow-'+id);if(!row)return;
+  ['oo','o','n','x','xx'].forEach(t=>{
+    const btn=row.querySelector(`.ub[onclick*="'${t}'"]`);if(!btn)return;
+    btn.classList.remove('sel-oo','sel-o','sel-n','sel-x','sel-xx');
+    if(r.u===t)btn.classList.add('sel-'+t);
+  });
+  const urg=calcUrgency(id),showRev=urg!==null&&curViewTab==='urgent';
+  const rp=r.reviewPassed===true,hasRX=!rp&&!!r.reviewDate;
+  const uB=row.querySelector('.u-btns'),revB=row.querySelector('.review-eval-btns');
+  if(showRev){
+    if(uB)uB.style.display='none';
+    if(revB){revB.style.display='flex';
+      const[o,x]=revB.querySelectorAll('.ub-rev');
+      if(o)o.className='ub-rev'+(rp?' sel-o':'');
+      if(x)x.className='ub-rev'+(hasRX?' sel-x':'');
+    }
+  }else{if(uB)uB.style.display='flex';if(revB)revB.style.display='none';}
+  const wrap=row.querySelector('.urgency-wrap');
+  if(urg!==null){
+    const c=urgencyColor(urg);
+    const el=document.createElement('div');el.className='urgency-wrap';el.id='urg-'+id;
+    el.innerHTML=`<span class="urgency-score" style="color:${c}">${urg}</span><div class="urgency-track"><div class="urgency-fill" style="width:${urg}%;background:${c}"></div></div>`;
+    if(wrap)wrap.replaceWith(el);else row.querySelector('.item-top')?.insertAdjacentElement('afterend',el);
+  }else if(wrap)wrap.remove();
+}
+function refreshChProg(id){
+  const ch=DATA.find(c=>c.items.find(i=>i.id===id));if(!ch)return;
+  const key=chKey(ch),scoped=ch.items.filter(itemInScope);
+  const done=scoped.filter(i=>getItemR(i.id).u).length;
+  const el=document.getElementById('chprog-'+key);
+  if(el){el.textContent=`${done}/${scoped.length}`;el.className='ch-badge'+(done===scoped.length&&scoped.length>0?' done':'');}
+}
+
+function getRoundStats(ri){
+  let mins=0,last=null;
+  Object.keys(chState).forEach(k=>{
+    const rec=(chState[k]||{})[ri];
+    if(rec&&rec.time)mins+=parseInt(rec.time)||0;
+    if(rec&&rec.date&&(!last||rec.date>last))last=rec.date;
+  });
+  const rd=appState.rounds[ri]||{};
+  let days=null;
+  if(rd.startDate&&last)days=Math.round((new Date(last)-new Date(rd.startDate))/86400000)+1;
+  return{totalMins:mins,dayCount:days};
+}
+function fmtTime(m){if(!m)return null;const h=Math.floor(m/60),r=m%60;return h>0?`${h}時間${r>0?r+'分':''}`:`${r}分`}
+
+function renderRoundTabs(){
+  const tabs=document.getElementById('round-tabs');tabs.innerHTML='';
+  appState.rounds.forEach((rd,i)=>{
+    const btn=document.createElement('button');btn.className='tab'+(i===curRound()?' active':'');
+    const st=getRoundStats(i);
+    const tp=fmtTime(st.totalMins),dp=st.dayCount!==null?st.dayCount+'日':null;
+    const ss=(dp||tp)?' · '+[dp,tp].filter(Boolean).join(' '):'';
+    const sc=rd.scope==='A'?'(A)':rd.scope==='B'?'(A·B)':'(全)';
+    btn.textContent=(rd.label||`第${i+1}回`)+sc+ss;
+    btn.onclick=()=>switchRound(i);tabs.appendChild(btn);
+  });
+}
+function switchRound(i){appState.currentRound=i;save();render()}
+
+function updateProgress(){
+  const items=scopedItems(),total=items.length,done=items.filter(i=>getItemR(i.id).u).length;
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('prog-lbl').textContent=`${done} / ${total} 完了`;
+  document.getElementById('prog-bar').style.width=pct+'%';
+  updateRoundInfoBar(pct);
+}
+function updateRoundInfoBar(pct){
+  const bar=document.getElementById('round-info-bar');if(!bar)return;
+  const rd=appState.rounds[curRound()]||{};
+  const sl=rd.scope==='A'?'A のみ':rd.scope==='B'?'A・B':'全部';
+  const dl=rd.deadline,days=daysUntil(dl);
+  const ds=days===null?'未設定':days<0?`${Math.abs(days)}日超過`:`残り${days}日`;
+  const dc=days===null?'':days<=7?'warn':'ok';
+  const items=scopedItems(),rem=items.filter(i=>!getItemR(i.id).u).length;
+  let pH='';
+  if(days!==null&&days>0){
+    const pd=rem/days,bp=rd.basePace||(items.length/days),pc=pd/bp>1.2?'warn':pd/bp>1?'':'ok';
+    const pds=pd>=10?Math.round(pd)+'問':pd.toFixed(1)+'問';
+    const df=pd-bp,dfs=df>0.05?'+'+df.toFixed(1)+'問/日':df<-0.05?df.toFixed(1)+'問/日':'基準通り';
+    const dst=df>0.05?'color:var(--x-color)':df<-0.05?'color:var(--o-color)':'color:var(--text-3)';
+    pH=`<div class="ri-item"><span class="ri-lbl">1日ペース</span><span class="ri-val ${pc}">${pds}<span style="font-size:10px;font-weight:500;margin-left:4px;${dst}">(${dfs})</span></span></div>`;
+  }else if(days!==null&&days<=0){pH=`<div class="ri-item"><span class="ri-lbl">1日ペース</span><span class="ri-val warn">期限超過</span></div>`;}
+  bar.innerHTML=`
+    <div class="ri-item"><span class="ri-lbl">回</span><span class="ri-val">${rd.label||''}</span></div>
+    <div class="ri-item"><span class="ri-lbl">対象</span><button class="ri-deadline-btn" onclick="openScopeModal(curRound()===0)">${sl}</button></div>
+    <div class="ri-item"><span class="ri-lbl">期限</span><button class="ri-deadline-btn" onclick="openDeadlineModal()">${dl?formatDate(dl):'未設定'}</button></div>
+    <div class="ri-item"><span class="ri-lbl">残り</span><span class="ri-val ${dc}">${ds}</span></div>
+    <div class="ri-item"><span class="ri-lbl">進捗</span><span class="ri-val">${pct}%</span></div>
+    ${pH}`;
+}
+function updateNextRoundBtn(){
+  const items=scopedItems(),pct=items.length?items.filter(i=>getItemR(i.id).u).length/items.length*100:0;
+  document.getElementById('next-round-wrap').style.display=pct>=70?'block':'none';
+}
+
+function toggleWeaknessPage(){
+  showingWeakness=!showingWeakness;
+  document.getElementById('main-view').style.display=showingWeakness?'none':'block';
+  document.getElementById('weakness-view').style.display=showingWeakness?'block':'none';
+  document.getElementById('view-tabs').style.display=showingWeakness?'none':'flex';
+  document.getElementById('weakness-btn').classList.toggle('active',showingWeakness);
+  if(showingWeakness)renderHistoryPage();
+}
+
+let histActiveChIdx=0;
+
+function renderHistoryPage(){
+  const view=document.getElementById('weakness-view');
+  const totalRounds=appState.rounds.length;
+  const roundHeaders=Array.from({length:totalRounds},(_,i)=>(appState.rounds[i]||{}).label||`第${i+1}回`);
+  const roundStats=roundHeaders.map((label,i)=>{
+    const st=getRoundStats(i),rd=appState.rounds[i]||{};
+    const tp=fmtTime(st.totalMins),dp=st.dayCount!==null?st.dayCount+'日':null;
+    const statStr=[dp,tp].filter(Boolean).join(' / ');
+    const scopeTag=rd.scope==='A'?'A':rd.scope==='B'?'A·B':'全';
+    return{label,statStr,scopeTag};
+  });
+
+  const visibleChs=DATA.filter(ch=>ch.items.filter(itemInScope).length>0);
+  if(histActiveChIdx>=visibleChs.length)histActiveChIdx=0;
+
+  let html=`<div class="hist-page-header"><div class="hist-page-title">履歴一覧</div><div class="hist-page-subtitle">問題ごとの回答履歴</div></div>`;
+  html+=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">`;
+  roundStats.forEach(({label,statStr,scopeTag},i)=>{
+    const act=i===curRound();
+    html+=`<div style="background:${act?'var(--text)':'var(--surface)'};color:${act?'#fff':'var(--text)'};border:1px solid ${act?'var(--text)':'var(--border)'};border-radius:var(--radius);padding:8px 12px;min-width:0;">
+      <div style="font-size:10px;font-weight:700;font-family:'DM Mono',monospace;margin-bottom:3px;opacity:${act?'1':'0.7'}">${label}（${scopeTag}）</div>
+      ${statStr?`<div style="font-size:11px;font-family:'DM Mono',monospace;">${statStr}</div>`:`<div style="font-size:10px;opacity:0.5;">記録なし</div>`}
+    </div>`;
+  });
+  html+=`</div>`;
+
+  html+=`<div id="hist-ch-tabs" style="display:flex;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);margin:0 -14px 0;padding:0 14px;gap:0;">`;
+  visibleChs.forEach((ch,idx)=>{
+    const active=idx===histActiveChIdx;
+    html+=`<button onclick="selectHistCh(${idx})" style="flex-shrink:0;padding:9px 12px;font-size:11px;font-weight:700;font-family:'Noto Sans JP',sans-serif;background:transparent;border:none;border-bottom:2px solid ${active?'var(--text)':'transparent'};color:${active?'var(--text)':'var(--text-3)'};cursor:pointer;white-space:nowrap;transition:all .15s;">${ch.ch}</button>`;
+  });
+  html+=`</div>`;
+
+  html+=`<div id="hist-ch-content" style="padding-top:4px;">`;
+  html+=buildHistChContent(visibleChs[histActiveChIdx],roundHeaders);
+  html+=`</div>`;
+
+  view.innerHTML=html;
+
+  const tabBar=view.querySelector('#hist-ch-tabs');
+  const activeBtn=tabBar?.querySelectorAll('button')[histActiveChIdx];
+  if(tabBar&&activeBtn&&!view._tabInitialized){
+    tabBar.scrollLeft=activeBtn.offsetLeft-tabBar.offsetWidth/2+activeBtn.offsetWidth/2;
+    view._tabInitialized=true;
+  }
+}
+
+function buildHistChContent(ch,roundHeaders){
+  if(!ch)return'';
+  const scopedChItems=ch.items.filter(itemInScope);
+  const SCORE_COLOR={oo:'#0a5c35',o:'var(--o-color)',n:'#666',x:'var(--x-color)',xx:'#8b0000'};
+  let html=`<div style="font-size:10px;font-weight:700;color:var(--text-2);padding:10px 0 8px;letter-spacing:.06em;">${ch.ch}　${ch.chName}</div>`;
+
+  scopedChItems.forEach(item=>{
+    const kws=getKeywords(item.id);
+    const roundEntries=roundHeaders.map((label,i)=>{
+      const rd=(itemState[item.id]||{})[i]||{};
+      return{label,roundIdx:i,u:rd.u||null,date:rd.date||null};
+    }).filter(e=>e.u!==null);
+
+    let scoreVal=null,scorePct=0;
+    if(kws.length>0){
+      const allResults=kws.flatMap(kw=>kw.results);
+      if(allResults.length>0){
+        const okCount=allResults.filter(r=>r.result==='o').length;
+        scoreVal=Math.round(okCount/allResults.length*100);
+        scorePct=scoreVal;
+      }
+    }else if(roundEntries.length>0){
+      const lastU=roundEntries[roundEntries.length-1].u;
+      const uMap={oo:100,o:80,n:50,x:25,xx:0};
+      scoreVal=lastU in uMap?uMap[lastU]:null;
+      scorePct=scoreVal!==null?scoreVal:0;
+    }
+
+    const scoreColor=scoreVal===null?'var(--text-3)':scoreVal>=80?'#0a5c35':scoreVal>=60?'var(--o-color)':scoreVal>=40?'#d4a017':'var(--x-color)';
+    const totalAttempts=roundEntries.length;
+    const impCls=`imp-${item.imp}`;
+
+    let bodyHTML;
+    if(roundEntries.length===0){
+      bodyHTML='<div class="rec-no-kw">記録がありません</div>';
+    }else{
+      const evalCells=roundEntries.map(e=>{
+        const sym=e.u==='oo'?'○○':e.u==='o'?'○':e.u==='n'?'ー':e.u==='x'?'×':e.u==='xx'?'××':'–';
+        const col=SCORE_COLOR[e.u]||'var(--text-3)';
+        return`<div style="display:flex;flex-direction:column;align-items:center;gap:2px;min-width:36px;">
+          <span style="font-size:9px;font-family:'DM Mono',monospace;color:var(--text-3);">${e.label.replace('第','').replace('回','')}回</span>
+          <span style="font-size:14px;font-weight:900;color:${col};font-family:'Noto Sans JP',sans-serif;">${sym}</span>
+        </div>`;
+      }).join('');
+      const evalBar=`<div style="display:flex;align-items:center;gap:4px;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:${kws.length?'10px':'0'};">
+        <span style="font-size:12px;font-weight:700;color:var(--text);margin-right:8px;flex-shrink:0;">評価</span>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">${evalCells}</div>
+      </div>`;
+
+      let kwTableHTML='';
+      if(kws.length>0){
+        const headers=roundEntries.map(e=>`<th>${e.label.replace('第','').replace('回','')}回</th>`).join('');
+        const kwRows=kws.map(kw=>{
+          const cells=roundEntries.map(e=>{
+            const res=kw.results.find(r=>r.round===e.roundIdx);
+            const s=res?res.result:null;
+            const label=s==='o'?'○':s==='x'?'×':'–';
+            const col=s==='o'?'var(--o-color)':s==='x'?'var(--x-color)':'var(--text-3)';
+            return`<td style="color:${col};font-weight:${s?700:400}">${label}</td>`;
+          }).join('');
+          return`<tr><td class="kw-name-col">${escHtml(kw.word)}</td>${cells}</tr>`;
+        }).join('');
+        kwTableHTML=`<div class="rec-kw-table"><table>
+          <thead><tr><th class="kw-name-col"></th>${headers}</tr></thead>
+          <tbody>${kwRows}</tbody>
+        </table></div>`;
+      }
+      bodyHTML=evalBar+kwTableHTML;
+    }
+
+    html+=`<div class="rec-item" id="recitem-${item.id}">
+      <div class="rec-item-header" onclick="this.closest('.rec-item').classList.toggle('open')">
+        <div class="rec-item-name">${escHtml(item.name)}</div>
+        <span class="rec-imp ${impCls}">${item.imp}</span>
+        <div class="rec-u-track"><div class="rec-u-fill" style="width:${scorePct}%;background:${scoreColor}"></div></div>
+        <div class="rec-score" style="color:${scoreColor}">${scoreVal!==null?scoreVal+'%':'–'}</div>
+        <div class="rec-count">${totalAttempts?totalAttempts+'回':'–'}</div>
+      </div>
+      <div class="rec-item-body">${bodyHTML}</div>
+    </div>`;
+  });
+  return html;
+}
+
+function selectHistCh(idx){
+  histActiveChIdx=idx;
+  const view=document.getElementById('weakness-view');
+  view.querySelectorAll('#hist-ch-tabs button').forEach((btn,i)=>{
+    btn.style.borderBottomColor=i===idx?'var(--text)':'transparent';
+    btn.style.color=i===idx?'var(--text)':'var(--text-3)';
+  });
+  const contentEl=view.querySelector('#hist-ch-content');
+  if(!contentEl){renderHistoryPage();return;}
+  const totalRounds=appState.rounds.length;
+  const roundHeaders=Array.from({length:totalRounds},(_,i)=>(appState.rounds[i]||{}).label||`第${i+1}回`);
+  const visibleChs=DATA.filter(ch=>ch.items.filter(itemInScope).length>0);
+  contentEl.innerHTML=buildHistChContent(visibleChs[idx],roundHeaders);
+}
+
+let pendingScope=null,pendingScopeIsFirst=false;
+function openScopeModal(isFirst){
+  pendingScope=null;pendingScopeIsFirst=isFirst||false;
+  const n=pendingScopeIsFirst?1:appState.rounds.length+1;
+  document.getElementById('scope-modal-title').textContent=`第${n}回を始める`;
+  if(pendingScopeIsFirst){
+    const cur=appState.rounds[0]||{};
+    document.getElementById('scope-startdate').value=cur.startDate||today();
+    document.getElementById('scope-deadline').value=cur.deadline||'';
+    document.querySelectorAll('.scope-opt').forEach(b=>b.classList.remove('sel'));
+    if(cur.scope){
+      document.querySelectorAll('.scope-opt')[['all','A','B'].indexOf(cur.scope)]?.classList.add('sel');
+      pendingScope=cur.scope;
+      document.getElementById('scope-confirm-btn').style.cssText='width:100%';
+    }else{document.getElementById('scope-confirm-btn').style.cssText='width:100%;opacity:.4;pointer-events:none';}
+  }else{
+    document.getElementById('scope-startdate').value=today();
+    document.getElementById('scope-deadline').value='';
+    document.querySelectorAll('.scope-opt').forEach(b=>b.classList.remove('sel'));
+    document.getElementById('scope-confirm-btn').style.cssText='width:100%;opacity:.4;pointer-events:none';
+  }
+  document.getElementById('scope-overlay').classList.add('open');
+}
+function checkScopeConfirmBtn(){
+  const ok=!!pendingScope&&!!document.getElementById('scope-startdate').value;
+  document.getElementById('scope-confirm-btn').style.opacity=ok?'1':'.4';
+  document.getElementById('scope-confirm-btn').style.pointerEvents=ok?'auto':'none';
+}
+function selectScope(scope){
+  pendingScope=scope;
+  document.querySelectorAll('.scope-opt').forEach(b=>b.classList.remove('sel'));
+  document.querySelectorAll('.scope-opt')[['all','A','B'].indexOf(scope)]?.classList.add('sel');
+  checkScopeConfirmBtn();
+}
+document.getElementById('scope-confirm-btn').onclick=function(){
+  if(!pendingScope)return;
+  const sd=document.getElementById('scope-startdate').value||today();
+  const dl=document.getElementById('scope-deadline').value||null;
+  const bd=dl?daysUntil(dl):null;
+  const bt=DATA.flatMap(c=>c.items).filter(item=>{
+    if(item.imp==='C')return false;
+    if(pendingScope==='A')return item.imp==='A';
+    if(pendingScope==='B')return item.imp!=='C';
+    return true;
+  }).length;
+  const bp=(bd&&bd>0)?bt/bd:null;
+  if(pendingScopeIsFirst){Object.assign(appState.rounds[0],{scope:pendingScope,startDate:sd,deadline:dl,basePace:bp});}
+  else{appState.rounds.push({label:`第${appState.rounds.length+1}回`,scope:pendingScope,startDate:sd,deadline:dl,basePace:bp});appState.currentRound=appState.rounds.length-1;}
+  save();document.getElementById('scope-overlay').classList.remove('open');render();
+};
+document.getElementById('scope-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('scope-overlay'))document.getElementById('scope-overlay').classList.remove('open')});
+
+function openDeadlineModal(){document.getElementById('deadline-input').value=curDeadline()||'';document.getElementById('deadline-overlay').classList.add('open')}
+function closeDeadlineModal(){document.getElementById('deadline-overlay').classList.remove('open')}
+function saveDeadline(){
+  const nl=document.getElementById('deadline-input').value||null;
+  const rd=appState.rounds[curRound()];rd.deadline=nl;
+  const bd=nl?daysUntil(nl):null;rd.basePace=(bd&&bd>0)?scopedItems().length/bd:null;
+  save();closeDeadlineModal();updateProgress();
+}
+document.getElementById('deadline-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('deadline-overlay'))closeDeadlineModal()});
+
+load();render();
+if(!appState.rounds[0].startDate)openScopeModal(true);
+
+function exportData(){
+  const d={version:1,label:'管理会計論（理論）',exportedAt:new Date().toISOString(),
+    itemState:JSON.parse(localStorage.getItem(STORE_KEY+'-item')||'{}'),
+    chState:JSON.parse(localStorage.getItem(STORE_KEY+'-ch')||'{}'),
+    appState:JSON.parse(localStorage.getItem(STORE_KEY+'-app')||'{}'),
+    kwState:JSON.parse(localStorage.getItem(STORE_KEY+'-kw')||'{}')};
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));
+  a.download='kanri_riron_backup.json';a.click();
+}
+function importData(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      const d=JSON.parse(ev.target.result);
+      if(!d.itemState||!d.appState)throw new Error('invalid');
+      if(!confirm('現在のデータを上書きして復元しますか？'))return;
+      localStorage.setItem(STORE_KEY+'-item',JSON.stringify(d.itemState));
+      localStorage.setItem(STORE_KEY+'-ch',JSON.stringify(d.chState||{}));
+      localStorage.setItem(STORE_KEY+'-app',JSON.stringify(d.appState));
+      localStorage.setItem(STORE_KEY+'-kw',JSON.stringify(d.kwState||{}));
+      location.reload();
+    }catch(err){alert('ファイルの読み込みに失敗しました。');}
+  };
+  reader.readAsText(file);e.target.value='';
+}
+</script>
+</body>
+</html>
