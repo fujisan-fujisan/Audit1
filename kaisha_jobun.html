@@ -412,17 +412,12 @@
     background: var(--surface);
     z-index: 400;
     transform: translateX(-100%);
-    visibility: hidden;
-    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1), visibility 0s linear 0.28s;
-    display: flex;
+    display: none;
     flex-direction: column;
     box-shadow: 4px 0 24px rgba(0,0,0,0.12);
+    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
   }
-  .drawer.open {
-    transform: translateX(0);
-    visibility: visible;
-    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1), visibility 0s linear 0s;
-  }
+  .drawer.open { transform: translateX(0); }
 
   .drawer-header {
     padding: 16px 18px;
@@ -1459,15 +1454,20 @@ let currentChapterIdx = null;
 
 function openDrawer() {
   renderDrawer();
-  document.getElementById('drawer').classList.add('open');
+  const el = document.getElementById('drawer');
+  el.style.display = 'flex';
+  el.offsetHeight;
+  el.classList.add('open');
   document.getElementById('drawerOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
 function closeDrawer() {
-  document.getElementById('drawer').classList.remove('open');
+  const el = document.getElementById('drawer');
+  el.classList.remove('open');
   document.getElementById('drawerOverlay').classList.remove('open');
   document.body.style.overflow = '';
+  setTimeout(() => { el.style.display = 'none'; }, 280);
 }
 
 function renderDrawer() {
@@ -2075,15 +2075,20 @@ let trainingChapterIdx = null;
 
 function openTrainingDrawer() {
   renderTrainingDrawer();
-  document.getElementById('trainingDrawer').classList.add('open');
+  const el = document.getElementById('trainingDrawer');
+  el.style.display = 'flex';
+  el.offsetHeight;
+  el.classList.add('open');
   document.getElementById('trainingDrawerOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
 function closeTrainingDrawer() {
-  document.getElementById('trainingDrawer').classList.remove('open');
+  const el = document.getElementById('trainingDrawer');
+  el.classList.remove('open');
   document.getElementById('trainingDrawerOverlay').classList.remove('open');
   document.body.style.overflow = '';
+  setTimeout(() => { el.style.display = 'none'; }, 280);
 }
 
 function renderTrainingDrawer() {
