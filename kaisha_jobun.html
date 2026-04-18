@@ -861,6 +861,56 @@
   .score-num.total { color: var(--text-secondary); }
   .score-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
+  /* トレーニング サブビュー */
+  .training-view { display: none; }
+  .training-view.active { display: block; }
+
+  .tv-home-top { margin-bottom: 32px; }
+
+  .tv-home-start { text-align: center; margin-bottom: 16px; }
+  .tv-start-btn { padding: 14px 48px !important; font-size: 15px !important; }
+
+  .tv-home-sub {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .tv-sub-btn { padding: 10px 24px !important; }
+
+  .session-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .session-score {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  .tv-back-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .tv-back-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  .q-stats {
+    font-size: 11px;
+    color: var(--text-muted);
+    min-width: 36px;
+    text-align: right;
+  }
+
   /* ===== 共通ボタン ===== */
   .btn {
     padding: 8px 16px;
@@ -1011,77 +1061,84 @@
   <!-- ===== 逆引きトレーニング ===== -->
   <div id="panel-training" class="panel">
 
-    <!-- 絞り込みボタン＋スコア -->
-    <div class="score-bar">
-      <button class="btn-nav" id="btnTrainingNav" onclick="openTrainingDrawer()" style="flex-shrink:0">
-        <span class="btn-nav-icon">☰</span>
-        <span class="btn-nav-label" id="btnTrainingNavLabel">全問題</span>
-      </button>
-      <div class="score-item">
-        <div class="score-num correct" id="scoreCorrect">0</div>
-        <div class="score-label">正解</div>
+    <!-- ① ホーム画面 -->
+    <div id="tv-home" class="training-view active">
+      <div class="tv-home-top">
+        <button class="btn-nav" id="btnTrainingNav" onclick="openTrainingDrawer()">
+          <span class="btn-nav-icon">☰</span>
+          <span class="btn-nav-label" id="btnTrainingNavLabel">全問題</span>
+        </button>
       </div>
-      <div class="score-item">
-        <div class="score-num wrong" id="scoreWrong">0</div>
-        <div class="score-label">不正解</div>
+      <div class="tv-home-start">
+        <button class="btn btn-primary tv-start-btn" onclick="startTraining()">開始</button>
       </div>
-      <div class="score-item">
-        <div class="score-num total" id="scoreTotal">0</div>
-        <div class="score-label">合計</div>
+      <div class="tv-home-sub">
+        <button class="btn tv-sub-btn" onclick="switchTrainingView('register')">問題登録</button>
+        <button class="btn tv-sub-btn" onclick="switchTrainingView('manage')">問題管理</button>
       </div>
-      <div style="margin-left:auto;display:flex;gap:8px">
-        <button class="btn btn-sm" onclick="resetScore()">スコアリセット</button>
-        <button class="btn btn-sm btn-primary" onclick="startTraining()">開始</button>
-      </div>
+      <div id="trainingHomeMsg" class="empty-state" style="display:none"></div>
     </div>
 
-    <!-- 問題カード -->
-    <div id="trainingCard" class="training-card" style="display:none">
-      <div class="training-article-id" id="cardArticleId"></div>
-      <div class="training-question" id="cardQuestion"></div>
-      <div class="training-answer" id="cardAnswer"></div>
-      <div class="training-article-text" id="cardArticleText"></div>
-      <button class="btn-show-answer" id="btnShowAnswer" onclick="showAnswer()">答えを見る</button>
-      <div class="judge-buttons" id="judgeButtons">
-        <button class="btn-correct" onclick="judge(true)">○ 正解</button>
-        <button class="btn-wrong" onclick="judge(false)">✕ 不正解</button>
+    <!-- ② トレーニング中画面 -->
+    <div id="tv-session" class="training-view">
+      <div class="session-header">
+        <button class="btn btn-sm" onclick="endSession()">← 終了</button>
+        <div class="session-score" id="sessionScore">0問中0問正解</div>
       </div>
-    </div>
-
-    <div id="trainingEmpty" class="empty-state">
-      問題を登録してトレーニングを開始してください
-    </div>
-
-    <!-- 問題登録 -->
-    <div class="reg-section">
-      <h3>問題を登録する</h3>
-      <div class="reg-row">
-        <span class="reg-label">対象条文</span>
-        <div style="flex:1">
-          <div class="related-wrap">
-            <input class="reg-input" id="regArticleInput" placeholder="半角" oninput="showRegSuggest()" onblur="hideRegSuggestDelay()" style="flex:1;max-width:200px" autocomplete="off">
-            <div id="regSuggestBox" class="related-suggest" style="display:none"></div>
-          </div>
+      <div id="trainingCard" class="training-card">
+        <div class="training-article-id" id="cardArticleId"></div>
+        <div class="training-question" id="cardQuestion"></div>
+        <div class="training-answer" id="cardAnswer"></div>
+        <div class="training-article-text" id="cardArticleText"></div>
+        <button class="btn-show-answer" id="btnShowAnswer" onclick="showAnswer()">答えを見る</button>
+        <div class="judge-buttons" id="judgeButtons">
+          <button class="btn-correct" onclick="judge(true)">○ 正解</button>
+          <button class="btn-wrong" onclick="judge(false)">✕ 不正解</button>
         </div>
       </div>
-      <div class="reg-row">
-        <span class="reg-label">要約文</span>
-        <div style="flex:1">
-          <textarea class="reg-input" id="regQuestion" placeholder="要約を入力"></textarea>
-          <div id="claudeHintBox" style="display:none">
-            <div class="claude-hint-label">💡 Claudeの要約（参考・叩き台）</div>
-            <div class="claude-hint" id="claudeHintText"></div>
+      <div id="trainingEmpty" class="empty-state" style="display:none"></div>
+    </div>
+
+    <!-- ③ 問題登録画面 -->
+    <div id="tv-register" class="training-view">
+      <div class="tv-back-bar">
+        <button class="btn btn-sm" onclick="switchTrainingView('home')">← 戻る</button>
+        <span class="tv-back-title">問題登録</span>
+      </div>
+      <div class="reg-section">
+        <div class="reg-row">
+          <span class="reg-label">対象条文</span>
+          <div style="flex:1">
+            <div class="related-wrap">
+              <input class="reg-input" id="regArticleInput" placeholder="半角" oninput="showRegSuggest()" onblur="hideRegSuggestDelay()" style="flex:1;max-width:200px" autocomplete="off">
+              <div id="regSuggestBox" class="related-suggest" style="display:none"></div>
+            </div>
           </div>
         </div>
-      </div>
-      <div style="display:flex;justify-content:flex-end;gap:8px">
-        <button class="btn btn-primary btn-sm" onclick="addQuestion()">登録する</button>
+        <div class="reg-row">
+          <span class="reg-label">要約文</span>
+          <div style="flex:1">
+            <textarea class="reg-input" id="regQuestion" placeholder="要約を入力"></textarea>
+            <div id="claudeHintBox" style="display:none">
+              <div class="claude-hint-label">💡 Claudeの要約（参考・叩き台）</div>
+              <div class="claude-hint" id="claudeHintText"></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px">
+          <button class="btn btn-primary btn-sm" onclick="addQuestion()">登録する</button>
+        </div>
       </div>
     </div>
 
-    <!-- 登録済み問題一覧 -->
-    <div class="section-title">登録済み問題</div>
-    <div id="questionList"></div>
+    <!-- ④ 問題管理画面 -->
+    <div id="tv-manage" class="training-view">
+      <div class="tv-back-bar">
+        <button class="btn btn-sm" onclick="switchTrainingView('home')">← 戻る</button>
+        <span class="tv-back-title">問題管理</span>
+      </div>
+      <div id="questionList"></div>
+    </div>
   </div>
 
 </div>
@@ -1150,7 +1207,41 @@ function switchTab(name) {
   });
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
-  if (name === 'training') renderTraining();
+  if (name === 'training') { switchTrainingView('home'); renderTrainingHome(); }
+}
+
+function switchTrainingView(name) {
+  document.querySelectorAll('.training-view').forEach(v => v.classList.remove('active'));
+  document.getElementById('tv-' + name).classList.add('active');
+  if (name === 'manage') renderQuestionList();
+}
+
+function renderTrainingHome() {
+  updateTrainingNavButton();
+  const storage = getStorage();
+  const filtered = getFilteredQuestions(storage.questions);
+  const msg = document.getElementById('trainingHomeMsg');
+  if (!storage.questions.length) {
+    msg.textContent = '問題を登録してトレーニングを開始してください';
+    msg.style.display = 'block';
+  } else if (!filtered.length) {
+    msg.textContent = 'この範囲に登録された問題がありません';
+    msg.style.display = 'block';
+  } else {
+    msg.textContent = '';
+    msg.style.display = 'none';
+  }
+}
+
+function endSession() {
+  trainingQueue = [];
+  currentIdx = 0;
+  switchTrainingView('home');
+  renderTrainingHome();
+}
+
+function updateSessionScore() {
+  document.getElementById('sessionScore').textContent = `${sessionTotal}問中${sessionCorrect}問正解`;
 }
 
 // ===== サイドドロワー =====
@@ -1736,6 +1827,8 @@ function jumpBack(articleNum, pNum) {
 
 let trainingQueue = [];
 let currentIdx = 0;
+let sessionCorrect = 0;
+let sessionTotal = 0;
 
 // 条番号から編・章を判定するユーティリティ
 function getChapterInfo(articleNum) {
@@ -1855,38 +1948,21 @@ function getFilteredQuestions(questions) {
 }
 
 function renderTraining() {
-  const storage = getStorage();
-  document.getElementById('scoreCorrect').textContent = storage.score.correct;
-  document.getElementById('scoreWrong').textContent = storage.score.wrong;
-  document.getElementById('scoreTotal').textContent = storage.score.correct + storage.score.wrong;
-  updateTrainingNavButton();
-  renderQuestionList();
-  if (trainingQueue.length > 0) updateCard();
-  else {
-    document.getElementById('trainingCard').style.display = 'none';
-    const filtered = getFilteredQuestions(storage.questions);
-    const emptyEl = document.getElementById('trainingEmpty');
-    if (!storage.questions.length) {
-      emptyEl.style.display = 'block';
-      emptyEl.textContent = '問題を登録してトレーニングを開始してください';
-    } else if (!filtered.length) {
-      emptyEl.style.display = 'block';
-      emptyEl.textContent = 'この範囲に登録された問題がありません';
-    } else {
-      emptyEl.style.display = 'block';
-      emptyEl.textContent = '開始を押してトレーニングを始めましょう';
-    }
-  }
+  renderTrainingHome();
 }
 
 function startTraining() {
   const storage = getStorage();
   const filtered = getFilteredQuestions(storage.questions);
   if (!filtered.length) { showToast('この範囲に登録された問題がありません'); return; }
-  trainingQueue = [...filtered].sort(() => Math.random() - 0.5);
+  trainingQueue = filtered.map(q => ({ ...q, originalIdx: storage.questions.indexOf(q) })).sort(() => Math.random() - 0.5);
   currentIdx = 0;
+  sessionCorrect = 0;
+  sessionTotal = 0;
+  switchTrainingView('session');
   document.getElementById('trainingCard').style.display = 'flex';
   document.getElementById('trainingEmpty').style.display = 'none';
+  updateSessionScore();
   updateCard();
 }
 
@@ -1894,7 +1970,7 @@ function updateCard() {
   if (currentIdx >= trainingQueue.length) {
     document.getElementById('trainingCard').style.display = 'none';
     document.getElementById('trainingEmpty').style.display = 'block';
-    document.getElementById('trainingEmpty').textContent = 'トレーニング完了！スコアを確認してください。';
+    document.getElementById('trainingEmpty').textContent = `完了！ ${sessionTotal}問中${sessionCorrect}問正解`;
     return;
   }
   const q = trainingQueue[currentIdx];
@@ -1944,12 +2020,19 @@ function showAnswer() {
 
 function judge(correct) {
   const storage = getStorage();
-  if (correct) storage.score.correct++;
-  else storage.score.wrong++;
+  const q = trainingQueue[currentIdx];
+  sessionTotal++;
+  if (correct) {
+    sessionCorrect++;
+    if (q.originalIdx !== undefined && storage.questions[q.originalIdx]) {
+      storage.questions[q.originalIdx].correct = (storage.questions[q.originalIdx].correct || 0) + 1;
+    }
+  }
+  if (q.originalIdx !== undefined && storage.questions[q.originalIdx]) {
+    storage.questions[q.originalIdx].attempted = (storage.questions[q.originalIdx].attempted || 0) + 1;
+  }
   saveStorage(storage);
-  document.getElementById('scoreCorrect').textContent = storage.score.correct;
-  document.getElementById('scoreWrong').textContent = storage.score.wrong;
-  document.getElementById('scoreTotal').textContent = storage.score.correct + storage.score.wrong;
+  updateSessionScore();
   currentIdx++;
   updateCard();
 }
@@ -1958,9 +2041,6 @@ function resetScore() {
   const storage = getStorage();
   storage.score = { correct: 0, wrong: 0 };
   saveStorage(storage);
-  document.getElementById('scoreCorrect').textContent = 0;
-  document.getElementById('scoreWrong').textContent = 0;
-  document.getElementById('scoreTotal').textContent = 0;
   showToast('スコアをリセットしました');
 }
 
@@ -2026,6 +2106,8 @@ function addQuestion() {
     question,
     partIdx: chapterInfo ? chapterInfo.partIdx : null,
     chapterIdx: chapterInfo ? chapterInfo.chapterIdx : null,
+    correct: 0,
+    attempted: 0,
   });
   saveStorage(storage);
 
@@ -2043,12 +2125,17 @@ function renderQuestionList() {
     list.innerHTML = '<div class="empty-state">まだ問題が登録されていません</div>';
     return;
   }
-  list.innerHTML = storage.questions.map((q, i) => `
+  list.innerHTML = storage.questions.map((q, i) => {
+    const correct = q.correct || 0;
+    const attempted = q.attempted || 0;
+    return `
     <div class="question-item">
       <span class="question-item-text">${q.question}</span>
       <span class="question-item-answer">${q.answer}</span>
+      <span class="q-stats">${correct}/${attempted}</span>
       <button class="btn btn-sm btn-danger" onclick="deleteQuestion(${i})">削除</button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function deleteQuestion(i) {
