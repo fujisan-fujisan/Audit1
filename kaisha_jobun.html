@@ -892,6 +892,61 @@
     color: var(--text-secondary);
   }
 
+  .session-search { margin-top: 20px; }
+
+  .session-search-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 15px;
+    font-family: 'Noto Sans JP', sans-serif;
+    color: var(--text-primary);
+    background: var(--surface);
+    outline: none;
+    margin-bottom: 10px;
+    -moz-appearance: textfield;
+  }
+  .session-search-input::-webkit-outer-spin-button,
+  .session-search-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .session-search-input:focus { border-color: var(--accent); }
+
+  .session-article-display {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+
+  .session-article-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .session-para {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    line-height: 1.85;
+    color: var(--text-primary);
+  }
+
+  .session-para-num {
+    color: var(--text-muted);
+    font-size: 11px;
+    min-width: 20px;
+    padding-top: 3px;
+    flex-shrink: 0;
+  }
+
   .tv-back-bar {
     display: flex;
     align-items: center;
@@ -1171,6 +1226,11 @@
         </div>
       </div>
       <div id="trainingEmpty" class="empty-state" style="display:none"></div>
+      <div class="session-search">
+        <input type="number" class="session-search-input" id="sessionArticleInput"
+          placeholder="条番号を入力（例：300）" oninput="onSessionArticleSearch()" min="1">
+        <div id="sessionArticleDisplay" class="session-article-display" style="display:none"></div>
+      </div>
     </div>
 
     <!-- ③ 問題登録画面 -->
@@ -1310,8 +1370,31 @@ function renderTrainingHome() {
 function endSession() {
   trainingQueue = [];
   currentIdx = 0;
+  document.getElementById('sessionArticleInput').value = '';
+  document.getElementById('sessionArticleDisplay').style.display = 'none';
   switchTrainingView('home');
   renderTrainingHome();
+}
+
+function onSessionArticleSearch() {
+  const val = document.getElementById('sessionArticleInput').value.trim();
+  const display = document.getElementById('sessionArticleDisplay');
+  const num = parseInt(val);
+  if (!num || !LAW_DATA[num]) {
+    display.style.display = 'none';
+    return;
+  }
+  const article = LAW_DATA[num];
+  const storage = getStorage();
+  const parasHtml = article.paragraphs.map(p => {
+    const key = `${num}-${p.num}`;
+    const text = (storage.edits && storage.edits[key]) ? storage.edits[key] : p.text;
+    const pNum = article.paragraphs.length > 1 ? `<span class="session-para-num">${p.num}</span>` : '';
+    return `<div class="session-para">${pNum}<span>${text}</span></div>`;
+  }).join('');
+  const caption = article.caption ? `　${article.caption}` : '';
+  display.innerHTML = `<div class="session-article-title">第${num}条${caption}</div>${parasHtml}`;
+  display.style.display = 'block';
 }
 
 function updateSessionScore() {
