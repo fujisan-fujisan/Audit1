@@ -2243,6 +2243,8 @@ function jumpToArticle(articleNum, paragraphNum, fromArticleNum, fromLabel) {
         if (ch.start <= baseNum && baseNum <= ch.end) {
           currentPartIdx = pi;
           currentChapterIdx = ci;
+          // 検索ワードが残っていると章切替が無視されるのでクリア
+          document.getElementById('searchInput').value = '';
           updateNavButton();
           renderArticles();
           found = true;
