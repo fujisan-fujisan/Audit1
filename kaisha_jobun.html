@@ -970,6 +970,35 @@
     text-align: right;
   }
 
+  .manage-part-header {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    padding: 16px 4px 6px;
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: 4px;
+  }
+
+  .manage-chapter-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .manage-chapter-item:hover { border-color: var(--accent); background: var(--accent-light); }
+
+  .manage-chapter-label { font-size: 14px; color: var(--text-primary); }
+  .manage-chapter-count { font-size: 12px; color: var(--accent); font-weight: 500; }
+
+  .manage-edit-form { width: 100%; }
+
   /* ===== 共通ボタン ===== */
   .btn {
     padding: 8px 16px;
@@ -1271,10 +1300,10 @@
     <!-- ④ 問題管理画面 -->
     <div id="tv-manage" class="training-view">
       <div class="tv-back-bar">
-        <button class="btn btn-sm" onclick="switchTrainingView('home')">← 戻る</button>
-        <span class="tv-back-title">問題管理</span>
+        <button class="btn btn-sm" onclick="manageBack()">← 戻る</button>
+        <span class="tv-back-title" id="manageTitle">問題管理</span>
       </div>
-      <div id="questionList"></div>
+      <div id="manageBody"></div>
     </div>
   </div>
 
@@ -1350,7 +1379,7 @@ function switchTab(name) {
 function switchTrainingView(name) {
   document.querySelectorAll('.training-view').forEach(v => v.classList.remove('active'));
   document.getElementById('tv-' + name).classList.add('active');
-  if (name === 'manage') renderQuestionList();
+  if (name === 'manage') { manageState = 'list'; renderManageView(); }
 }
 
 function renderTrainingHome() {
@@ -2274,8 +2303,139 @@ function addQuestion() {
   document.getElementById('regArticleInput').value = '';
   document.getElementById('regQuestion').value = '';
   document.getElementById('claudeHintBox').style.display = 'none';
-  renderQuestionList();
   showToast('問題を登録しました');
+}
+
+let manageState = 'list';
+let manageSelectedPartIdx = null;
+let manageSelectedChapterIdx = null;
+
+function renderManageView() {
+  if (manageState === 'list') renderManageChapterList();
+  else renderManageQuestionList();
+}
+
+function manageBack() {
+  if (manageState === 'detail') {
+    manageState = 'list';
+    renderManageChapterList();
+  } else {
+    switchTrainingView('home');
+  }
+}
+
+function renderManageChapterList() {
+  document.getElementById('manageTitle').textContent = '問題管理';
+  const storage = getStorage();
+  const body = document.getElementById('manageBody');
+  if (!storage.questions.length) {
+    body.innerHTML = '<div class="empty-state">まだ問題が登録されていません</div>';
+    return;
+  }
+  const counts = {};
+  for (const q of storage.questions) {
+    const key = (q.partIdx !== null && q.partIdx !== undefined) ? `${q.partIdx}-${q.chapterIdx}` : 'other';
+    counts[key] = (counts[key] || 0) + 1;
+  }
+  let html = `<div class="manage-chapter-item" onclick="openManageChapter(null,null)">
+    <span class="manage-chapter-label">全問題</span>
+    <span class="manage-chapter-count">${storage.questions.length}問</span>
+  </div>`;
+  for (let pi = 0; pi < STRUCTURE.parts.length; pi++) {
+    const part = STRUCTURE.parts[pi];
+    const partHasQ = part.chapters.some((ch, ci) => counts[`${pi}-${ci}`] > 0);
+    if (!partHasQ) continue;
+    html += `<div class="manage-part-header">${part.label}</div>`;
+    for (let ci = 0; ci < part.chapters.length; ci++) {
+      const count = counts[`${pi}-${ci}`] || 0;
+      if (!count) continue;
+      html += `<div class="manage-chapter-item" onclick="openManageChapter(${pi},${ci})">
+        <span class="manage-chapter-label">${part.chapters[ci].label}</span>
+        <span class="manage-chapter-count">${count}問</span>
+      </div>`;
+    }
+  }
+  body.innerHTML = html;
+}
+
+function openManageChapter(pi, ci) {
+  manageSelectedPartIdx = pi;
+  manageSelectedChapterIdx = ci;
+  manageState = 'detail';
+  renderManageQuestionList();
+}
+
+function renderManageQuestionList() {
+  const storage = getStorage();
+  const body = document.getElementById('manageBody');
+  let filtered;
+  let title;
+  if (manageSelectedPartIdx === null) {
+    filtered = storage.questions.map((q, i) => ({ q, i }));
+    title = '全問題';
+  } else {
+    const ch = STRUCTURE.parts[manageSelectedPartIdx].chapters[manageSelectedChapterIdx];
+    title = ch.label;
+    filtered = storage.questions.map((q, i) => ({ q, i })).filter(({ q }) =>
+      q.partIdx === manageSelectedPartIdx && q.chapterIdx === manageSelectedChapterIdx
+    );
+  }
+  document.getElementById('manageTitle').textContent = title;
+  if (!filtered.length) {
+    body.innerHTML = '<div class="empty-state">この章に登録された問題がありません</div>';
+    return;
+  }
+  body.innerHTML = filtered.map(({ q, i }) => {
+    const correct = q.correct || 0;
+    const attempted = q.attempted || 0;
+    return `<div class="question-item" id="qitem-${i}">
+      <span class="question-item-text">${q.question}</span>
+      <span class="question-item-answer">${q.answer}</span>
+      <span class="q-stats">${correct}/${attempted}</span>
+      <button class="btn btn-sm" onclick="editQuestion(${i})">編集</button>
+      <button class="btn btn-sm btn-danger" onclick="deleteQuestion(${i})">削除</button>
+    </div>`;
+  }).join('');
+}
+
+function editQuestion(i) {
+  const storage = getStorage();
+  const q = storage.questions[i];
+  const item = document.getElementById(`qitem-${i}`);
+  item.innerHTML = `<div class="manage-edit-form">
+    <div class="reg-row">
+      <span class="reg-label">対象条文</span>
+      <input class="reg-input" id="editAnswer-${i}" value="${q.answer}" style="flex:1;max-width:200px">
+    </div>
+    <div class="reg-row">
+      <span class="reg-label">要約文</span>
+      <textarea class="reg-input" id="editQuestion-${i}">${q.question}</textarea>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">
+      <button class="btn btn-sm" onclick="cancelEditQuestion(${i})">キャンセル</button>
+      <button class="btn btn-sm btn-primary" onclick="saveEditQuestion(${i})">保存</button>
+    </div>
+  </div>`;
+}
+
+function saveEditQuestion(i) {
+  const newAnswer = document.getElementById(`editAnswer-${i}`).value.trim();
+  const newQuestion = document.getElementById(`editQuestion-${i}`).value.trim();
+  if (!newAnswer || !newQuestion) { showToast('条文と要約文を入力してください'); return; }
+  const storage = getStorage();
+  const match = newAnswer.match(/^(\d+)条/);
+  const chapterInfo = match ? getChapterInfo(parseInt(match[1])) : null;
+  storage.questions[i].answer = newAnswer;
+  storage.questions[i].question = newQuestion;
+  storage.questions[i].partIdx = chapterInfo ? chapterInfo.partIdx : null;
+  storage.questions[i].chapterIdx = chapterInfo ? chapterInfo.chapterIdx : null;
+  saveStorage(storage);
+  renderManageQuestionList();
+  showToast('保存しました');
+}
+
+function cancelEditQuestion(i) {
+  renderManageQuestionList();
 }
 
 function renderQuestionList() {
@@ -2302,8 +2462,8 @@ function deleteQuestion(i) {
   const storage = getStorage();
   storage.questions.splice(i, 1);
   saveStorage(storage);
-  renderQuestionList();
   trainingQueue = [];
+  renderManageView();
   showToast('問題を削除しました');
 }
 
