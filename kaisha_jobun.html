@@ -2301,6 +2301,7 @@ function jumpBack(articleNum, pNum) {
           if (ch.start <= fromArticle && fromArticle <= ch.end) {
             currentPartIdx = pi;
             currentChapterIdx = ci;
+            document.getElementById('searchInput').value = '';
             updateNavButton();
             renderArticles();
             break;
