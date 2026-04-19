@@ -1542,6 +1542,11 @@ function escapeHtml(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+function stripItemNum(num, text) {
+  const escaped = num.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return text.replace(new RegExp('^' + escaped + '[\\s\u3000]*'), '');
+}
+
 // 文単位diff：原文と編集済みを比較してハイライトHTMLを返す
 // 原文の各文について、編集済みに残っているか・変わっているか・消えているかを判定
 // サジェストをfixed配置で画面座標に基づいて表示
@@ -1811,12 +1816,12 @@ function buildParagraph(articleNum, p, storage) {
             ${i.subitems.map(s => {
               const sub2Html = s.subitems && s.subitems.length ? `
                 <div class="sub2items-list">
-                  ${s.subitems.map(s2 => `<div class="sub2item-row"><span class="subitem-num">${s2.num}</span><span>${s2.text}</span></div>`).join('')}
+                  ${s.subitems.map(s2 => `<div class="sub2item-row"><span class="subitem-num">${s2.num}</span><span>${stripItemNum(s2.num, s2.text)}</span></div>`).join('')}
                 </div>` : '';
-              return `<div class="subitem-row"><span class="subitem-num">${s.num}</span><span>${s.text}</span></div>${sub2Html}`;
+              return `<div class="subitem-row"><span class="subitem-num">${s.num}</span><span>${stripItemNum(s.num, s.text)}</span></div>${sub2Html}`;
             }).join('')}
           </div>` : '';
-        return `<div class="item-row"><span class="item-num">${i.num}</span><span class="item-text">${i.text}</span></div>${subitemsHtml}`;
+        return `<div class="item-row"><span class="item-num">${i.num}</span><span class="item-text">${stripItemNum(i.num, i.text)}</span></div>${subitemsHtml}`;
       }).join('')}
     </div>` : '';
 
