@@ -2168,6 +2168,29 @@ function addRelated(storageKey) {
     showToast('既に追加済みです'); return;
   }
   storage.related[storageKey].push(ref);
+
+  // 項まで指定されている場合、逆向きリンクも自動追加
+  if (ref.paragraph != null) {
+    const { articleKey: srcKey, pNum: srcPNum } = parseStorageKey(storageKey);
+    const srcArticle = LAW_DATA[srcKey];
+    if (srcArticle) {
+      const srcDisplayNum = keyToDisplay(srcKey);
+      const reverseLabel = `${srcDisplayNum}条${srcPNum}項`;
+      const reverseRef = {
+        article: srcArticle.article,
+        numStr: srcKey,
+        paragraph: srcPNum,
+        item: null,
+        label: reverseLabel
+      };
+      const reverseKey = `${ref.numStr}-${ref.paragraph}`;
+      if (!storage.related[reverseKey]) storage.related[reverseKey] = [];
+      if (!storage.related[reverseKey].find(r => r.label === reverseLabel)) {
+        storage.related[reverseKey].push(reverseRef);
+      }
+    }
+  }
+
   saveStorage(storage);
   input.value = '';
 
