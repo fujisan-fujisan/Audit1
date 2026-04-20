@@ -13,195 +13,1354 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Maru+Gothic:wght@700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:#f9f9f8;--surface:#fff;--border:#e8e8e5;--border-strong:#d0d0cb;
-  --text:#111;--text-2:#666;--text-3:#aaa;
-  --o-color:#1a7a4a;--o-bg:#edf7f2;--x-color:#c0392b;--x-bg:#fdf0ee;
-  --A-color:#c0392b;--A-bg:#fdf0ee;--B-color:#7c5c00;--B-bg:#fdf4e3;
-  --C-color:#1a7a4a;--C-bg:#edf7f2;--radius:10px;--radius-sm:6px;
+  --bg:#f9f9f8;
+  --surface:#fff;
+  --border:#e8e8e5;
+  --border-strong:#d0d0cb;
+  --text:#111;
+  --text-2:#666;
+  --text-3:#aaa;
+  --o-color:#1a7a4a;
+  --o-bg:#edf7f2;
+  --x-color:#c0392b;
+  --x-bg:#fdf0ee;
+  --A-color:#c0392b;
+  --A-bg:#fdf0ee;
+  --B-color:#7c5c00;
+  --B-bg:#fdf4e3;
+  --C-color:#1a7a4a;
+  --C-bg:#edf7f2;
+  --radius:10px;
+  --radius-sm:6px;
 }
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:100px;font-size:14px;line-height:1.5}
-.header{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border)}
-.header-top{padding:14px 16px 12px}
-.header-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.app-title{font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--text-3);text-transform:uppercase}
-.header-actions{display:flex;gap:6px}
-.btn-icon{padding:5px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);background:transparent;color:var(--text-2);font-size:11px;font-family:'Noto Sans JP',sans-serif;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
-.btn-icon:hover,.btn-icon.active{background:var(--text);border-color:var(--text);color:#fff}
-.progress-row{display:flex;align-items:baseline;gap:8px;margin-bottom:7px}
-.prog-num{font-family:'DM Mono',monospace;font-size:28px;font-weight:500;color:var(--text);line-height:1}
-.prog-label{font-size:11px;color:var(--text-3)}
-.prog-track{height:3px;background:var(--border);border-radius:999px;overflow:hidden}
-.prog-fill{height:100%;background:var(--text);border-radius:999px;transition:width .4s ease}
-.tabs{display:flex;overflow-x:auto;scrollbar-width:none;border-top:1px solid var(--border);padding:0 4px}
-.tabs::-webkit-scrollbar{display:none}
-.tab{padding:10px 14px;font-size:12px;font-weight:700;font-family:'Noto Sans JP',sans-serif;background:transparent;border:none;cursor:pointer;color:var(--text-3);border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s}
-.tab.active{color:var(--text);border-bottom-color:var(--text)}
-.round-info-bar{display:flex;align-items:center;padding:6px 16px 4px;border-top:1px solid var(--border);overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap;gap:0}
-.round-info-bar::-webkit-scrollbar{display:none}
-.ri-item{display:flex;flex-direction:column;align-items:flex-start;padding:4px 12px 4px 0;min-width:0;flex-shrink:0}
-.ri-item+.ri-item{border-left:1px solid var(--border);padding-left:12px}
-.ri-lbl{font-size:9px;font-weight:700;color:var(--text-3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:1px}
-.ri-val{font-size:13px;font-weight:700;color:var(--text);font-family:'DM Mono',monospace;white-space:nowrap}
-.ri-val.warn{color:var(--x-color)}.ri-val.ok{color:var(--o-color)}
-.ri-deadline-btn{background:none;border:none;padding:0;cursor:pointer;font-size:13px;font-weight:700;color:var(--text);font-family:'DM Mono',monospace;text-decoration:underline dotted;text-underline-offset:3px}
-.view-tabs{display:flex;border-top:1px solid var(--border);background:var(--surface)}
-.vtab{flex:1;padding:9px 8px;font-size:12px;font-weight:700;font-family:'Noto Sans JP',sans-serif;background:transparent;border:none;cursor:pointer;color:var(--text-3);border-bottom:2px solid transparent;transition:all .15s;letter-spacing:.02em}
-.vtab.active{color:var(--text);border-bottom-color:var(--text)}
-.content{padding:12px 14px;max-width:700px;margin:0 auto}
-.ch-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden}
-.ch-card.hidden{display:none}
-.ch-header{padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;user-select:none}
-.ch-header:active{background:var(--bg)}
-.ch-chevron{font-size:9px;color:var(--text-3);transition:transform .2s;flex-shrink:0;width:12px}
-.ch-card.open .ch-chevron{transform:rotate(90deg)}
-.ch-info{flex:1;min-width:0}
-.ch-name{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ch-sub{font-size:10px;color:var(--text-3);margin-top:1px;font-family:'DM Mono',monospace}
-.ch-badge{font-size:10px;font-family:'DM Mono',monospace;font-weight:500;padding:3px 8px;border-radius:var(--radius-sm);background:var(--bg);border:1px solid var(--border);color:var(--text-2);flex-shrink:0;transition:all .2s}
-.ch-badge.done{background:var(--o-bg);border-color:var(--o-color);color:var(--o-color)}
-.items-wrap{display:none;border-top:1px solid var(--border)}
-.ch-card.open .items-wrap{display:block}
-.item-row{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
-.item-row:last-child{border-bottom:none}
-.item-row.hidden{display:none}
-.item-top{display:flex;align-items:flex-start;gap:7px}
-.item-name{flex:1;font-size:12px;line-height:1.5;color:var(--text)}
-.imp-badge{font-size:9px;font-weight:700;font-family:'DM Mono',monospace;padding:2px 5px;border-radius:4px;flex-shrink:0;margin-top:2px}
-.imp-A{background:var(--A-bg);color:var(--A-color)}
-.imp-B{background:var(--B-bg);color:var(--B-color)}
-.imp-C{background:var(--C-bg);color:var(--C-color)}
-.u-btns{display:flex;gap:3px;flex-shrink:0}
-.ub{min-width:34px;height:32px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);background:var(--bg);font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;color:var(--text-3);font-family:'Noto Sans JP',sans-serif;white-space:nowrap;padding:0 4px}
-.ub:active{transform:scale(.88)}
-.ub.sel-oo{background:#e8f7f0;border-color:#1a7a4a;color:#1a7a4a}
-.ub.sel-o{background:var(--o-bg);border-color:var(--o-color);color:var(--o-color)}
-.ub.sel-n{background:#f0f0ee;border-color:#999;color:#555}
-.ub.sel-x{background:var(--x-bg);border-color:var(--x-color);color:var(--x-color)}
-.ub.sel-xx{background:#fde;border-color:#900;color:#900;font-weight:700}
-.review-eval-btns{display:flex;gap:3px;flex-shrink:0;align-items:center}
-.ub-rev{width:34px;height:26px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);background:var(--bg);font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;color:var(--text-3);font-family:'Noto Sans JP',sans-serif}
-.ub-rev:active{transform:scale(.88)}
-.ub-rev.sel-o{background:var(--o-bg);border-color:var(--o-color);color:var(--o-color)}
-.ub-rev.sel-x{background:var(--x-bg);border-color:var(--x-color);color:var(--x-color)}
-.item-history{display:flex;gap:4px;align-items:center}
-.hist-dot-wrap{display:flex;align-items:center;gap:2px}
-.hist-label{font-size:9px;color:var(--text-3);font-family:'DM Mono',monospace;min-width:20px}
-.hist-dot{min-width:22px;height:18px;border-radius:4px;font-size:9px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);background:var(--bg);color:var(--text-3);font-family:'Noto Sans JP',sans-serif;font-weight:700;padding:0 2px}
-.hist-dot.dot-oo{background:#e8f7f0;border-color:#1a7a4a;color:#1a7a4a}
-.hist-dot.dot-o{background:var(--o-bg);border-color:var(--o-color);color:var(--o-color)}
-.hist-dot.dot-n{background:#f0f0ee;border-color:#999;color:#555}
-.hist-dot.dot-x{background:var(--x-bg);border-color:var(--x-color);color:var(--x-color)}
-.hist-dot.dot-xx{background:#fde;border-color:#900;color:#900}
-.urgency-wrap{display:flex;align-items:center;gap:7px}
-.urgency-score{font-size:11px;font-weight:700;font-family:'DM Mono',monospace;min-width:32px;flex-shrink:0}
-.urgency-track{flex:1;height:5px;background:var(--border);border-radius:999px;overflow:hidden}
-.urgency-fill{height:100%;border-radius:999px;transition:width .4s ease,background .4s ease}
+
+* {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  -webkit-tap-highlight-color:transparent
+}
+
+body {
+  font-family:'Noto Sans JP',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  padding-bottom:100px;
+  font-size:14px;
+  line-height:1.5
+}
+
+.header {
+  position:sticky;
+  top:0;
+  z-index:100;
+  background:var(--surface);
+  border-bottom:1px solid var(--border)
+}
+
+.header-top {
+  padding:14px 16px 12px
+}
+
+.header-meta {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px
+}
+
+.app-title {
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.12em;
+  color:var(--text-3);
+  text-transform:uppercase
+}
+
+.header-actions {
+  display:flex;
+  gap:6px
+}
+
+.btn-icon {
+  padding:5px 10px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border-strong);
+  background:transparent;
+  color:var(--text-2);
+  font-size:11px;
+  font-family:'Noto Sans JP',sans-serif;
+  font-weight:500;
+  cursor:pointer;
+  transition:all .15s;
+  white-space:nowrap
+}
+
+.btn-icon:hover,.btn-icon.active {
+  background:var(--text);
+  border-color:var(--text);
+  color:#fff
+}
+
+.progress-row {
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+  margin-bottom:7px
+}
+
+.prog-num {
+  font-family:'DM Mono',monospace;
+  font-size:28px;
+  font-weight:500;
+  color:var(--text);
+  line-height:1
+}
+
+.prog-label {
+  font-size:11px;
+  color:var(--text-3)
+}
+
+.prog-track {
+  height:3px;
+  background:var(--border);
+  border-radius:999px;
+  overflow:hidden
+}
+
+.prog-fill {
+  height:100%;
+  background:var(--text);
+  border-radius:999px;
+  transition:width .4s ease
+}
+
+.tabs {
+  display:flex;
+  overflow-x:auto;
+  scrollbar-width:none;
+  border-top:1px solid var(--border);
+  padding:0 4px
+}
+
+.tabs::-webkit-scrollbar {
+  display:none
+}
+
+.tab {
+  padding:10px 14px;
+  font-size:12px;
+  font-weight:700;
+  font-family:'Noto Sans JP',sans-serif;
+  background:transparent;
+  border:none;
+  cursor:pointer;
+  color:var(--text-3);
+  border-bottom:2px solid transparent;
+  white-space:nowrap;
+  transition:all .15s
+}
+
+.tab.active {
+  color:var(--text);
+  border-bottom-color:var(--text)
+}
+
+.round-info-bar {
+  display:flex;
+  align-items:center;
+  padding:6px 16px 4px;
+  border-top:1px solid var(--border);
+  overflow-x:auto;
+  scrollbar-width:none;
+  flex-wrap:nowrap;
+  gap:0
+}
+
+.round-info-bar::-webkit-scrollbar {
+  display:none
+}
+
+.ri-item {
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  padding:4px 12px 4px 0;
+  min-width:0;
+  flex-shrink:0
+}
+
+.ri-item+.ri-item {
+  border-left:1px solid var(--border);
+  padding-left:12px
+}
+
+.ri-lbl {
+  font-size:9px;
+  font-weight:700;
+  color:var(--text-3);
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  margin-bottom:1px
+}
+
+.ri-val {
+  font-size:13px;
+  font-weight:700;
+  color:var(--text);
+  font-family:'DM Mono',monospace;
+  white-space:nowrap
+}
+
+.ri-val.warn {
+  color:var(--x-color)
+}
+
+.ri-val.ok {
+  color:var(--o-color)
+}
+
+.ri-deadline-btn {
+  background:none;
+  border:none;
+  padding:0;
+  cursor:pointer;
+  font-size:13px;
+  font-weight:700;
+  color:var(--text);
+  font-family:'DM Mono',monospace;
+  text-decoration:underline dotted;
+  text-underline-offset:3px
+}
+
+.view-tabs {
+  display:flex;
+  border-top:1px solid var(--border);
+  background:var(--surface)
+}
+
+.vtab {
+  flex:1;
+  padding:9px 8px;
+  font-size:12px;
+  font-weight:700;
+  font-family:'Noto Sans JP',sans-serif;
+  background:transparent;
+  border:none;
+  cursor:pointer;
+  color:var(--text-3);
+  border-bottom:2px solid transparent;
+  transition:all .15s;
+  letter-spacing:.02em
+}
+
+.vtab.active {
+  color:var(--text);
+  border-bottom-color:var(--text)
+}
+
+.content {
+  padding:12px 14px;
+  max-width:700px;
+  margin:0 auto
+}
+
+.ch-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  margin-bottom:8px;
+  overflow:hidden
+}
+
+.ch-card.hidden {
+  display:none
+}
+
+.ch-header {
+  padding:12px 14px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  user-select:none
+}
+
+.ch-header:active {
+  background:var(--bg)
+}
+
+.ch-chevron {
+  font-size:9px;
+  color:var(--text-3);
+  transition:transform .2s;
+  flex-shrink:0;
+  width:12px
+}
+
+.ch-card.open .ch-chevron {
+  transform:rotate(90deg)
+}
+
+.ch-info {
+  flex:1;
+  min-width:0
+}
+
+.ch-name {
+  font-size:13px;
+  font-weight:700;
+  color:var(--text);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis
+}
+
+.ch-sub {
+  font-size:10px;
+  color:var(--text-3);
+  margin-top:1px;
+  font-family:'DM Mono',monospace
+}
+
+.ch-badge {
+  font-size:10px;
+  font-family:'DM Mono',monospace;
+  font-weight:500;
+  padding:3px 8px;
+  border-radius:var(--radius-sm);
+  background:var(--bg);
+  border:1px solid var(--border);
+  color:var(--text-2);
+  flex-shrink:0;
+  transition:all .2s
+}
+
+.ch-badge.done {
+  background:var(--o-bg);
+  border-color:var(--o-color);
+  color:var(--o-color)
+}
+
+.items-wrap {
+  display:none;
+  border-top:1px solid var(--border)
+}
+
+.ch-card.open .items-wrap {
+  display:block
+}
+
+.item-row {
+  padding:10px 14px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  gap:6px
+}
+
+.item-row:last-child {
+  border-bottom:none
+}
+
+.item-row.hidden {
+  display:none
+}
+
+.item-top {
+  display:flex;
+  align-items:flex-start;
+  gap:7px
+}
+
+.item-name {
+  flex:1;
+  font-size:12px;
+  line-height:1.5;
+  color:var(--text)
+}
+
+.imp-badge {
+  font-size:9px;
+  font-weight:700;
+  font-family:'DM Mono',monospace;
+  padding:2px 5px;
+  border-radius:4px;
+  flex-shrink:0;
+  margin-top:2px
+}
+
+.imp-A {
+  background:var(--A-bg);
+  color:var(--A-color)
+}
+
+.imp-B {
+  background:var(--B-bg);
+  color:var(--B-color)
+}
+
+.imp-C {
+  background:var(--C-bg);
+  color:var(--C-color)
+}
+
+.u-btns {
+  display:flex;
+  gap:3px;
+  flex-shrink:0
+}
+
+.ub {
+  min-width:34px;
+  height:32px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border-strong);
+  background:var(--bg);
+  font-size:11px;
+  font-weight:700;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all .12s;
+  color:var(--text-3);
+  font-family:'Noto Sans JP',sans-serif;
+  white-space:nowrap;
+  padding:0 4px
+}
+
+.ub:active {
+  transform:scale(.88)
+}
+
+.ub.sel-oo {
+  background:#e8f7f0;
+  border-color:#1a7a4a;
+  color:#1a7a4a
+}
+
+.ub.sel-o {
+  background:var(--o-bg);
+  border-color:var(--o-color);
+  color:var(--o-color)
+}
+
+.ub.sel-n {
+  background:#f0f0ee;
+  border-color:#999;
+  color:#555
+}
+
+.ub.sel-x {
+  background:var(--x-bg);
+  border-color:var(--x-color);
+  color:var(--x-color)
+}
+
+.ub.sel-xx {
+  background:#fde;
+  border-color:#900;
+  color:#900;
+  font-weight:700
+}
+
+.review-eval-btns {
+  display:flex;
+  gap:3px;
+  flex-shrink:0;
+  align-items:center
+}
+
+.ub-rev {
+  width:34px;
+  height:26px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border-strong);
+  background:var(--bg);
+  font-size:12px;
+  font-weight:700;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all .12s;
+  color:var(--text-3);
+  font-family:'Noto Sans JP',sans-serif
+}
+
+.ub-rev:active {
+  transform:scale(.88)
+}
+
+.ub-rev.sel-o {
+  background:var(--o-bg);
+  border-color:var(--o-color);
+  color:var(--o-color)
+}
+
+.ub-rev.sel-x {
+  background:var(--x-bg);
+  border-color:var(--x-color);
+  color:var(--x-color)
+}
+
+.item-history {
+  display:flex;
+  gap:4px;
+  align-items:center
+}
+
+.hist-dot-wrap {
+  display:flex;
+  align-items:center;
+  gap:2px
+}
+
+.hist-label {
+  font-size:9px;
+  color:var(--text-3);
+  font-family:'DM Mono',monospace;
+  min-width:20px
+}
+
+.hist-dot {
+  min-width:22px;
+  height:18px;
+  border-radius:4px;
+  font-size:9px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid var(--border);
+  background:var(--bg);
+  color:var(--text-3);
+  font-family:'Noto Sans JP',sans-serif;
+  font-weight:700;
+  padding:0 2px
+}
+
+.hist-dot.dot-oo {
+  background:#e8f7f0;
+  border-color:#1a7a4a;
+  color:#1a7a4a
+}
+
+.hist-dot.dot-o {
+  background:var(--o-bg);
+  border-color:var(--o-color);
+  color:var(--o-color)
+}
+
+.hist-dot.dot-n {
+  background:#f0f0ee;
+  border-color:#999;
+  color:#555
+}
+
+.hist-dot.dot-x {
+  background:var(--x-bg);
+  border-color:var(--x-color);
+  color:var(--x-color)
+}
+
+.hist-dot.dot-xx {
+  background:#fde;
+  border-color:#900;
+  color:#900
+}
+
+.urgency-wrap {
+  display:flex;
+  align-items:center;
+  gap:7px
+}
+
+.urgency-score {
+  font-size:11px;
+  font-weight:700;
+  font-family:'DM Mono',monospace;
+  min-width:32px;
+  flex-shrink:0
+}
+
+.urgency-track {
+  flex:1;
+  height:5px;
+  background:var(--border);
+  border-radius:999px;
+  overflow:hidden
+}
+
+.urgency-fill {
+  height:100%;
+  border-radius:999px;
+  transition:width .4s ease,background .4s ease
+}
 
 /* ── キーワード ── */
-.kw-reveal-btn{display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--text-3);background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:5px 0;width:100%;cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:all .15s}
-.kw-reveal-btn.active{color:var(--text-2);border-color:var(--border-strong);background:var(--bg)}
-.kw-section{overflow:hidden;max-height:0;transition:max-height .28s ease,opacity .2s ease;opacity:0}
-.kw-section.kw-open{max-height:800px;opacity:1}
-.kw-inner{display:flex;flex-direction:column;gap:5px;padding-top:2px}
-.kw-list{display:flex;flex-direction:column;gap:3px}
-.kw-row{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:5px 8px;transition:border-color .15s,background .15s}
-.kw-row.kw-passed{border-color:var(--o-color);background:var(--o-bg)}
-.kw-row.kw-failed{border-color:var(--x-color);background:var(--x-bg)}
-.kw-text{flex:1;font-size:11px;font-weight:700;color:var(--text);font-family:'Noto Sans JP',sans-serif;line-height:1.4}
-.kw-eval-btns{display:flex;gap:3px;flex-shrink:0}
-.kw-btn{width:28px;height:24px;border-radius:5px;border:1px solid var(--border-strong);background:var(--surface);font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;color:var(--text-3)}
-.kw-btn:active{transform:scale(.85)}
-.kw-btn.kw-sel-o{background:var(--o-bg);border-color:var(--o-color);color:var(--o-color)}
-.kw-btn.kw-sel-x{background:var(--x-bg);border-color:var(--x-color);color:var(--x-color)}
-.kw-del{width:20px;height:20px;border-radius:4px;border:none;background:transparent;color:var(--text-3);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;transition:color .12s}
-.kw-del:hover{color:var(--x-color)}
-.kw-footer{display:flex;align-items:center;justify-content:space-between}
-.kw-stats{font-size:9px;font-family:'DM Mono',monospace;color:var(--text-3)}
-.kw-stats .ks-ok{color:var(--o-color);font-weight:700}
-.kw-stats .ks-ng{color:var(--x-color);font-weight:700}
-.kw-add-open-btn{font-size:10px;font-weight:700;color:var(--text-3);background:none;border:none;cursor:pointer;padding:0;font-family:'Noto Sans JP',sans-serif;transition:color .15s}
-.kw-add-open-btn:hover{color:var(--text-2)}
-.kw-add-row{display:flex;gap:6px;align-items:center}
-.kw-input{flex:1;font-size:16px;background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:5px 8px;color:var(--text);font-family:'Noto Sans JP',sans-serif;outline:none;transition:border-color .15s;touch-action:manipulation}
-.kw-input:focus{border-color:var(--text)}
-.kw-input::placeholder{color:var(--text-3)}
-.kw-add-confirm-btn{padding:4px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);background:var(--surface);color:var(--text-2);font-size:11px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;white-space:nowrap;transition:all .15s}
-.kw-add-confirm-btn:hover{border-color:var(--text);color:var(--text)}
-.kw-close-btn{font-size:11px;font-weight:700;color:var(--text-3);background:none;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;padding:5px 0;width:100%;font-family:'Noto Sans JP',sans-serif;transition:all .15s}
-.kw-close-btn:hover{color:var(--text-2);border-color:var(--border-strong)}
+.kw-reveal-btn {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  font-weight:500;
+  color:var(--text-3);
+  background:none;
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:5px 0;
+  width:100%;
+  cursor:pointer;
+  font-family:'Noto Sans JP',sans-serif;
+  transition:all .15s
+}
+
+.kw-reveal-btn.active {
+  color:var(--text-2);
+  border-color:var(--border-strong);
+  background:var(--bg)
+}
+
+.kw-section {
+  overflow:hidden;
+  max-height:0;
+  transition:max-height .28s ease,opacity .2s ease;
+  opacity:0
+}
+
+.kw-section.kw-open {
+  max-height:800px;
+  opacity:1
+}
+
+.kw-inner {
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  padding-top:2px
+}
+
+.kw-list {
+  display:flex;
+  flex-direction:column;
+  gap:3px
+}
+
+.kw-row {
+  display:flex;
+  align-items:center;
+  gap:6px;
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:5px 8px;
+  transition:border-color .15s,background .15s
+}
+
+.kw-row.kw-passed {
+  border-color:var(--o-color);
+  background:var(--o-bg)
+}
+
+.kw-row.kw-failed {
+  border-color:var(--x-color);
+  background:var(--x-bg)
+}
+
+.kw-text {
+  flex:1;
+  font-size:11px;
+  font-weight:700;
+  color:var(--text);
+  font-family:'Noto Sans JP',sans-serif;
+  line-height:1.4
+}
+
+.kw-eval-btns {
+  display:flex;
+  gap:3px;
+  flex-shrink:0
+}
+
+.kw-btn {
+  width:28px;
+  height:24px;
+  border-radius:5px;
+  border:1px solid var(--border-strong);
+  background:var(--surface);
+  font-size:11px;
+  font-weight:700;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all .12s;
+  color:var(--text-3)
+}
+
+.kw-btn:active {
+  transform:scale(.85)
+}
+
+.kw-btn.kw-sel-o {
+  background:var(--o-bg);
+  border-color:var(--o-color);
+  color:var(--o-color)
+}
+
+.kw-btn.kw-sel-x {
+  background:var(--x-bg);
+  border-color:var(--x-color);
+  color:var(--x-color)
+}
+
+.kw-del {
+  width:20px;
+  height:20px;
+  border-radius:4px;
+  border:none;
+  background:transparent;
+  color:var(--text-3);
+  font-size:13px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  padding:0;
+  transition:color .12s
+}
+
+.kw-del:hover {
+  color:var(--x-color)
+}
+
+.kw-footer {
+  display:flex;
+  align-items:center;
+  justify-content:space-between
+}
+
+.kw-stats {
+  font-size:9px;
+  font-family:'DM Mono',monospace;
+  color:var(--text-3)
+}
+
+.kw-stats .ks-ok {
+  color:var(--o-color);
+  font-weight:700
+}
+
+.kw-stats .ks-ng {
+  color:var(--x-color);
+  font-weight:700
+}
+
+.kw-add-open-btn {
+  font-size:10px;
+  font-weight:700;
+  color:var(--text-3);
+  background:none;
+  border:none;
+  cursor:pointer;
+  padding:0;
+  font-family:'Noto Sans JP',sans-serif;
+  transition:color .15s
+}
+
+.kw-add-open-btn:hover {
+  color:var(--text-2)
+}
+
+.kw-add-row {
+  display:flex;
+  gap:6px;
+  align-items:center
+}
+
+.kw-input {
+  flex:1;
+  font-size:16px;
+  background:var(--surface);
+  border:1px solid var(--border-strong);
+  border-radius:var(--radius-sm);
+  padding:5px 8px;
+  color:var(--text);
+  font-family:'Noto Sans JP',sans-serif;
+  outline:none;
+  transition:border-color .15s;
+  touch-action:manipulation
+}
+
+.kw-input:focus {
+  border-color:var(--text)
+}
+
+.kw-input::placeholder {
+  color:var(--text-3)
+}
+
+.kw-add-confirm-btn {
+  padding:4px 10px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border-strong);
+  background:var(--surface);
+  color:var(--text-2);
+  font-size:11px;
+  font-weight:700;
+  font-family:'Noto Sans JP',sans-serif;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:all .15s
+}
+
+.kw-add-confirm-btn:hover {
+  border-color:var(--text);
+  color:var(--text)
+}
+
+.kw-close-btn {
+  font-size:11px;
+  font-weight:700;
+  color:var(--text-3);
+  background:none;
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  padding:5px 0;
+  width:100%;
+  font-family:'Noto Sans JP',sans-serif;
+  transition:all .15s
+}
+
+.kw-close-btn:hover {
+  color:var(--text-2);
+  border-color:var(--border-strong)
+}
 
 /* ── キーワード評価ポップアップ ── */
-.kw-eval-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;align-items:flex-end;justify-content:center}
-.kw-eval-overlay.open{display:flex}
-.kw-eval-modal{background:var(--surface);border-radius:16px 16px 0 0;padding:20px 16px 44px;width:100%;max-width:700px;max-height:75vh;overflow-y:auto}
-.kw-eval-handle{width:32px;height:3px;background:var(--border-strong);border-radius:999px;margin:0 auto 14px}
-.kw-eval-title{font-size:11px;font-weight:700;color:var(--text-3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
-.kw-eval-subtitle{font-size:12px;color:var(--text);font-weight:700;margin-bottom:14px;line-height:1.4}
-.kw-eval-list{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
-.kw-eval-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);transition:border-color .15s,background .15s}
-.kw-eval-row.ep{border-color:var(--o-color);background:var(--o-bg)}
-.kw-eval-row.ef{border-color:var(--x-color);background:var(--x-bg)}
-.kw-eval-word{flex:1;font-size:13px;font-weight:700;color:var(--text)}
-.kw-eval-btns2{display:flex;gap:4px;flex-shrink:0}
-.kw-ebtn{width:38px;height:32px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);background:var(--surface);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;color:var(--text-3)}
-.kw-ebtn:active{transform:scale(.88)}
-.kw-ebtn.ep{background:var(--o-bg);border-color:var(--o-color);color:var(--o-color)}
-.kw-ebtn.ef{background:var(--x-bg);border-color:var(--x-color);color:var(--x-color)}
-.kw-eval-done-btn{width:100%;padding:12px;border-radius:var(--radius-sm);border:none;background:var(--text);color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer}
+.kw-eval-overlay {
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.4);
+  z-index:300;
+  align-items:flex-end;
+  justify-content:center
+}
 
-.ch-footer{border-top:1px solid var(--border);background:var(--bg)}
-.ch-footer-row{padding:8px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.ch-stat{font-size:20px;font-weight:700;color:#1a3a6e;font-family:'Zen Maru Gothic',sans-serif;letter-spacing:.02em}
-.ch-stat-lbl{font-size:9px;font-weight:500;color:#7a8fa8;font-family:'Noto Sans JP',sans-serif;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:1px}
-.ch-record-btn{font-size:11px;padding:4px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);background:var(--surface);color:var(--text-2);cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:all .15s;white-space:nowrap}
-.ch-record-btn:hover{border-color:var(--text);color:var(--text)}
-.ch-record-form{display:none;padding:10px 14px 14px;border-top:1px solid var(--border);gap:8px;flex-direction:column}
-.ch-record-form.open{display:flex}
-.ch-record-form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.ch-record-form-lbl{font-size:10px;font-weight:700;color:var(--text-2);display:block;margin-bottom:3px}
-.ch-record-input{width:100%;background:var(--surface);border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:16px;padding:8px 10px;outline:none;-webkit-appearance:none;appearance:none;touch-action:manipulation}
-.ch-record-input:focus{border-color:var(--text)}
-.ch-record-form-btns{display:flex;gap:6px}
-.ch-record-save{flex:1;padding:10px;border-radius:var(--radius-sm);border:none;background:var(--text);color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer}
-.ch-record-cancel{padding:10px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--border-strong);background:transparent;color:var(--text-2);font-family:'Noto Sans JP',sans-serif;font-size:13px;cursor:pointer}
-.next-round-wrap{padding:14px;text-align:center;max-width:700px;margin:0 auto}
-.next-round-btn{background:var(--text);color:#fff;border:none;border-radius:var(--radius);padding:13px 28px;font-size:13px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;letter-spacing:.04em}
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:200;align-items:flex-end;justify-content:center}
-.overlay.open{display:flex}
-.scope-modal{background:var(--surface);border-radius:16px 16px 0 0;padding:20px 16px 44px;width:100%;max-width:700px;max-height:80vh;overflow-y:auto}
-.modal-handle{width:32px;height:3px;background:var(--border-strong);border-radius:999px;margin:0 auto 14px}
-.scope-options{display:flex;flex-direction:column;gap:8px;margin:14px 0}
-.scope-opt{padding:13px 14px;border-radius:var(--radius);border:1.5px solid var(--border-strong);background:var(--bg);font-size:14px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;text-align:left;transition:all .15s;color:var(--text)}
-.scope-opt:hover{border-color:var(--text)}
-.scope-opt.sel{background:var(--text);color:#fff;border-color:var(--text)}
-.scope-opt .scope-sub{font-size:11px;font-weight:400;color:inherit;opacity:.7;display:block;margin-top:2px}
-.form-lbl{font-size:11px;font-weight:700;color:var(--text-2);display:block;margin-bottom:4px}
+.kw-eval-overlay.open {
+  display:flex
+}
+
+.kw-eval-modal {
+  background:var(--surface);
+  border-radius:16px 16px 0 0;
+  padding:20px 16px 44px;
+  width:100%;
+  max-width:700px;
+  max-height:75vh;
+  overflow-y:auto
+}
+
+.kw-eval-handle {
+  width:32px;
+  height:3px;
+  background:var(--border-strong);
+  border-radius:999px;
+  margin:0 auto 14px
+}
+
+.kw-eval-title {
+  font-size:11px;
+  font-weight:700;
+  color:var(--text-3);
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  margin-bottom:4px
+}
+
+.kw-eval-subtitle {
+  font-size:12px;
+  color:var(--text);
+  font-weight:700;
+  margin-bottom:14px;
+  line-height:1.4
+}
+
+.kw-eval-list {
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  margin-bottom:16px
+}
+
+.kw-eval-row {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 10px;
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  background:var(--bg);
+  transition:border-color .15s,background .15s
+}
+
+.kw-eval-row.ep {
+  border-color:var(--o-color);
+  background:var(--o-bg)
+}
+
+.kw-eval-row.ef {
+  border-color:var(--x-color);
+  background:var(--x-bg)
+}
+
+.kw-eval-word {
+  flex:1;
+  font-size:13px;
+  font-weight:700;
+  color:var(--text)
+}
+
+.kw-eval-btns2 {
+  display:flex;
+  gap:4px;
+  flex-shrink:0
+}
+
+.kw-ebtn {
+  width:38px;
+  height:32px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border-strong);
+  background:var(--surface);
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all .12s;
+  color:var(--text-3)
+}
+
+.kw-ebtn:active {
+  transform:scale(.88)
+}
+
+.kw-ebtn.ep {
+  background:var(--o-bg);
+  border-color:var(--o-color);
+  color:var(--o-color)
+}
+
+.kw-ebtn.ef {
+  background:var(--x-bg);
+  border-color:var(--x-color);
+  color:var(--x-color)
+}
+
+.kw-eval-done-btn {
+  width:100%;
+  padding:12px;
+  border-radius:var(--radius-sm);
+  border:none;
+  background:var(--text);
+  color:#fff;
+  font-family:'Noto Sans JP',sans-serif;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer
+}
+
+.ch-footer {
+  border-top:1px solid var(--border);
+  background:var(--bg)
+}
+
+.ch-footer-row {
+  padding:8px 14px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap
+}
+
+.ch-stat {
+  font-size:20px;
+  font-weight:700;
+  color:#1a3a6e;
+  font-family:'Zen Maru Gothic',sans-serif;
+  letter-spacing:.02em
+}
+
+.ch-stat-lbl {
+  font-size:9px;
+  font-weight:500;
+  color:#7a8fa8;
+  font-family:'Noto Sans JP',sans-serif;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  display:block;
+  margin-bottom:1px
+}
+
+.ch-record-btn {
+  font-size:11px;
+  padding:4px 10px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border-strong);
+  background:var(--surface);
+  color:var(--text-2);
+  cursor:pointer;
+  font-family:'Noto Sans JP',sans-serif;
+  transition:all .15s;
+  white-space:nowrap
+}
+
+.ch-record-btn:hover {
+  border-color:var(--text);
+  color:var(--text)
+}
+
+.ch-record-form {
+  display:none;
+  padding:10px 14px 14px;
+  border-top:1px solid var(--border);
+  gap:8px;
+  flex-direction:column
+}
+
+.ch-record-form.open {
+  display:flex
+}
+
+.ch-record-form-row {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px
+}
+
+.ch-record-form-lbl {
+  font-size:10px;
+  font-weight:700;
+  color:var(--text-2);
+  display:block;
+  margin-bottom:3px
+}
+
+.ch-record-input {
+  width:100%;
+  background:var(--surface);
+  border:1.5px solid var(--border-strong);
+  border-radius:var(--radius-sm);
+  color:var(--text);
+  font-family:'Noto Sans JP',sans-serif;
+  font-size:16px;
+  padding:8px 10px;
+  outline:none;
+  -webkit-appearance:none;
+  appearance:none;
+  touch-action:manipulation
+}
+
+.ch-record-input:focus {
+  border-color:var(--text)
+}
+
+.ch-record-form-btns {
+  display:flex;
+  gap:6px
+}
+
+.ch-record-save {
+  flex:1;
+  padding:10px;
+  border-radius:var(--radius-sm);
+  border:none;
+  background:var(--text);
+  color:#fff;
+  font-family:'Noto Sans JP',sans-serif;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer
+}
+
+.ch-record-cancel {
+  padding:10px 14px;
+  border-radius:var(--radius-sm);
+  border:1.5px solid var(--border-strong);
+  background:transparent;
+  color:var(--text-2);
+  font-family:'Noto Sans JP',sans-serif;
+  font-size:13px;
+  cursor:pointer
+}
+
+.next-round-wrap {
+  padding:14px;
+  text-align:center;
+  max-width:700px;
+  margin:0 auto
+}
+
+.next-round-btn {
+  background:var(--text);
+  color:#fff;
+  border:none;
+  border-radius:var(--radius);
+  padding:13px 28px;
+  font-size:13px;
+  font-weight:700;
+  font-family:'Noto Sans JP',sans-serif;
+  cursor:pointer;
+  letter-spacing:.04em
+}
+
+.overlay {
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.35);
+  z-index:200;
+  align-items:flex-end;
+  justify-content:center
+}
+
+.overlay.open {
+  display:flex
+}
+
+.scope-modal {
+  background:var(--surface);
+  border-radius:16px 16px 0 0;
+  padding:20px 16px 44px;
+  width:100%;
+  max-width:700px;
+  max-height:80vh;
+  overflow-y:auto
+}
+
+.modal-handle {
+  width:32px;
+  height:3px;
+  background:var(--border-strong);
+  border-radius:999px;
+  margin:0 auto 14px
+}
+
+.scope-options {
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin:14px 0
+}
+
+.scope-opt {
+  padding:13px 14px;
+  border-radius:var(--radius);
+  border:1.5px solid var(--border-strong);
+  background:var(--bg);
+  font-size:14px;
+  font-weight:700;
+  font-family:'Noto Sans JP',sans-serif;
+  cursor:pointer;
+  text-align:left;
+  transition:all .15s;
+  color:var(--text)
+}
+
+.scope-opt:hover {
+  border-color:var(--text)
+}
+
+.scope-opt.sel {
+  background:var(--text);
+  color:#fff;
+  border-color:var(--text)
+}
+
+.scope-opt .scope-sub {
+  font-size:11px;
+  font-weight:400;
+  color:inherit;
+  opacity:.7;
+  display:block;
+  margin-top:2px
+}
+
+.form-lbl {
+  font-size:11px;
+  font-weight:700;
+  color:var(--text-2);
+  display:block;
+  margin-bottom:4px
+}
+
 /* ── 履歴一覧 ── */
-#hist-ch-tabs::-webkit-scrollbar{display:none}
-.hist-page-header{padding:14px 0 10px}
-.hist-page-title{font-size:12px;font-weight:700;color:var(--text-2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
-.hist-page-subtitle{font-size:11px;color:var(--text-3)}
-.rec-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden}
-.rec-item-header{display:flex;align-items:center;gap:8px;padding:11px 13px;cursor:pointer;user-select:none}
-.rec-item-header:active{background:var(--bg)}
-.rec-item-name{flex:1;font-size:12px;font-weight:700;color:var(--text);line-height:1.4}
-.rec-imp{font-size:9px;font-weight:700;font-family:'DM Mono',monospace;padding:2px 5px;border-radius:4px;flex-shrink:0}
-.rec-u-track{width:44px;height:5px;background:var(--border);border-radius:999px;overflow:hidden;flex-shrink:0}
-.rec-u-fill{height:100%;border-radius:999px}
-.rec-score{font-family:'DM Mono',monospace;font-size:12px;font-weight:700;flex-shrink:0;min-width:36px;text-align:right}
-.rec-count{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-3);flex-shrink:0}
-.rec-item-body{display:none;border-top:1px solid var(--border);padding:10px 13px}
-.rec-item.open .rec-item-body{display:block}
-.rec-kw-table{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
-.rec-kw-table table{border-collapse:collapse;min-width:100%}
-.rec-kw-table th{font-size:10px;font-family:'DM Mono',monospace;color:var(--text-3);padding:4px 8px;text-align:center;white-space:nowrap;font-weight:400;border-bottom:1px solid var(--border)}
-.rec-kw-table th.kw-name-col{text-align:left;font-size:10px;min-width:100px}
-.rec-kw-table td{font-size:11px;padding:5px 8px;text-align:center;white-space:nowrap}
-.rec-kw-table td.kw-name-col{text-align:left;font-size:11px;color:var(--text);line-height:1.4;white-space:normal;min-width:100px}
-.rec-kw-table tr:nth-child(odd) td{background:var(--surface)}
-.rec-kw-table tr:nth-child(even) td{background:var(--bg)}
-.rec-no-kw{font-size:11px;color:var(--text-3);padding:4px 0}
+#hist-ch-tabs::-webkit-scrollbar {
+  display:none
+}
+
+.hist-page-header {
+  padding:14px 0 10px
+}
+
+.hist-page-title {
+  font-size:12px;
+  font-weight:700;
+  color:var(--text-2);
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  margin-bottom:4px
+}
+
+.hist-page-subtitle {
+  font-size:11px;
+  color:var(--text-3)
+}
+
+.rec-item {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  margin-bottom:8px;
+  overflow:hidden
+}
+
+.rec-item-header {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:11px 13px;
+  cursor:pointer;
+  user-select:none
+}
+
+.rec-item-header:active {
+  background:var(--bg)
+}
+
+.rec-item-name {
+  flex:1;
+  font-size:12px;
+  font-weight:700;
+  color:var(--text);
+  line-height:1.4
+}
+
+.rec-imp {
+  font-size:9px;
+  font-weight:700;
+  font-family:'DM Mono',monospace;
+  padding:2px 5px;
+  border-radius:4px;
+  flex-shrink:0
+}
+
+.rec-u-track {
+  width:44px;
+  height:5px;
+  background:var(--border);
+  border-radius:999px;
+  overflow:hidden;
+  flex-shrink:0
+}
+
+.rec-u-fill {
+  height:100%;
+  border-radius:999px
+}
+
+.rec-score {
+  font-family:'DM Mono',monospace;
+  font-size:12px;
+  font-weight:700;
+  flex-shrink:0;
+  min-width:36px;
+  text-align:right
+}
+
+.rec-count {
+  font-family:'DM Mono',monospace;
+  font-size:10px;
+  color:var(--text-3);
+  flex-shrink:0
+}
+
+.rec-item-body {
+  display:none;
+  border-top:1px solid var(--border);
+  padding:10px 13px
+}
+
+.rec-item.open .rec-item-body {
+  display:block
+}
+
+.rec-kw-table {
+  width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch
+}
+
+.rec-kw-table table {
+  border-collapse:collapse;
+  min-width:100%
+}
+
+.rec-kw-table th {
+  font-size:10px;
+  font-family:'DM Mono',monospace;
+  color:var(--text-3);
+  padding:4px 8px;
+  text-align:center;
+  white-space:nowrap;
+  font-weight:400;
+  border-bottom:1px solid var(--border)
+}
+
+.rec-kw-table th.kw-name-col {
+  text-align:left;
+  font-size:10px;
+  min-width:100px
+}
+
+.rec-kw-table td {
+  font-size:11px;
+  padding:5px 8px;
+  text-align:center;
+  white-space:nowrap
+}
+
+.rec-kw-table td.kw-name-col {
+  text-align:left;
+  font-size:11px;
+  color:var(--text);
+  line-height:1.4;
+  white-space:normal;
+  min-width:100px
+}
+
+.rec-kw-table tr:nth-child(odd) td {
+  background:var(--surface)
+}
+
+.rec-kw-table tr:nth-child(even) td {
+  background:var(--bg)
+}
+
+.rec-no-kw {
+  font-size:11px;
+  color:var(--text-3);
+  padding:4px 0
+}
+
 </style>
 </head>
 <body>
@@ -276,237 +1435,237 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 
 <script>
 const DATA=[
-  {ch:"第1章",chName:"費目別計算・製造間接費",items:[
-    {id:"t1-1",name:"問題1-1　購入原価に算入する付随費用の範囲",imp:"C"},
-    {id:"t1-2",name:"問題1-2　購入原価に算入しない付随費用の処理",imp:"C"},
-    {id:"t1-3",name:"問題1-3　継続記録法のメリット",imp:"B"},
-    {id:"t1-4",name:"問題1-4　棚卸法の利用",imp:"C"},
-    {id:"t1-5",name:"問題1-5　費目別計算における予定価格等の利用",imp:"B"},
-    {id:"t1-6",name:"問題1-6　予定消費価格と予定受入価格の相違",imp:"B"},
-    {id:"t1-7",name:"問題1-7　望ましい消費量測定",imp:"C"},
-    {id:"t1-8",name:"問題1-8　定時外作業手当の会計処理",imp:"B"},
-    {id:"t1-9",name:"問題1-9　製造間接費の配賦基準の選択",imp:"B"},
-    {id:"t1-10",name:"問題1-10　製造間接費実際配賦の問題点",imp:"A"},
-    {id:"t1-11",name:"問題1-11　製造間接費正常配賦の理論",imp:"B"},
-    {id:"t1-12",name:"問題1-12　基準操業度の選択",imp:"B"},
-    {id:"t1-13",name:"問題1-13　製造間接費予算の設定",imp:"B"},
-    {id:"t1-14",name:"問題1-14　固定予算の問題点",imp:"A"},
-    {id:"t1-15",name:"問題1-15　複式簿記変動予算の限界",imp:"B"},
-    {id:"t1-16",name:"問題1-16　操業度差異の計算方法",imp:"B"},
-    {id:"t1-17",name:"問題1-17　操業度差異分析の意義",imp:"B"},
-    {id:"t1-18",name:"問題1-18　有利な操業度差異の解釈",imp:"A"},
-    {id:"t1-19",name:"問題1-19　操業度差異の理論的会計処理",imp:"B"},
+ {ch:"第1章",chName:"費目別計算・製造間接費",items:[
+   {id:"t1-1",name:"問題1-1　購入原価に算入する付随費用の範囲",imp:"C"},
+   {id:"t1-2",name:"問題1-2　購入原価に算入しない付随費用の処理",imp:"C"},
+   {id:"t1-3",name:"問題1-3　継続記録法のメリット",imp:"B"},
+   {id:"t1-4",name:"問題1-4　棚卸法の利用",imp:"C"},
+   {id:"t1-5",name:"問題1-5　費目別計算における予定価格等の利用",imp:"B"},
+   {id:"t1-6",name:"問題1-6　予定消費価格と予定受入価格の相違",imp:"B"},
+   {id:"t1-7",name:"問題1-7　望ましい消費量測定",imp:"C"},
+   {id:"t1-8",name:"問題1-8　定時外作業手当の会計処理",imp:"B"},
+   {id:"t1-9",name:"問題1-9　製造間接費の配賦基準の選択",imp:"B"},
+   {id:"t1-10",name:"問題1-10　製造間接費実際配賦の問題点",imp:"A"},
+   {id:"t1-11",name:"問題1-11　製造間接費正常配賦の理論",imp:"B"},
+   {id:"t1-12",name:"問題1-12　基準操業度の選択",imp:"B"},
+   {id:"t1-13",name:"問題1-13　製造間接費予算の設定",imp:"B"},
+   {id:"t1-14",name:"問題1-14　固定予算の問題点",imp:"A"},
+   {id:"t1-15",name:"問題1-15　複式簿記変動予算の限界",imp:"B"},
+   {id:"t1-16",name:"問題1-16　操業度差異の計算方法",imp:"B"},
+   {id:"t1-17",name:"問題1-17　操業度差異分析の意義",imp:"B"},
+   {id:"t1-18",name:"問題1-18　有利な操業度差異の解釈",imp:"A"},
+   {id:"t1-19",name:"問題1-19　操業度差異の理論的会計処理",imp:"B"},
   ]},
-  {ch:"第2章",chName:"部門別計算・個別原価計算",items:[
-    {id:"t2-1",name:"問題2-1　一括配賦法の問題点",imp:"A"},
-    {id:"t2-2",name:"問題2-2　原価部門の設定",imp:"A"},
-    {id:"t2-3",name:"問題2-3　部門別計算の手順",imp:"B"},
-    {id:"t2-4",name:"問題2-4　製造部門に集計する原価要素の範囲",imp:"B"},
-    {id:"t2-5",name:"問題2-5　第1次集計の新傾向",imp:"B"},
-    {id:"t2-6",name:"問題2-6　補助部門費を製造部門に配賦する理由",imp:"B"},
-    {id:"t2-7",name:"問題2-7　直接配賦法と相互配賦法の選択",imp:"B"},
-    {id:"t2-8",name:"問題2-8　複数基準配賦法の内容と論拠",imp:"A"},
-    {id:"t2-9",name:"問題2-9　補助部門費の配賦と責任会計",imp:"A"},
-    {id:"t2-10",name:"問題2-10　製造部門費と補助部門費の予定配賦の相違",imp:"A"},
-    {id:"t2-11",name:"問題2-11　仕損費の計算",imp:"B"},
-    {id:"t2-12",name:"問題2-12　個別原価計算における仕損費の処理",imp:"B"},
-    {id:"t2-13",name:"問題2-13　ハイブリッド・システム",imp:"B"},
+ {ch:"第2章",chName:"部門別計算・個別原価計算",items:[
+   {id:"t2-1",name:"問題2-1　一括配賦法の問題点",imp:"A"},
+   {id:"t2-2",name:"問題2-2　原価部門の設定",imp:"A"},
+   {id:"t2-3",name:"問題2-3　部門別計算の手順",imp:"B"},
+   {id:"t2-4",name:"問題2-4　製造部門に集計する原価要素の範囲",imp:"B"},
+   {id:"t2-5",name:"問題2-5　第1次集計の新傾向",imp:"B"},
+   {id:"t2-6",name:"問題2-6　補助部門費を製造部門に配賦する理由",imp:"B"},
+   {id:"t2-7",name:"問題2-7　直接配賦法と相互配賦法の選択",imp:"B"},
+   {id:"t2-8",name:"問題2-8　複数基準配賦法の内容と論拠",imp:"A"},
+   {id:"t2-9",name:"問題2-9　補助部門費の配賦と責任会計",imp:"A"},
+   {id:"t2-10",name:"問題2-10　製造部門費と補助部門費の予定配賦の相違",imp:"A"},
+   {id:"t2-11",name:"問題2-11　仕損費の計算",imp:"B"},
+   {id:"t2-12",name:"問題2-12　個別原価計算における仕損費の処理",imp:"B"},
+   {id:"t2-13",name:"問題2-13　ハイブリッド・システム",imp:"B"},
   ]},
-  {ch:"第3章",chName:"総合原価計算",items:[
-    {id:"t3-1",name:"問題3-1　原価配分法の選択",imp:"C"},
-    {id:"t3-2",name:"問題3-2　無価値法の妥当性",imp:"C"},
-    {id:"t3-3",name:"問題3-3　度外視法と原価計算基準の関係",imp:"C"},
-    {id:"t3-4",name:"問題3-4　度外視法と非度外視法の計算結果が相違する理由",imp:"B"},
-    {id:"t3-5",name:"問題3-5　仕損・減損の発生態様と原価配分法の関係",imp:"B"},
-    {id:"t3-6",name:"問題3-6　非度外視法を採用する意義",imp:"A"},
-    {id:"t3-7",name:"問題3-7　正常仕損と異常仕損の関係",imp:"B"},
-    {id:"t3-8",name:"問題3-8　正常仕損費の計算方法",imp:"C"},
-    {id:"t3-9",name:"問題3-9　検査点の増設が原価に与える影響",imp:"B"},
-    {id:"t3-10",name:"問題3-10　加算法と非加算法の計算結果が相違する理由",imp:"C"},
-    {id:"t3-11",name:"問題3-11　加算法と先入先出法の関係",imp:"C"},
-    {id:"t3-12",name:"問題3-12　非加算法と後入法の関係",imp:"C"},
-    {id:"t3-13",name:"問題3-13　加算法の問題点と改善策",imp:"A"},
-    {id:"t3-14",name:"問題3-14　非加算法のメリット",imp:"B"},
-    {id:"t3-15",name:"問題3-15　工程別標準総合原価計算の簡略化を図る方法",imp:"C"},
-    {id:"t3-16",name:"問題3-16　加工費法の適用要件",imp:"B"},
-    {id:"t3-17",name:"問題3-17　個別原価計算と組別総合原価計算の相違",imp:"A"},
-    {id:"t3-18",name:"問題3-18　等級別総合原価計算の方法",imp:"B"},
-    {id:"t3-19",name:"問題3-19　組別総合原価計算と等級別総合原価計算の選択",imp:"A"},
-    {id:"t3-20",name:"問題3-20　連産品の原価計算方法の相違",imp:"B"},
-    {id:"t3-21",name:"問題3-21　副産物の計算の意義と妥当性",imp:"B"},
-    {id:"t3-22",name:"問題3-22　副産物の計算と等級別総合原価計算の相違",imp:"A"},
+ {ch:"第3章",chName:"総合原価計算",items:[
+   {id:"t3-1",name:"問題3-1　原価配分法の選択",imp:"C"},
+   {id:"t3-2",name:"問題3-2　無価値法の妥当性",imp:"C"},
+   {id:"t3-3",name:"問題3-3　度外視法と原価計算基準の関係",imp:"C"},
+   {id:"t3-4",name:"問題3-4　度外視法と非度外視法の計算結果が相違する理由",imp:"B"},
+   {id:"t3-5",name:"問題3-5　仕損・減損の発生態様と原価配分法の関係",imp:"B"},
+   {id:"t3-6",name:"問題3-6　非度外視法を採用する意義",imp:"A"},
+   {id:"t3-7",name:"問題3-7　正常仕損と異常仕損の関係",imp:"B"},
+   {id:"t3-8",name:"問題3-8　正常仕損費の計算方法",imp:"C"},
+   {id:"t3-9",name:"問題3-9　検査点の増設が原価に与える影響",imp:"B"},
+   {id:"t3-10",name:"問題3-10　加算法と非加算法の計算結果が相違する理由",imp:"C"},
+   {id:"t3-11",name:"問題3-11　加算法と先入先出法の関係",imp:"C"},
+   {id:"t3-12",name:"問題3-12　非加算法と後入法の関係",imp:"C"},
+   {id:"t3-13",name:"問題3-13　加算法の問題点と改善策",imp:"A"},
+   {id:"t3-14",name:"問題3-14　非加算法のメリット",imp:"B"},
+   {id:"t3-15",name:"問題3-15　工程別標準総合原価計算の簡略化を図る方法",imp:"C"},
+   {id:"t3-16",name:"問題3-16　加工費法の適用要件",imp:"B"},
+   {id:"t3-17",name:"問題3-17　個別原価計算と組別総合原価計算の相違",imp:"A"},
+   {id:"t3-18",name:"問題3-18　等級別総合原価計算の方法",imp:"B"},
+   {id:"t3-19",name:"問題3-19　組別総合原価計算と等級別総合原価計算の選択",imp:"A"},
+   {id:"t3-20",name:"問題3-20　連産品の原価計算方法の相違",imp:"B"},
+   {id:"t3-21",name:"問題3-21　副産物の計算の意義と妥当性",imp:"B"},
+   {id:"t3-22",name:"問題3-22　副産物の計算と等級別総合原価計算の相違",imp:"A"},
   ]},
-  {ch:"第4章",chName:"標準原価計算",items:[
-    {id:"t4-1",name:"問題4-1　見積原価計算と標準原価計算",imp:"B"},
-    {id:"t4-2",name:"問題4-2　標準原価計算と原価管理",imp:"A"},
-    {id:"t4-3",name:"問題4-3　標準原価計算制度と計算・記帳の簡略化・迅速化",imp:"A"},
-    {id:"t4-4",name:"問題4-4　標準原価管理のサイクル",imp:"B"},
-    {id:"t4-5",name:"問題4-5　理想標準原価が制度上認められない理由",imp:"A"},
-    {id:"t4-6",name:"問題4-6　現実的標準原価が原価管理に役立つ理由",imp:"A"},
-    {id:"t4-7",name:"問題4-7　理想標準原価を原価管理に使用する意義",imp:"A"},
-    {id:"t4-8",name:"問題4-8　原価標準に正常仕損費を組み込む方法",imp:"B"},
-    {id:"t4-9",name:"問題4-9　標準原価の製造予算への利用",imp:"A"},
-    {id:"t4-10",name:"問題4-10　改訂頻度に基づく標準原価の分類",imp:"B"},
-    {id:"t4-11",name:"問題4-11　直接費と間接費の標準の相違",imp:"A"},
-    {id:"t4-12",name:"問題4-12　標準原価計算制度における勘定記入法",imp:"A"},
-    {id:"t4-13",name:"問題4-13　修正パーシャル・プランのメリット",imp:"B"},
-    {id:"t4-14",name:"問題4-14　パーシャル・プランの問題点",imp:"C"},
-    {id:"t4-15",name:"問題4-15　原価差異の把握方法",imp:"A"},
-    {id:"t4-16",name:"問題4-16　原価差異の把握方法と生産形態の関係",imp:"B"},
-    {id:"t4-17",name:"問題4-17　原価差異の把握方法と勘定記入法の関係",imp:"B"},
-    {id:"t4-18",name:"問題4-18　原価差異の相互依存性",imp:"A"},
-    {id:"t4-19",name:"問題4-19　混合差異の取り扱い",imp:"A"},
-    {id:"t4-20",name:"問題4-20　価格差異の管理可能性",imp:"B"},
-    {id:"t4-21",name:"問題4-21　配合差異の分析方法の検討",imp:"B"},
-    {id:"t4-22",name:"問題4-22　労働歩留差異分析の必要性",imp:"B"},
-    {id:"t4-23",name:"問題4-23　固定給制のもとでの直接労務費の管理",imp:"B"},
-    {id:"t4-24",name:"問題4-24　固定費能率差異の取り扱い",imp:"B"},
-    {id:"t4-25",name:"問題4-25　操業度差異を製造部門の責任とすることの問題点",imp:"B"},
-    {id:"t4-26",name:"問題4-26　工程別標準総合原価計算",imp:"B"},
-    {id:"t4-27",name:"問題4-27　材料受入価格差異以外の原価差異の処理⑴",imp:"A"},
-    {id:"t4-28",name:"問題4-28　材料受入価格差異以外の原価差異の処理⑵",imp:"A"},
-    {id:"t4-29",name:"問題4-29　材料受入価格差異の処理",imp:"B"},
+ {ch:"第4章",chName:"標準原価計算",items:[
+   {id:"t4-1",name:"問題4-1　見積原価計算と標準原価計算",imp:"B"},
+   {id:"t4-2",name:"問題4-2　標準原価計算と原価管理",imp:"A"},
+   {id:"t4-3",name:"問題4-3　標準原価計算制度と計算・記帳の簡略化・迅速化",imp:"A"},
+   {id:"t4-4",name:"問題4-4　標準原価管理のサイクル",imp:"B"},
+   {id:"t4-5",name:"問題4-5　理想標準原価が制度上認められない理由",imp:"A"},
+   {id:"t4-6",name:"問題4-6　現実的標準原価が原価管理に役立つ理由",imp:"A"},
+   {id:"t4-7",name:"問題4-7　理想標準原価を原価管理に使用する意義",imp:"A"},
+   {id:"t4-8",name:"問題4-8　原価標準に正常仕損費を組み込む方法",imp:"B"},
+   {id:"t4-9",name:"問題4-9　標準原価の製造予算への利用",imp:"A"},
+   {id:"t4-10",name:"問題4-10　改訂頻度に基づく標準原価の分類",imp:"B"},
+   {id:"t4-11",name:"問題4-11　直接費と間接費の標準の相違",imp:"A"},
+   {id:"t4-12",name:"問題4-12　標準原価計算制度における勘定記入法",imp:"A"},
+   {id:"t4-13",name:"問題4-13　修正パーシャル・プランのメリット",imp:"B"},
+   {id:"t4-14",name:"問題4-14　パーシャル・プランの問題点",imp:"C"},
+   {id:"t4-15",name:"問題4-15　原価差異の把握方法",imp:"A"},
+   {id:"t4-16",name:"問題4-16　原価差異の把握方法と生産形態の関係",imp:"B"},
+   {id:"t4-17",name:"問題4-17　原価差異の把握方法と勘定記入法の関係",imp:"B"},
+   {id:"t4-18",name:"問題4-18　原価差異の相互依存性",imp:"A"},
+   {id:"t4-19",name:"問題4-19　混合差異の取り扱い",imp:"A"},
+   {id:"t4-20",name:"問題4-20　価格差異の管理可能性",imp:"B"},
+   {id:"t4-21",name:"問題4-21　配合差異の分析方法の検討",imp:"B"},
+   {id:"t4-22",name:"問題4-22　労働歩留差異分析の必要性",imp:"B"},
+   {id:"t4-23",name:"問題4-23　固定給制のもとでの直接労務費の管理",imp:"B"},
+   {id:"t4-24",name:"問題4-24　固定費能率差異の取り扱い",imp:"B"},
+   {id:"t4-25",name:"問題4-25　操業度差異を製造部門の責任とすることの問題点",imp:"B"},
+   {id:"t4-26",name:"問題4-26　工程別標準総合原価計算",imp:"B"},
+   {id:"t4-27",name:"問題4-27　材料受入価格差異以外の原価差異の処理⑴",imp:"A"},
+   {id:"t4-28",name:"問題4-28　材料受入価格差異以外の原価差異の処理⑵",imp:"A"},
+   {id:"t4-29",name:"問題4-29　材料受入価格差異の処理",imp:"B"},
   ]},
-  {ch:"第5章",chName:"直接原価計算・短期利益計画のための管理会計",items:[
-    {id:"t5-1",name:"問題5-1　全部原価と部分原価",imp:"B"},
-    {id:"t5-2",name:"問題5-2　全部原価計算と直接原価計算の営業利益が相違する理由",imp:"C"},
-    {id:"t5-3",name:"問題5-3　全部原価計算と直接原価計算の営業利益の関係",imp:"C"},
-    {id:"t5-4",name:"問題5-4　全部原価計算の問題点",imp:"C"},
-    {id:"t5-5",name:"問題5-5　直接原価計算の外部報告上の問題点",imp:"C"},
-    {id:"t5-6",name:"問題5-6　直接原価計算の利用パターン",imp:"C"},
-    {id:"t5-7",name:"問題5-7　固定費の管理思考",imp:"B"},
-    {id:"t5-8",name:"問題5-8　キャパシティ・コストの管理",imp:"B"},
-    {id:"t5-9",name:"問題5-9　直接原価計算と原価管理の関係",imp:"B"},
-    {id:"t5-10",name:"問題5-10　直接原価計算と差額原価収益分析の関係",imp:"B"},
-    {id:"t5-11",name:"問題5-11　短期利益計画に役立つ損益計算方式",imp:"B"},
-    {id:"t5-12",name:"問題5-12　CVP分析の一般的仮定",imp:"A"},
-    {id:"t5-13",name:"問題5-13　複数製品を扱う場合の損益分岐点分析",imp:"B"},
-    {id:"t5-14",name:"問題5-14　固定費と経営リスク",imp:"A"},
-    {id:"t5-15",name:"問題5-15　経営レバレッジと経営行動",imp:"A"},
-    {id:"t5-16",name:"問題5-16　IE法と実績データに基づく方法の相違",imp:"B"},
-    {id:"t5-17",name:"問題5-17　実績データに基づく線形原価関数の妥当性",imp:"B"},
-    {id:"t5-18",name:"問題5-18　実績データに基づく線形原価関数の正確性",imp:"B"},
+ {ch:"第5章",chName:"直接原価計算・短期利益計画のための管理会計",items:[
+   {id:"t5-1",name:"問題5-1　全部原価と部分原価",imp:"B"},
+   {id:"t5-2",name:"問題5-2　全部原価計算と直接原価計算の営業利益が相違する理由",imp:"C"},
+   {id:"t5-3",name:"問題5-3　全部原価計算と直接原価計算の営業利益の関係",imp:"C"},
+   {id:"t5-4",name:"問題5-4　全部原価計算の問題点",imp:"C"},
+   {id:"t5-5",name:"問題5-5　直接原価計算の外部報告上の問題点",imp:"C"},
+   {id:"t5-6",name:"問題5-6　直接原価計算の利用パターン",imp:"C"},
+   {id:"t5-7",name:"問題5-7　固定費の管理思考",imp:"B"},
+   {id:"t5-8",name:"問題5-8　キャパシティ・コストの管理",imp:"B"},
+   {id:"t5-9",name:"問題5-9　直接原価計算と原価管理の関係",imp:"B"},
+   {id:"t5-10",name:"問題5-10　直接原価計算と差額原価収益分析の関係",imp:"B"},
+   {id:"t5-11",name:"問題5-11　短期利益計画に役立つ損益計算方式",imp:"B"},
+   {id:"t5-12",name:"問題5-12　CVP分析の一般的仮定",imp:"A"},
+   {id:"t5-13",name:"問題5-13　複数製品を扱う場合の損益分岐点分析",imp:"B"},
+   {id:"t5-14",name:"問題5-14　固定費と経営リスク",imp:"A"},
+   {id:"t5-15",name:"問題5-15　経営レバレッジと経営行動",imp:"A"},
+   {id:"t5-16",name:"問題5-16　IE法と実績データに基づく方法の相違",imp:"B"},
+   {id:"t5-17",name:"問題5-17　実績データに基づく線形原価関数の妥当性",imp:"B"},
+   {id:"t5-18",name:"問題5-18　実績データに基づく線形原価関数の正確性",imp:"B"},
   ]},
-  {ch:"第6章",chName:"予算管理",items:[
-    {id:"t6-1",name:"問題6-1　会社全体の予算をキャッシュ・フローとして把握する意義",imp:"A"},
-    {id:"t6-2",name:"問題6-2　予算の役割",imp:"B"},
-    {id:"t6-3",name:"問題6-3　予算編成の方法",imp:"A"},
-    {id:"t6-4",name:"問題6-4　参加型予算の問題",imp:"A"},
-    {id:"t6-5",name:"問題6-5　予算管理のプロセス",imp:"B"},
-    {id:"t6-6",name:"問題6-6　予算統制差異の分析と変動予算を利用する意義",imp:"B"},
-    {id:"t6-7",name:"問題6-7　標準原価計算方法の製造間接費差異の分析方法",imp:"B"},
-    {id:"t6-8",name:"問題6-8　セールス・ミックス差異の分析方法の意義",imp:"C"},
-    {id:"t6-9",name:"問題6-9　市場規模差異と市場占有率差異の分析",imp:"B"},
-    {id:"t6-10",name:"問題6-10　ローリング方式の予算編成",imp:"B"},
-    {id:"t6-11",name:"問題6-11　予算スラックの構成",imp:"A"},
-    {id:"t6-12",name:"問題6-12　予算スラックを解消する方法",imp:"A"},
-    {id:"t6-13",name:"問題6-13　予算目標の設定基準",imp:"A"},
-    {id:"t6-14",name:"問題6-14　脱予算管理",imp:"B"},
+ {ch:"第6章",chName:"予算管理",items:[
+   {id:"t6-1",name:"問題6-1　会社全体の予算をキャッシュ・フローとして把握する意義",imp:"A"},
+   {id:"t6-2",name:"問題6-2　予算の役割",imp:"B"},
+   {id:"t6-3",name:"問題6-3　予算編成の方法",imp:"A"},
+   {id:"t6-4",name:"問題6-4　参加型予算の問題",imp:"A"},
+   {id:"t6-5",name:"問題6-5　予算管理のプロセス",imp:"B"},
+   {id:"t6-6",name:"問題6-6　予算統制差異の分析と変動予算を利用する意義",imp:"B"},
+   {id:"t6-7",name:"問題6-7　標準原価計算方法の製造間接費差異の分析方法",imp:"B"},
+   {id:"t6-8",name:"問題6-8　セールス・ミックス差異の分析方法の意義",imp:"C"},
+   {id:"t6-9",name:"問題6-9　市場規模差異と市場占有率差異の分析",imp:"B"},
+   {id:"t6-10",name:"問題6-10　ローリング方式の予算編成",imp:"B"},
+   {id:"t6-11",name:"問題6-11　予算スラックの構成",imp:"A"},
+   {id:"t6-12",name:"問題6-12　予算スラックを解消する方法",imp:"A"},
+   {id:"t6-13",name:"問題6-13　予算目標の設定基準",imp:"A"},
+   {id:"t6-14",name:"問題6-14　脱予算管理",imp:"B"},
   ]},
-  {ch:"第7章",chName:"資金管理とキャッシュ・フロー管理",items:[
-    {id:"t7-1",name:"問題7-1　資金管理の目的",imp:"A"},
-    {id:"t7-2",name:"問題7-2　キャッシュ・コンバージョン・サイクルの管理",imp:"A"},
-    {id:"t7-3",name:"問題7-3　オペレーティング・サイクルと収益性の関係",imp:"B"},
-    {id:"t7-4",name:"問題7-4　取引先のキャッシュ・コンバージョン・サイクルの解釈",imp:"B"},
-    {id:"t7-5",name:"問題7-5　回転差資金",imp:"B"},
-    {id:"t7-6",name:"問題7-6　運転資金の管理",imp:"A"},
-    {id:"t7-7",name:"問題7-7　現金資金の管理",imp:"B"},
-    {id:"t7-8",name:"問題7-8　資金計算書の作成方法",imp:"C"},
-    {id:"t7-9",name:"問題7-9　資金移動表・資金運用表とキャッシュ・フロー計算書の関係",imp:"C"},
-    {id:"t7-10",name:"問題7-10　事業の発展ステージとキャッシュ・フローの関係",imp:"B"},
+ {ch:"第7章",chName:"資金管理とキャッシュ・フロー管理",items:[
+   {id:"t7-1",name:"問題7-1　資金管理の目的",imp:"A"},
+   {id:"t7-2",name:"問題7-2　キャッシュ・コンバージョン・サイクルの管理",imp:"A"},
+   {id:"t7-3",name:"問題7-3　オペレーティング・サイクルと収益性の関係",imp:"B"},
+   {id:"t7-4",name:"問題7-4　取引先のキャッシュ・コンバージョン・サイクルの解釈",imp:"B"},
+   {id:"t7-5",name:"問題7-5　回転差資金",imp:"B"},
+   {id:"t7-6",name:"問題7-6　運転資金の管理",imp:"A"},
+   {id:"t7-7",name:"問題7-7　現金資金の管理",imp:"B"},
+   {id:"t7-8",name:"問題7-8　資金計算書の作成方法",imp:"C"},
+   {id:"t7-9",name:"問題7-9　資金移動表・資金運用表とキャッシュ・フロー計算書の関係",imp:"C"},
+   {id:"t7-10",name:"問題7-10　事業の発展ステージとキャッシュ・フローの関係",imp:"B"},
   ]},
-  {ch:"第8章",chName:"差額原価収益分析",items:[
-    {id:"t8-1",name:"問題8-1　差額原価と埋没原価",imp:"A"},
-    {id:"t8-2",name:"問題8-2　機会原価と機会損失の意義",imp:"B"},
-    {id:"t8-3",name:"問題8-3　全部法と差額法",imp:"B"},
-    {id:"t8-4",name:"問題8-4　差額原価収益分析と原価計算目的の関係",imp:"B"},
-    {id:"t8-5",name:"問題8-5　差額原価収益分析と固定費の取扱いの関係",imp:"B"},
-    {id:"t8-6",name:"問題8-6　差額原価収益分析と遊休設備利用の関係",imp:"B"},
-    {id:"t8-7",name:"問題8-7　内製か外注かの意思決定に対しての批判",imp:"A"},
-    {id:"t8-8",name:"問題8-8　製品廃棄・製品ライン削除の意思決定に対しての批判",imp:"B"},
-    {id:"t8-9",name:"問題8-9　追加加工の意思決定に対しての批判",imp:"B"},
-    {id:"t8-10",name:"問題8-10　制約が生じる場合の差額原価収益分析",imp:"B"},
-    {id:"t8-11",name:"問題8-11　TOCモデルの批判的考察",imp:"B"},
-    {id:"t8-12",name:"問題8-12　意思決定のフォローアップ",imp:"B"},
-    {id:"t8-13",name:"問題8-13　コストドライバーの意思決定の意義",imp:"B"},
+ {ch:"第8章",chName:"差額原価収益分析",items:[
+   {id:"t8-1",name:"問題8-1　差額原価と埋没原価",imp:"A"},
+   {id:"t8-2",name:"問題8-2　機会原価と機会損失の意義",imp:"B"},
+   {id:"t8-3",name:"問題8-3　全部法と差額法",imp:"B"},
+   {id:"t8-4",name:"問題8-4　差額原価収益分析と原価計算目的の関係",imp:"B"},
+   {id:"t8-5",name:"問題8-5　差額原価収益分析と固定費の取扱いの関係",imp:"B"},
+   {id:"t8-6",name:"問題8-6　差額原価収益分析と遊休設備利用の関係",imp:"B"},
+   {id:"t8-7",name:"問題8-7　内製か外注かの意思決定に対しての批判",imp:"A"},
+   {id:"t8-8",name:"問題8-8　製品廃棄・製品ライン削除の意思決定に対しての批判",imp:"B"},
+   {id:"t8-9",name:"問題8-9　追加加工の意思決定に対しての批判",imp:"B"},
+   {id:"t8-10",name:"問題8-10　制約が生じる場合の差額原価収益分析",imp:"B"},
+   {id:"t8-11",name:"問題8-11　TOCモデルの批判的考察",imp:"B"},
+   {id:"t8-12",name:"問題8-12　意思決定のフォローアップ",imp:"B"},
+   {id:"t8-13",name:"問題8-13　コストドライバーの意思決定の意義",imp:"B"},
   ]},
-  {ch:"第9章",chName:"設備投資の経済性計算",items:[
-    {id:"t9-1",name:"問題9-1　キャッシュ・フロー計算における減価償却費の取り扱い",imp:"A"},
-    {id:"t9-2",name:"問題9-2　回収期間法の問題点",imp:"A"},
-    {id:"t9-3",name:"問題9-3　修正回収期間法と正味現在価値法の関係",imp:"C"},
-    {id:"t9-4",name:"問題9-4　投下資本利益率法の問題点",imp:"B"},
-    {id:"t9-5",name:"問題9-5　正味現在価値と内部収益率の関係",imp:"A"},
-    {id:"t9-6",name:"問題9-6　キャッシュ・フローのタイミングと正味現在価値の関係",imp:"A"},
-    {id:"t9-7",name:"問題9-7　価値加法性",imp:"A"},
-    {id:"t9-8",name:"問題9-8　割引率の設定",imp:"A"},
-    {id:"t9-9",name:"問題9-9　クロスオーバー・ポイントを持つ相互排他的投資案の割り付け",imp:"B"},
-    {id:"t9-10",name:"問題9-10　修正キャッシュ・フロー法の問題点",imp:"A"},
-    {id:"t9-11",name:"問題9-11　日本企業が回収期間法を選好する理由",imp:"B"},
-    {id:"t9-12",name:"問題9-12　米国企業が内部収益率法を選好する理由",imp:"B"},
-    {id:"t9-13",name:"問題9-13　差額法による撤退投資の意思決定",imp:"B"},
-    {id:"t9-14",name:"問題9-14　撤退投資における未償却残高の取り扱い",imp:"B"},
-    {id:"t9-15",name:"問題9-15　将来キャッシュ・フローの取り扱いⅠ",imp:"B"},
-    {id:"t9-16",name:"問題9-16　将来キャッシュ・フローの取り扱いⅡ",imp:"C"},
-    {id:"t9-17",name:"問題9-17　修正キャッシュ・フロー法にリスクを取り込む方法",imp:"B"},
-    {id:"t9-18",name:"問題9-18　修正キャッシュ・フロー法による企業価値評価の方法",imp:"B"},
-    {id:"t9-19",name:"問題9-19　修正キャッシュ・フロー法による企業価値評価の問題点",imp:"B"},
+ {ch:"第9章",chName:"設備投資の経済性計算",items:[
+   {id:"t9-1",name:"問題9-1　キャッシュ・フロー計算における減価償却費の取り扱い",imp:"A"},
+   {id:"t9-2",name:"問題9-2　回収期間法の問題点",imp:"A"},
+   {id:"t9-3",name:"問題9-3　修正回収期間法と正味現在価値法の関係",imp:"C"},
+   {id:"t9-4",name:"問題9-4　投下資本利益率法の問題点",imp:"B"},
+   {id:"t9-5",name:"問題9-5　正味現在価値と内部収益率の関係",imp:"A"},
+   {id:"t9-6",name:"問題9-6　キャッシュ・フローのタイミングと正味現在価値の関係",imp:"A"},
+   {id:"t9-7",name:"問題9-7　価値加法性",imp:"A"},
+   {id:"t9-8",name:"問題9-8　割引率の設定",imp:"A"},
+   {id:"t9-9",name:"問題9-9　クロスオーバー・ポイントを持つ相互排他的投資案の割り付け",imp:"B"},
+   {id:"t9-10",name:"問題9-10　修正キャッシュ・フロー法の問題点",imp:"A"},
+   {id:"t9-11",name:"問題9-11　日本企業が回収期間法を選好する理由",imp:"B"},
+   {id:"t9-12",name:"問題9-12　米国企業が内部収益率法を選好する理由",imp:"B"},
+   {id:"t9-13",name:"問題9-13　差額法による撤退投資の意思決定",imp:"B"},
+   {id:"t9-14",name:"問題9-14　撤退投資における未償却残高の取り扱い",imp:"B"},
+   {id:"t9-15",name:"問題9-15　将来キャッシュ・フローの取り扱いⅠ",imp:"B"},
+   {id:"t9-16",name:"問題9-16　将来キャッシュ・フローの取り扱いⅡ",imp:"C"},
+   {id:"t9-17",name:"問題9-17　修正キャッシュ・フロー法にリスクを取り込む方法",imp:"B"},
+   {id:"t9-18",name:"問題9-18　修正キャッシュ・フロー法による企業価値評価の方法",imp:"B"},
+   {id:"t9-19",name:"問題9-19　修正キャッシュ・フロー法による企業価値評価の問題点",imp:"B"},
   ]},
-  {ch:"第10章",chName:"原価管理",items:[
-    {id:"t10-1",name:"問題10-1　標準原価計算の現代的意義",imp:"A"},
-    {id:"t10-2",name:"問題10-2　原価低減と源流管理の重要性",imp:"A"},
-    {id:"t10-3",name:"問題10-3　原価管理の体系",imp:"A"},
-    {id:"t10-4",name:"問題10-4　日米で異なるコスト・マネジメントが台頭した理由",imp:"B"},
-    {id:"t10-5",name:"問題10-5　原価企画の目的",imp:"A"},
-    {id:"t10-6",name:"問題10-6　目標原価の設定方法",imp:"A"},
-    {id:"t10-7",name:"問題10-7　ライフサイクル・コストと原価企画の関係",imp:"C"},
-    {id:"t10-8",name:"問題10-8　ラグビー方式の製品開発",imp:"A"},
-    {id:"t10-9",name:"問題10-9　原価企画におけるサプライヤー関係",imp:"A"},
-    {id:"t10-10",name:"問題10-10　VEの適用方法",imp:"B"},
-    {id:"t10-11",name:"問題10-11　目標原価が未達成でも量産体制に移行する理由",imp:"B"},
-    {id:"t10-12",name:"問題10-12　原価企画における販売活動の重要性",imp:"B"},
-    {id:"t10-13",name:"問題10-13　原価企画の逆機能",imp:"A"},
-    {id:"t10-14",name:"問題10-14　原価改善の種類",imp:"A"},
-    {id:"t10-15",name:"問題10-15　原価維持と期別原価改善の関係",imp:"A"},
-    {id:"t10-16",name:"問題10-16　品質コストの分類",imp:"B"},
-    {id:"t10-17",name:"問題10-17　品質コストの相互関係",imp:"B"},
-    {id:"t10-18",name:"問題10-18　品質コスト・マネジメントのあり方",imp:"B"},
+ {ch:"第10章",chName:"原価管理",items:[
+   {id:"t10-1",name:"問題10-1　標準原価計算の現代的意義",imp:"A"},
+   {id:"t10-2",name:"問題10-2　原価低減と源流管理の重要性",imp:"A"},
+   {id:"t10-3",name:"問題10-3　原価管理の体系",imp:"A"},
+   {id:"t10-4",name:"問題10-4　日米で異なるコスト・マネジメントが台頭した理由",imp:"B"},
+   {id:"t10-5",name:"問題10-5　原価企画の目的",imp:"A"},
+   {id:"t10-6",name:"問題10-6　目標原価の設定方法",imp:"A"},
+   {id:"t10-7",name:"問題10-7　ライフサイクル・コストと原価企画の関係",imp:"C"},
+   {id:"t10-8",name:"問題10-8　ラグビー方式の製品開発",imp:"A"},
+   {id:"t10-9",name:"問題10-9　原価企画におけるサプライヤー関係",imp:"A"},
+   {id:"t10-10",name:"問題10-10　VEの適用方法",imp:"B"},
+   {id:"t10-11",name:"問題10-11　目標原価が未達成でも量産体制に移行する理由",imp:"B"},
+   {id:"t10-12",name:"問題10-12　原価企画における販売活動の重要性",imp:"B"},
+   {id:"t10-13",name:"問題10-13　原価企画の逆機能",imp:"A"},
+   {id:"t10-14",name:"問題10-14　原価改善の種類",imp:"A"},
+   {id:"t10-15",name:"問題10-15　原価維持と期別原価改善の関係",imp:"A"},
+   {id:"t10-16",name:"問題10-16　品質コストの分類",imp:"B"},
+   {id:"t10-17",name:"問題10-17　品質コストの相互関係",imp:"B"},
+   {id:"t10-18",name:"問題10-18　品質コスト・マネジメントのあり方",imp:"B"},
   ]},
-  {ch:"第11章",chName:"ABC・ABM",items:[
-    {id:"t11-1",name:"問題11-1　伝統的原価計算の問題点",imp:"A"},
-    {id:"t11-2",name:"問題11-2　ABCの意義",imp:"A"},
-    {id:"t11-3",name:"問題11-3　伝統的原価計算とABCの計算結果の相違",imp:"A"},
-    {id:"t11-4",name:"問題11-4　活動ごとの活動原価の同質性",imp:"A"},
-    {id:"t11-5",name:"問題11-5　伝統的原価計算とABCの計算結果が相違する原因",imp:"A"},
-    {id:"t11-6",name:"問題11-6　長期変動費",imp:"A"},
-    {id:"t11-7",name:"問題11-7　活動ドライバーの種類と適用",imp:"B"},
-    {id:"t11-8",name:"問題11-8　ABCの限界",imp:"B"},
-    {id:"t11-9",name:"問題11-9　ABCとABMの相違",imp:"B"},
+ {ch:"第11章",chName:"ABC・ABM",items:[
+   {id:"t11-1",name:"問題11-1　伝統的原価計算の問題点",imp:"A"},
+   {id:"t11-2",name:"問題11-2　ABCの意義",imp:"A"},
+   {id:"t11-3",name:"問題11-3　伝統的原価計算とABCの計算結果の相違",imp:"A"},
+   {id:"t11-4",name:"問題11-4　活動ごとの活動原価の同質性",imp:"A"},
+   {id:"t11-5",name:"問題11-5　伝統的原価計算とABCの計算結果が相違する原因",imp:"A"},
+   {id:"t11-6",name:"問題11-6　長期変動費",imp:"A"},
+   {id:"t11-7",name:"問題11-7　活動ドライバーの種類と適用",imp:"B"},
+   {id:"t11-8",name:"問題11-8　ABCの限界",imp:"B"},
+   {id:"t11-9",name:"問題11-9　ABCとABMの相違",imp:"B"},
   ]},
-  {ch:"第12章",chName:"分権組織とグループ経営の管理会計",items:[
-    {id:"t12-1",name:"問題12-1　集権と分権",imp:"B"},
-    {id:"t12-2",name:"問題12-2　事業部の責任会計上の位置付け⑴",imp:"A"},
-    {id:"t12-3",name:"問題12-3　事業部の責任会計上の位置付け⑵",imp:"A"},
-    {id:"t12-4",name:"問題12-4　カンパニー制の特徴",imp:"C"},
-    {id:"t12-5",name:"問題12-5　投資利益率と残余利益の比較⑴",imp:"A"},
-    {id:"t12-6",name:"問題12-6　投資利益率と残余利益の比較⑵",imp:"B"},
-    {id:"t12-7",name:"問題12-7　残余利益と投資意思決定の関係",imp:"A"},
-    {id:"t12-8",name:"問題12-8　事業部制の業績測定の２つの側面",imp:"A"},
-    {id:"t12-9",name:"問題12-9　本社費を配賦する理由",imp:"A"},
-    {id:"t12-10",name:"問題12-10　EVAを改善する方策",imp:"B"},
-    {id:"t12-11",name:"問題12-11　EVAによる業績測定の特徴⑴",imp:"B"},
-    {id:"t12-12",name:"問題12-12　EVAによる業績測定の特徴⑵",imp:"B"},
-    {id:"t12-13",name:"問題12-13　社内金利制度と社内資本金制度",imp:"B"},
-    {id:"t12-14",name:"問題12-14　社内資本金制度の機能",imp:"B"},
-    {id:"t12-15",name:"問題12-15　多角化企業における業績測定上の留意点",imp:"B"},
-    {id:"t12-16",name:"問題12-16　内部振替価格の設定目的",imp:"B"},
-    {id:"t12-17",name:"問題12-17　市価基準の振替価格の適用",imp:"B"},
-    {id:"t12-18",name:"問題12-18　原価基準の振替価格の適用⑴",imp:"A"},
-    {id:"t12-19",name:"問題12-19　原価基準の振替価格の適用⑵",imp:"A"},
-    {id:"t12-20",name:"問題12-20　原価基準の振替価格の適用⑶",imp:"B"},
-    {id:"t12-21",name:"問題12-21　内部振替価格の決定方式と本社の役割",imp:"B"},
-    {id:"t12-22",name:"問題12-22　シェアードサービス",imp:"B"},
-    {id:"t12-23",name:"問題12-23　移転価格の設定",imp:"B"},
-    {id:"t12-24",name:"問題12-24　EBITDAの特徴",imp:"B"},
+ {ch:"第12章",chName:"分権組織とグループ経営の管理会計",items:[
+   {id:"t12-1",name:"問題12-1　集権と分権",imp:"B"},
+   {id:"t12-2",name:"問題12-2　事業部の責任会計上の位置付け⑴",imp:"A"},
+   {id:"t12-3",name:"問題12-3　事業部の責任会計上の位置付け⑵",imp:"A"},
+   {id:"t12-4",name:"問題12-4　カンパニー制の特徴",imp:"C"},
+   {id:"t12-5",name:"問題12-5　投資利益率と残余利益の比較⑴",imp:"A"},
+   {id:"t12-6",name:"問題12-6　投資利益率と残余利益の比較⑵",imp:"B"},
+   {id:"t12-7",name:"問題12-7　残余利益と投資意思決定の関係",imp:"A"},
+   {id:"t12-8",name:"問題12-8　事業部制の業績測定の２つの側面",imp:"A"},
+   {id:"t12-9",name:"問題12-9　本社費を配賦する理由",imp:"A"},
+   {id:"t12-10",name:"問題12-10　EVAを改善する方策",imp:"B"},
+   {id:"t12-11",name:"問題12-11　EVAによる業績測定の特徴⑴",imp:"B"},
+   {id:"t12-12",name:"問題12-12　EVAによる業績測定の特徴⑵",imp:"B"},
+   {id:"t12-13",name:"問題12-13　社内金利制度と社内資本金制度",imp:"B"},
+   {id:"t12-14",name:"問題12-14　社内資本金制度の機能",imp:"B"},
+   {id:"t12-15",name:"問題12-15　多角化企業における業績測定上の留意点",imp:"B"},
+   {id:"t12-16",name:"問題12-16　内部振替価格の設定目的",imp:"B"},
+   {id:"t12-17",name:"問題12-17　市価基準の振替価格の適用",imp:"B"},
+   {id:"t12-18",name:"問題12-18　原価基準の振替価格の適用⑴",imp:"A"},
+   {id:"t12-19",name:"問題12-19　原価基準の振替価格の適用⑵",imp:"A"},
+   {id:"t12-20",name:"問題12-20　原価基準の振替価格の適用⑶",imp:"B"},
+   {id:"t12-21",name:"問題12-21　内部振替価格の決定方式と本社の役割",imp:"B"},
+   {id:"t12-22",name:"問題12-22　シェアードサービス",imp:"B"},
+   {id:"t12-23",name:"問題12-23　移転価格の設定",imp:"B"},
+   {id:"t12-24",name:"問題12-24　EBITDAの特徴",imp:"B"},
   ]},
 ];
 
