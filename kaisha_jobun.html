@@ -1802,7 +1802,7 @@ function switchTab(name) {
   });
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
-  if (name === 'training') { switchTrainingView('home'); renderTrainingHome(); }
+  if (name === 'training' && trainingQueue.length === 0) { switchTrainingView('home'); renderTrainingHome(); }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
