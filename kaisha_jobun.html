@@ -683,6 +683,13 @@
   }
   .btn-tag-ronten:hover { background: #6a1b9a; color: white; }
 
+  .btn-tag-hanrei {
+    background: #fce4ec;
+    color: #880e4f;
+    border-color: #f48fb1;
+  }
+  .btn-tag-hanrei:hover { background: #880e4f; color: white; }
+
   .btn-tag-related {
     background: var(--accent-light);
     color: var(--accent);
@@ -1590,6 +1597,7 @@ function getStorage() {
   if (!d.yoken) d.yoken = {};
   if (!d.shushi) d.shushi = {};
   if (!d.ronten) d.ronten = {};
+  if (!d.hanrei) d.hanrei = {};
   if (!d.starred) d.starred = [];
   if (!d.bookmarks) d.bookmarks = [];
   if (!d.browseHistory) d.browseHistory = [];
@@ -1927,6 +1935,8 @@ function buildParagraph(articleNum, p, storage) {
     const yokenBtn = yoken ? `<button class="btn-popup-tag btn-tag-yoken" onclick="showInfoPopup('要件', '${key}', 'yoken')">要件</button>` : '';
     const shushiBtn = shushi ? `<button class="btn-popup-tag btn-tag-shushi" onclick="showInfoPopup('趣旨', '${key}', 'shushi')">趣旨</button>` : '';
     const rontenBtn = ronten ? `<button class="btn-popup-tag btn-tag-ronten" onclick="showInfoPopup('論点', '${key}', 'ronten')">論点</button>` : '';
+    const hanrei = (storage.hanrei || {})[key];
+    const hanreiBtn = hanrei ? `<button class="btn-popup-tag btn-tag-hanrei" onclick="showInfoPopup('判例', '${key}', 'hanrei')">判例</button>` : '';
 
     const relatedBtns = related.map((r, i) => {
       const rKey = `${key}_view_${i}`;
@@ -1934,8 +1944,8 @@ function buildParagraph(articleNum, p, storage) {
       return `<button class="btn-popup-tag btn-tag-related" onclick="jumpToArticleByKey('${rKey}')">${r.label}</button>`;
     }).join('');
 
-    const hasTags = hasEdit || yoken || shushi || ronten || related.length;
-    const tagsRow = hasTags ? `<div class="para-tags-row">${origBtn}${yokenBtn}${shushiBtn}${rontenBtn}${relatedBtns}</div>` : '';
+    const hasTags = hasEdit || yoken || shushi || ronten || hanrei || related.length;
+    const tagsRow = hasTags ? `<div class="para-tags-row">${origBtn}${yokenBtn}${shushiBtn}${rontenBtn}${hanreiBtn}${relatedBtns}</div>` : '';
 
     return `
       <div class="paragraph" id="para-${articleNum}-${p.num}" data-key="${articleNum}" data-pnum="${p.num}">
@@ -1957,6 +1967,7 @@ function buildParagraph(articleNum, p, storage) {
   const yokenVal = (storage.yoken || {})[key] || '';
   const shushiVal = (storage.shushi || {})[key] || '';
   const rontenVal = (storage.ronten || {})[key] || '';
+  const hanreiVal = (storage.hanrei || {})[key] || '';
 
   return `
     <div class="paragraph" id="para-${articleNum}-${p.num}" data-key="${articleNum}" data-pnum="${p.num}">
@@ -2057,6 +2068,8 @@ function saveEdit(articleNum, pNum) {
   if (yokenEl) { const v = yokenEl.value.trim(); if (v) storage.yoken[key] = v; else delete storage.yoken[key]; }
   if (shushiEl) { const v = shushiEl.value.trim(); if (v) storage.shushi[key] = v; else delete storage.shushi[key]; }
   if (rontenEl) { const v = rontenEl.value.trim(); if (v) storage.ronten[key] = v; else delete storage.ronten[key]; }
+  const hanreiEl = document.getElementById(`hanrei-${articleNum}-${pNum}`);
+  if (hanreiEl) { const v = hanreiEl.value.trim(); if (v) storage.hanrei[key] = v; else delete storage.hanrei[key]; }
 
   saveStorage(storage);
 
@@ -2092,6 +2105,8 @@ function cancelEdit(articleNum, pNum) {
     if (yokenEl) yokenEl.value = (storage.yoken || {})[key2] || '';
     if (shushiEl) shushiEl.value = (storage.shushi || {})[key2] || '';
     if (rontenEl) rontenEl.value = (storage.ronten || {})[key2] || '';
+    const hanreiEl2 = document.getElementById(`hanrei-${articleNum}-${pNum}`);
+    if (hanreiEl2) hanreiEl2.value = (storage.hanrei || {})[key2] || '';
   }
 }
 
