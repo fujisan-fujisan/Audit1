@@ -1642,12 +1642,16 @@ function positionSuggest(inputEl, suggestEl) {
 
 
 function switchTab(name) {
+  const tabs = ['browse','training'];
+  const alreadyActive = document.getElementById('panel-' + name).classList.contains('active');
+  if (alreadyActive) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
   document.querySelectorAll('.tab').forEach((t,i) => {
-    t.classList.toggle('active', ['browse','training'][i] === name);
+    t.classList.toggle('active', tabs[i] === name);
   });
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
   if (name === 'training') { switchTrainingView('home'); renderTrainingHome(); }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function switchTrainingView(name) {
