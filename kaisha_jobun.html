@@ -2193,6 +2193,10 @@ function buildParagraph(articleNum, p, storage) {
           <textarea class="extra-field-area" id="hanrei-${articleNum}-${p.num}" placeholder="判例を入力">${hanreiVal}</textarea>
         </div>
         ${buildQSection(articleNum, p.num, storage)}
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border-light)">
+          <button class="btn btn-sm" onclick="closeExtraFields('${articleNum}',${p.num})">閉じる</button>
+          <button class="btn btn-primary btn-sm" onclick="saveExtraFields('${articleNum}',${p.num})">保存</button>
+        </div>
       </div>
     </div>`;
 }
@@ -2339,6 +2343,38 @@ function cancelEdit(articleNum, pNum) {
     const hanreiEl2 = document.getElementById(`hanrei-${articleNum}-${pNum}`);
     if (hanreiEl2) hanreiEl2.value = (storage.hanrei || {})[key2] || '';
   }
+}
+
+function saveExtraFields(articleNum, pNum) {
+  const key = `${articleNum}-${pNum}`;
+  const storage = getStorage();
+  const yokenEl = document.getElementById(`yoken-${articleNum}-${pNum}`);
+  const shushiEl = document.getElementById(`shushi-${articleNum}-${pNum}`);
+  const rontenEl = document.getElementById(`ronten-${articleNum}-${pNum}`);
+  const hanreiEl = document.getElementById(`hanrei-${articleNum}-${pNum}`);
+  if (yokenEl) { const v = yokenEl.value.trim(); if (v) storage.yoken[key] = v; else delete storage.yoken[key]; }
+  if (shushiEl) { const v = shushiEl.value.trim(); if (v) storage.shushi[key] = v; else delete storage.shushi[key]; }
+  if (rontenEl) { const v = rontenEl.value.trim(); if (v) storage.ronten[key] = v; else delete storage.ronten[key]; }
+  if (hanreiEl) { const v = hanreiEl.value.trim(); if (v) storage.hanrei[key] = v; else delete storage.hanrei[key]; }
+  saveStorage(storage);
+  const extraFields = document.getElementById(`extra-fields-${articleNum}-${pNum}`);
+  if (extraFields) extraFields.classList.remove('open');
+  showToast('保存しました');
+}
+
+function closeExtraFields(articleNum, pNum) {
+  const storage = getStorage();
+  const key = `${articleNum}-${pNum}`;
+  const yokenEl = document.getElementById(`yoken-${articleNum}-${pNum}`);
+  const shushiEl = document.getElementById(`shushi-${articleNum}-${pNum}`);
+  const rontenEl = document.getElementById(`ronten-${articleNum}-${pNum}`);
+  const hanreiEl = document.getElementById(`hanrei-${articleNum}-${pNum}`);
+  if (yokenEl) yokenEl.value = (storage.yoken || {})[key] || '';
+  if (shushiEl) shushiEl.value = (storage.shushi || {})[key] || '';
+  if (rontenEl) rontenEl.value = (storage.ronten || {})[key] || '';
+  if (hanreiEl) hanreiEl.value = (storage.hanrei || {})[key] || '';
+  const extraFields = document.getElementById(`extra-fields-${articleNum}-${pNum}`);
+  if (extraFields) extraFields.classList.remove('open');
 }
 
 function deleteEdit(articleNum, pNum) {
