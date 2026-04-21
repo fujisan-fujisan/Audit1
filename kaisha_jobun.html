@@ -694,6 +694,19 @@
   }
   .btn-tag-hanrei:hover { background: #880e4f; color: white; }
 
+  .badge-q {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: #e3f2fd;
+    color: #1565c0;
+    margin-left: 4px;
+    vertical-align: middle;
+    pointer-events: none;
+  }
+
   .btn-tag-related {
     background: var(--accent-light);
     color: var(--accent);
@@ -1810,11 +1823,22 @@ function renderNav() {} // 互換性のため残す
 
 // ===== 検索・閲覧 =====
 let browseFilter = null;
+let _qParaKeySet = new Set();
+
+function refreshQParaKeys(questions) {
+  _qParaKeySet = new Set();
+  for (const q of questions || []) {
+    const m = q.answer.match(/^(\d+(?:の\d+)?)条(\d+)項/);
+    if (!m) continue;
+    _qParaKeySet.add(`${m[1].replace(/の/g, '_')}-${m[2]}`);
+  }
+}
 
 function renderArticles() {
   const q = document.getElementById('searchInput').value.trim();
   const list = document.getElementById('articleList');
   const storage = getStorage();
+  refreshQParaKeys(storage.questions);
 
   let articles, breadcrumb;
 
@@ -1897,11 +1921,13 @@ function buildArticleCard(a, storage) {
   const paragraphsHtml = a.paragraphs.map(p => buildParagraph(numKey, p, storage)).join('');
   const isStarred = (storage.starred || []).includes(numKey);
   const isBookmarked = (storage.bookmarks || []).includes(numKey);
+  const hasQ = browseMode === 'view' && a.paragraphs.some(p => _qParaKeySet.has(`${numKey}-${p.num}`));
 
   return `
     <div class="article-card" id="card-${numKey}">
       <div class="article-header" onclick="toggleArticle('${numKey}')">
         <span class="article-num">${displayNum}条</span>
+        ${hasQ ? '<span class="badge-q">問</span>' : ''}
         ${caption}
         <div class="article-header-actions" onclick="event.stopPropagation()">
           <button class="btn-article-star${isStarred ? ' on' : ''}" id="star-btn-${numKey}" onclick="toggleStarred('${numKey}')">★</button>
@@ -1965,11 +1991,13 @@ function buildParagraph(articleNum, p, storage) {
     const hasTags = hasEdit || yoken || shushi || ronten || hanrei || related.length;
     const tagsRow = hasTags ? `<div class="para-tags-row">${origBtn}${yokenBtn}${shushiBtn}${rontenBtn}${hanreiBtn}${relatedBtns}</div>` : '';
 
+    const qBadge = _qParaKeySet.has(key) ? '<span class="badge-q">問</span>' : '';
     return `
       <div class="paragraph" id="para-${articleNum}-${p.num}" data-key="${articleNum}" data-pnum="${p.num}">
         <div class="paragraph-header">
           <div style="display:flex;align-items:center;gap:6px">
             <span class="paragraph-num">${p.num}項</span>
+            ${qBadge}
             <button class="btn-jump-back" id="back-${articleNum}-${p.num}" data-key="${articleNum}" data-pnum="${p.num}" onclick="jumpBack('${articleNum}', ${p.num})">← 戻る</button>
           </div>
         </div>
