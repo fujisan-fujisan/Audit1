@@ -851,7 +851,35 @@
   }
   .extra-field-area:focus { border-color: var(--accent); }
 
-  /* ===== モード切替ボタン ===== */
+  /* ===== 問題追加セクション（編集モード） ===== */
+  .q-edit-section {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+  }
+  .q-edit-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .q-edit-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .q-edit-item-text { flex: 1; }
+  .q-edit-add-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+  }
   .btn-mode-toggle {
     padding: 9px 16px;
     border: 1px solid var(--border);
@@ -2080,6 +2108,11 @@ function buildParagraph(articleNum, p, storage) {
           <label class="extra-field-label">論点</label>
           <textarea class="extra-field-area" id="ronten-${articleNum}-${p.num}" placeholder="論点を入力">${rontenVal}</textarea>
         </div>
+        <div class="extra-field-row">
+          <label class="extra-field-label">判例</label>
+          <textarea class="extra-field-area" id="hanrei-${articleNum}-${p.num}" placeholder="判例を入力">${hanreiVal}</textarea>
+        </div>
+        ${buildQSection(articleNum, p.num, storage)}
       </div>
     </div>`;
 }
@@ -2823,6 +2856,53 @@ function addQuestion() {
   document.getElementById('regQuestion').value = '';
   document.getElementById('claudeHintBox').style.display = 'none';
   showToast('問題を登録しました');
+}
+
+function buildQSection(articleNum, pNum, storage) {
+  const answer = `${keyToDisplay(articleNum)}条${pNum}項`;
+  const qs = (storage.questions || []).map((q, i) => ({q, i})).filter(({q}) => q.answer === answer);
+  const listHtml = qs.map(({q, i}) => `
+    <div class="q-edit-item">
+      <span class="q-edit-item-text">${escapeHtml(q.question)}</span>
+      <button class="btn btn-sm btn-danger" onclick="deleteQuestionFromEdit(${i},'${articleNum}',${pNum})">削除</button>
+    </div>`).join('');
+  return `
+    <div class="q-edit-section" id="q-section-${articleNum}-${pNum}">
+      <div class="q-edit-label">問題</div>
+      ${listHtml}
+      <div class="q-edit-add-row">
+        <textarea class="extra-field-area" id="q-new-${articleNum}-${pNum}" placeholder="要約文を入力"></textarea>
+        <div style="display:flex;justify-content:flex-end">
+          <button class="btn btn-primary btn-sm" onclick="addQuestionFromEdit('${articleNum}',${pNum})">登録する</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function addQuestionFromEdit(articleNum, pNum) {
+  const textarea = document.getElementById(`q-new-${articleNum}-${pNum}`);
+  const question = textarea.value.trim();
+  if (!question) { showToast('要約文を入力してください'); return; }
+  const answer = `${keyToDisplay(articleNum)}条${pNum}項`;
+  const match = answer.match(/^(\d+)条/);
+  const chapterInfo = match ? getChapterInfo(parseInt(match[1])) : null;
+  const storage = getStorage();
+  storage.questions.push({ answer, question, partIdx: chapterInfo?.partIdx ?? null, chapterIdx: chapterInfo?.chapterIdx ?? null, correct: 0, attempted: 0 });
+  saveStorage(storage);
+  refreshQParaKeys(storage.questions);
+  const section = document.getElementById(`q-section-${articleNum}-${pNum}`);
+  if (section) section.outerHTML = buildQSection(articleNum, pNum, storage);
+  showToast('問題を登録しました');
+}
+
+function deleteQuestionFromEdit(idx, articleNum, pNum) {
+  const storage = getStorage();
+  storage.questions.splice(idx, 1);
+  saveStorage(storage);
+  refreshQParaKeys(storage.questions);
+  const section = document.getElementById(`q-section-${articleNum}-${pNum}`);
+  if (section) section.outerHTML = buildQSection(articleNum, pNum, storage);
+  showToast('問題を削除しました');
 }
 
 let manageState = 'list';
