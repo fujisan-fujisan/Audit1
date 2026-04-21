@@ -702,10 +702,41 @@
     border-radius: 3px;
     background: #e3f2fd;
     color: #1565c0;
+    border: 1px solid #90caf9;
     margin-left: 4px;
     vertical-align: middle;
-    pointer-events: none;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
   }
+  .badge-q:hover { background: #1565c0; color: white; }
+
+  .q-popup-item {
+    display: flex;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 13.5px;
+    line-height: 1.8;
+  }
+  .q-popup-item:last-child { border-bottom: none; }
+  .q-popup-num {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: #1565c0;
+    background: #e3f2fd;
+    border-radius: 3px;
+    padding: 2px 5px;
+    height: fit-content;
+    margin-top: 2px;
+  }
+  .q-popup-para-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin: 10px 0 4px;
+  }
+  .q-popup-para-label:first-child { margin-top: 0; }
 
   .btn-tag-related {
     background: var(--accent-light);
@@ -1927,7 +1958,7 @@ function buildArticleCard(a, storage) {
     <div class="article-card" id="card-${numKey}">
       <div class="article-header" onclick="toggleArticle('${numKey}')">
         <span class="article-num">${displayNum}条</span>
-        ${hasQ ? '<span class="badge-q">問</span>' : ''}
+        ${hasQ ? `<button class="badge-q" onclick="event.stopPropagation();showArticleQPopup('${numKey}')">問</button>` : ''}
         ${caption}
         <div class="article-header-actions" onclick="event.stopPropagation()">
           <button class="btn-article-star${isStarred ? ' on' : ''}" id="star-btn-${numKey}" onclick="toggleStarred('${numKey}')">★</button>
@@ -1991,7 +2022,7 @@ function buildParagraph(articleNum, p, storage) {
     const hasTags = hasEdit || yoken || shushi || ronten || hanrei || related.length;
     const tagsRow = hasTags ? `<div class="para-tags-row">${origBtn}${yokenBtn}${shushiBtn}${rontenBtn}${hanreiBtn}${relatedBtns}</div>` : '';
 
-    const qBadge = _qParaKeySet.has(key) ? '<span class="badge-q">問</span>' : '';
+    const qBadge = _qParaKeySet.has(key) ? `<button class="badge-q" onclick="showParaQPopup('${key}')">問</button>` : '';
     return `
       <div class="paragraph" id="para-${articleNum}-${p.num}" data-key="${articleNum}" data-pnum="${p.num}">
         <div class="paragraph-header">
@@ -3071,7 +3102,9 @@ function showInfoPopup(title, key, field) {
   const storage = getStorage();
   const content = (storage[field] || {})[key] || '';
   document.getElementById('infoPopupTitle').textContent = title;
-  document.getElementById('infoPopupBody').textContent = content;
+  const body = document.getElementById('infoPopupBody');
+  body.style.whiteSpace = 'pre-wrap';
+  body.textContent = content;
   document.getElementById('infoPopup').classList.add('open');
   document.getElementById('infoPopupOverlay').classList.add('open');
 }
@@ -3079,6 +3112,60 @@ function showInfoPopup(title, key, field) {
 function closeInfoPopup() {
   document.getElementById('infoPopup').classList.remove('open');
   document.getElementById('infoPopupOverlay').classList.remove('open');
+}
+
+function _openQPopup(title, qs) {
+  document.getElementById('infoPopupTitle').textContent = title;
+  const body = document.getElementById('infoPopupBody');
+  body.style.whiteSpace = 'normal';
+  if (qs.length === 1) {
+    body.style.whiteSpace = 'pre-wrap';
+    body.textContent = qs[0].question;
+  } else {
+    body.innerHTML = qs.map((q, i) =>
+      `<div class="q-popup-item"><span class="q-popup-num">${i + 1}</span><span>${escapeHtml(q.question)}</span></div>`
+    ).join('');
+  }
+  document.getElementById('infoPopup').classList.add('open');
+  document.getElementById('infoPopupOverlay').classList.add('open');
+}
+
+function showParaQPopup(paraKey) {
+  const { articleKey, pNum } = parseStorageKey(paraKey);
+  const storage = getStorage();
+  const qs = (storage.questions || []).filter(q => {
+    const m = q.answer.match(/^(\d+(?:の\d+)?)条(\d+)項/);
+    return m && m[1].replace(/の/g, '_') === articleKey && Number(m[2]) === pNum;
+  });
+  if (!qs.length) return;
+  _openQPopup(`${keyToDisplay(articleKey)}条 ${pNum}項 — 問題`, qs);
+}
+
+function showArticleQPopup(numKey) {
+  const storage = getStorage();
+  const qs = (storage.questions || []).filter(q => {
+    const m = q.answer.match(/^(\d+(?:の\d+)?)条(\d+)項/);
+    return m && m[1].replace(/の/g, '_') === numKey;
+  });
+  if (!qs.length) return;
+  document.getElementById('infoPopupTitle').textContent = `${keyToDisplay(numKey)}条 — 問題一覧`;
+  const body = document.getElementById('infoPopupBody');
+  body.style.whiteSpace = 'normal';
+  // 項ごとにグループ化
+  const byPara = {};
+  for (const q of qs) {
+    const m = q.answer.match(/(\d+)項/);
+    const pNum = m ? m[1] : '?';
+    (byPara[pNum] = byPara[pNum] || []).push(q);
+  }
+  body.innerHTML = Object.entries(byPara).map(([pNum, paraQs]) =>
+    `<div class="q-popup-para-label">${pNum}項</div>` +
+    paraQs.map((q, i) =>
+      `<div class="q-popup-item"><span class="q-popup-num">${i + 1}</span><span>${escapeHtml(q.question)}</span></div>`
+    ).join('')
+  ).join('');
+  document.getElementById('infoPopup').classList.add('open');
+  document.getElementById('infoPopupOverlay').classList.add('open');
 }
 </script>
 <!-- 情報ポップアップ（要件・趣旨・論点） -->
