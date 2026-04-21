@@ -1347,6 +1347,57 @@
     .training-card { padding: 24px 18px; }
     .btn-correct, .btn-wrong { padding: 10px 24px; font-size: 13px; }
   }
+
+  /* ===== ブックマーク・重要・閲覧履歴 ===== */
+  .browse-quick-actions {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .btn-quick-filter {
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+    transition: all 0.15s;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-quick-filter:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-quick-filter.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+  .article-header-actions {
+    display: flex;
+    gap: 1px;
+    align-items: center;
+    margin-left: auto;
+    margin-right: 4px;
+  }
+  .btn-article-star, .btn-article-bm {
+    font-size: 15px;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.25;
+    transition: opacity 0.15s, background 0.15s;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+  }
+  .btn-article-star:hover, .btn-article-bm:hover { opacity: 0.6; }
+  .btn-article-star.on { opacity: 1; color: #d4a017; }
+  .btn-article-bm.on { opacity: 1; color: var(--accent); }
 </style>
 </head>
 <body>
@@ -1402,6 +1453,11 @@
     <div class="search-bar">
       <input class="search-input" id="searchInput" type="text" placeholder="条番号 / キーワード" oninput="onSearch()" autocomplete="off">
       <button class="btn-mode-toggle" id="browseModeBtn" onclick="toggleBrowseMode()">編集モード</button>
+    </div>
+    <div class="browse-quick-actions">
+      <button class="btn-quick-filter" id="qf-starred" onclick="setBrowseFilter('starred')">★ 重要</button>
+      <button class="btn-quick-filter" id="qf-bookmarks" onclick="setBrowseFilter('bookmarks')">🔖 ブックマーク</button>
+      <button class="btn-quick-filter" id="qf-history" onclick="setBrowseFilter('history')">最近見た</button>
     </div>
     <div id="articleList"></div>
   </div>
@@ -1534,6 +1590,9 @@ function getStorage() {
   if (!d.yoken) d.yoken = {};
   if (!d.shushi) d.shushi = {};
   if (!d.ronten) d.ronten = {};
+  if (!d.starred) d.starred = [];
+  if (!d.bookmarks) d.bookmarks = [];
+  if (!d.browseHistory) d.browseHistory = [];
   return d;
 }
 
@@ -1722,6 +1781,8 @@ function selectChapter(pi, ci) {
 function onSearch() {
   currentPartIdx = null;
   currentChapterIdx = null;
+  browseFilter = null;
+  document.querySelectorAll('.btn-quick-filter').forEach(b => b.classList.remove('active'));
   updateNavButton();
   renderArticles();
 }
@@ -1730,12 +1791,34 @@ function onSearch() {
 function renderNav() {} // 互換性のため残す
 
 // ===== 検索・閲覧 =====
+let browseFilter = null;
+
 function renderArticles() {
   const q = document.getElementById('searchInput').value.trim();
   const list = document.getElementById('articleList');
   const storage = getStorage();
 
   let articles, breadcrumb;
+
+  // クイックフィルター（★重要 / ブックマーク / 履歴）
+  if (browseFilter === 'starred') {
+    articles = (storage.starred || []).map(k => LAW_DATA[k]).filter(Boolean);
+    if (!articles.length) { list.innerHTML = '<div class="no-results" style="color:var(--text-muted);padding:40px 20px;text-align:center">重要マークした条文がありません</div>'; return; }
+    list.innerHTML = `<div class="breadcrumb">★ 重要マーク（${articles.length}件）</div>` + articles.map(a => buildArticleCard(a, storage)).join('');
+    return;
+  }
+  if (browseFilter === 'bookmarks') {
+    articles = (storage.bookmarks || []).map(k => LAW_DATA[k]).filter(Boolean);
+    if (!articles.length) { list.innerHTML = '<div class="no-results" style="color:var(--text-muted);padding:40px 20px;text-align:center">ブックマークした条文がありません</div>'; return; }
+    list.innerHTML = `<div class="breadcrumb">🔖 ブックマーク（${articles.length}件）</div>` + articles.map(a => buildArticleCard(a, storage)).join('');
+    return;
+  }
+  if (browseFilter === 'history') {
+    articles = (storage.browseHistory || []).map(k => LAW_DATA[k]).filter(Boolean);
+    if (!articles.length) { list.innerHTML = '<div class="no-results" style="color:var(--text-muted);padding:40px 20px;text-align:center">まだ条文を開いていません</div>'; return; }
+    list.innerHTML = `<div class="breadcrumb">最近見た条文（${articles.length}件）</div>` + articles.map(a => buildArticleCard(a, storage)).join('');
+    return;
+  }
 
   if (q) {
     const qNum = q.replace(/[^0-9の]/g, '');
@@ -1786,12 +1869,18 @@ function buildArticleCard(a, storage) {
   const displayNum = keyToDisplay(numKey);
   const caption = a.caption ? `<span class="article-caption">${a.caption}</span>` : '';
   const paragraphsHtml = a.paragraphs.map(p => buildParagraph(numKey, p, storage)).join('');
+  const isStarred = (storage.starred || []).includes(numKey);
+  const isBookmarked = (storage.bookmarks || []).includes(numKey);
 
   return `
     <div class="article-card" id="card-${numKey}">
       <div class="article-header" onclick="toggleArticle('${numKey}')">
         <span class="article-num">${displayNum}条</span>
         ${caption}
+        <div class="article-header-actions" onclick="event.stopPropagation()">
+          <button class="btn-article-star${isStarred ? ' on' : ''}" id="star-btn-${numKey}" onclick="toggleStarred('${numKey}')">★</button>
+          <button class="btn-article-bm${isBookmarked ? ' on' : ''}" id="bm-btn-${numKey}" onclick="toggleBookmark('${numKey}')">🔖</button>
+        </div>
         <span class="article-toggle" id="toggle-${numKey}">▼</span>
       </div>
       <div class="article-body" id="body-${numKey}">
@@ -1934,6 +2023,7 @@ function toggleArticle(num) {
   body.classList.toggle('open', !isOpen);
   toggle.classList.toggle('open', !isOpen);
   header.classList.toggle('open', !isOpen);
+  if (!isOpen) recordBrowseHistory(num);
 }
 
 function toggleEdit(articleNum, pNum) {
@@ -2722,6 +2812,15 @@ function renderManageQuestionList() {
     body.innerHTML = '<div class="empty-state">この章に登録された問題がありません</div>';
     return;
   }
+  // 条文番号順にソート
+  filtered.sort((a, b) => {
+    const parseBase = s => { const m = (s||'').match(/^(\d+)/); return m ? parseInt(m[1]) : 9999; };
+    const parseSuffix = s => { const m = (s||'').match(/^(\d+)条の(\d+)/); return m ? parseInt(m[2]) : 0; };
+    const na = parseBase(a.q.answer), nb = parseBase(b.q.answer);
+    if (na !== nb) return na - nb;
+    return parseSuffix(a.q.answer) - parseSuffix(b.q.answer);
+  });
+
   body.innerHTML = filtered.map(({ q, i }) => {
     const correct = q.correct || 0;
     const attempted = q.attempted || 0;
@@ -2850,6 +2949,52 @@ window.addEventListener('scroll', () => {
 // ===== 初期化 =====
 updateNavButton();
 renderArticles();
+
+// ===== ★重要・ブックマーク・閲覧履歴 =====
+function toggleStarred(numKey) {
+  const storage = getStorage();
+  const idx = storage.starred.indexOf(numKey);
+  if (idx >= 0) storage.starred.splice(idx, 1);
+  else storage.starred.push(numKey);
+  saveStorage(storage);
+  const btn = document.getElementById(`star-btn-${numKey}`);
+  if (btn) btn.classList.toggle('on', storage.starred.includes(numKey));
+  showToast(storage.starred.includes(numKey) ? '重要マークしました' : 'マークを解除しました');
+}
+
+function toggleBookmark(numKey) {
+  const storage = getStorage();
+  const idx = storage.bookmarks.indexOf(numKey);
+  if (idx >= 0) storage.bookmarks.splice(idx, 1);
+  else storage.bookmarks.push(numKey);
+  saveStorage(storage);
+  const btn = document.getElementById(`bm-btn-${numKey}`);
+  if (btn) btn.classList.toggle('on', storage.bookmarks.includes(numKey));
+  showToast(storage.bookmarks.includes(numKey) ? 'ブックマークしました' : 'ブックマークを解除しました');
+}
+
+function recordBrowseHistory(numKey) {
+  if (!LAW_DATA[numKey]) return;
+  const storage = getStorage();
+  storage.browseHistory = storage.browseHistory.filter(k => k !== numKey);
+  storage.browseHistory.unshift(numKey);
+  storage.browseHistory = storage.browseHistory.slice(0, 30);
+  saveStorage(storage);
+}
+
+function setBrowseFilter(filter) {
+  document.getElementById('searchInput').value = '';
+  currentPartIdx = null;
+  currentChapterIdx = null;
+  browseFilter = browseFilter === filter ? null : filter;
+  document.querySelectorAll('.btn-quick-filter').forEach(b => b.classList.remove('active'));
+  if (browseFilter) {
+    const btn = document.getElementById(`qf-${browseFilter}`);
+    if (btn) btn.classList.add('active');
+  }
+  updateNavButton();
+  renderArticles();
+}
 
 // ===== 閲覧/編集モード切替 =====
 function toggleBrowseMode() {
