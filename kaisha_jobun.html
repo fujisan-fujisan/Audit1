@@ -1465,6 +1465,7 @@
       <button class="btn-quick-filter" id="qf-starred" onclick="setBrowseFilter('starred')">★ 重要</button>
       <button class="btn-quick-filter" id="qf-bookmarks" onclick="setBrowseFilter('bookmarks')">🔖 ブックマーク</button>
       <button class="btn-quick-filter" id="qf-history" onclick="setBrowseFilter('history')">最近見た</button>
+      <button class="btn-quick-filter" id="qf-hanrei" onclick="setBrowseFilter('hanrei')">判例あり</button>
     </div>
     <div id="articleList"></div>
   </div>
@@ -1825,6 +1826,14 @@ function renderArticles() {
     articles = (storage.browseHistory || []).map(k => LAW_DATA[k]).filter(Boolean);
     if (!articles.length) { list.innerHTML = '<div class="no-results" style="color:var(--text-muted);padding:40px 20px;text-align:center">まだ条文を開いていません</div>'; return; }
     list.innerHTML = `<div class="breadcrumb">最近見た条文（${articles.length}件）</div>` + articles.map(a => buildArticleCard(a, storage)).join('');
+    return;
+  }
+  if (browseFilter === 'hanrei') {
+    const hanreiKeys = Object.keys(storage.hanrei || {});
+    const articleKeySet = new Set(hanreiKeys.map(sk => parseStorageKey(sk).articleKey));
+    articles = [...articleKeySet].map(k => LAW_DATA[k]).filter(Boolean);
+    if (!articles.length) { list.innerHTML = '<div class="no-results" style="color:var(--text-muted);padding:40px 20px;text-align:center">判例が登録された条文がありません</div>'; return; }
+    list.innerHTML = `<div class="breadcrumb">判例あり（${articles.length}件）</div>` + articles.map(a => buildArticleCard(a, storage)).join('');
     return;
   }
 
