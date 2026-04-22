@@ -1690,7 +1690,8 @@ function renderRonten() {
 
       const histCols = entries.map(e => {
         const label = EVAL_LABELS[e.eval] || '–';
-        const probShort = e.probId;
+        const prob = getProbById(e.probId);
+        const probShort = prob ? (prob.id.startsWith('custom-') ? (prob.num || '') : prob.id) : e.probId;
         const dateShort = fmtDate(e.date);
         return `
           <div class="ronten-hist-col">
