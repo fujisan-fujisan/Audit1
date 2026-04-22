@@ -134,6 +134,11 @@ body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); color: va
 .item-memo { width: 100%; font-size: 11px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 6px 9px; color: var(--text); font-family: 'Noto Sans JP', sans-serif; resize: none; outline: none; min-height: 28px; line-height: 1.5; transition: border-color .15s; }
 .item-memo:focus { border-color: var(--text); }
 .item-memo::placeholder { color: var(--text-3); }
+.item-memo-btn { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; border: 1.5px solid #e5a400; background: #fffbe6; color: #c47f00; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; align-self: flex-start; touch-action: manipulation; line-height: 1.3; }
+.item-memo-btn:active { background: #e5a400; color: #fff; }
+.item-memo-btn.no-memo { border-color: var(--border-strong); background: transparent; color: var(--text-3); }
+.memo-view-body { font-size: 13px; line-height: 1.9; color: var(--text); white-space: pre-wrap; word-break: break-all; padding: 8px 0; max-height: 45vh; overflow-y: auto; }
+.memo-add-area { display: block; width: 100%; background: var(--bg); border: none; color: var(--text); font-family: 'Noto Sans JP', sans-serif; font-size: 16px; padding: 10px 0 8px; outline: none; resize: none; min-height: 200px; flex: 1; box-sizing: border-box; line-height: 1.8; }
 
 .ch-footer { border-top: 1px solid var(--border); background: var(--bg); }
 .ch-footer-row { padding: 8px 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -453,6 +458,7 @@ const FULL_DAYS = {
   'C': { '易': { o: 35, x: 10}, '普': { o: 28, x: 14}, '難': { o: 20, x: 20 } },
 };
 
+let memoState = {};
 let itemState = {}, chState = {}, appState = {rounds:[{label:'第1回', scope:null, deadline:null, startDate:null}], currentRound:0};
 let showingWeakness = false;
 
@@ -464,6 +470,7 @@ function load() {
     if (i) itemState = JSON.parse(i);
     if (c) chState = JSON.parse(c);
     if (a) appState = JSON.parse(a);
+    const m = localStorage.getItem('hojin-memo'); if (m) memoState = JSON.parse(m);
   } catch(e) {}
 }
 
@@ -472,6 +479,7 @@ function save() {
     localStorage.setItem('hojin-item', JSON.stringify(itemState));
     localStorage.setItem('hojin-ch', JSON.stringify(chState));
     localStorage.setItem('hojin-app', JSON.stringify(appState));
+    localStorage.setItem('hojin-memo', JSON.stringify(memoState));
   } catch(e) {}
 }
 
@@ -781,9 +789,7 @@ function buildItemRow(item) {
     </div>
     ${urgencyHTML}
     ${histHTML}
-    <textarea class="item-memo" placeholder="間違えた箇所・メモ..." rows="1"
-      onchange="saveMemo('${item.id}',this.value)"
-      oninput="autoResize(this)">${r.memo||''}</textarea>`;
+    <button class="item-memo-btn${memoState[item.id] ? '' : ' no-memo'}" onclick="memoState['${item.id}'] ? openMemoView('${item.id}') : openMemoInput('${item.id}')">${memoState[item.id] ? 'メモ' : '＋メモ'}</button>`;
   return row;
 }
 
@@ -1239,6 +1245,62 @@ function importData(e) {
   reader.readAsText(file);
   e.target.value = '';
 }
+
+// ===== 累積メモ =====
+let _memoTargetId = null;
+
+function openMemoView(itemId) {
+  _memoTargetId = itemId;
+  const memo = memoState[itemId] || '';
+  document.getElementById('memo-view-title').textContent = itemId;
+  document.getElementById('memo-view-body').textContent = memo || '（まだメモはありません）';
+  document.getElementById('memo-view-overlay').classList.add('open');
+}
+function closeMemoView() { document.getElementById('memo-view-overlay').classList.remove('open'); }
+
+function openMemoInput(itemId) {
+  _memoTargetId = itemId;
+  document.getElementById('memo-add-area').value = '';
+  document.getElementById('memo-input-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('memo-add-area').focus(), 50);
+}
+function closeMemoInput() { document.getElementById('memo-input-overlay').classList.remove('open'); }
+
+function saveMemoEntry() {
+  const val = document.getElementById('memo-add-area').value.trim();
+  if (!val) { closeMemoInput(); return; }
+  const d = new Date();
+  const ds = d.getFullYear()+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0');
+  memoState[_memoTargetId] = (memoState[_memoTargetId] ? memoState[_memoTargetId]+'\n' : '')+'〈'+ds+'〉'+val;
+  save();
+  closeMemoInput();
+  render();
+}
 </script>
+
+<!-- MEMO VIEW OVERLAY -->
+<div class="overlay" id="memo-view-overlay" onclick="if(event.target===this)closeMemoView()">
+  <div class="scope-modal" style="display:flex;flex-direction:column;max-height:85vh;overflow:hidden;padding-bottom:44px;">
+    <div class="modal-handle"></div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:6px;" id="memo-view-title"></div>
+    <div class="memo-view-body" id="memo-view-body"></div>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-shrink:0;">
+      <button class="ch-record-cancel" style="flex:1;" onclick="closeMemoView()">閉じる</button>
+      <button class="ch-record-save" style="flex:1;" onclick="closeMemoView();openMemoInput(_memoTargetId)">追記する</button>
+    </div>
+  </div>
+</div>
+<!-- MEMO INPUT OVERLAY -->
+<div class="overlay" id="memo-input-overlay" onclick="if(event.target===this)closeMemoInput()">
+  <div class="scope-modal" style="display:flex;flex-direction:column;max-height:85vh;overflow:hidden;padding-bottom:44px;">
+    <div class="modal-handle"></div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:4px;">メモを追記</div>
+    <textarea class="memo-add-area" id="memo-add-area" placeholder="気づいたことや間違えたポイントを記録..."></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-shrink:0;">
+      <button class="ch-record-cancel" style="flex:1;" onclick="closeMemoInput()">キャンセル</button>
+      <button class="ch-record-save" style="flex:1;" onclick="saveMemoEntry()">完了</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
