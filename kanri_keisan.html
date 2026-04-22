@@ -1242,7 +1242,7 @@ function buildItemRow(item) {
     ${histHTML}
     ${recordHTML}
     ${topicPromptHTML}
-    <button class="item-memo-btn${memoState[item.id] ? '' : ' no-memo'}" onclick="memoState['${item.id}'] ? openMemoView('${item.id}') : openMemoInput('${item.id}')">${memoState[item.id] ? 'メモ' : '＋メモ'}</button>`;
+    <button id="memo-btn-${item.id}" class="item-memo-btn${memoState[item.id] ? '' : ' no-memo'}" onclick="memoState['${item.id}'] ? openMemoView('${item.id}') : openMemoInput('${item.id}')">${memoState[item.id] ? 'メモ' : '＋メモ'}</button>`;
   return row;
 }
 
@@ -2388,7 +2388,8 @@ function saveMemoEntry() {
   memoState[_memoTargetId] = (memoState[_memoTargetId] ? memoState[_memoTargetId]+'\n' : '')+'〈'+ds+'〉'+val;
   save();
   closeMemoInput();
-  render();
+  const btn = document.getElementById('memo-btn-'+_memoTargetId);
+  if (btn) { btn.className = 'item-memo-btn'; btn.textContent = 'メモ'; btn.onclick = () => openMemoView(_memoTargetId); }
 }
 </script>
 
