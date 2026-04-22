@@ -1,0 +1,1859 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="apple-touch-icon" href="icons/kanri-keisan.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>管理会計論（計算）復習管理</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="財務計算">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#ffffff">
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Maru+Gothic:wght@700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f9f9f8;
+  --surface: #ffffff;
+  --border: #e8e8e5;
+  --border-strong: #d0d0cb;
+  --text: #111111;
+  --text-2: #666666;
+  --text-3: #aaaaaa;
+  --o-color: #1a7a4a;
+  --o-bg: #edf7f2;
+  --x-color: #c0392b;
+  --x-bg: #fdf0ee;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: var(--bg); color: var(--text);
+  min-height: 100vh; padding-bottom: 80px;
+  font-size: 14px; line-height: 1.5;
+}
+
+/* HEADER */
+.header { position: sticky; top: 0; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--border); }
+.header-top { padding: 12px 16px 10px; display: flex; justify-content: space-between; align-items: center; }
+.app-title { font-size: 11px; font-weight: 700; letter-spacing: .12em; color: var(--text-3); text-transform: uppercase; }
+.header-actions { display: flex; gap: 6px; }
+.btn-sm { padding: 5px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: transparent; color: var(--text-2); font-size: 11px; font-family: 'Noto Sans JP', sans-serif; font-weight: 500; cursor: pointer; transition: all .15s; }
+.btn-sm:hover, .btn-sm.active { background: var(--text); border-color: var(--text); color: #fff; }
+
+
+.imp-badge { font-size: 13px; font-weight: 700; font-family: 'Zen Maru Gothic', sans-serif; padding: 3px 8px; border-radius: 6px; flex-shrink: 0; }
+.imp-A { background: #fdf0ee; color: #c0392b; }
+.imp-B { background: #fdf4e3; color: #7c5c00; }
+.imp-hidden { display: none; }
+.tabs { display: flex; border-top: 1px solid var(--border); }
+.tab { flex: 1; padding: 10px 8px; font-size: 12px; font-weight: 700; font-family: 'Noto Sans JP', sans-serif; background: transparent; border: none; cursor: pointer; color: var(--text-3); border-bottom: 2px solid transparent; transition: all .15s; }
+.tab.active { color: var(--text); border-bottom-color: var(--text); }
+
+/* CONTENT */
+.content { padding: 12px 14px; max-width: 700px; margin: 0 auto; }
+
+/* CHAPTER GROUP */
+.ch-group { margin-bottom: 10px; }
+.ch-group-header { display: flex; align-items: center; gap: 8px; padding: 12px 14px; cursor: pointer; user-select: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+.ch-group.open .ch-group-header { border-radius: var(--radius) var(--radius) 0 0; background: var(--text); }
+.ch-group.open .ch-group-title { color: #fff; }
+.ch-group.open .ch-group-count { color: rgba(255,255,255,0.6); }
+.ch-group.open .ch-group-chevron { color: rgba(255,255,255,0.7); }
+.ch-group-header:active { background: var(--bg); }
+.ch-group-title { font-size: 15px; font-weight: 700; color: var(--text); flex: 1; }
+.ch-group-body { display: none; margin-left: 12px; border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--radius) var(--radius); overflow: hidden; }
+.ch-group.open .ch-group-body { display: block; }
+.ch-group-body .prob-card { border-radius: 0; border-left: none; border-right: none; border-top: none; margin-bottom: 0; }
+.ch-group-body .prob-card:last-child { border-bottom: none; }
+
+/* PROBLEM CARD */
+.prob-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 8px; overflow: hidden; }
+.prob-header { padding: 12px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+.prob-header:active { background: var(--bg); }
+
+/* 左側：タイトル + 問題番号 */
+.prob-left { flex: 1; min-width: 0; }
+.prob-title { font-size: 13px; font-weight: 700; }
+.prob-id-sub { font-size: 10px; color: var(--text-3); font-family: 'DM Mono', monospace; margin-top: 1px; }
+
+/* 右側：実施情報 横並び */
+.prob-right { display: flex; flex-direction: row; align-items: center; gap: 4px; flex-shrink: 0; }
+.prob-right-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.prob-right-item:nth-child(1) { min-width: 52px; }
+.prob-right-item:nth-child(2) { min-width: 48px; }
+.prob-right-item:nth-child(3) { min-width: 40px; }
+.prob-right-val { font-size: 17px; font-weight: 700; font-family: 'Zen Maru Gothic', sans-serif; line-height: 1; color: #1a3a6e; text-align: center; }
+.prob-right-eval-val { font-size: 17px; font-weight: 700; font-family: 'Zen Maru Gothic', sans-serif; line-height: 1; text-align: center; }
+.prob-right-lbl { font-size: 8px; color: var(--text-3); letter-spacing: .06em; text-transform: uppercase; font-family: 'DM Mono', monospace; }
+
+/* MEMO BUTTON on card */
+.prob-memo-btn {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 20px;
+  border: 1.5px solid #e5a400;
+  background: #fffbe6;
+  color: #c47f00;
+  cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+  flex-shrink: 0;
+  touch-action: manipulation;
+  line-height: 1.3;
+}
+.prob-memo-btn:active { background: #e5a400; color: #fff; }
+
+/* MEMO TEXTAREA in record modal */
+.memo-input-section { margin-top: 4px; border-top: 1px dashed var(--border); padding-top: 12px; }
+.memo-textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 13px;
+  padding: 8px 10px;
+  outline: none;
+  resize: vertical;
+  min-height: 72px;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+}
+.memo-textarea:focus { border-color: var(--text); }
+
+.memo-trigger {
+  width: 100%;
+  min-height: 72px;
+  background: var(--surface);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: 'Noto Sans JP', sans-serif;
+  color: var(--text);
+  cursor: pointer;
+  box-sizing: border-box;
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 1.75;
+}
+.memo-trigger.empty { color: var(--text-3); }
+.memo-trigger:active { border-color: var(--text); }
+
+.memo-input-area {
+  display: block;
+  width: 100%;
+  background: var(--surface);
+  border: none;
+  color: var(--text);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 16px;
+  padding: 4px 0 12px;
+  outline: none;
+  resize: none;
+  min-height: 200px;
+  flex: 1;
+  box-sizing: border-box;
+  line-height: 1.8;
+}
+
+/* MEMO POPUP */
+.memo-popup-body {
+  font-size: 13px;
+  line-height: 1.9;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-all;
+  padding: 4px 0 8px;
+  max-height: 55vh;
+  overflow-y: auto;
+}
+
+.eval-oo { color: #1a7a4a; }
+.eval-o  { color: var(--o-color); }
+.eval-n  { color: #777; }
+.eval-x  { color: var(--x-color); }
+.eval-xx { color: #900; }
+.eval-none { color: var(--text-3); }
+
+/* PROB DETAIL MODAL */
+.prob-detail-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 150; align-items: center; justify-content: center; padding: 20px; }
+.prob-detail-overlay.open { display: flex; }
+.prob-detail-modal { background: var(--surface); border-radius: 14px; width: 100%; max-width: 560px; max-height: 85vh; overflow-y: auto; box-shadow: 0 8px 40px rgba(0,0,0,.25); }
+.prob-detail-header { background: var(--bg); border-radius: 14px 14px 0 0; padding: 16px 16px 14px; position: sticky; top: 0; z-index: 1; border-bottom: 1px solid var(--border); }
+.prob-detail-title { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.4; margin-bottom: 10px; }
+.prob-detail-meta { display: flex; gap: 16px; align-items: center; }
+.prob-detail-close { position: absolute; top: 14px; right: 14px; background: rgba(0,0,0,0.08); border: none; color: var(--text-2); width: 28px; height: 28px; border-radius: 50%; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.prob-detail-body { padding: 0; }
+.prob-detail-hist { padding: 14px 16px; border-bottom: 1px solid var(--border); background: var(--bg); }
+.prob-detail-actions { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.prob-detail-sub { padding: 10px 16px; display: flex; gap: 6px; align-items: center; }
+.prob-detail-delete { padding: 10px 16px 16px; }
+
+/* 記録するボタン */
+.btn-record { width: 100%; padding: 13px; border-radius: var(--radius-sm); border: none; background: var(--text); color: #fff; font-family: 'Noto Sans JP', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; letter-spacing: .04em; }
+.btn-record:active { opacity: .85; }
+
+.hist-empty { font-size: 11px; color: var(--text-3); text-align: center; padding: 10px 0; }
+.hist-entry { border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; overflow: hidden; }
+.hist-entry-header { padding: 8px 12px; display: flex; gap: 8px; align-items: center; background: var(--bg); }
+.hist-entry-num { font-size: 10px; font-weight: 700; color: var(--text-3); font-family: 'DM Mono', monospace; min-width: 20px; }
+.hist-entry-date { font-size: 10px; color: var(--text-3); font-family: 'DM Mono', monospace; }
+.hist-entry-time { font-size: 10px; color: var(--text-3); font-family: 'DM Mono', monospace; }
+.hist-entry-body { padding: 8px 12px; display: flex; flex-direction: column; gap: 4px; }
+.hist-ronten-row { display: flex; align-items: center; gap: 6px; }
+.hist-ronten-name { font-size: 11px; color: var(--text); flex: 1; line-height: 1.4; }
+
+.prob-meta-badge { font-size: 13px; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-family: 'Zen Maru Gothic', sans-serif; }
+.badge-oo { background: #e8f7f0; color: #1a7a4a; }
+.badge-o  { background: var(--o-bg); color: var(--o-color); }
+.badge-n  { background: #f0f0ee; color: #555; }
+.badge-x  { background: var(--x-bg); color: var(--x-color); }
+.badge-xx { background: #fde; color: #900; }
+.badge-none { background: var(--bg); color: var(--text-3); border: 1px solid var(--border); }
+
+/* サブコントロール */
+.prob-sub-controls { padding: 10px 14px 10px 24px; display: flex; gap: 6px; align-items: center; }
+.btn-sub { padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: transparent; color: var(--text-2); font-family: 'Noto Sans JP', sans-serif; font-size: 11px; cursor: pointer; white-space: nowrap; transition: all .15s; }
+.btn-sub:hover { border-color: var(--text); color: var(--text); }
+.move-btns { display: flex; gap: 2px; margin-left: auto; }
+.move-btn { width: 28px; height: 28px; border-radius: 4px; border: 1px solid var(--border-strong); background: var(--bg); color: var(--text-3); font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s; }
+.move-btn:hover { background: var(--text); color: #fff; border-color: var(--text); }
+.move-btn:disabled { opacity: .3; cursor: default; }
+.move-btn:disabled:hover { background: var(--bg); color: var(--text-3); border-color: var(--border-strong); }
+.del-btn { width: 28px; height: 28px; border-radius: 4px; border: 1px solid var(--border-strong); background: var(--bg); color: var(--text-3); font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s; }
+.del-btn:hover { background: var(--x-bg); color: var(--x-color); border-color: var(--x-color); }
+
+/* MODAL */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 300; align-items: flex-end; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--surface); border-radius: 16px 16px 0 0; padding: 20px 16px 44px; width: 100%; max-width: 700px; max-height: 85vh; overflow-y: auto; }
+.modal-handle { width: 32px; height: 3px; background: var(--border-strong); border-radius: 999px; margin: 0 auto 16px; }
+.modal-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.modal-subtitle { font-size: 11px; color: var(--text-2); margin-bottom: 16px; }
+.modal-step { display: none; }
+.modal-step.active { display: block; }
+
+/* step indicator */
+.step-indicator { display: flex; gap: 6px; align-items: center; margin-bottom: 16px; }
+.step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-strong); transition: background .2s; }
+.step-dot.active { background: var(--text); }
+.step-label { font-size: 11px; color: var(--text-3); font-family: 'DM Mono', monospace; }
+
+/* form elements */
+.form-section { margin-bottom: 14px; }
+.form-label { font-size: 11px; font-weight: 700; color: var(--text-2); display: block; margin-bottom: 5px; letter-spacing: .04em; }
+.form-input { width: 100%; background: var(--surface); border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text); font-family: 'Noto Sans JP', sans-serif; font-size: 16px; padding: 8px 10px; outline: none; -webkit-appearance: none; appearance: none; touch-action: manipulation; }
+.form-input:focus { border-color: var(--text); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* eval buttons */
+.u-btns { display: flex; gap: 3px; flex-wrap: wrap; }
+.ub { min-width: 44px; height: 34px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--bg); font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s; color: var(--text-3); font-family: 'Noto Sans JP', sans-serif; padding: 0 6px; }
+.ub:active { transform: scale(.9); }
+.ub.sel-oo { background: #e8f7f0; border-color: #1a7a4a; color: #1a7a4a; }
+.ub.sel-o  { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
+.ub.sel-n  { background: #f0f0ee; border-color: #999; color: #555; }
+.ub.sel-x  { background: var(--x-bg); border-color: var(--x-color); color: var(--x-color); }
+.ub.sel-xx { background: #fde; border-color: #900; color: #900; }
+.rb { min-width: 38px; height: 28px; border-radius: 4px; border: 1px solid var(--border-strong); background: var(--bg); font-size: 10px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s; color: var(--text-3); font-family: 'Noto Sans JP', sans-serif; padding: 0 4px; }
+.rb:active { transform: scale(.9); }
+.rb.sel-oo { background: #e8f7f0; border-color: #1a7a4a; color: #1a7a4a; }
+.rb.sel-o  { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
+.rb.sel-n  { background: #f0f0ee; border-color: #999; color: #555; }
+.rb.sel-x  { background: var(--x-bg); border-color: var(--x-color); color: var(--x-color); }
+.rb.sel-xx { background: #fde; border-color: #900; color: #900; }
+
+/* ronten item in modal */
+.modal-ronten-item { padding: 10px 0; border-bottom: 1px solid var(--border); }
+.modal-ronten-item:last-child { border-bottom: none; }
+.modal-ronten-name { font-size: 12px; color: var(--text); margin-bottom: 6px; line-height: 1.5; }
+
+/* modal buttons */
+.modal-btns { display: flex; gap: 8px; margin-top: 16px; }
+.btn-cancel { flex: 1; padding: 11px; border-radius: var(--radius-sm); border: 1.5px solid var(--border-strong); background: transparent; color: var(--text-2); font-family: 'Noto Sans JP', sans-serif; font-size: 13px; cursor: pointer; }
+.btn-next { flex: 2; padding: 11px; border-radius: var(--radius-sm); border: none; background: var(--text); color: #fff; font-family: 'Noto Sans JP', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; }
+.btn-next:disabled { opacity: .4; pointer-events: none; }
+
+/* RONTEN EDIT MODAL */
+.ronten-edit-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.ronten-edit-item { display: flex; align-items: center; gap: 6px; padding: 8px 10px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.ronten-edit-name { flex: 1; font-size: 12px; }
+.ronten-edit-del { width: 24px; height: 24px; border-radius: 4px; border: 1px solid var(--border-strong); background: transparent; color: var(--text-3); font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.ronten-edit-del:hover { background: var(--x-bg); color: var(--x-color); border-color: var(--x-color); }
+.ronten-add-row { display: flex; gap: 6px; }
+.ronten-add-input { flex: 1; background: var(--surface); border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text); font-family: 'Noto Sans JP', sans-serif; font-size: 12px; padding: 7px 10px; outline: none; }
+.ronten-add-input:focus { border-color: var(--text); }
+.btn-add-ronten { padding: 7px 12px; border-radius: var(--radius-sm); border: none; background: var(--text); color: #fff; font-family: 'Noto Sans JP', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+
+/* ADD PROBLEM */
+.add-section { background: var(--surface); border: 1px dashed var(--border-strong); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 8px; }
+.add-select { flex: 1; background: var(--surface); border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text); font-family: 'Noto Sans JP', sans-serif; font-size: 12px; padding: 7px 10px; outline: none; -webkit-appearance: none; appearance: none; }
+.btn-add { padding: 7px 14px; border-radius: var(--radius-sm); border: none; background: var(--text); color: #fff; font-family: 'Noto Sans JP', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+
+.ronten-ch-group { margin-bottom: 10px; }
+.ronten-ch-group-body { display: none; margin-left: 12px; border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--radius) var(--radius); overflow: hidden; }
+.ronten-ch-group.open .ronten-ch-group-body { display: block; }
+.ronten-ch-group .ch-group-header { border-radius: var(--radius); }
+.ronten-ch-group.open .ch-group-header { border-radius: var(--radius) var(--radius) 0 0; background: var(--text); }
+.ronten-ch-group.open .ch-group-title { color: #fff; }
+.ronten-ch-group.open .ch-group-count { color: rgba(255,255,255,0.6); }
+.ronten-ch-group.open .ch-group-chevron { color: rgba(255,255,255,0.7); }
+.ronten-ch-group-body .ronten-row { border-radius: 0; border-left: none; border-right: none; border-top: none; margin-bottom: 0; }
+.ronten-ch-group-body .ronten-row:last-child { border-bottom: none; }
+.ronten-row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 6px; overflow: hidden; }
+.ronten-row-header { padding: 8px 12px; display: flex; align-items: flex-start; gap: 8px; cursor: pointer; }
+.ronten-row-header:active { background: var(--bg); }
+.ronten-row-name { flex: 1; font-size: 12px; font-weight: 500; line-height: 1.4; }
+.ronten-row-latest { flex-shrink: 0; }
+.ronten-avg-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.ronten-avg-num { font-size: 9px; color: var(--text-3); font-family: 'DM Mono', monospace; }
+.ronten-row-body { display: none; border-top: 1px solid var(--border); padding: 8px 12px; overflow-x: auto; }
+.ronten-row.open .ronten-row-body { display: block; }
+.ronten-hist-table { display: flex; gap: 6px; }
+.ronten-hist-col { display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 52px; }
+.ronten-hist-prob { font-size: 9px; color: var(--text-3); font-family: 'DM Mono', monospace; text-align: center; white-space: nowrap; }
+.ronten-hist-date { font-size: 8px; color: var(--text-3); font-family: 'DM Mono', monospace; }
+.ronten-hist-chip { min-width: 36px; height: 22px; border-radius: 4px; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; font-family: 'Noto Sans JP', sans-serif; }
+.chip-oo { background: #e8f7f0; color: #1a7a4a; }
+.chip-o  { background: var(--o-bg); color: var(--o-color); }
+.chip-n  { background: #f0f0ee; color: #555; }
+.chip-x  { background: var(--x-bg); color: var(--x-color); }
+.chip-xx { background: #fde; color: #900; }
+.chip-none { background: var(--bg); color: var(--text-3); border: 1px solid var(--border); }
+
+/* URGENT TAB */
+.urgent-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 8px; }
+.urgent-review-btns { display: flex; gap: 8px; }
+.ub-rev { flex: 1; height: 38px; border-radius: var(--radius-sm); border: 1.5px solid var(--border-strong); background: var(--bg); font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s; color: var(--text-3); font-family: 'Noto Sans JP', sans-serif; }
+.ub-rev:active { transform: scale(.95); }
+.ub-rev.sel-x { background: var(--x-bg); border-color: var(--x-color); color: var(--x-color); }
+.ub-rev.sel-o-btn { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
+.urgency-wrap { display: flex; align-items: center; gap: 7px; margin-top: 6px; }
+.urgency-score { font-size: 11px; font-weight: 700; font-family: 'DM Mono', monospace; min-width: 32px; flex-shrink: 0; }
+.urgency-track { flex: 1; height: 5px; background: var(--border); border-radius: 999px; overflow: hidden; }
+.urgency-fill { height: 100%; border-radius: 999px; transition: width .4s ease; }
+
+/* 章理解度スコア */
+.ch-score-badge { font-size: 13px; font-weight: 700; font-family: 'DM Mono', monospace; min-width: 36px; text-align: right; flex-shrink: 0; }
+.ch-score-badge.score-high   { color: #1a7a4a; }
+.ch-score-badge.score-mid    { color: #d4a017; }
+.ch-score-badge.score-low    { color: #c0392b; }
+.ch-score-badge.score-none   { color: var(--text-3); }
+.ch-group.open .ch-score-badge { opacity: 0.7; }
+
+.empty-state { text-align: center; padding: 48px 16px; color: var(--text-3); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="app-title">管理会計論（計算）復習管理</div>
+    <div class="header-actions">
+      <button class="btn-sm" onclick="exportData()">バックアップ</button>
+      <button class="btn-sm" onclick="document.getElementById('import-input').click()">復元</button>
+      <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)">
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="setTab('problems',this)">問題</button>
+    <button class="tab" onclick="setTab('ronten',this)">論点</button>
+    <button class="tab" onclick="setTab('urgent',this)">要復習</button>
+  </div>
+</div>
+
+<div id="tab-problems" class="content"></div>
+<div id="tab-ronten" class="content" style="display:none"></div>
+<div id="tab-urgent" class="content" style="display:none"></div>
+
+<!-- RECORD MODAL -->
+<div class="modal-overlay" id="record-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-subtitle" id="modal-subtitle"></div>
+    <div class="step-indicator">
+      <div class="step-dot active" id="step-dot-1"></div>
+      <div class="step-dot" id="step-dot-2"></div>
+      <div class="step-label" id="step-label">ステップ 1 / 2</div>
+    </div>
+
+    <!-- STEP 1: 問題評価 -->
+    <div class="modal-step active" id="modal-step1">
+      <div class="form-section">
+        <label class="form-label">問題の評価</label>
+        <div class="u-btns" id="modal-prob-btns">
+          <button class="ub" onclick="selectModalEval('oo')">○○</button>
+          <button class="ub" onclick="selectModalEval('o')">○</button>
+          <button class="ub" onclick="selectModalEval('n')">ー</button>
+          <button class="ub" onclick="selectModalEval('x')">×</button>
+          <button class="ub" onclick="selectModalEval('xx')">××</button>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-section">
+          <label class="form-label">実施日</label>
+          <input type="date" class="form-input" id="modal-date">
+        </div>
+        <div class="form-section">
+          <label class="form-label">所要時間（分）</label>
+          <input type="text" inputmode="numeric" class="form-input" id="modal-time" placeholder="例: 30">
+        </div>
+      </div>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeModal()">キャンセル</button>
+        <button class="btn-next" id="step1-next" onclick="goStep2()" disabled>次へ →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: 論点評価 -->
+    <div class="modal-step" id="modal-step2">
+      <div id="modal-ronten-list"></div>
+      <div class="form-section memo-input-section">
+        <label class="form-label">メモ（任意・追記されます）</label>
+        <div class="memo-trigger empty" id="memo-trigger" onclick="openMemoInputPopup()">気づいたことや間違えたポイントを記録...</div>
+        <textarea class="memo-textarea" id="modal-memo" style="display:none"></textarea>
+      </div>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="goStep1()">← 戻る</button>
+        <button class="btn-next" onclick="saveRecord()">記録する</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RONTEN EDIT MODAL -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="edit-modal-title"></div>
+    <div class="modal-subtitle" style="font-size:11px;color:var(--text-2);margin-bottom:14px;">論点を追加・削除できます（章の論点プールから選択）</div>
+    <div class="ronten-edit-list" id="ronten-edit-list"></div>
+    <div class="ronten-add-row">
+      <select class="add-select" id="ronten-add-select" style="flex:1;font-size:12px;padding:7px 10px;">
+        <option value="">論点を選択して追加...</option>
+      </select>
+      <button class="btn-add-ronten" onclick="addRonten()">追加</button>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeEditModal()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROB DETAIL MODAL -->
+<div class="prob-detail-overlay" id="prob-detail-overlay" onclick="closeProbDetail(event)">
+  <div class="prob-detail-modal">
+    <div class="prob-detail-header">
+      <button class="prob-detail-close" onclick="closeProbDetailDirect()">✕</button>
+      <div class="prob-detail-title" id="pd-title"></div>
+      <div class="prob-detail-meta" id="pd-meta"></div>
+    </div>
+    <div class="prob-detail-body">
+      <div class="prob-detail-hist" id="pd-hist"></div>
+      <div class="prob-detail-actions">
+        <button class="btn-record" id="pd-record-btn">記録する</button>
+      </div>
+      <div class="prob-detail-sub" id="pd-sub"></div>
+      <div class="prob-detail-delete" id="pd-delete"></div>
+    </div>
+  </div>
+</div>
+
+<!-- NEW PROBLEM MODAL -->
+<div class="modal-overlay" id="new-prob-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">問題を追加</div>
+    <div class="modal-subtitle" style="font-size:11px;color:var(--text-2);margin-bottom:14px;">章・問題名・論点を設定して追加します</div>
+
+    <div class="form-section">
+      <label class="form-label">章</label>
+      <select class="form-input" id="new-prob-ch" onchange="onNewProbChChange()">
+        <option value="">章を選択...</option>
+      </select>
+    </div>
+    <div class="form-section">
+      <label class="form-label">問題番号（任意）</label>
+      <input type="text" class="form-input" id="new-prob-num" placeholder="例：1-6、2-1 など">
+    </div>
+    <div class="form-section">
+      <label class="form-label">問題名</label>
+      <input type="text" class="form-input" id="new-prob-title" placeholder="例：有価証券の決算整理" oninput="checkNewProbBtn()">
+    </div>
+    <div class="form-section">
+      <label class="form-label">重要度</label>
+      <div class="u-btns" id="new-prob-imp-btns">
+        <button type="button" class="ub" onclick="selectNewProbImp('A')">A</button>
+        <button type="button" class="ub" onclick="selectNewProbImp('B')">B</button>
+      </div>
+    </div>
+    <div class="form-section">
+      <label class="form-label">論点（章の論点プールから選択）</label>
+      <div class="ronten-edit-list" id="new-prob-ronten-list" style="margin-bottom:8px;"></div>
+      <div class="ronten-add-row">
+        <select class="add-select" id="new-prob-ronten-select" style="flex:1;font-size:12px;padding:7px 10px;">
+          <option value="">まず章を選択してください</option>
+        </select>
+        <button type="button" class="btn-add-ronten" onclick="addNewProbRonten()">追加</button>
+      </div>
+    </div>
+
+    <div class="modal-btns">
+      <button type="button" class="btn-cancel" onclick="closeNewProbModal()">キャンセル</button>
+      <button type="button" class="btn-next" id="new-prob-confirm" onclick="saveNewProblem()" style="opacity:.4;pointer-events:none;">追加する</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── 章ごとの論点プール ──
+// 章名はテキストの章番号に合わせて統一
+const CHAPTER_RONTEN_POOL = {
+  // テキスト②
+  "第9章 有価証券": [
+    "有価証券の取得・売却","株式分割・株式併合","端数利息",
+    "その他資本剰余金の処分による配当を受けた場合","新株予約権付社債",
+    "売買目的有価証券の分類と評価","満期保有目的の債券の分類と評価",
+    "子会社株式及び関連会社株式の分類と評価",
+    "その他有価証券（全部純資産直入法）","その他有価証券（部分純資産直入法）",
+    "評価・換算差額等に係る税効果","貸借対照表の表示区分",
+    "償却原価法（利息法）","償却原価法（定額法）","市場価格のない株式等",
+    "有価証券の減損処理（市場価格のない株式等以外）","有価証券の減損処理（市場価格のない株式等）",
+    "損益計算書の表示（売却損益）","損益計算書の表示（評価損益）",
+    "損益計算書の表示（減損処理による評価損）","親会社株式",
+    "有価証券の保有目的区分の変更",
+  ],
+  "第11章 債権債務": [
+    "金融資産及び金融負債の発生の認識",
+    "財務構成要素アプローチ","ローン・パーティシペーション",
+    "消滅に該当しない取引（クロス取引・有価証券の現先取引）","消滅の会計処理",
+    "ゴルフ会員権","運用目的の金銭の信託",
+    "コマーシャル・ペーパー（CP）","譲渡性預金（CD）",
+    "未収利息の不計上","有価証券の空売り","有価証券の貸借","建設協力金",
+  ],
+  "第12章 貸倒引当金": [
+    "一般債権","貸倒懸念債権","破産更生債権等",
+    "財務内容評価法","キャッシュ・フロー見積法",
+    "発生年度ごとの貸倒実績率の平均値による方法",
+    "合計残高ごとの貸倒実績率の平均値による方法",
+    "貸倒引当金の繰入れと取崩し","相殺適状",
+    "損益計算書の表示","貸借対照表の表示",
+  ],
+  "第13章 デリバティブ取引・ヘッジ会計": [
+    "先物取引・先渡取引","オプション取引","スワップ取引",
+    "ヘッジ会計（繰延ヘッジ）","ヘッジ会計（時価ヘッジ）",
+    "ヘッジ会計の中止","ヘッジ会計の終了",
+    "金利スワップの特例処理","予定取引",
+  ],
+  // テキスト③
+  "第14章 リース会計（旧基準）": [
+    "リース取引の分類",
+    "所有権移転ファイナンス・リース（借手）",
+    "所有権移転外ファイナンス・リース（借手）",
+    "リース資産・リース債務計上額の算定",
+    "利息相当額の計算（利息法）","利息相当額の計算（定額法）",
+    "維持管理費用相当額","割安購入選択権","残価保証",
+    "ファイナンス・リース取引の中途解約","貸借対照表の表示（借手）",
+    "貸手の会計処理（所有権移転・リース取引開始日に売上高と売上原価を計上）",
+    "貸手の会計処理（所有権移転・リース料受取時に売上高と売上原価を計上）",
+    "貸手の会計処理（所有権移転・売上高を計上せずに利息相当額を各期へ配分）",
+    "貸手の会計処理（所有権移転外・リース取引開始日に売上高と売上原価を計上）",
+    "貸手の会計処理（所有権移転外・リース料受取時に売上高と売上原価を計上）",
+    "貸手の会計処理（所有権移転外・売上高を計上せずに利息相当額を各期へ配分）",
+    "見積残存価額",
+    "貸手の製作価額または現金購入価額と借手に対する現金販売価額に差がある場合",
+    "貸借対照表の表示（貸手）",
+    "セール・アンド・リースバック取引","転リース取引",
+  ],
+  "第14章 リース会計（新基準）": [
+    "リースを構成する部分とリースを構成しない部分の区分","リース期間",
+    "使用権資産・リース負債計上額の算定",
+    "使用権資産の減価償却（所有権が借手に移転すると認められるリース）",
+    "使用権資産の減価償却（所有権が借手に移転すると認められるリース以外）",
+    "変動リース料","残価保証","購入オプション",
+    "リースの契約条件の変更（独立したリースとして会計処理を行うケース）",
+    "リースの契約条件の変更（リース負債の計上額の見直しを行うケース）",
+    "リースの契約条件を伴わないリース負債の見直し","貸借対照表の表示（借手）",
+    "貸手のリースの分類",
+    "所有権移転ファイナンス・リース（製造または販売を事業とする貸手）",
+    "所有権移転ファイナンス・リース（製造または販売以外を事業とする貸手）",
+    "所有権移転外ファイナンス・リース（製造または販売を事業とする貸手）",
+    "所有権移転外ファイナンス・リース（製造または販売以外を事業とする貸手）",
+    "所有権移転外ファイナンス・リース（事業の一環以外で行うリース）",
+    "所有権移転外ファイナンス・リース（残価保証）","貸借対照表の表示（貸手）",
+    "セール・アンド・リースバック取引","サブリース取引","転リース取引","建設協力金",
+  ],
+  "第15章 研究開発費・ソフトウェア": [
+    "研究開発費の会計処理","特定の研究開発目的資産",
+    "市場販売目的のソフトウェア（資産計上額の算定）",
+    "市場販売目的のソフトウェア（減価償却）",
+    "自社利用のソフトウェア（導入費用）","自社利用のソフトウェア（減価償却）",
+  ],
+  "第16章 固定資産の減損会計": [
+    "減損会計の手続一巡","減損損失の配分",
+    "将来キャッシュ・フローの見積り方法",
+    "固定資産の減損会計における将来キャッシュ・フローの見積りと資産除去債務",
+    "割引前将来キャッシュ・フローの見積期間（経済的残存使用年数≦20年）",
+    "割引前将来キャッシュ・フローの見積期間（経済的残存使用年数＞20年）",
+    "他の構成資産に係るキャッシュ・フロー","使用価値の算定",
+    "共用資産の減損処理（通常のケース）",
+    "共用資産の減損処理（帳簿価額と正味売却価額の差額を超過するケース）",
+    "共用資産の帳簿価額を各資産または資産グループに配分する方法",
+    "のれんの帳簿価額の分割","のれんの減損処理（通常のケース）",
+    "のれんの減損処理（のれんの帳簿価額を超過するケース）",
+    "のれんの帳簿価額を各資産または資産グループに配分する方法",
+  ],
+  "第17章 税効果会計（個別財務諸表）": [
+    "法定実効税率","将来減算一時差異","将来加算一時差異","繰越欠損金",
+    "繰延税金資産及び繰延税金負債の計上（評価・換算差額等以外）",
+    "繰延税金資産及び繰延税金負債の計上（評価・換算差額等）",
+    "貸借対照表の表示","税率の変更",
+    "繰延税金資産の回収可能性（簡便的な計算）",
+    "繰延税金資産の回収可能性（スケジューリング）",
+    "繰延税金資産の回収可能性（繰越欠損金等）",
+  ],
+  // テキスト④
+  "第18章 外貨換算会計": [
+    "取引発生時の処理（通常の取引）","取引発生時の処理（前渡金・前受金を含む取引）",
+    "決済時の処理","決算時の処理（外貨建資産・負債の換算）",
+    "外貨建新株予約権","外貨建新株予約権付社債","換算差額・決済差額の表示",
+    "外貨建有価証券の評価（売買目的有価証券）",
+    "外貨建有価証券の評価（満期保有目的の債券）",
+    "外貨建有価証券の評価（子会社株式及び関連会社株式）",
+    "外貨建有価証券の評価（その他有価証券・債券以外）",
+    "外貨建有価証券の評価（その他有価証券・債券）",
+    "外貨建有価証券の評価（市場価格のない株式等）",
+    "外貨建有価証券の評価（貸借対照表の表示区分）",
+    "外貨建有価証券の減損処理（市場価格のない株式等以外）",
+    "外貨建有価証券の減損処理（市場価格のない株式等）",
+    "為替予約の振当処理（非資金取引・取引発生時以前）",
+    "為替予約の振当処理（非資金取引・取引発生時以後）",
+    "為替予約の振当処理（資金取引・取引発生時以前）",
+    "為替予約の振当処理（資金取引・取引発生時以後）",
+    "振当処理の適用範囲",
+    "外貨建債券等を外貨による非貨幣性資産等に再投資する場合",
+    "在外支店の外貨表示財務諸表項目の換算",
+  ],
+  "第19章 社債": [
+    "貸借対照表価額","貸借対照表の表示",
+    "償却原価法（利息法）","償却原価法（定額法）",
+    "一括償還社債（満期償還）","一括償還社債（買入償還）",
+    "分割償還社債（定時償還・抽選償還）","分割償還社債（繰上償還）",
+  ],
+  "第21章 退職給付会計（個別財務諸表）": [
+    "退職給付見込額の配分方法（期間定額基準）",
+    "退職給付見込額の配分方法（給付算定式基準）",
+    "退職給付債務の見積り","前払年金費用の計上","退職給付費用の算定",
+    "従業員拠出がある企業年金制度","数理計算上の差異","過去勤務費用",
+    "退職給付信託","年金資産の返還","簡便法","退職給付制度の終了","退職給付債務の増減",
+  ],
+  "第22章 資産除去債務": [
+    "資産除去債務の基本的な会計処理",
+    "割引前将来キャッシュ・フローの見積り","割引率の選択",
+    "割引前将来キャッシュ・フローが増加する場合",
+    "割引前将来キャッシュ・フローが減少する場合",
+    "資産除去債務が複数の有形固定資産から構成される場合",
+    "資産除去債務が使用の都度発生する場合",
+    "賃借契約に関連して敷金を支出している場合の容認処理",
+  ],
+  // テキスト⑤
+  "第23章 純資産": [
+    "新株の発行等",
+    "剰余金の配当の原資と剰余金の配当に伴う準備金の積立て","現物配当",
+    "株主資本の計数の変動",
+    "自己株式の会計処理","自己株式の処分と新株の発行を同時に行った場合",
+    "その他資本剰余金の残高が負の値になった場合",
+    "評価・換算差額等の会計処理","土地再評価差額金",
+    "新株予約権の会計処理（発行者側）","自己新株予約権の会計処理",
+    "転換社債型新株予約権付社債","その他の新株予約権付社債",
+    "株主資本の各項目",
+    "株主資本以外の各項目（原則・当期変動額を純額で表示）",
+    "株主資本以外の各項目（容認・当期変動額について主な変動事由ごとにその金額を表示）",
+  ],
+  "第25章 ストック・オプション等": [
+    "各会計期間における費用計上額の算定",
+    "複数の権利確定条件が付されている場合",
+    "段階的に権利行使が可能となるストック・オプション",
+    "権利行使された場合","権利不行使による失効が生じた場合",
+    "公正な評価単価を変動させる条件変更",
+    "ストック・オプション数を変動させる条件変更",
+    "費用の合理的な計上期間を変動させる条件変更",
+    "取締役の報酬等として株式を無償交付する取引（事前交付型・新株の発行）",
+    "取締役の報酬等として株式を無償交付する取引（事前交付型・自己株式の処分）",
+    "取締役の報酬等として株式を無償交付する取引（事後交付型・新株の発行）",
+    "取締役の報酬等として株式を無償交付する取引（事後交付型・自己株式の処分）",
+    "有償ストック・オプション（費用計上額の算定）",
+    "有償ストック・オプション（新株予約権の会計処理）",
+    "有償ストック・オプション（権利不確定による失効が生じた場合）",
+  ],
+  "第26章 会計上の変更及び誤謬の訂正": [
+    "会計方針の変更（会計処理）","会計方針の変更（比較情報）","表示方法の変更",
+    "会計上の見積りの変更（変更期間のみに影響する場合）",
+    "会計上の見積りの変更（将来の期間にも影響する場合）",
+    "会計方針の変更を会計上の見積りの変更と区別することが困難な場合の取扱い",
+    "過去の誤謬の訂正（会計処理）","過去の誤謬の訂正（比較情報）",
+    "会計上の見積りの変更と過去の誤謬の訂正の区別",
+  ],
+  "第27章 中間財務諸表": [
+    "原価差異の繰延","税金費用の計算","簡便的な会計処理",
+  ],
+  "第28章 収益認識": [
+    "契約変更",
+    "財またはサービスに対する保証","本人と代理人の区分",
+    "追加の財またはサービスを取得するオプションの付与",
+    "顧客により行使されない権利（非行使部分）",
+    "第三者のために回収する額","変動対価","契約における重要な金融要素",
+    "顧客に支払われる対価","返品権付きの販売",
+    "値引きの配分","変動対価の配分",
+    "一定の期間にわたり充足される履行義務",
+    "一時点で充足される履行義務",
+    "買戻契約","委託販売契約","請求済未出荷契約","工事損失引当金",
+    "契約資産・契約負債及び顧客との契約から生じた債権",
+  ],
+  // テキスト⑥⑦⑧
+  "第29章 連結会計基礎": [
+    "連結財務諸表の作成",
+    "追加取得","一部売却","段階取得による子会社化","持分法から連結への移行",
+    "連結から持分法への移行","連結除外",
+    "追加取得（その他の包括利益累計額あり）",
+    "一部売却（その他の包括利益累計額あり）",
+    "段階取得による子会社化（その他の包括利益累計額あり）",
+    "持分法から連結への移行（その他の包括利益累計額あり）",
+    "付随費用（支配獲得時）","付随費用（追加取得）","付随費用（一部売却）",
+    "付随費用（段階取得による子会社化）","付随費用（持分法から連結への移行）",
+    "評価差額の実現","アップ・ストリームと持分変動","子会社の増資",
+    "子会社の自己株式","子会社の新株予約権","負ののれん",
+    "資本剰余金が負の値となる場合","識別可能無形資産","条件付取得対価",
+    "のれんの一時償却","子会社の欠損","権利落ち株式",
+    "取引高・債権債務の相殺消去（営業取引）",
+    "取引高・債権債務の相殺消去（社債取引）",
+    "取引高・債権債務の相殺消去（その他）","未達取引",
+    "貸倒引当金の修正（アップ・ストリーム）","貸倒引当金の修正（ダウン・ストリーム）",
+    "未実現利益の消去・棚卸資産（アップ・ストリーム）",
+    "未実現利益の消去・棚卸資産（ダウン・ストリーム）",
+    "未実現利益の消去・償却性資産（アップ・ストリーム）",
+    "未実現利益の消去・償却性資産（ダウン・ストリーム）",
+    "未実現利益の消去・その他（アップ・ストリーム）",
+    "未実現利益の消去・その他（ダウン・ストリーム）",
+    "税効果・評価差額","税効果・未実現利益の消去","税効果・貸倒引当金の修正",
+    "税効果・社債償還損益","税効果・退職給付に係る調整累計額",
+    "税効果・子会社への投資に係る税効果","税効果・税率の変更","税効果・貸借対照表の表示",
+    "連結財務諸表における退職給付会計（未認識差異がないケース）",
+    "連結財務諸表における退職給付会計（未認識差異があるケース）",
+    "間接所有の子会社",
+    "在外子会社（持分変動・追加取得）","在外子会社（持分変動・一部売却）",
+    "在外子会社（未実現利益の消去）","子会社が保有する親会社株式",
+    "連結財務諸表における1株当たり情報","決算日の異なる子会社",
+    "持分法（基本的処理）",
+    "持分法・追加取得","持分法・一部売却","持分法・段階取得による関連会社化",
+    "持分法・その他の包括利益累計額（追加取得）",
+    "持分法・その他の包括利益累計額（一部売却）",
+    "持分法・その他の包括利益累計額（段階取得による関連会社化）",
+    "持分法・負ののれん","持分法・未実現利益の消去","持分法・付随費用",
+    "包括利益計算書（2計算書方式）","包括利益計算書（1計算書方式）",
+    "その他の包括利益（その他有価証券評価差額金）",
+    "その他の包括利益（退職給付に係る調整額）",
+    "その他の包括利益（為替換算調整勘定）",
+    "その他の包括利益（持分法適用会社に対する持分相当額）",
+    "その他の包括利益の内訳に係る注記（当期発生額）",
+    "その他の包括利益の内訳に係る注記（組替調整額）",
+    "株主資本等変動計算書（株主資本の各項目）",
+    "株主資本等変動計算書（株主資本以外の各項目・原則）",
+    "株主資本等変動計算書（株主資本以外の各項目・容認）",
+    "包括利益計算書の様式（2計算書方式）","包括利益計算書の様式（1計算書方式）",
+    "その他の包括利益の算定",
+  ],
+  // テキスト⑨
+  "第36章 個別キャッシュ・フロー計算書": [
+    "資金の範囲",
+    "営業活動によるキャッシュ・フロー・直接法",
+    "営業収入",
+    "仕入支出",
+    "人件費支出",
+    "その他の営業支出",
+    "営業活動によるキャッシュ・フロー・間接法",
+    "利息及び配当金の表示区分（損益計算の観点）",
+    "利息及び配当金の表示区分（活動区分の観点）",
+    "投資活動によるキャッシュ・フロー",
+    "財務活動によるキャッシュ・フロー",
+    "現金及び現金同等物に係る換算差額",
+    "リース取引に係る借手側の支払いリース料の取り扱い",
+    "連結CF計算書・原則法（直接法）","連結CF計算書・原則法（間接法）",
+    "連結CF計算書・簡便法（間接法）",
+    "在外子会社の外貨表示キャッシュ・フローの換算",
+    "在外子会社を含む連結CF計算書・原則法（直接法）",
+    "在外子会社を含む連結CF計算書・原則法（間接法）",
+    "在外子会社を含む連結CF計算書・簡便法（間接法）",
+  ],
+  // テキスト⑩
+  "第39章 企業結合会計": [
+    "取得企業の決定",
+    "取得原価の算定（段階取得以外）","取得原価の算定（段階取得）",
+    "取得関連費用の取扱い","識別可能無形資産","企業結合に係る特定勘定",
+    "合併（通常の取得）","合併（逆取得）",
+    "株式交換（通常の取得）","株式交換（逆取得）","株式移転","合併比率等の算定",
+    "共通支配下・親会社による子会社の合併",
+    "共通支配下・親会社と子会社による株式交換",
+    "共通支配下・親会社と子会社による株式移転",
+    "共通支配下・子会社同士の合併（対価が株式のみ）",
+    "共通支配下・子会社同士の合併（対価が現金等の財産のみ）",
+    "共同支配企業の形成・完全子会社同士の合併",
+    "共同支配企業の形成・共同新設分割",
+  ],
+  "第40章 事業分離会計": [
+    "事業分離（受取対価が現金等・分離先が子会社）",
+    "事業分離（受取対価が現金等・分離先が子会社・関連会社以外）",
+    "事業分離（受取対価が株式のみ・分離先が子会社）",
+    "事業分離（受取対価が株式のみ・分離先が新たに子会社・段階取得以外）",
+    "事業分離（受取対価が株式のみ・分離先が新たに子会社・段階取得）",
+    "事業分離（受取対価が株式のみ・分離先が新たに関連会社）",
+    "事業分離（受取対価が株式のみ・分離先が子会社・関連会社以外）",
+    "事業分離（受取対価が現金等の財産と株式・分離先が子会社）",
+    "共同新設分割（分離先が子会社になるケース）",
+    "共同新設分割（分離先が共同支配企業になるケース）",
+    "結合当事企業の株主の会計処理",
+  ],
+};
+
+// ── 章の表示順（テキスト章番号順） ──
+const CHAPTER_ORDER = [
+  "第9章 有価証券",
+  "第11章 債権債務",
+  "第12章 貸倒引当金",
+  "第13章 デリバティブ取引・ヘッジ会計",
+  "第14章 リース会計（旧基準）",
+  "第14章 リース会計（新基準）",
+  "第15章 研究開発費・ソフトウェア",
+  "第16章 固定資産の減損会計",
+  "第17章 税効果会計（個別財務諸表）",
+  "第18章 外貨換算会計",
+  "第19章 社債",
+  "第21章 退職給付会計（個別財務諸表）",
+  "第22章 資産除去債務",
+  "第23章 純資産",
+  "第25章 ストック・オプション等",
+  "第26章 会計上の変更及び誤謬の訂正",
+  "第27章 中間財務諸表",
+  "第28章 収益認識",
+  "第29章 連結会計基礎",
+  "第36章 個別キャッシュ・フロー計算書",
+  "第39章 企業結合会計",
+  "第40章 事業分離会計",
+];
+
+// ── テキスト番号マッピング ──
+const CHAPTER_TEXT_NUM = {
+  "第9章 有価証券": "②",
+  "第11章 債権債務": "②",
+  "第12章 貸倒引当金": "②",
+  "第13章 デリバティブ取引・ヘッジ会計": "②",
+  "第14章 リース会計（旧基準）": "③",
+  "第14章 リース会計（新基準）": "③",
+  "第15章 研究開発費・ソフトウェア": "③",
+  "第16章 固定資産の減損会計": "③",
+  "第17章 税効果会計（個別財務諸表）": "③",
+  "第18章 外貨換算会計": "④",
+  "第19章 社債": "④",
+  "第21章 退職給付会計（個別財務諸表）": "④",
+  "第22章 資産除去債務": "④",
+  "第23章 純資産": "⑤",
+  "第25章 ストック・オプション等": "⑤",
+  "第26章 会計上の変更及び誤謬の訂正": "⑤",
+  "第27章 中間財務諸表": "⑤",
+  "第28章 収益認識": "⑤",
+  "第29章 連結会計基礎": "⑥⑦⑧",
+  "第36章 個別キャッシュ・フロー計算書": "⑨",
+  "第39章 企業結合会計": "⑩",
+  "第40章 事業分離会計": "⑩",
+};
+
+// ── MASTER DATA ──
+const ALL_PROBLEMS = [
+  { id:"q1", ch:"第2章 部門別計算", title:"Q-1　部門別計算", imp:"A",
+    defaultRonten:["製造間接費配賦差異の分析（公式法変動予算）","予算編成","実績集計","配賦差異の算定","直接配賦法","複数基準配賦法","補助部門費の配賦と責任会計"] },
+  { id:"q2", ch:"第3章 個別原価計算", title:"Q-2　個別原価計算⑴", imp:"A",
+    defaultRonten:["予定賃率の適用","製造間接費配賦差異の分析（固定予算）","製造間接費配賦差異の分析（公式法変動予算）","実績集計","階梯式配賦法（相互の配賦額の比較）","原価計算表と仕掛品勘定の作成","分割納入制"] },
+  { id:"q3", ch:"第3章 個別原価計算", title:"Q-3　個別原価計算⑵", imp:"A",
+    defaultRonten:["実際購入原価の計算","値引・割戻の処理","材料副費の配賦","実際消費価格の計算（平均法）","要支払額に基づく実際消費賃率の計算","直接工賃金の機能別分類","棚卸減耗費の計算","実績集計","配賦差異の算定","簡便法の相互配賦法","相互配賦法（連立方程式法）","補修不能一部仕損","補修不能全部仕損","直接経費処理","間接経費処理","作業屑の処理","原価計算表と仕掛品勘定の作成"] },
+  { id:"q4", ch:"第3章 個別原価計算", title:"Q-4　個別原価計算⑶", imp:"B",
+    defaultRonten:["実際消費価格の計算（先入先出法）","材料元帳","返還（残材戻入）の処理","支払賃金の計算","定時外作業手当の処理（間接労務費処理）","棚卸減耗費の計算","外注加工の処理（無償支給）","外注加工の処理（有償支給）","製造間接費配賦差異の分析（公式法変動予算）","簡便法の相互配賦法","補修可能仕損","補修不能一部仕損","補修不能全部仕損","直接経費処理","原価計算表と仕掛品勘定の作成"] },
+  { id:"q5", ch:"第4章 総合原価計算", title:"Q-5　総合原価計算⑴", imp:"A",
+    defaultRonten:["実際消費価格の計算（先入先出法）","実際消費価格の計算（平均法）","材料元帳","支払賃金の計算","要支払額に基づく実際消費賃率の計算","直接工賃金の機能別分類","棚卸減耗費の計算","実績集計","相互配賦法（連立方程式法）","複数基準配賦法","完成品と月末仕掛品への原価配分（平均法）","完成品と月末仕掛品への原価配分（修正先入先出法）","仕損・減損の処理（度外視法）","仕損・減損の処理（非度外視法・定点発生）","仕損・減損の処理（非度外視法・平均発生）","終点発生","仕損品の評価額がある場合の両者負担の計算","追加材料（非増量タイプ）","工程別総合原価計算（累加法）","全原価要素工程別総合原価計算"] },
+  { id:"q6", ch:"第4章 総合原価計算", title:"Q-6　総合原価計算⑵", imp:"A",
+    defaultRonten:["材料副費の配賦","完成品と月末仕掛品への原価配分（修正先入先出法）","仕損・減損の処理（非度外視法・定点発生）","検査点が複数ある場合の仕損費の負担計算","正常仕損と異常仕損","仕損品の評価額がある場合の両者負担の計算"] },
+  { id:"q7", ch:"第4章 総合原価計算", title:"Q-7　総合原価計算⑶", imp:"B",
+    defaultRonten:["完成品と月末仕掛品への原価配分（純粋先入先出法）","減損率安定＋度外視法","減損率安定＋非度外視法"] },
+  { id:"q8", ch:"第4章 総合原価計算", title:"Q-8　総合原価計算⑷", imp:"B",
+    defaultRonten:["完成品と月末仕掛品への原価配分（修正先入先出法）","仕損・減損の処理（度外視法）","終点発生","工程別総合原価計算（非累加法・通常の計算方式）","全原価要素工程別総合原価計算","加工費工程別総合原価計算"] },
+  { id:"q9", ch:"第4章 総合原価計算", title:"Q-9　総合原価計算⑸", imp:"B",
+    defaultRonten:["完成品と月末仕掛品への原価配分（修正先入先出法）","終点発生","等級別総合原価計算（当月製造費用按分法）","等級別総合原価計算（総合原価按分法＋先入先出法）","組別総合原価計算"] },
+  { id:"q10", ch:"第4章 総合原価計算", title:"Q-10　総合原価計算⑹", imp:"B",
+    defaultRonten:["完成品と月末仕掛品への原価配分（修正先入先出法）","仕損・減損の処理（非度外視法・定点発生）","副産物の処理と評価","連産品（NRV法による連結原価の按分）","連産品（副産物に準じた処理）","追加加工の可否（追加加工した場合の差額利益の計算）","追加加工の可否（最適な意思決定による増分利益の計算）"] },
+  { id:"q11", ch:"第5章 標準原価計算", title:"Q-11　標準原価計算⑴", imp:"A",
+    defaultRonten:["原価標準と標準原価の計算（第１法）","原価標準と標準原価の計算（第２法・終点発生）","勘定記入（パーシャル・プラン）","直接材料費差異の分析（理想標準原価を用いた分析）","製造間接費差異の分析（公式法変動予算・四分法）"] },
+  { id:"q12", ch:"第5章 標準原価計算", title:"Q-12　標準原価計算⑵", imp:"A",
+    defaultRonten:["原価標準と標準原価の計算（第２法・終点発生）","勘定記入（パーシャル・プラン）","直接材料費差異の分析（仕損差異と歩留差異）","直接労務費差異の分析（仕損差異と作業時間差異）","製造間接費差異の分析（公式法変動予算・三分法・実際時間基準）"] },
+  { id:"q13", ch:"第5章 標準原価計算", title:"Q-13　標準原価計算⑶", imp:"A",
+    defaultRonten:["原価標準と標準原価の計算（第２法・途中点発生）","勘定記入（修正パーシャル・プラン）","直接労務費差異の分析（人員構成差異）","製造間接費差異の分析（公式法変動予算・三分法・標準時間基準）"] },
+  { id:"q14", ch:"第5章 標準原価計算", title:"Q-14　標準原価計算⑷", imp:"A",
+    defaultRonten:["減損が発生する場合","直接材料費差異の分析（歩留差異と配合差異・通常の分析法）","直接材料費差異の分析（歩留差異と配合差異・平均価格を媒介とする方法）","直接労務費差異の分析（労働歩留差異と労働能率差異）"] },
+  { id:"q15", ch:"第5章 標準原価計算", title:"Q-15　標準原価計算⑸", imp:"B",
+    defaultRonten:["原価標準と標準原価の計算（第２法・終点発生）","仕損・減損の同時発生","直接材料費差異の分析（仕損差異と歩留差異）","直接材料費差異の分析（減損差異と作業屑差異）","直接労務費差異の分析（仕損差異と作業時間差異）","直接労務費差異の分析（労働歩留差異と労働能率差異）"] },
+  { id:"q16", ch:"第5章 標準原価計算", title:"Q-16　標準原価計算⑹", imp:"A",
+    defaultRonten:["原価標準と標準原価の計算（第２法・途中点発生）","勘定記入（パーシャル・プラン）","製造間接費－仕掛品勘定の作成","製造間接費差異の分析（公式法変動予算・二分法）","製造間接費差異の分析（公式法変動予算・四分法）"] },
+  { id:"q17", ch:"第5章 標準原価計算", title:"Q-17　標準原価計算⑺", imp:"B",
+    defaultRonten:["勘定記入（修正パーシャル・プラン）","工程別・作業区分別（工場全体の仕掛品勘定の作成）","工程別・作業区分別（最終完成品のみに正常仕損費を負担させる処理）","工程別・作業区分別（作業区分別の作業時間差異の分析）"] },
+  { id:"q18", ch:"第5章 標準原価計算", title:"Q-18　標準原価計算⑻", imp:"C",
+    defaultRonten:["勘定記入（シングル・プラン）","直接材料費差異の分析（インプット法による数量差異の把握）","直接労務費差異の分析（インプット法による作業時間差異の把握）"] },
+  { id:"q40", ch:"第8章 財務情報分析", title:"Q-40　財務情報分析", imp:"B",
+    defaultRonten:["収益性分析（総資本事業利益率などの分析）","安全性分析（流動比率などの分析）","活動性分析（売上債権回転期間などの分析）","企業価値評価（DCF法）","WACCの計算（調達源泉別資本コスト率に基づくWACCの計算）","DCF法による企業価値評価（FCFFの計算）","DCF法による企業価値評価（継続価値の計算）","DCF法による企業価値評価（事業価値・企業価値・株主価値の計算）","多国籍企業の管理会計（EBITDAの計算）"] },
+  { id:"q19", ch:"第9章 予算管理", title:"Q-19　予算管理⑴", imp:"A",
+    defaultRonten:["直接標準原価計算による損益計算","CVP分析（損益分岐点分析）","CVP分析（損益分岐点比率と安全余裕率の計算）","多品種製品のCVP分析（売上高比率を一定と仮定する場合）","多品種製品のCVP分析（販売量比率を一定と仮定する場合）","予算実績差異分析（直接原価計算方式）","販売数量差異と価格・能率・予算差異の分析","販売数量差異の原因分析（S/M差異と総販売数量差異・通常の方法）","市場占拠率差異と市場総需要量差異","総額法と差額法"] },
+  { id:"q20", ch:"第9章 予算管理", title:"Q-20　予算管理⑵", imp:"B",
+    defaultRonten:["直接標準原価計算による損益計算","全部原価計算と直接原価計算の比較（標準原価計算）","CVP分析（損益分岐点分析）","全部原価計算方式の損益分岐点分析","予算実績差異分析（直接原価計算方式）","予算実績差異分析（全部原価計算方式）","販売数量差異と価格・能率・予算差異の分析","在庫がある場合の予算実績差異分析","市場占拠率差異と市場総需要量差異","総額法と差額法"] },
+  { id:"q21", ch:"第10章 資金管理とキャッシュ・フロー管理", title:"Q-21　資金管理とキャッシュ・フロー管理⑴", imp:"A",
+    defaultRonten:["活動性分析（売上債権回転期間などの分析）","売上債権回転期間の計算","棚卸資産回転期間の計算","仕入債務回転期間の計算","オペレーティング・サイクルとCCCの計算","所要運転資金の計算"] },
+  { id:"q22", ch:"第10章 資金管理とキャッシュ・フロー管理", title:"Q-22　資金管理とキャッシュ・フロー管理⑵", imp:"B",
+    defaultRonten:["活動性分析（売上債権回転期間などの分析）","売上債権回転期間の計算","棚卸資産回転期間の計算","仕入債務回転期間の計算","オペレーティング・サイクルとCCCの計算","売上債権の回収計画（手形取引なし）","仕入債権の支払計画（手形取引なし）","所要運転資金の計算","資金計算書（キャッシュ・フロー計算書）"] },
+  { id:"q23", ch:"第10章 資金管理とキャッシュ・フロー管理", title:"Q-23　資金管理とキャッシュ・フロー管理⑶", imp:"B",
+    defaultRonten:["活動性分析（売上債権回転期間などの分析）","企業価値評価（EVAに基づく企業価値評価）","売上債権回転期間の計算","棚卸資産回転期間の計算","仕入債務回転期間の計算","オペレーティング・サイクルとCCCの計算","売上債権の回収計画（手形取引あり）","仕入債権の支払計画（手形取引あり）","資金計算書（資金移動表）","資金計算書（資金繰り表）","WACCの計算（調達源泉別資本コスト率に基づくWACCの計算）","投資センターの業績測定（EVA®の計算）"] },
+  { id:"q24", ch:"第11章 差額原価収益分析", title:"Q-24　差額原価収益分析⑴", imp:"B",
+    defaultRonten:["原価予測（高低点法）","機会原価の計算","自製か外注か（自製部品の外注への切り替え）","差額原価の分岐点分析"] },
+  { id:"q25", ch:"第11章 差額原価収益分析", title:"Q-25　差額原価収益分析⑵", imp:"C",
+    defaultRonten:["機会原価の計算","注文引受可否（注文を引き受けた場合の差額利益の計算）"] },
+  { id:"q26", ch:"第11章 差額原価収益分析", title:"Q-26　差額原価収益分析⑶", imp:"A",
+    defaultRonten:["CVP分析（損益分岐点分析）","CVP分析（損益分岐点比率と安全余裕率の計算）","機会損失の計算","最適セールス・ミックス（共通の制約条件が単一の場合）","最適セールス・ミックス（共通の制約条件が複数の場合）","最適セールス・ミックス（LPモデル）","設備の売却に関連するCFの計算（売却益）"] },
+  { id:"q27", ch:"第12章 設備投資の経済性計算", title:"Q-27　設備投資の経済性計算⑴", imp:"A",
+    defaultRonten:["期間のCFの計算","WACCの計算（調達源泉別資本コスト率に基づくWACCの計算）","投資案の評価（正味現在価値の計算）","投資案の評価（単純回収期間の計算・平均発生を仮定）","投資案の評価（割引回収期間の計算）","投資案の評価（会計的利益率の計算）"] },
+  { id:"q28", ch:"第12章 設備投資の経済性計算", title:"Q-28　設備投資の経済性計算⑵", imp:"A",
+    defaultRonten:["期間のCFの計算","投資案の評価（正味現在価値の計算）","投資案の評価（内部利益率の計算）","投資案の評価（単純回収期間の計算・平均発生を仮定）"] },
+  { id:"q29", ch:"第12章 設備投資の経済性計算", title:"Q-29　設備投資の経済性計算⑶", imp:"A",
+    defaultRonten:["期間のCFの計算","設備の売却に関連するCFの計算（売却損）","運転資金の調整計算","投資案の評価（正味現在価値の計算）","投資案の評価（正味終価の計算）","投資案の評価（単純回収期間の計算・期末一括発生を仮定）"] },
+  { id:"q30", ch:"第12章 設備投資の経済性計算", title:"Q-30　設備投資の経済性計算⑷", imp:"A",
+    defaultRonten:["期間のCFの計算","設備の売却に関連するCFの計算（売却損）","設備の売却に関連するCFの計算（売却益）","WACCの計算（調達源泉別資本コスト率に基づくWACCの計算）","現価係数の計算","投資案の評価（正味現在価値の計算）","取替投資（総額法によるCFの計算）","取替投資（差額法によるCFの計算）","取替投資（現有設備の売却損益の税効果の計上時点）"] },
+  { id:"q31", ch:"第13章 原価管理", title:"Q-31　原価管理⑴", imp:"A",
+    defaultRonten:["原価企画（許容原価の計算）","原価企画（QFDによる目標原価の展開）","原価企画（価値比率の計算と解釈）"] },
+  { id:"q32", ch:"第13章 原価管理", title:"Q-32　原価管理⑵", imp:"C",
+    defaultRonten:["期別原価改善（原価改善目標額の計算と割当）","期別原価改善（原価改善差異の分析）"] },
+  { id:"q33", ch:"第13章 原価管理", title:"Q-33　原価管理⑶", imp:"C",
+    defaultRonten:["原価維持（設備総合効率の計算）","原価維持（設備総合効率を導入した標準原価差異分析）"] },
+  { id:"q34", ch:"第14章 活動基準原価計算（ABC）", title:"Q-34　ABC⑴", imp:"A",
+    defaultRonten:["ABCに基づく原価計算（伝統的原価計算とABCとの比較）","ABCに基づく原価計算（ABCと組別総合原価計算の結合）","ABCに基づく原価計算（活動の実行状況に基づく原価配分）"] },
+  { id:"q35", ch:"第14章 活動基準原価計算（ABC）", title:"Q-35　ABC⑵", imp:"A",
+    defaultRonten:["ABCの利用（ABCに基づく販管費の配賦）","ABCの利用（ABCに基づくセグメント別損益計算）"] },
+  { id:"q36", ch:"第14章 活動基準原価計算（ABC）", title:"Q-36　ABC⑶", imp:"C",
+    defaultRonten:["ABCの利用（ABCに基づくセグメント別損益計算）","TDABC（キャパシティ費用率の計算）","TDABC（時間方程式を利用した所要時間ドライバーの見積り）","TDABC（未利用キャパシティの計算）"] },
+  { id:"q37", ch:"第15章 分権組織とグループ経営の管理会計", title:"Q-37　分権組織とグループ経営の管理会計⑴", imp:"A",
+    defaultRonten:["機会原価の計算","注文引受可否（最低受注価格の計算）","投資センターの業績測定（事業部長の業績測定と事業部自体の業績測定）","投資センターの業績測定（ROIの計算）","投資センターの業績測定（RIの計算）","投資センターの業績測定（業績測定尺度と投資判断の関係・ROI）","投資センターの業績測定（業績測定尺度と投資判断の関係・RI）","内部振替価格（差額原価基準の振替価格）","内部振替価格（市価基準の振替価格・市価差引基準含む）"] },
+  { id:"q38", ch:"第15章 分権組織とグループ経営の管理会計", title:"Q-38　分権組織とグループ経営の管理会計⑵", imp:"A",
+    defaultRonten:["注文引受可否（最低受注価格の計算）","投資センターの業績測定（ROIの計算）","投資センターの業績測定（RIの計算）","投資センターの業績測定（業績測定尺度と投資判断の関係・RI）","投資センターの業績測定（業績測定尺度と投資判断の関係・RIとNPVの関係）","内部振替価格（差額原価基準の振替価格）"] },
+  { id:"q39", ch:"第15章 分権組織とグループ経営の管理会計", title:"Q-39　分権組織とグループ経営の管理会計⑶", imp:"B",
+    defaultRonten:["機会原価の計算","自製か外注か（自製部品の外注への切り替え）","内部振替価格（差額原価基準の振替価格）","内部振替価格（全部原価・総原価プラス基準の振替価格）","多国籍企業の管理会計（多国間移転価格）"] },
+];
+
+const STORE_KEY = 'kanri-keisan2-v2';
+const EVAL_LABELS = { oo:'○○', o:'○', n:'ー', x:'×', xx:'××' };
+const LEARN_DAYS = { oo:14, o:10, n:7, x:4, xx:2 };
+
+let state = { problems: ALL_PROBLEMS.map(p=>p.id), ronten: {}, history: {} };
+
+function load() {
+  try { const s = localStorage.getItem(STORE_KEY); if(s) state = JSON.parse(s); } catch(e){}
+}
+function save() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch(e){}
+}
+function today() { return new Date().toISOString().split('T')[0]; }
+function getAllProblems() {
+  return [...ALL_PROBLEMS, ...(state.customProblems || [])];
+}
+function getProbById(id) {
+  return getAllProblems().find(p => p.id === id);
+}
+function getRonten(probId) {
+  const prob = getProbById(probId);
+  const pool = CHAPTER_RONTEN_POOL[prob?.ch] || [];
+  const list = state.ronten[probId] || prob?.defaultRonten || [];
+  return [...list].sort((a, b) => {
+    const ai = pool.indexOf(a);
+    const bi = pool.indexOf(b);
+    if (ai === -1 && bi === -1) return 0;
+    if (ai === -1) return 1;
+    if (bi === -1) return -1;
+    return ai - bi;
+  });
+}
+function getHistory(probId) { return state.history[probId] || []; }
+function getLatest(probId) {
+  const h = getHistory(probId);
+  return h.length > 0 ? h[h.length-1] : null;
+}
+function fmtDate(dateStr) {
+  if (!dateStr) return '';
+  const p = dateStr.split('-');
+  if (p.length < 3) return dateStr;
+  return `${parseInt(p[1])}/${parseInt(p[2])}`;
+}
+// 復習サイクル日数の定義（評価別）
+const REVIEW_DAYS_AFTER_X = { oo:7, o:5, n:3, x:2, xx:1 }; // 要復習タブで×を押した後の再復習サイクル
+
+function calcUrgency(probId) {
+  const latest = getLatest(probId);
+  if (!latest || !latest.eval || !latest.date) return null;
+
+  // ○覚えた済みは要復習に出さない
+  if (latest.reviewPassed === true) return null;
+
+  // 要復習タブで×を押した場合：reviewDate基準で短いサイクルで再表示
+  if (latest.reviewDate && !latest.reviewPassed) {
+    const days = REVIEW_DAYS_AFTER_X[latest.eval] || 3;
+    const diff = Math.floor((Date.now() - new Date(latest.reviewDate).getTime()) / 86400000);
+    return Math.min(100, Math.round(diff / days * 100));
+  }
+
+  // 通常：問題を解いた日（date）からの経過日数で判定
+  const days = LEARN_DAYS[latest.eval] || 7;
+  const diff = Math.floor((Date.now() - new Date(latest.date).getTime()) / 86400000);
+  return Math.min(100, Math.round(diff / days * 100));
+}
+function urgencyColor(score) {
+  if (score >= 80) return '#c0392b';
+  if (score >= 55) return '#e67e22';
+  if (score >= 30) return '#d4a017';
+  return '#1a7a4a';
+}
+
+
+// ── 章理解度スコア計算 ──
+const IMP_WEIGHT = { A: 2, B: 1 };
+const EVAL_SCORE_MAP = { oo:5, o:4, n:3, x:2, xx:1 };
+
+function calcChapterScore(probIds) {
+  const total = probIds.length;
+  if (total === 0) return null;
+
+  const done = probIds.filter(id => getLatest(id));
+  const doneRatio = done.length / total;
+
+  // 50%未満実施は強制0
+  if (doneRatio < 0.5) return 0;
+
+  // 最新学習日を取得
+  let latestDate = null;
+  done.forEach(id => {
+    const lat = getLatest(id);
+    if (lat?.date && (!latestDate || lat.date > latestDate)) latestDate = lat.date;
+  });
+  if (!latestDate) return 0;
+
+  const days = Math.floor((Date.now() - new Date(latestDate).getTime()) / 86400000);
+
+  // freshness（①用）
+  const fresh1 = days <= 14 ? 1.0 : days <= 28 ? 0.76 : 0.55;
+  // 鮮度（③用）
+  const fresh3 = Math.max(0, 1 - days / 60);
+
+  // 重み付きスコア計算
+  let ws = 0, wmax = 0;
+  probIds.forEach(id => {
+    const lat = getLatest(id);
+    const prob = getProbById(id);
+    const w = IMP_WEIGHT[prob?.imp] || 1;
+    const s = lat ? (EVAL_SCORE_MAP[lat.eval] || 0) : 0;
+    ws += s * w;
+    wmax += 5 * w;
+  });
+
+  const s1 = (ws / wmax) * 100 * fresh1;
+  const s3 = (ws / wmax) * fresh3 * 100;
+  return Math.min(100, Math.round((s1 + s3) / 2));
+}
+
+function scoreClass(score) {
+  if (score === null) return 'score-none';
+  if (score >= 80) return 'score-high';
+  if (score >= 40) return 'score-mid';
+  return 'score-low';
+}
+
+// ── TAB ──
+let curTab = 'problems';
+function setTab(tab, btn) {
+  curTab = tab;
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  ['problems','ronten','urgent'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===tab ? 'block' : 'none';
+  });
+  if (tab==='problems') renderProblems();
+  if (tab==='ronten') renderRonten();
+  if (tab==='urgent') renderUrgent();
+}
+
+// ── PROBLEMS TAB ──
+function renderProblems() {
+  const ct = document.getElementById('tab-problems');
+  const openChapters = new Set();
+  document.querySelectorAll('.ch-group.open').forEach(el => openChapters.add(el.dataset.ch));
+
+  ct.innerHTML = '';
+
+  const chapters = {};
+  const chapterOrder = [];
+  state.problems.forEach(probId => {
+    const prob = getProbById(probId);
+    if (!prob) return;
+    if (!chapters[prob.ch]) { chapters[prob.ch] = []; chapterOrder.push(prob.ch); }
+    chapters[prob.ch].push(probId);
+  });
+
+  // テキスト章番号順にソート
+  chapterOrder.sort((a, b) => {
+    const ai = CHAPTER_ORDER.indexOf(a);
+    const bi = CHAPTER_ORDER.indexOf(b);
+    if (ai === -1 && bi === -1) return 0;
+    if (ai === -1) return 1;
+    if (bi === -1) return -1;
+    return ai - bi;
+  });
+
+  chapterOrder.forEach(ch => {
+    const probIds = chapters[ch];
+    const chDisplay = ch.replace('第', '').replace(' ', '　');
+    const textNum = CHAPTER_TEXT_NUM[ch] || '';
+
+    const group = document.createElement('div');
+    group.className = 'ch-group' + (openChapters.has(ch) ? ' open' : '');
+    group.dataset.ch = ch;
+
+    const groupHeader = document.createElement('div');
+    groupHeader.className = 'ch-group-header';
+    groupHeader.onclick = () => group.classList.toggle('open');
+    const chScore = calcChapterScore(probIds);
+    const chScoreLabel = chScore === null ? '–' : chScore;
+    const chScoreCls = scoreClass(chScore);
+    groupHeader.innerHTML = `
+      <span class="ch-group-title">${chDisplay}${textNum ? ' <span style="font-size:11px;font-weight:500;opacity:0.7;">ー' + textNum + '</span>' : ''}</span>
+      <span class="ch-score-badge ${chScoreCls}">${chScoreLabel}</span>`;
+    group.appendChild(groupHeader);
+
+    const groupBody = document.createElement('div');
+    groupBody.className = 'ch-group-body';
+
+    probIds.forEach((probId) => {
+      const prob = getProbById(probId);
+      if (!prob) return;
+      const latest = getLatest(probId);
+      const evalVal = latest?.eval || null;
+      const evalLabel = evalVal ? EVAL_LABELS[evalVal] : null;
+
+      let daysStr = '';
+      if (latest?.date) {
+        const diff = Math.floor((Date.now() - new Date(latest.date).getTime()) / 86400000);
+        daysStr = diff === 0 ? '今日' : `${diff}日前`;
+      }
+
+      const rightHtml = latest ? `
+        <div class="prob-right">
+          <div class="prob-right-item"><span class="prob-right-val">${daysStr}</span></div>
+          <div class="prob-right-item"><span class="prob-right-val">${latest.time ? latest.time+'分' : '–'}</span></div>
+          <div class="prob-right-item"><span class="prob-right-eval-val eval-${evalVal || 'none'}">${evalLabel || '–'}</span></div>
+        </div>` : `
+        <div class="prob-right"><span style="font-size:11px;color:var(--text-3);">未実施</span></div>`;
+
+      const impClass = prob.imp === 'A' ? 'imp-badge imp-A'
+        : prob.imp === 'B' ? 'imp-badge imp-B'
+        : 'imp-badge imp-hidden';
+      const impText = (prob.imp === 'A' || prob.imp === 'B') ? prob.imp : '';
+
+      const hasMemo = !!(state.memos && state.memos[probId]);
+      const memoBtnHtml = hasMemo
+        ? `<button class="prob-memo-btn" onclick="event.stopPropagation();openMemoPopup('${probId}')">メモ</button>`
+        : '';
+
+      const card = document.createElement('div');
+      card.className = 'prob-card';
+      card.dataset.probId = probId;
+
+      card.innerHTML = `
+        <div class="prob-header" onclick="openProbDetail('${probId}')">
+          <span class="${impClass}">${impText}</span>
+          <div class="prob-left">
+            <div class="prob-title">${prob.title}</div>
+            <div class="prob-id-sub">${prob.id.startsWith('custom-') ? (prob.num || '') : prob.id}</div>
+          </div>
+          ${memoBtnHtml}
+          ${rightHtml}
+        </div>`;
+
+      groupBody.appendChild(card);
+    });
+
+    group.appendChild(groupBody);
+    ct.appendChild(group);
+  });
+
+  const addDiv = document.createElement('div');
+  addDiv.className = 'add-section';
+  addDiv.innerHTML = `<button class="btn-add" style="width:100%;padding:10px;" onclick="openNewProbModal()">＋ 問題を追加する</button>`;
+  ct.appendChild(addDiv);
+}
+
+function openProbDetail(probId) {
+  const prob = getProbById(probId);
+  const hist = getHistory(probId);
+  const latest = getLatest(probId);
+  const idxInAll = state.problems.indexOf(probId);
+  if (!prob) return;
+
+  const idLabel = prob.num || (prob.id.startsWith('custom-') ? '' : prob.id);
+  document.getElementById('pd-title').textContent = prob.title;
+
+  const evalVal = latest?.eval || null;
+  const evalLabel = evalVal ? EVAL_LABELS[evalVal] : null;
+  let daysStr = '未実施';
+  if (latest?.date) {
+    const diff = Math.floor((Date.now() - new Date(latest.date).getTime()) / 86400000);
+    daysStr = diff === 0 ? '今日' : `${diff}日前`;
+  }
+  document.getElementById('pd-meta').innerHTML = latest ? `
+    <span style="font-family:'Zen Maru Gothic',sans-serif;font-size:16px;font-weight:700;color:#1a3a6e;">${daysStr}</span>
+    <span style="font-family:'Zen Maru Gothic',sans-serif;font-size:16px;font-weight:700;color:#1a3a6e;">${latest.time ? latest.time+'分' : '–'}</span>
+    <span style="font-family:'Zen Maru Gothic',sans-serif;font-size:16px;font-weight:700;color:#1a3a6e;">${evalLabel || '–'}</span>
+    ${idLabel ? `<span style="font-size:10px;color:var(--text-3);font-family:'DM Mono',monospace;margin-left:auto;">${idLabel}</span>` : ''}
+  ` : `<span style="font-size:12px;color:var(--text-3);">未実施</span>`;
+
+  const histHtml = hist.length === 0
+    ? `<div class="hist-empty">まだ記録がありません</div>`
+    : [...hist].reverse().map((entry, i) => {
+        const num = hist.length - i;
+        const rontenRows = Object.entries(entry.ronten || {}).map(([name, val]) => `
+          <div class="hist-ronten-row">
+            <span class="hist-ronten-name">${name}</span>
+            ${val ? `<span class="prob-meta-badge badge-${val}">${EVAL_LABELS[val]}</span>` : ''}
+          </div>`).join('');
+        return `
+          <div class="hist-entry">
+            <div class="hist-entry-header">
+              <span class="hist-entry-num">#${num}</span>
+              <span class="prob-meta-badge badge-${entry.eval}">${EVAL_LABELS[entry.eval]}</span>
+              ${entry.date ? `<span class="hist-entry-date">${fmtDate(entry.date)}</span>` : ''}
+              ${entry.time ? `<span class="hist-entry-time">${entry.time}分</span>` : ''}
+            </div>
+            ${rontenRows ? `<div class="hist-entry-body">${rontenRows}</div>` : ''}
+          </div>`;
+      }).join('');
+  document.getElementById('pd-hist').innerHTML = histHtml;
+
+  document.getElementById('pd-record-btn').onclick = () => {
+    closeProbDetailDirect();
+    openModal(probId);
+  };
+
+  document.getElementById('pd-sub').innerHTML = `
+    <button class="btn-sub" onclick="closeProbDetailDirect();openEditModal('${probId}')">論点を編集する</button>
+    <div class="move-btns" style="margin-left:auto;">
+      <button class="move-btn" onclick="moveProblem('${probId}',-1)" ${idxInAll===0?'disabled':''}>↑</button>
+      <button class="move-btn" onclick="moveProblem('${probId}',1)" ${idxInAll===state.problems.length-1?'disabled':''}>↓</button>
+    </div>`;
+
+  document.getElementById('pd-delete').innerHTML = `
+    <button onclick="closeProbDetailDirect();deleteProblem('${probId}')" style="width:100%;padding:10px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);background:transparent;color:var(--text-3);font-family:'Noto Sans JP',sans-serif;font-size:12px;cursor:pointer;">この問題を削除する</button>`;
+
+  document.getElementById('prob-detail-overlay').classList.add('open');
+}
+
+function closeProbDetail(e) {
+  if (e.target === document.getElementById('prob-detail-overlay')) closeProbDetailDirect();
+}
+function closeProbDetailDirect() {
+  document.getElementById('prob-detail-overlay').classList.remove('open');
+}
+
+function moveProblem(probId, dir) {
+  const idx = state.problems.indexOf(probId);
+  if (idx < 0) return;
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= state.problems.length) return;
+  state.problems.splice(idx, 1);
+  state.problems.splice(newIdx, 0, probId);
+  save(); renderProblems();
+}
+function deleteProblem(probId) {
+  const prob = getProbById(probId);
+  if (!confirm(`「${prob?.title}」を一覧から削除しますか？\n（評価データは保持されます）`)) return;
+  state.problems = state.problems.filter(id=>id!==probId);
+  save(); renderProblems();
+}
+
+// ── RECORD MODAL ──
+let modalProbId = null;
+let modalEval = null;
+let modalRontenEvals = {};
+
+function openModal(probId) {
+  modalProbId = probId;
+  modalEval = null;
+  modalRontenEvals = {};
+  const prob = getProbById(probId);
+  document.getElementById('modal-title').textContent = `[${probId}] ${prob.title}`;
+  document.getElementById('modal-subtitle').textContent = '問題の評価と論点を記録します';
+  document.getElementById('modal-date').value = today();
+  document.getElementById('modal-time').value = '';
+
+  document.querySelectorAll('#modal-prob-btns .ub').forEach(b=>b.className='ub');
+  document.getElementById('step1-next').disabled = true;
+  const memoEl = document.getElementById('modal-memo'); if (memoEl) memoEl.value = '';
+  const memoTrigger = document.getElementById('memo-trigger');
+  if (memoTrigger) { memoTrigger.textContent = '気づいたことや間違えたポイントを記録...'; memoTrigger.classList.add('empty'); }
+
+  goStep1();
+  document.getElementById('record-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('record-modal').classList.remove('open');
+}
+
+function selectModalEval(val) {
+  modalEval = val;
+  document.querySelectorAll('#modal-prob-btns .ub').forEach((b,i) => {
+    const v = ['oo','o','n','x','xx'][i];
+    b.className = 'ub' + (v===val ? ' sel-'+v : '');
+  });
+  document.getElementById('step1-next').disabled = false;
+}
+
+function goStep1() {
+  document.getElementById('modal-step1').classList.add('active');
+  document.getElementById('modal-step2').classList.remove('active');
+  document.getElementById('step-dot-1').classList.add('active');
+  document.getElementById('step-dot-2').classList.remove('active');
+  document.getElementById('step-label').textContent = 'ステップ 1 / 2';
+}
+
+function goStep2() {
+  if (!modalEval) return;
+  const rontenList = getRonten(modalProbId);
+  const listEl = document.getElementById('modal-ronten-list');
+  listEl.innerHTML = rontenList.map(name => {
+    const vals = ['oo','o','n','x','xx'];
+    const labels = ['○○','○','ー','×','××'];
+    return `
+      <div class="modal-ronten-item">
+        <div class="modal-ronten-name">${name}</div>
+        <div class="u-btns">
+          ${vals.map((v,i)=>`<button class="rb" data-name="${name}" data-val="${v}" onclick="selectRontenEval(this,'${name}','${v}')">${labels[i]}</button>`).join('')}
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('modal-step1').classList.remove('active');
+  document.getElementById('modal-step2').classList.add('active');
+  document.getElementById('step-dot-1').classList.remove('active');
+  document.getElementById('step-dot-2').classList.add('active');
+  document.getElementById('step-label').textContent = 'ステップ 2 / 2';
+}
+
+function selectRontenEval(btn, name, val) {
+  if (modalRontenEvals[name] === val) {
+    modalRontenEvals[name] = null;
+    btn.closest('.u-btns').querySelectorAll('.rb').forEach(b => b.className = 'rb');
+    return;
+  }
+  modalRontenEvals[name] = val;
+  btn.closest('.u-btns').querySelectorAll('.rb').forEach(b => {
+    const bv = b.dataset.val;
+    b.className = 'rb' + (bv===val ? ' sel-'+val : '');
+  });
+}
+
+function saveRecord() {
+  if (!modalProbId || !modalEval) return;
+  const date = document.getElementById('modal-date').value || today();
+  const time = document.getElementById('modal-time').value || '';
+  const entry = {
+    id: Date.now(),
+    eval: modalEval,
+    date,
+    time,
+    ronten: { ...modalRontenEvals }
+  };
+  if (!state.history[modalProbId]) state.history[modalProbId] = [];
+  state.history[modalProbId].push(entry);
+
+  // メモを追記（累積）
+  const memoVal = (document.getElementById('modal-memo')?.value || '').trim();
+  if (memoVal) {
+    if (!state.memos) state.memos = {};
+    const d = fmtDate(date);
+    const newLine = `〈${d}〉${memoVal}`;
+    state.memos[modalProbId] = state.memos[modalProbId]
+      ? state.memos[modalProbId] + '\n' + newLine
+      : newLine;
+  }
+  save();
+  closeModal();
+  renderProblems();
+  if (curTab === 'ronten') renderRonten();
+  if (curTab === 'urgent') renderUrgent();
+}
+
+// ── RONTEN EDIT MODAL ──
+let editProbId = null;
+
+function openEditModal(probId) {
+  editProbId = probId;
+  const prob = getProbById(probId);
+  document.getElementById('edit-modal-title').textContent = `[${probId}] 論点を編集`;
+  renderEditList();
+  renderEditSelect();
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function closeEditModal() {
+  document.getElementById('edit-modal').classList.remove('open');
+  editProbId = null;
+  renderProblems();
+}
+
+function renderEditList() {
+  const list = getRonten(editProbId);
+  const el = document.getElementById('ronten-edit-list');
+  el.innerHTML = list.length === 0
+    ? `<div style="font-size:11px;color:var(--text-3);text-align:center;padding:10px 0;">論点が設定されていません</div>`
+    : list.map((name, idx) => `
+      <div class="ronten-edit-item">
+        <span class="ronten-edit-name">${name}</span>
+        <button class="ronten-edit-del" onclick="deleteRonten(${idx})">✕</button>
+      </div>`).join('');
+}
+
+function renderEditSelect() {
+  const prob = getProbById(editProbId);
+  const ch = prob?.ch;
+  const pool = CHAPTER_RONTEN_POOL[ch] || [];
+  const current = getRonten(editProbId);
+  const available = pool.filter(name => !current.includes(name));
+  const sel = document.getElementById('ronten-add-select');
+  sel.innerHTML = available.length === 0
+    ? `<option value="">追加できる論点がありません</option>`
+    : `<option value="">論点を選択して追加...</option>`
+      + available.map(name => `<option value="${name}">${name}</option>`).join('');
+}
+
+function deleteRonten(idx) {
+  const list = [...getRonten(editProbId)];
+  list.splice(idx, 1);
+  state.ronten[editProbId] = list;
+  save(); renderEditList(); renderEditSelect();
+}
+
+function addRonten() {
+  const sel = document.getElementById('ronten-add-select');
+  const val = sel.value;
+  if (!val) return;
+  const list = [...getRonten(editProbId)];
+  if (list.includes(val)) return;
+  list.push(val);
+  state.ronten[editProbId] = list;
+  save(); renderEditList(); renderEditSelect();
+}
+
+// ── RONTEN TAB ──
+function renderRonten() {
+  const ct = document.getElementById('tab-ronten');
+  ct.innerHTML = '';
+
+  const rontenMap = {};
+  state.problems.forEach(probId => {
+    const hist = getHistory(probId);
+    const rontenList = getRonten(probId);
+    rontenList.forEach(name => {
+      if (!rontenMap[name]) rontenMap[name] = [];
+      hist.forEach(entry => {
+        const val = (entry.ronten || {})[name];
+        if (val) {
+          rontenMap[name].push({ probId, probTitle: getProbById(probId)?.title || probId, date: entry.date, eval: val });
+        }
+      });
+    });
+  });
+
+  const chapterRonten = {};
+  state.problems.forEach(probId => {
+    const prob = getProbById(probId);
+    if (!prob) return;
+    // プール全体を論点タブに表示（修正済み）
+    const pool = CHAPTER_RONTEN_POOL[prob.ch] || [];
+    pool.forEach(name => {
+      if (!chapterRonten[prob.ch]) chapterRonten[prob.ch] = [];
+      if (!chapterRonten[prob.ch].includes(name)) chapterRonten[prob.ch].push(name);
+    });
+  });
+
+  // 各章の論点をプール順にソート
+  Object.keys(chapterRonten).forEach(ch => {
+    const pool = CHAPTER_RONTEN_POOL[ch] || [];
+    chapterRonten[ch].sort((a, b) => {
+      const ai = pool.indexOf(a);
+      const bi = pool.indexOf(b);
+      if (ai === -1 && bi === -1) return 0;
+      if (ai === -1) return 1;
+      if (bi === -1) return -1;
+      return ai - bi;
+    });
+  });
+
+  const EVAL_SCORE = { oo: 5, o: 4, n: 3, x: 2, xx: 1 };
+  const SCORE_LABEL = (avg) => {
+    if (avg === null) return { label: '–', cls: 'badge-none' };
+    if (avg >= 4.5) return { label: '○○', cls: 'badge-oo' };
+    if (avg >= 3.5) return { label: '○',  cls: 'badge-o'  };
+    if (avg >= 2.5) return { label: 'ー', cls: 'badge-n'  };
+    if (avg >= 1.5) return { label: '×',  cls: 'badge-x'  };
+    return               { label: '××', cls: 'badge-xx' };
+  };
+
+  const openChs = new Set();
+  document.querySelectorAll('.ronten-ch-group.open').forEach(el => openChs.add(el.dataset.ch));
+
+  // 論点タブもテキスト章番号順にソート
+  const sortedRontenChs = Object.keys(chapterRonten).sort((a, b) => {
+    const ai = CHAPTER_ORDER.indexOf(a);
+    const bi = CHAPTER_ORDER.indexOf(b);
+    if (ai === -1 && bi === -1) return 0;
+    if (ai === -1) return 1;
+    if (bi === -1) return -1;
+    return ai - bi;
+  });
+
+  sortedRontenChs.forEach(ch => {
+    const rontenList = chapterRonten[ch];
+    const chDisplay = ch.replace('第', '').replace(' ', '　');
+    const textNumR = CHAPTER_TEXT_NUM[ch] || '';
+
+    const group = document.createElement('div');
+    group.className = 'ronten-ch-group' + (openChs.has(ch) ? ' open' : '');
+    group.dataset.ch = ch;
+
+    const groupHeader = document.createElement('div');
+    groupHeader.className = 'ch-group-header';
+    groupHeader.onclick = () => group.classList.toggle('open');
+    groupHeader.innerHTML = `
+      <span class="ch-group-title">${chDisplay}${textNumR ? ' <span style="font-size:11px;font-weight:500;opacity:0.7;">ー' + textNumR + '</span>' : ''}</span>`;
+    group.appendChild(groupHeader);
+
+    const groupBody = document.createElement('div');
+    groupBody.className = 'ronten-ch-group-body';
+
+    rontenList.forEach(name => {
+      const entries = rontenMap[name] || [];
+      const scores = entries.map(e => EVAL_SCORE[e.eval]).filter(Boolean);
+      const avg = scores.length > 0 ? scores.reduce((a,b) => a+b, 0) / scores.length : null;
+      const { label: avgLabel, cls: avgCls } = SCORE_LABEL(avg);
+
+      const row = document.createElement('div');
+      row.className = 'ronten-row';
+
+      const histCols = entries.map(e => {
+        const label = EVAL_LABELS[e.eval] || '–';
+        const prob = getProbById(e.probId);
+        const probShort = prob ? (prob.id.startsWith('custom-') ? (prob.num || '') : prob.id) : e.probId;
+        const dateShort = fmtDate(e.date);
+        return `
+          <div class="ronten-hist-col">
+            <span class="ronten-hist-prob">${probShort}</span>
+            <div class="ronten-hist-chip chip-${e.eval}">${label}</div>
+            <span class="ronten-hist-date">${dateShort}</span>
+          </div>`;
+      }).join('');
+
+      const avgBadge = `<span class="prob-meta-badge ${avgCls}">${avgLabel}</span>`;
+
+      row.innerHTML = `
+        <div class="ronten-row-header" onclick="this.parentElement.classList.toggle('open')">
+          <div class="ronten-row-name">${name}</div>
+          <div class="ronten-row-latest">${avgBadge}</div>
+        </div>
+        <div class="ronten-row-body">
+          ${entries.length === 0
+            ? '<div style="font-size:11px;color:var(--text-3);">まだ記録がありません</div>'
+            : `<div class="ronten-hist-table">${histCols}</div>`}
+        </div>`;
+
+      groupBody.appendChild(row);
+    });
+
+    group.appendChild(groupBody);
+    ct.appendChild(group);
+  });
+}
+
+// ── URGENT TAB ──
+function renderUrgent() {
+  const ct = document.getElementById('tab-urgent');
+  ct.innerHTML = '';
+
+  const urgent = state.problems
+    .map(id => ({ id, score: calcUrgency(id) }))
+    .filter(x => x.score !== null && x.score >= 70)
+    .sort((a,b) => b.score - a.score);
+
+  if (urgent.length === 0) {
+    ct.innerHTML = '<div class="empty-state">要復習の問題はありません 🎉</div>';
+    return;
+  }
+
+  urgent.forEach(({ id, score }) => {
+    const prob = getProbById(id);
+    const latest = getLatest(id);
+    if (!prob || !latest) return;
+    const color = urgencyColor(score);
+    const hasReviewX = !!latest.reviewDate && !latest.reviewPassed;
+
+    const card = document.createElement('div');
+    card.className = 'urgent-card';
+    card.dataset.probId = id;
+    const chDisplay = (prob.ch || '').replace('第', '').replace(' ', '　');
+    const textNum = CHAPTER_TEXT_NUM[prob.ch] || '';
+    card.innerHTML = `
+      <div style="font-size:10px;color:var(--text-3);margin-bottom:4px;font-family:'DM Mono',monospace;">${chDisplay}${textNum ? ' ー' + textNum : ''}</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div style="flex:1;font-size:13px;font-weight:700;">${prob.title}</div>
+        <span class="prob-meta-badge badge-${latest.eval}">${EVAL_LABELS[latest.eval]}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-3)">${prob.num || (prob.id.startsWith('custom-') ? '' : prob.id)}</span>
+      </div>
+      <div class="urgency-wrap" style="margin-bottom:12px;">
+        <span class="urgency-score" style="color:${color}">${score}</span>
+        <div class="urgency-track"><div class="urgency-fill" style="width:${score}%;background:${color}"></div></div>
+      </div>
+      <div class="urgent-review-btns">
+        <button class="ub-rev${hasReviewX ? ' sel-x' : ''}" onclick="reviewItem('${id}','x')">× もう一度</button>
+        <button class="ub-rev${latest.reviewPassed ? ' sel-o-btn' : ''}" onclick="reviewItem('${id}','o')">○ 覚えた</button>
+      </div>`;
+    ct.appendChild(card);
+  });
+}
+
+function reviewItem(probId, type) {
+  const hist = state.history[probId];
+  if (!hist || hist.length === 0) return;
+  const entry = hist[hist.length - 1];
+  if (type === 'o') {
+    entry.reviewPassed = true;
+    entry.reviewDate = today();
+  } else {
+    entry.reviewPassed = false;
+    entry.reviewDate = today();
+  }
+  save();
+  renderUrgent();
+}
+
+// ── BACKUP / RESTORE ──
+function exportData() {
+  const data = { version:2, label:'管理会計論（計算）', exportedAt: new Date().toISOString(), state };
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='zaimu_keisan_backup.json'; a.click();
+  URL.revokeObjectURL(url);
+}
+function importData(e) {
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.state) throw new Error('invalid');
+      if (!confirm('現在のデータを上書きして復元しますか？')) return;
+      state = data.state;
+      localStorage.setItem(STORE_KEY, JSON.stringify(state));
+      location.reload();
+    } catch(err) { alert('ファイルの読み込みに失敗しました。'); }
+  };
+  reader.readAsText(file); e.target.value='';
+}
+
+// ── NEW PROBLEM MODAL ──
+let newProbRonten = [];
+let newProbImp = 'B';
+
+function selectNewProbImp(val) {
+  newProbImp = val;
+  document.querySelectorAll('#new-prob-imp-btns .ub').forEach(b => {
+    const bv = b.textContent.trim();
+    b.className = 'ub' + (bv === val ? (val === 'A' ? ' sel-x' : ' sel-n') : '');
+  });
+}
+
+function openNewProbModal() {
+  newProbRonten = [];
+  newProbImp = 'B';
+  document.getElementById('new-prob-title').value = '';
+  document.getElementById('new-prob-num').value = '';
+  document.getElementById('new-prob-ronten-list').innerHTML = '';
+  document.querySelectorAll('#new-prob-imp-btns .ub').forEach(b => {
+    b.className = 'ub' + (b.textContent.trim() === 'B' ? ' sel-n' : '');
+  });
+
+  const chSel = document.getElementById('new-prob-ch');
+  chSel.innerHTML = '<option value="">章を選択...</option>'
+    + Object.keys(CHAPTER_RONTEN_POOL).map(ch => `<option value="${ch}">${ch}</option>`).join('');
+
+  document.getElementById('new-prob-ronten-select').innerHTML = '<option value="">まず章を選択してください</option>';
+
+  document.getElementById('new-prob-confirm').style.opacity = '.4';
+  document.getElementById('new-prob-confirm').style.pointerEvents = 'none';
+  document.getElementById('new-prob-modal').classList.add('open');
+}
+
+function closeNewProbModal() {
+  document.getElementById('new-prob-modal').classList.remove('open');
+}
+
+function onNewProbChChange() {
+  newProbRonten = [];
+  renderNewProbRontenList();
+  renderNewProbRontenSelect();
+  checkNewProbBtn();
+}
+
+function renderNewProbRontenList() {
+  const el = document.getElementById('new-prob-ronten-list');
+  el.innerHTML = newProbRonten.length === 0
+    ? `<div style="font-size:11px;color:var(--text-3);padding:4px 0;">論点未設定（後で編集も可能）</div>`
+    : newProbRonten.map((name, idx) => `
+        <div class="ronten-edit-item">
+          <span class="ronten-edit-name">${name}</span>
+          <button class="ronten-edit-del" onclick="removeNewProbRonten(${idx})">✕</button>
+        </div>`).join('');
+}
+
+function renderNewProbRontenSelect() {
+  const ch = document.getElementById('new-prob-ch').value;
+  const pool = CHAPTER_RONTEN_POOL[ch] || [];
+  const available = pool.filter(n => !newProbRonten.includes(n));
+  const sel = document.getElementById('new-prob-ronten-select');
+  sel.innerHTML = available.length === 0
+    ? `<option value="">追加できる論点がありません</option>`
+    : `<option value="">論点を選択して追加...</option>`
+      + available.map(n => `<option value="${n}">${n}</option>`).join('');
+}
+
+function addNewProbRonten() {
+  const sel = document.getElementById('new-prob-ronten-select');
+  if (!sel.value) return;
+  newProbRonten.push(sel.value);
+  renderNewProbRontenList();
+  renderNewProbRontenSelect();
+}
+
+function removeNewProbRonten(idx) {
+  newProbRonten.splice(idx, 1);
+  renderNewProbRontenList();
+  renderNewProbRontenSelect();
+}
+
+function checkNewProbBtn() {
+  const ch = document.getElementById('new-prob-ch').value;
+  const title = document.getElementById('new-prob-title').value.trim();
+  const ok = !!ch && !!title;
+  document.getElementById('new-prob-confirm').style.opacity = ok ? '1' : '.4';
+  document.getElementById('new-prob-confirm').style.pointerEvents = ok ? 'auto' : 'none';
+}
+
+function saveNewProblem() {
+  const ch = document.getElementById('new-prob-ch').value;
+  const title = document.getElementById('new-prob-title').value.trim();
+  const num = document.getElementById('new-prob-num').value.trim();
+  if (!ch || !title) return;
+  const newId = 'custom-' + Date.now();
+  if (!state.customProblems) state.customProblems = [];
+  state.customProblems.push({ id: newId, ch, title, imp: newProbImp, num: num || null, defaultRonten: [...newProbRonten] });
+  state.problems.push(newId);
+  save();
+  closeNewProbModal();
+  renderProblems();
+}
+
+document.getElementById('new-prob-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('new-prob-modal')) closeNewProbModal();
+});
+
+// ── INIT ──
+load();
+renderProblems();
+
+// ── MEMO POPUP ──
+function openMemoPopup(probId) {
+  const prob = getProbById(probId);
+  const memo = (state.memos || {})[probId] || '';
+  document.getElementById('memo-popup-title').textContent = prob ? prob.title : '';
+  document.getElementById('memo-popup-body').textContent = memo;
+  document.getElementById('memo-popup-overlay').classList.add('open');
+}
+function closeMemoPopup() {
+  document.getElementById('memo-popup-overlay').classList.remove('open');
+}
+
+function openMemoInputPopup() {
+  const val = document.getElementById('modal-memo')?.value || '';
+  document.getElementById('memo-input-popup-area').value = val;
+  document.getElementById('memo-input-popup-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('memo-input-popup-area').focus(), 50);
+}
+
+function closeMemoInputPopup() {
+  document.getElementById('memo-input-popup-overlay').classList.remove('open');
+}
+
+function confirmMemoInput() {
+  const val = document.getElementById('memo-input-popup-area').value;
+  document.getElementById('modal-memo').value = val;
+  const trigger = document.getElementById('memo-trigger');
+  if (trigger) {
+    if (val.trim()) { trigger.textContent = val; trigger.classList.remove('empty'); }
+    else { trigger.textContent = '気づいたことや間違えたポイントを記録...'; trigger.classList.add('empty'); }
+  }
+  closeMemoInputPopup();
+}
+
+</script>
+<!-- MEMO INPUT POPUP -->
+<div class="modal-overlay" id="memo-input-popup-overlay" onclick="closeMemoInputPopup()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-height:85vh;display:flex;flex-direction:column;overflow:hidden;padding-bottom:44px;">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="font-size:13px;font-weight:600;margin-bottom:8px;">メモ（追記されます）</div>
+    <textarea class="memo-input-area" id="memo-input-popup-area"></textarea>
+    <div class="modal-btns" style="margin-top:8px;flex-shrink:0;">
+      <button class="btn-cancel" onclick="closeMemoInputPopup()">キャンセル</button>
+      <button class="btn-next" onclick="confirmMemoInput()">完了</button>
+    </div>
+  </div>
+</div>
+
+<!-- MEMO POPUP -->
+<div class="modal-overlay" id="memo-popup-overlay" onclick="closeMemoPopup()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-height:75vh;overflow-y:auto;">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="memo-popup-title" style="font-size:13px;line-height:1.4;margin-bottom:10px;"></div>
+    <div class="memo-popup-body" id="memo-popup-body"></div>
+    <div class="modal-btns" style="margin-top:8px;">
+      <button class="btn-next" onclick="closeMemoPopup()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
