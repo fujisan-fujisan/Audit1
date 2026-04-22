@@ -2,12 +2,12 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<link rel="apple-touch-icon" href="icons/kanri-keisan.png">
+<link rel="apple-touch-icon" href="icons/kanri_keisan.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>管理会計論（計算）復習管理</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="財務計算">
+<meta name="apple-mobile-web-app-title" content="管理計算2">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#ffffff">
 
@@ -360,7 +360,7 @@ body {
     <div class="header-actions">
       <button class="btn-sm" onclick="exportData()">バックアップ</button>
       <button class="btn-sm" onclick="document.getElementById('import-input').click()">復元</button>
-      <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)">
+      <input type="file" id="import-input" accept=".json,application/json,text/plain" style="display:none" onchange="importData(event)">
     </div>
   </div>
 
