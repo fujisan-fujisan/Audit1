@@ -128,6 +128,42 @@ body {
 }
 .memo-textarea:focus { border-color: var(--text); }
 
+.memo-trigger {
+  width: 100%;
+  min-height: 72px;
+  background: var(--surface);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: 'Noto Sans JP', sans-serif;
+  color: var(--text);
+  cursor: pointer;
+  box-sizing: border-box;
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 1.75;
+}
+.memo-trigger.empty { color: var(--text-3); }
+.memo-trigger:active { border-color: var(--text); }
+
+.memo-input-area {
+  display: block;
+  width: 100%;
+  background: var(--surface);
+  border: none;
+  color: var(--text);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 16px;
+  padding: 4px 0 12px;
+  outline: none;
+  resize: none;
+  min-height: 200px;
+  flex: 1;
+  box-sizing: border-box;
+  line-height: 1.8;
+}
+
 /* MEMO POPUP */
 .memo-popup-body {
   font-size: 13px;
@@ -384,7 +420,8 @@ body {
       <div id="modal-ronten-list"></div>
       <div class="form-section memo-input-section">
         <label class="form-label">メモ（任意・追記されます）</label>
-        <textarea class="memo-textarea" id="modal-memo" placeholder="気づいたことや間違えたポイントを記録..."></textarea>
+        <div class="memo-trigger empty" id="memo-trigger" onclick="openMemoInputPopup()">気づいたことや間違えたポイントを記録...</div>
+        <textarea class="memo-textarea" id="modal-memo" style="display:none"></textarea>
       </div>
       <div class="modal-btns">
         <button class="btn-cancel" onclick="goStep1()">← 戻る</button>
@@ -1438,6 +1475,8 @@ function openModal(probId) {
   document.querySelectorAll('#modal-prob-btns .ub').forEach(b=>b.className='ub');
   document.getElementById('step1-next').disabled = true;
   const memoEl = document.getElementById('modal-memo'); if (memoEl) memoEl.value = '';
+  const memoTrigger = document.getElementById('memo-trigger');
+  if (memoTrigger) { memoTrigger.textContent = '気づいたことや間違えたポイントを記録...'; memoTrigger.classList.add('empty'); }
 
   goStep1();
   document.getElementById('record-modal').classList.add('open');
@@ -1929,7 +1968,42 @@ function closeMemoPopup() {
   document.getElementById('memo-popup-overlay').classList.remove('open');
 }
 
+function openMemoInputPopup() {
+  const val = document.getElementById('modal-memo')?.value || '';
+  document.getElementById('memo-input-popup-area').value = val;
+  document.getElementById('memo-input-popup-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('memo-input-popup-area').focus(), 50);
+}
+
+function closeMemoInputPopup() {
+  document.getElementById('memo-input-popup-overlay').classList.remove('open');
+}
+
+function confirmMemoInput() {
+  const val = document.getElementById('memo-input-popup-area').value;
+  document.getElementById('modal-memo').value = val;
+  const trigger = document.getElementById('memo-trigger');
+  if (trigger) {
+    if (val.trim()) { trigger.textContent = val; trigger.classList.remove('empty'); }
+    else { trigger.textContent = '気づいたことや間違えたポイントを記録...'; trigger.classList.add('empty'); }
+  }
+  closeMemoInputPopup();
+}
+
 </script>
+<!-- MEMO INPUT POPUP -->
+<div class="modal-overlay" id="memo-input-popup-overlay" onclick="closeMemoInputPopup()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-height:85vh;display:flex;flex-direction:column;overflow:hidden;padding-bottom:44px;">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="font-size:13px;font-weight:600;margin-bottom:8px;">メモ（追記されます）</div>
+    <textarea class="memo-input-area" id="memo-input-popup-area" placeholder="気づいたことや間違えたポイントを記録..."></textarea>
+    <div class="modal-btns" style="margin-top:8px;flex-shrink:0;">
+      <button class="btn-cancel" onclick="closeMemoInputPopup()">キャンセル</button>
+      <button class="btn-next" onclick="confirmMemoInput()">完了</button>
+    </div>
+  </div>
+</div>
+
 <!-- MEMO POPUP -->
 <div class="modal-overlay" id="memo-popup-overlay" onclick="closeMemoPopup()">
   <div class="modal" onclick="event.stopPropagation()" style="max-height:75vh;overflow-y:auto;">
