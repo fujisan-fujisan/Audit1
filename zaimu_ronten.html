@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="apple-touch-icon" href="icons/zaimu-riron.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="財務論点">
+<title>財務論点リコール</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f9f9f8;
+  --surface: #ffffff;
+  --surface2: #f2f2f0;
+  --border: #e8e8e5;
+  --border2: #d0d0cb;
+  --text: #111111;
+  --text2: #666666;
+  --text3: #aaaaaa;
+  --ok: #1a7a4a;
+  --ok-dim: #edf7f2;
+  --ng: #c0392b;
+  --ng-dim: #fdf0ee;
+  --lock: #999999;
+  --lock-dim: #f2f2f2;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6;overflow-x:hidden}
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex;flex-direction:column}
+
+/* START */
+#screen-start{align-items:center;justify-content:center;padding:60px 24px}
+.start-btns{display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px}
+.btn-primary{background:var(--text);color:#fff;border:none;border-radius:var(--radius);padding:15px 24px;font-size:14px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:all .12s}
+.btn-primary:active{transform:scale(.97)}
+.btn-secondary{background:var(--surface);color:var(--text2);border:1.5px solid var(--border2);border-radius:var(--radius);padding:13px 24px;font-size:14px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:all .12s}
+.btn-secondary:hover{border-color:var(--text2);color:var(--text)}
+.btn-secondary:active{transform:scale(.97)}
+
+/* COMMON HEADER */
+.page-header{padding:18px 16px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0}
+.back-btn{background:none;border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text2);font-size:12px;padding:5px 10px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.back-btn:hover{border-color:var(--text2);color:var(--text)}
+.page-header-info{flex:1;min-width:0}
+.page-header-title{font-size:15px;font-weight:700}
+.page-header-sub{font-size:11px;color:var(--text2);margin-top:1px}
+
+/* CHAPTER */
+.chapter-list{padding:12px 14px 40px;display:flex;flex-direction:column;gap:8px;overflow-y:auto}
+.ch-btn{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px 14px;text-align:left;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px;font-family:'Noto Sans JP',sans-serif;width:100%}
+.ch-btn:hover{border-color:var(--border2);background:var(--surface2)}
+.ch-btn:active{transform:scale(.98)}
+.ch-btn-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);min-width:26px}
+.ch-btn-info{flex:1;min-width:0}
+.ch-btn-name{font-size:13px;font-weight:700;color:var(--text)}
+.ch-btn-count{font-size:10px;color:var(--text2);margin-top:2px;font-family:'DM Mono',monospace}
+.ch-btn-hist{font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);text-align:right;flex-shrink:0}
+.ch-btn-hist .best{color:var(--ok);font-weight:700}
+
+/* GAME */
+.game-header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--border);padding:12px 16px;flex-shrink:0}
+.game-header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px}
+.game-chapter-name{font-size:12px;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.game-score-display{font-family:'DM Mono',monospace;font-size:13px;color:var(--text2);white-space:nowrap;flex-shrink:0}
+.game-score-display span{color:var(--ok);font-weight:700}
+.prog-track{height:3px;background:var(--border);border-radius:999px;overflow:hidden}
+.prog-fill{height:100%;background:var(--text);border-radius:999px;transition:width .4s ease}
+.game-content{padding:14px;max-width:600px;margin:0 auto;width:100%;padding-bottom:40px;overflow-y:auto}
+
+.input-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px}
+.input-card-title{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px}
+.input-group{margin-bottom:10px}
+.input-lbl{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.input-lbl-badge{font-size:9px;padding:1px 6px;border-radius:999px;background:var(--surface2);border:1px solid var(--border2);color:var(--text2)}
+.game-input{width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:16px;padding:10px 12px;outline:none;transition:border-color .15s;resize:vertical;min-height:54px;touch-action:manipulation}
+.game-input:focus{border-color:var(--text)}
+.game-input::placeholder{color:var(--text3)}
+.btn-submit{width:100%;padding:12px;border-radius:var(--radius-sm);border:none;background:var(--text);color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .12s;margin-top:2px}
+.btn-submit:active{transform:scale(.97)}
+
+/* CONFIRM */
+.confirm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end;justify-content:center}
+.confirm-overlay.open{display:flex}
+.confirm-modal{background:var(--surface);border-radius:16px 16px 0 0;padding:20px 16px 44px;width:100%;max-width:600px;max-height:80vh;overflow-y:auto}
+.confirm-handle{width:32px;height:3px;background:var(--border2);border-radius:999px;margin:0 auto 16px}
+.confirm-lbl{font-size:10px;font-weight:700;color:var(--text2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.confirm-ronten{font-size:16px;font-weight:700;margin-bottom:8px;line-height:1.4}
+.confirm-score-row{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.confirm-score-badge{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--ok-dim);color:var(--ok)}
+.confirm-score-sub{font-size:11px;color:var(--text2)}
+.confirm-other-title{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.confirm-other-list{display:flex;flex-direction:column;gap:5px;margin-bottom:16px}
+.confirm-other-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all .15s}
+.confirm-other-item:hover{border-color:var(--border2);background:var(--surface2)}
+.confirm-other-score{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);min-width:32px;flex-shrink:0}
+.confirm-other-name{font-size:12px;color:var(--text);flex:1;line-height:1.4}
+.confirm-btns{display:flex;gap:8px}
+.btn-yes{flex:2;padding:13px;border-radius:var(--radius-sm);border:none;background:var(--text);color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .12s}
+.btn-yes:active{transform:scale(.97)}
+.btn-no{flex:1;padding:13px;border-radius:var(--radius-sm);border:1.5px solid var(--border2);background:transparent;color:var(--text2);font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .12s}
+.btn-no:active{transform:scale(.97)}
+
+/* RESULTS */
+.results-section{margin-top:4px}
+.results-count-lbl{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+.result-item{border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:6px;display:flex;align-items:flex-start;gap:10px}
+.result-item.ok{border-color:var(--ok);background:var(--ok-dim)}
+.result-item.locked{border-color:var(--lock);background:var(--lock-dim);opacity:.6}
+.result-dot{font-size:13px;font-weight:700;flex-shrink:0;width:18px;text-align:center;margin-top:1px}
+.result-dot.ok{color:var(--ok)}
+.result-dot.locked{color:var(--lock)}
+.result-content{flex:1;min-width:0}
+.result-name{font-size:12px;font-weight:700;color:var(--text);line-height:1.4}
+.result-input-text{font-size:10px;color:var(--text2);margin-top:2px}
+.result-locked-msg{font-size:10px;color:var(--lock);margin-top:2px}
+
+.btn-finish{width:100%;padding:13px;border-radius:var(--radius-sm);border:1.5px solid var(--border2);background:transparent;color:var(--text2);font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-top:14px;transition:all .15s}
+.btn-finish:hover{border-color:var(--text2);color:var(--text)}
+.error-msg{font-size:11px;color:var(--ng);padding:8px 12px;background:var(--ng-dim);border-radius:var(--radius-sm);border:1px solid var(--ng);margin-bottom:8px}
+
+/* RESULT */
+#screen-result{align-items:stretch}
+.result-inner{padding:28px 18px 60px;max-width:600px;margin:0 auto;width:100%}
+.result-top{text-align:center;margin-bottom:28px}
+.result-ch-lbl{font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}
+.result-big{font-family:'DM Mono',monospace;font-size:68px;font-weight:500;color:var(--text);line-height:1;margin-bottom:4px}
+.result-big span{font-size:26px;color:var(--text2)}
+.result-total-lbl{font-size:12px;color:var(--text2);margin-bottom:6px}
+.result-rate{font-size:13px;font-weight:700;margin-bottom:14px}
+.result-rate .rn{color:var(--ok)}
+.result-rate .rn.warn{color:var(--ng)}
+.result-msg{font-size:13px;color:var(--text2);line-height:1.7}
+.result-breakdown{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:24px}
+.bd-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;text-align:center}
+.bd-num{font-family:'DM Mono',monospace;font-size:22px;font-weight:500}
+.bd-num.ok{color:var(--ok)}
+.bd-num.locked{color:var(--lock)}
+.bd-num.remain{color:var(--text2)}
+.bd-lbl{font-size:9px;color:var(--text3);margin-top:3px;letter-spacing:.06em;text-transform:uppercase}
+.result-hist-sec{margin-bottom:22px}
+.result-hist-title{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.hist-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.hist-bar-lbl{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);min-width:22px}
+.hist-bar-track{flex:1;height:7px;background:var(--border);border-radius:999px;overflow:hidden}
+.hist-bar-fill{height:100%;background:var(--text);border-radius:999px;transition:width .6s ease}
+.hist-bar-val{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);min-width:36px;text-align:right}
+.result-detail-sec{margin-bottom:24px}
+.result-detail-title{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.rdi{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)}
+.rdi:last-child{border-bottom:none}
+.rdi-dot{font-size:12px;font-weight:700;width:18px;flex-shrink:0;margin-top:2px;text-align:center}
+.rdi-dot.ok{color:var(--ok)}.rdi-dot.locked{color:var(--lock)}.rdi-dot.none{color:var(--text3)}
+.rdi-name{font-size:12px;color:var(--text);flex:1;line-height:1.5}
+.rdi-imp{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;flex-shrink:0;margin-top:2px}
+.imp-A{background:#fdf0ee;color:#c0392b}
+.imp-B{background:#fdf4e3;color:#7c5c00}
+.imp-C{background:#edf7f2;color:#1a7a4a}
+.result-btns{display:flex;flex-direction:column;gap:8px}
+.btn-retry{background:var(--text);color:#fff;border:none;border-radius:var(--radius-sm);padding:14px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .12s}
+.btn-retry:active{transform:scale(.97)}
+.btn-back{background:transparent;color:var(--text2);border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:13px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
+.btn-back:hover{border-color:var(--text2);color:var(--text)}
+
+/* MANAGE */
+#screen-manage{padding:0}
+.manage-tabs{display:flex;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);padding:0 4px;flex-shrink:0}
+.manage-tabs::-webkit-scrollbar{display:none}
+.mctab{padding:10px 12px;font-size:12px;font-weight:700;font-family:'Noto Sans JP',sans-serif;background:transparent;border:none;cursor:pointer;color:var(--text3);border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s}
+.mctab.active{color:var(--text);border-bottom-color:var(--text)}
+.manage-content{padding:12px 14px 60px;max-width:600px;margin:0 auto;overflow-y:auto}
+.manage-item-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden}
+.manage-item-header{padding:11px 13px;display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.manage-item-header:active{background:var(--surface2)}
+.manage-item-name{flex:1;font-size:12px;font-weight:700;color:var(--text);line-height:1.4;min-width:0}
+.manage-item-imp{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;flex-shrink:0}
+.manage-item-status{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);flex-shrink:0}
+.manage-item-status.has-ans{color:var(--ok)}
+.manage-item-body{display:none;border-top:1px solid var(--border);padding:12px 13px}
+.manage-item-card.open .manage-item-body{display:block}
+.manage-ans-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.manage-ans-row{display:flex;align-items:flex-start;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px}
+.manage-ans-text{flex:1;font-size:12px;color:var(--text);line-height:1.5}
+.manage-ans-del{background:none;border:none;color:var(--text3);font-size:14px;cursor:pointer;padding:0 2px;flex-shrink:0;transition:color .12s;line-height:1;margin-top:1px}
+.manage-ans-del:hover{color:var(--ng)}
+.manage-add-row{display:flex;gap:6px;align-items:flex-start}
+.manage-add-input{flex:1;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:16px;padding:8px 10px;outline:none;resize:vertical;min-height:50px;transition:border-color .15s;touch-action:manipulation}
+.manage-add-input:focus{border-color:var(--text)}
+.manage-add-input::placeholder{color:var(--text3)}
+.manage-add-btn{padding:8px 12px;border-radius:var(--radius-sm);border:1.5px solid var(--border2);background:var(--surface);color:var(--text2);font-size:12px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.manage-add-btn:hover{border-color:var(--text);color:var(--text)}
+.manage-excl-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.manage-excl-label{font-size:12px;color:var(--text2);font-weight:700}
+.manage-excl-toggle{padding:5px 14px;border-radius:999px;border:1.5px solid var(--border2);background:var(--surface2);color:var(--text3);font-size:12px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:all .15s}
+.manage-excl-toggle.on{background:var(--ok-dim);border-color:var(--ok);color:var(--ok)}
+.manage-item-card.excluded .manage-item-header{opacity:.45}
+.manage-item-card.excluded .manage-item-name{text-decoration:line-through}
+.manage-section-title{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;margin-top:2px}
+.alias-row{background:#f0f0ff;border-color:#c0c0e8}
+.manage-add-input-line{flex:1;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:12px;padding:8px 10px;outline:none;transition:border-color .15s;height:36px}
+.manage-add-input-line:focus{border-color:var(--text)}
+.manage-add-input-line::placeholder{color:var(--text3)}
+.record-item{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}
+.record-item:last-child{border-bottom:none}
+.record-item.excluded{opacity:.4}
+.record-item-name{flex:1;font-size:12px;color:var(--text);line-height:1.4}
+.record-item-right{flex-shrink:0}
+.record-score{font-family:'DM Mono',monospace;font-size:13px;font-weight:700}
+@media (min-width:820px){
+  body{font-size:17px}
+  .start-btns{max-width:480px}
+  .page-header{padding:22px 28px 18px}
+  .page-header-title{font-size:19px}
+  .page-header-sub{font-size:14px}
+  .back-btn{font-size:14px;padding:7px 14px}
+  .chapter-list{padding:16px 28px 60px;gap:10px}
+  .ch-btn{padding:16px 18px}
+  .ch-btn-num{font-size:13px;min-width:34px}
+  .ch-btn-name{font-size:16px}
+  .ch-btn-sub{font-size:12px}
+  .ch-btn-hist{font-size:13px}
+  .quiz-content{max-width:100%;padding:20px 28px 60px}
+  .ronten-name{font-size:19px}
+  .answer-input{font-size:16px;min-height:140px}
+  .btn-submit,.btn-next,.btn-skip{font-size:16px;padding:15px}
+  .kw-item-word{font-size:16px}
+  .ksb{font-size:14px;padding:10px 6px}
+  .result-inner{max-width:100%;padding:36px 28px 80px}
+  .result-big{font-size:80px}
+  .result-big span{font-size:28px}
+  .manage-content{max-width:100%;padding:16px 28px 80px}
+  .manage-item-name{font-size:15px}
+  .manage-add-input{font-size:14px}
+  .manage-kw-text{font-size:14px}
+  .mctab{font-size:14px;padding:12px 18px}
+  .import-content{max-width:100%;padding:20px 28px 80px}
+  .import-select{font-size:15px;padding:12px 14px}
+  .record-item-name{font-size:15px}
+  .record-score{font-size:14px}
+  .record-kw-table th{font-size:13px}
+  .record-kw-table td{font-size:13px}
+  .btn-main{font-size:19px;padding:32px 28px}
+  .btn-mid{font-size:17px;padding:18px 28px}
+  .btn-small{font-size:14px;padding:13px 10px}
+  .btn-retry,.btn-back{font-size:16px;padding:16px}
+  .quiz-chapter-name{font-size:15px}
+  .quiz-progress-text{font-size:14px}
+  .ronten-label,.answer-card-title,.kw-eval-title{font-size:13px}
+}
+</style>
+</head>
+<body>
+
+<!-- START -->
+<div class="screen active" id="screen-start">
+  <div class="start-btns">
+    <button class="btn-primary" onclick="goChapter()">章を選んで始める →</button>
+    <button class="btn-secondary" onclick="goManage()">解答を管理する</button>
+    <button class="btn-secondary" onclick="goRecord()">過去の回答を確認する</button>
+  </div>
+  <div style="display:flex;gap:8px;width:100%;max-width:320px;margin-top:32px">
+    <button class="btn-secondary" style="flex:1;font-size:12px;padding:10px" onclick="exportBackup()">バックアップ</button>
+    <button class="btn-secondary" style="flex:1;font-size:12px;padding:10px" onclick="document.getElementById('backup-input').click()">復元</button>
+    <input type="file" id="backup-input" accept=".json" style="display:none" onchange="importBackup(event)">
+  </div>
+</div>
+
+<!-- RECORD -->
+<div class="screen" id="screen-record">
+  <div class="page-header">
+    <button class="back-btn" onclick="goStart()">← トップ</button>
+    <div class="page-header-info">
+      <div class="page-header-title">過去の回答</div>
+      <div class="page-header-sub">論点ごとの正解回数</div>
+    </div>
+  </div>
+  <div class="manage-tabs" id="record-tabs"></div>
+  <div class="manage-content" id="record-content"></div>
+</div>
+
+<!-- CHAPTER -->
+<div class="screen" id="screen-chapter">
+  <div class="page-header">
+    <button class="back-btn" onclick="goStart()">← トップ</button>
+    <div class="page-header-info">
+      <div class="page-header-title">章を選択</div>
+      <div class="page-header-sub">全12章</div>
+    </div>
+  </div>
+  <div class="chapter-list" id="chapter-list"></div>
+</div>
+
+<!-- GAME -->
+<div class="screen" id="screen-game">
+  <div class="game-header">
+    <div class="game-header-top">
+      <button class="back-btn" onclick="abortGame()" style="flex-shrink:0">← 戻る</button>
+      <div class="game-chapter-name" id="game-chapter-name"></div>
+      <div class="game-score-display">正解 <span id="score-display">0</span></div>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="game-content">
+    <div class="input-card">
+      <div class="input-card-title">論点を入力</div>
+      <div class="input-group">
+        <div class="input-lbl">タイトル <span class="input-lbl-badge">問題名・キーワード</span></div>
+        <textarea class="game-input" id="input-title" rows="2"></textarea>
+      </div>
+      <div class="input-group">
+        <div class="input-lbl">解答内容 <span class="input-lbl-badge">どちらか一方でOK</span></div>
+        <textarea class="game-input" id="input-answer" rows="2"></textarea>
+      </div>
+      <button class="btn-submit" onclick="submitEntry()">照合する →</button>
+    </div>
+    <div class="results-section">
+      <div class="results-count-lbl" id="results-count-lbl">回答済み: 0件</div>
+      <div id="results-list"></div>
+    </div>
+    <button class="btn-finish" onclick="finishGame()">終了して結果を見る</button>
+  </div>
+</div>
+
+<!-- CONFIRM OVERLAY -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-modal">
+    <div class="confirm-handle"></div>
+    <div class="confirm-lbl">最も近い論点</div>
+    <div class="confirm-ronten" id="confirm-ronten"></div>
+    <div class="confirm-score-row">
+      <div class="confirm-score-badge" id="confirm-score-badge"></div>
+      <div class="confirm-score-sub" id="confirm-score-sub"></div>
+    </div>
+    <div class="confirm-btns">
+      <button class="btn-yes" onclick="confirmYes()">✓ これが答えたかった論点</button>
+      <button class="btn-no" onclick="confirmNo()">✕ 違う</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div class="screen" id="screen-result">
+  <div class="result-inner">
+    <div class="result-top">
+      <div class="result-ch-lbl" id="result-ch-lbl"></div>
+      <div class="result-big" id="result-big">0<span>/0</span></div>
+      <div class="result-total-lbl">論点を上げられました</div>
+      <div class="result-rate" id="result-rate"></div>
+      <div class="result-msg" id="result-msg"></div>
+    </div>
+    <div class="result-breakdown">
+      <div class="bd-card"><div class="bd-num ok" id="bd-ok">0</div><div class="bd-lbl">正解</div></div>
+      <div class="bd-card"><div class="bd-num locked" id="bd-locked">0</div><div class="bd-lbl">ロック</div></div>
+      <div class="bd-card"><div class="bd-num remain" id="bd-remain">0</div><div class="bd-lbl">未回答</div></div>
+    </div>
+    <div class="result-hist-sec" id="result-hist-sec" style="display:none">
+      <div class="result-hist-title">過去の記録</div>
+      <div id="hist-bars"></div>
+    </div>
+    <div class="result-detail-sec">
+      <div class="result-detail-title">この章の論点一覧</div>
+      <div id="result-detail-items"></div>
+    </div>
+    <div class="result-btns">
+      <button class="btn-retry" onclick="retryChapter()">同じ章でもう一度</button>
+      <button class="btn-back" onclick="goStart()">章選択に戻る</button>
+    </div>
+  </div>
+</div>
+
+<!-- MANAGE -->
+<div class="screen" id="screen-manage">
+  <div class="page-header">
+    <button class="back-btn" onclick="goStart()">← トップ</button>
+    <div class="page-header-info">
+      <div class="page-header-title">解答を管理</div>
+      <div class="page-header-sub">論点ごとに解答内容を登録・編集できます</div>
+    </div>
+  </div>
+  <div class="manage-tabs" id="manage-tabs"></div>
+  <div class="manage-content" id="manage-content"></div>
+</div>
+
+<script>
+const DATA=[
+ {ch:"第２章", chName:"財務会計総論", items:[
+   {id:"z2-5",name:"収益費用アプローチと資産負債アプローチの前提となる損益計算書と貸借対照表の関係",imp:"B"},
+   {id:"z2-6",name:"製品保証引当金の負債計上の可否（収益費用・資産負債アプローチ）",imp:"B"},
+   {id:"z2-7",name:"修繕引当金の負債計上の可否（収益費用・資産負債アプローチ）",imp:"A"},
+   {id:"z2-11",name:"名目・実質・実体資本維持概念のうち取得原価主義と結びつくもの",imp:"B"},
+   {id:"z2-12",name:"帰納的アプローチと演繹的アプローチの意義と帰納的アプローチの長短所",imp:"B"},
+   {id:"z2-13",name:"資本取引と損益取引の意義と区別が必要な理由",imp:"A"},
+   {id:"z2-14",name:"資本剰余金と利益剰余金の混同禁止（利害調整・情報提供の観点）",imp:"A"},
+   {id:"z2-15",name:"継続性の原則が要請される理由２つ",imp:"B"},
+   {id:"z2-16",name:"保守主義の原則と適用される場面２つ",imp:"B"},
+  ]},
+ {ch:"第３章", chName:"収益と費用", items:[
+   {id:"z3-1",name:"期間利益が備えるべき特質２つと財務会計の機能との関係",imp:"B"},
+   {id:"z3-3",name:"実現主義の意義と発生主義ではなく実現主義により収益を認識する理由",imp:"B"},
+   {id:"z3-4",name:"費用収益対応の原則は期間損益の算定においてどのように機能するか",imp:"B"},
+  ]},
+ {ch:"第４章", chName:"資産と負債", items:[
+   {id:"z4-1",name:"費用性資産について期間損益計算との関係から説明",imp:"B"},
+   {id:"z4-2",name:"費用性資産の評価に取得原価主義が採用される論拠",imp:"B"},
+   {id:"z4-5",name:"自家建設の固定資産への借入資本利子算入の要件と理由",imp:"B"},
+   {id:"z4-6",name:"自己所有固定資産と交換に固定資産取得した場合の取得原価決定",imp:"B"},
+   {id:"z4-7",name:"自己所有有価証券と交換に固定資産取得した場合の取得原価決定",imp:"B"},
+   {id:"z4-8",name:"無償で固定資産を取得した場合の会計処理方法の論拠と問題点",imp:"B"},
+   {id:"z4-9",name:"減価償却の目的と目的を果たすために必要とされる点",imp:"B"},
+   {id:"z4-14",name:"繰延資産の計上の根拠",imp:"B"},
+   {id:"z4-15",name:"株式分割・無償交付等に係る費用を繰延資産に計上できるか",imp:"B"},
+   {id:"z4-16",name:"株式交付費を資本から直接控除する方法ではなく費用処理する理由",imp:"B"},
+   {id:"z4-17",name:"負債性引当金と概念フレームワークにおける負債の定義との関係",imp:"B"},
+   {id:"z4-18",name:"引当金の計上根拠（費用性・損失性引当金）",imp:"B"},
+   {id:"z4-19",name:"将来の修繕に係る支出を引当金に計上する方法の論拠・問題点・解消方法",imp:"B"},
+  ]},
+ {ch:"第５章", chName:"概念フレームワーク", items:[
+   {id:"z5-1",name:"概念フレームワークにおける財務報告の目的",imp:"A"},
+   {id:"z5-2",name:"財務報告において特に重要とされる情報",imp:"A"},
+   {id:"z5-3",name:"会計情報に期待される役割（企業価値との関係）",imp:"A"},
+   {id:"z5-4",name:"ディスクロージャー制度の主たる当事者（投資家と経営者の役割）",imp:"A"},
+   {id:"z5-8",name:"セグメント情報等の開示とマネジメント・アプローチの採用理由（２特性の優劣関係）",imp:"B"},
+   {id:"z5-9",name:"セグメント情報開示のマネジメント・アプローチのメリット・デメリット",imp:"B"},
+   {id:"z5-10",name:"自己創設のれんを計上することは認められるか（財務報告の目的の観点）",imp:"A"},
+   {id:"z5-11",name:"概念フレームワークにおける資産の定義・支配・経済的資源の意味",imp:"A"},
+   {id:"z5-12",name:"概念フレームワークにおける負債の定義",imp:"A"},
+   {id:"z5-13",name:"繰延税金資産には資産性があるか（資産の定義に照らして）",imp:"A"},
+   {id:"z5-14",name:"繰延資産には資産性があるか（資産の定義に照らして）",imp:"B"},
+   {id:"z5-15",name:"製品保証引当金は概念フレームワークにおける負債の定義を充足するか",imp:"B"},
+   {id:"z5-16",name:"修繕引当金は概念フレームワークにおける負債の定義を充足するか",imp:"A"},
+   {id:"z5-17",name:"概念フレームワークにおける株主資本の定義",imp:"A"},
+   {id:"z5-18",name:"株主資本が株主に帰属する部分に限定される理由",imp:"B"},
+   {id:"z5-20",name:"利益の測定にとっての基本的な制約（純利益・包括利益との関係）",imp:"A"},
+   {id:"z5-22",name:"その他の包括利益のリサイクリング（純利益の性質・クリーンサープラス関係等）",imp:"A"},
+   {id:"z5-23",name:"財務諸表の構成要素の定義充足後に認識対象となるための２つの制約条件",imp:"A"},
+   {id:"z5-24",name:"未償却原価による測定値の意味",imp:"B"},
+   {id:"z5-25",name:"有形固定資産は原価評価・売買目的有価証券は時価評価される理由",imp:"A"},
+   {id:"z5-26",name:"リスクを調整した割引率による割引価値の意味と問題点",imp:"B"},
+   {id:"z5-27",name:"投資のリスクからの解放概念に基づく投資の成果の認識時点",imp:"B"},
+  ]},
+ {ch:"第６章", chName:"純資産", items:[
+   {id:"z6-1",name:"資本の部から純資産の部への変更の特徴と期待される効果",imp:"B"},
+   {id:"z6-2",name:"「資本の部」という表記を「純資産の部」に代えた理由",imp:"B"},
+   {id:"z6-3",name:"純資産の部に変更された項目３つと変更前後の取扱いの理由",imp:"A"},
+   {id:"z6-4",name:"株主資本と株主資本以外の各項目への区分の観点",imp:"B"},
+   {id:"z6-5",name:"純資産の部を株主資本と株主資本以外の各項目に区分する理由",imp:"A"},
+   {id:"z6-6",name:"純資産を株主資本とそれ以外に区分した結果の損益計算書と貸借対照表の関係",imp:"A"},
+   {id:"z6-10",name:"評価・換算差額等を純資産の部に株主資本とは区別して記載する理由",imp:"A"},
+   {id:"z6-11",name:"評価・換算差額等を株主資本とは区別して記載する理由（株主資本の特徴を踏まえて）",imp:"A"},
+   {id:"z6-12",name:"新株予約権を純資産の部に株主資本とは区別して記載する理由",imp:"A"},
+   {id:"z6-14",name:"非支配株主持分を純資産の部に株主資本とは区別して記載する理由",imp:"B"},
+   {id:"z6-15",name:"連結貸借対照表上，株主資本以外の項目の３つの区分の観点",imp:"B"},
+   {id:"z6-19",name:"資本剰余金の各項目と利益剰余金の各項目を混同してはならない理由",imp:"A"},
+   {id:"z6-20",name:"利益剰余金が負の残高のときその他資本剰余金で補てんする会計処理は混同に該当するか",imp:"B"},
+   {id:"z6-21",name:"その他資本剰余金による補てんの対象となる利益剰余金が年度決算時の負の残高に限られる理由",imp:"B"},
+   {id:"z6-22",name:"自己株式の会計上の性格（資産説・資本の控除説）",imp:"A"},
+   {id:"z6-23",name:"自己株式を無償取得した場合の２つの方法の論拠と制度会計上の取扱い",imp:"A"},
+   {id:"z6-24",name:"自己株式を純資産の部の株主資本の控除とする場合の会計処理の２つの方法",imp:"B"},
+   {id:"z6-25",name:"自己株式処分差益を資本剰余金として処理する理由",imp:"A"},
+   {id:"z6-26",name:"自己株式処分差損の取扱いの２つの考え方と制度会計上の採用理由",imp:"A"},
+   {id:"z6-29",name:"自己株式の会計上の性格を資本の控除とみる場合の付随費用の取扱い",imp:"A"},
+   {id:"z6-30",name:"株式交付費を資本から直接控除する方法ではなく費用処理する理由",imp:"B"},
+   {id:"z6-31",name:"自己新株予約権の会計上の性格",imp:"B"},
+   {id:"z6-33",name:"自己新株予約権を純資産の部の新株予約権から控除して表示する理由",imp:"B"},
+   {id:"z6-34",name:"その他資本剰余金の残高が負になった場合の処理の理由",imp:"A"},
+   {id:"z6-35",name:"その他資本剰余金の負の値の補てんを会計期間末においてする方法が採用される理由",imp:"B"},
+   {id:"z6-36",name:"減額した期の翌期以後に自己株式処分差益が生じても増額処理しない理由",imp:"B"},
+   {id:"z6-37",name:"連結子会社が保有する親会社株式を純資産の部の株主資本に対する控除項目として表示する理由",imp:"B"},
+  ]},
+ {ch:"第７章", chName:"ストック・オプション等", items:[
+   {id:"z7-1",name:"親会社が子会社の従業員等に親会社株式を原資産とした株式オプションを付与する取引の費用計上理由",imp:"B"},
+   {id:"z7-4",name:"企業がその従業員等にストック・オプションを付与する取引の費用認識の根拠",imp:"A"},
+   {id:"z7-5",name:"企業が従業員等に自社株式オプションを付与した場合に報酬性を有するものと考えられる論拠",imp:"B"},
+   {id:"z7-6",name:"「ストック・オプションの付与によっても新旧株主間で富の移転が生じるに過ぎない」という指摘への反論",imp:"B"},
+   {id:"z7-7",name:"「ストック・オプションを付与しても企業には現金その他の会社財産の流出が生じない」という指摘への反論",imp:"B"},
+   {id:"z7-8",name:"費用計上額をストック・オプションの公正な評価額に基づき算定する理由",imp:"B"},
+   {id:"z7-9",name:"ストック・オプションの公正な評価単価の算定の基準日を付与日とする理由",imp:"B"},
+   {id:"z7-10",name:"ストック・オプションの公正な評価単価を付与日以後見直さない理由",imp:"B"},
+   {id:"z7-11",name:"ストック・オプション数の算定にあたり権利不確定による失効の見積数を控除する理由",imp:"B"},
+   {id:"z7-12",name:"ストック・オプションの権利不行使による失効部分について費用の取消が行われない理由",imp:"A"},
+   {id:"z7-13",name:"ストック・オプションの権利不行使による失効部分を利益に計上する理由",imp:"A"},
+   {id:"z7-14",name:"ストック・オプションの公正な評価単価を変動させる条件変更が行われた場合に追加的に費用計上する理由",imp:"A"},
+   {id:"z7-15",name:"条件変更後の公正な評価単価が付与日における公正な評価単価を下回る場合に条件変更前からの費用計上を継続する理由",imp:"A"},
+   {id:"z7-16",name:"権利不確定による失効の見積数に重要な変動が生じた場合とストック・オプション数を変動させる条件変更の会計処理の相違",imp:"A"},
+   {id:"z7-17",name:"ストック・オプション数を変動させる条件変更が行われた場合に影響額を残存期間にわたって計上する理由",imp:"A"},
+  ]},
+ {ch:"第８章", chName:"退職給付", items:[
+   {id:"z8-1",name:"退職給付の費用認識に関する基本的な考え方",imp:"B"},
+   {id:"z8-2",name:"予測給付債務の意義・採用理由・問題点",imp:"B"},
+   {id:"z8-4",name:"退職給付見込額の期間帰属方法について期間定額基準が選択適用として認められている理由",imp:"A"},
+   {id:"z8-5",name:"給付算定式基準の長所（期間定額基準との対比）",imp:"A"},
+   {id:"z8-6",name:"期間定額基準の問題点２つ",imp:"A"},
+   {id:"z8-8",name:"退職給付債務の計算における割引率を安全性の高い債券の利回りを基礎として決定する理由",imp:"B"},
+   {id:"z8-9",name:"退職給付引当金の計上にあたって年金資産の額を退職給付債務から控除する理由",imp:"A"},
+   {id:"z8-10",name:"利息費用と期待運用収益の費用処理額を営業損益として表示する方法の論拠",imp:"A"},
+   {id:"z8-11",name:"数理計算上の差異を一期の費用として認識せず遅延認識する理由",imp:"A"},
+   {id:"z8-12",name:"過去勤務費用を一期の費用として認識せず遅延認識する理由",imp:"A"},
+   {id:"z8-14",name:"数理計算上の差異の取扱いに関する重要性基準と回廊アプローチの意義・共通する目的と制度会計上の採用方法",imp:"A"},
+   {id:"z8-15",name:"重要性基準と回廊アプローチの併用は行われていない理由",imp:"B"},
+   {id:"z8-16",name:"平均残存勤務期間が短縮された場合の各ケースの会計上の取扱い",imp:"B"},
+   {id:"z8-17",name:"連結貸借対照表において積立状況を示す額を負債または資産に計上する理由",imp:"A"},
+   {id:"z8-18",name:"数理計算上の差異について我が国で採用されていない方法の理由と採用している方法の説明",imp:"A"},
+   {id:"z8-19",name:"確定拠出制度においては資産または負債の計上は行われない理由",imp:"B"},
+  ]},
+ {ch:"第９章", chName:"金融商品", items:[
+   {id:"z9-1",name:"金融資産または金融負債自体を対象とする取引を契約締結時に認識する理由",imp:"B"},
+   {id:"z9-3",name:"有価証券の売買契約における買手と売手の会計処理（通常の期間と長い期間）",imp:"B"},
+   {id:"z9-4",name:"条件付きの金融資産の譲渡のリスク・経済価値アプローチと財務構成要素アプローチ",imp:"A"},
+   {id:"z9-5",name:"現先取引を金融取引として処理することが求められる理由",imp:"B"},
+   {id:"z9-11",name:"債権を債権金額より低い・高い価額で取得した場合に償却原価法を適用する理由",imp:"B"},
+   {id:"z9-12",name:"売買目的有価証券を時価評価する理由",imp:"B"},
+   {id:"z9-13",name:"売買目的有価証券の評価差額を当期の損益とする理由",imp:"A"},
+   {id:"z9-14",name:"満期の定めのない永久債等を満期保有目的の債券に分類することはできるか",imp:"B"},
+   {id:"z9-15",name:"満期保有目的の債券を時価評価しない理由",imp:"A"},
+   {id:"z9-16",name:"子会社株式及び関連会社株式を時価評価しない理由",imp:"B"},
+   {id:"z9-17",name:"その他有価証券を時価評価する理由",imp:"B"},
+   {id:"z9-18",name:"その他有価証券の評価差額を当期の損益としない理由",imp:"A"},
+   {id:"z9-19",name:"その他有価証券の評価差額の会計処理方法として部分純資産直入法が認められる理由",imp:"B"},
+   {id:"z9-20",name:"A社社債を資金繰りから売却した場合のB社社債の会計処理",imp:"B"},
+   {id:"z9-21",name:"償却原価法を適用してきた債券について減損処理後の償却原価法の適用",imp:"B"},
+   {id:"z9-22",name:"運用を目的とする金銭の信託の貸借対照表価額に時価を反映させる理由",imp:"B"},
+   {id:"z9-23",name:"運用を目的とする金銭の信託の評価差額を当期の損益とする理由",imp:"B"},
+   {id:"z9-26",name:"貸倒懸念債権のキャッシュ・フロー見積法において当初の約定利子率を用いる理由",imp:"B"},
+   {id:"z9-27",name:"ヘッジ会計の必要性（ヘッジ会計を適用しない場合を例にとって）",imp:"A"},
+   {id:"z9-28",name:"満期保有目的の債券を金利変動リスクに関するヘッジ対象とすることが認められない理由",imp:"B"},
+   {id:"z9-29",name:"ヘッジ会計の要件を充たすヘッジ取引に適用される２つの会計処理方法",imp:"A"},
+   {id:"z9-30",name:"金利スワップの特例処理の考え方及びその会計処理",imp:"B"},
+   {id:"z9-31",name:"転換社債型新株予約権付社債について一括法が認められる理由",imp:"B"},
+   {id:"z9-32",name:"転換社債型新株予約権付社債以外の新株予約権付社債について区分法が採用される理由",imp:"B"},
+  ]},
+ {ch:"第10章", chName:"固定資産の減損", items:[
+   {id:"z10-1",name:"事業用の固定資産を取得原価から減価償却累計額等を控除した金額で評価する理由",imp:"B"},
+   {id:"z10-2",name:"固定資産の減損とは何か・減損処理の本質",imp:"A"},
+   {id:"z10-3",name:"固定資産の減損処理と金融商品の時価評価との特徴の比較",imp:"A"},
+   {id:"z10-4",name:"「期末の帳簿価額を将来の回収可能性に照らして見直すだけでは減損損失を正しく認識できない」という指摘の意味",imp:"B"},
+   {id:"z10-5",name:"減損処理と臨時償却の共通点と相違点",imp:"B"},
+   {id:"z10-6",name:"資産のグルーピングを概ね独立したキャッシュ・フローを生み出す最小の単位で行う理由",imp:"B"},
+   {id:"z10-7",name:"減損の兆候がある資産・資産グループについて減損損失を認識するかどうかの判定を行う理由",imp:"B"},
+   {id:"z10-8",name:"減損損失を認識するかどうかの判定にあたって割引前将来キャッシュ・フローの総額と比較する理由",imp:"A"},
+   {id:"z10-9",name:"割引前将来キャッシュ・フローの見積期間が制限されている理由",imp:"B"},
+   {id:"z10-10",name:"減損損失の測定にあたり正味売却価額と使用価値のいずれか高い方を回収可能価額とする理由",imp:"A"},
+   {id:"z10-11",name:"回収可能価額の算定にあたって現在時点の正味売却価額を算定する必要はないとされる理由",imp:"B"},
+   {id:"z10-12",name:"帳簿価額を時価まで減額すべきとする見解（投資の継続性の観点）",imp:"B"},
+   {id:"z10-13",name:"将来キャッシュ・フローを企業に固有の事情を反映した仮定及び予測に基づいて見積る理由",imp:"B"},
+   {id:"z10-16",name:"資産除去債務が負債に計上されている場合に除去費用部分を将来キャッシュ・フローに含めない理由",imp:"B"},
+   {id:"z10-20",name:"より大きな単位でグルーピングを行う方法を採用した場合にのれんを加えることによる減損損失の増加額をのれんに配分する理由",imp:"B"},
+   {id:"z10-21",name:"減損処理を行った資産についても減損損失を控除した帳簿価額に基づき減価償却を行う理由",imp:"B"},
+   {id:"z10-22",name:"減損損失の戻入は行われない理由２つ",imp:"A"},
+  ]},
+ {ch:"第11章", chName:"棚卸資産", items:[
+   {id:"z11-2",name:"仕入割引の会計処理（営業外収益とする方法・送状価額から控除する方法）",imp:"A"},
+   {id:"z11-7",name:"後入先出法の長所及び短所",imp:"B"},
+   {id:"z11-8",name:"棚卸資産の評価に関する会計基準において後入先出法が認められなくなった理由",imp:"B"},
+   {id:"z11-9",name:"原価法が原則的な評価基準とされていた理由と低価法を容認する理由",imp:"A"},
+   {id:"z11-10",name:"通常の販売目的で保有する棚卸資産の収益性が低下した場合における簿価切下げの考え方",imp:"A"},
+   {id:"z11-11",name:"期末における正味売却価額が取得原価より下落している場合の２つの見解",imp:"A"},
+   {id:"z11-12",name:"収益性の低下の判断基準が正味売却価額と帳簿価額との比較とされる理由",imp:"A"},
+   {id:"z11-13",name:"品質低下または陳腐化に起因する簿価切下げとそれ以外の簿価切下げの取扱いに差を設けていない理由",imp:"B"},
+   {id:"z11-14",name:"正味売却価額に将来販売時点と期末時点の両方が含まれる理由",imp:"B"},
+   {id:"z11-15",name:"前期に計上した簿価切下額の戻入れの洗替え法と切放し法それぞれの論拠",imp:"B"},
+  ]},
+ {ch:"第12章", chName:"資産除去債務", items:[
+   {id:"z12-2",name:"資産除去債務の会計処理として引当金処理ではなく資産負債の両建処理が採用されている理由２つ",imp:"A"},
+   {id:"z12-3",name:"資産除去債務の負債計上に否定的な見解（概念フレームワークの認識規準）",imp:"B"},
+   {id:"z12-4",name:"資産除去債務の測定値として自己の支出見積りを用いる理由２つ",imp:"B"},
+   {id:"z12-5",name:"資産除去債務の算定に際し無リスクの割引率を用いる理由３つ",imp:"A"},
+   {id:"z12-7",name:"資産除去債務に対応する除去費用を別の資産として計上する方法が採用されなかった理由",imp:"B"},
+   {id:"z12-8",name:"関連する有形固定資産の帳簿価額を増加させる方法が採用されている理由",imp:"B"},
+   {id:"z12-11",name:"時の経過による資産除去債務の調整額の算定に当初負債計上時の割引率を固定する理由２つ",imp:"B"},
+   {id:"z12-12",name:"時の経過による調整額の営業外費用計上説と対象固定資産の減価償却費と同区分説の論拠",imp:"A"},
+   {id:"z12-13",name:"資産除去債務の履行時に生じる決済差額の計上区分の理由",imp:"A"},
+  ]},
+ {ch:"第13章", chName:"リース", items:[
+   {id:"z13-1",name:"ファイナンス・リース取引について通常の売買取引に係る方法に準じて会計処理を行う背景にある考え方",imp:"A"},
+   {id:"z13-2",name:"「リース取引に関する会計基準」の２区分モデルと「リースに関する会計基準」の単一モデルの比較",imp:"A"},
+   {id:"z13-3",name:"「リース取引に関する会計基準」の２区分の会計処理モデルの問題点",imp:"A"},
+   {id:"z13-4",name:"「リースに関する会計基準」の単一の会計処理モデルの長所",imp:"A"},
+   {id:"z13-6",name:"所有権移転外ファイナンス・リースの借手におけるリース資産及びリース債務の計上額の基礎",imp:"B"},
+   {id:"z13-7",name:"借手の資産及び負債の測定にあたり「リース取引に関する会計基準」と「リースに関する会計基準」の相違",imp:"A"},
+   {id:"z13-8",name:"所有権移転外ファイナンス・リースの借手においてリース物件の価値の側面を考慮することの問題点",imp:"B"},
+   {id:"z13-9",name:"「リース取引に関する会計基準」と「リースに関する会計基準」における借手のリースの費用配分",imp:"B"},
+   {id:"z13-10",name:"土地のリースが所有権移転外ファイナンス・リースに該当することはない理由",imp:"B"},
+   {id:"z13-12",name:"ファイナンス・リースの貸手において計上される資産の性格が所有権移転と移転外で異なる理由",imp:"B"},
+   {id:"z13-13",name:"「リース取引に関する会計基準」における貸手の会計処理の①と②の方法と収益認識基準との不整合",imp:"B"},
+   {id:"z13-14",name:"セール・アンド・リースバック取引の①金融取引として処理する方法と②資産の譲渡とリースに分けて処理する方法",imp:"A"},
+   {id:"z13-15",name:"「リース取引に関する会計基準」によるセール・アンド・リースバックでファイナンス・リースに該当する場合の売却損益の繰延処理の理由",imp:"A"},
+  ]},
+ {ch:"第14章", chName:"研究開発とソフトウェア", items:[
+   {id:"z14-1",name:"研究開発費をすべて発生時に費用処理する理由３つ",imp:"B"},
+   {id:"z14-2",name:"社内開発費の取扱いとして一定の要件を満たす場合には資産計上を求めるべきという見解の論拠",imp:"B"},
+  ]},
+ {ch:"第15章", chName:"収益認識", items:[
+   {id:"z15-1",name:"収益認識基準の基本となる原則と製品を２年間の保守サービス付きで販売した場合の収益の認識手順",imp:"A"},
+   {id:"z15-2",name:"製品Xを毎月初めに300個ずつ12か月にわたり合計3,600個を引渡す契約の契約変更の会計処理",imp:"B"},
+   {id:"z15-3",name:"製品の販売とともに製品保証を提供する契約において受取った代金全額を製品の販売時に収益に計上した会計処理の妥当性",imp:"A"},
+   {id:"z15-4",name:"販売額の１％をポイントとして顧客に付与している場合の取引価格全額を売上高に計上しポイント引当金を計上した会計処理の妥当性",imp:"A"},
+   {id:"z15-5",name:"顧客への財またはサービスの提供に他の当事者が関与している場合に企業が代理人に該当する状況と会計処理",imp:"A"},
+   {id:"z15-6",name:"小売業を営む当社が仕入先より商品を仕入れ店舗に陳列し販売している取引の会計処理（消化仕入）",imp:"A"},
+   {id:"z15-7",name:"建設業においてA社の所有する土地上にA社のための建物を建設する契約の履行義務が一定の期間にわたり充足されるものと判断した理由",imp:"B"},
+   {id:"z15-8",name:"建設業においてA社のための建物を建設する契約で履行義務の充足に係る進捗度を合理的に見積ることができないと判断し収益の認識を行わなかった取扱いの妥当性",imp:"A"},
+   {id:"z15-9",name:"商品の割賦販売について割賦基準・回収基準または回収期限到来基準を適用して収益を認識することは認められるか",imp:"A"},
+   {id:"z15-10",name:"製造業を営む当社がA社に製品を引き渡した時点で収益を認識している会計処理の妥当性（委託販売）",imp:"B"},
+   {id:"z15-11",name:"建設業において建物の完成がX２年３月31日より１日早まるごとに対価が増額される場合の取引価格決定上の留意点",imp:"B"},
+   {id:"z15-12",name:"建設業においてA社のための建物を建設する契約で割増金部分を取引価格に含めなかった取扱いの妥当性",imp:"B"},
+   {id:"z15-14",name:"現金販売価格2,000千円の商品を24回分割払いで販売し総受取額2,400千円を売上収益に計上した処理の妥当性",imp:"B"},
+   {id:"z15-15",name:"返品条件付販売における商品の販売時の会計処理",imp:"B"},
+   {id:"z15-16",name:"工事損失引当金の会計処理の背景にある考え方",imp:"B"},
+   {id:"z15-17",name:"有償支給取引の原則的な会計処理（買い戻す義務を負っている場合と負っていない場合）",imp:"B"},
+  ]},
+ {ch:"第16章", chName:"連結財務諸表", items:[
+   {id:"z16-1",name:"連結基礎概念の①親会社説と②経済的単一体説それぞれの考え方",imp:"A"},
+   {id:"z16-2",name:"連結貸借対照表における非支配株主持分の表示区分（①親会社説②経済的単一体説）",imp:"A"},
+   {id:"z16-3",name:"連結損益計算書における非支配株主に帰属する当期純利益の表示方法（①親会社説②経済的単一体説）",imp:"A"},
+   {id:"z16-4",name:"平成25年改正前の「連結財務諸表に関する会計基準」が親会社説の考え方によっていた理由２つ",imp:"B"},
+   {id:"z16-5",name:"平成25年改正後が親会社株主に帰属する当期純利益を区分して内訳表示または付記することとした理由２つ",imp:"B"},
+   {id:"z16-6",name:"平成25年改正後が非支配株主持分を株主資本とは区別して表示することとした理由",imp:"A"},
+   {id:"z16-7",name:"子会社の判定基準の①持株基準と②支配力基準の意義と特徴",imp:"A"},
+   {id:"z16-8",name:"子会社の判定基準として支配力基準が採用されている理由",imp:"A"},
+   {id:"z16-10",name:"P社はA社の議決権の45%を所有しているがA社がP社の子会社であると判定される理由２例",imp:"B"},
+   {id:"z16-11",name:"共同支配の実態にある合弁会社に対し比例連結を採用することは認められるか",imp:"B"},
+   {id:"z16-12",name:"親会社及び子会社が採用する会計方針を原則として統一するものとされている理由",imp:"B"},
+   {id:"z16-13",name:"親会社と各子会社の会計方針を画一的に統一することは求められていない理由",imp:"B"},
+   {id:"z16-14",name:"在外子会社の財務諸表がIFRSまたは米国会計基準に準拠して作成されている場合の修正が要請されている理由",imp:"A"},
+   {id:"z16-15",name:"我が国の会計基準に共通する考え方とは何か（在外子会社の会計処理修正）",imp:"A"},
+   {id:"z16-16",name:"子会社の資産及び負債の評価方法の①部分時価評価法と②全面時価評価法",imp:"A"},
+   {id:"z16-17",name:"子会社株式の取得が複数の取引により達成された場合の取得原価の算定方法の論拠（投資の継続性）",imp:"A"},
+   {id:"z16-18",name:"子会社の資本の範囲についての新株予約権を含める・含めない考え方の論拠",imp:"B"},
+   {id:"z16-19",name:"連結財務諸表におけるのれんの計上範囲の①購入のれん方式と②全部のれん方式",imp:"B"},
+   {id:"z16-20",name:"子会社に欠損が生じている場合の会計処理（連結基礎概念との関連）",imp:"B"},
+   {id:"z16-21",name:"子会社株式の追加取得及び一部売却の会計処理（連結基礎概念との関連）",imp:"A"},
+   {id:"z16-22",name:"子会社株式を一部売却した場合ののれんの取扱いの①のれんを減額する方法と②減額しない方法の論拠",imp:"B"},
+   {id:"z16-23",name:"支配を喪失して連結範囲から除外された場合の資本剰余金の取扱い",imp:"B"},
+   {id:"z16-24",name:"アップ・ストリームによる未実現損益の消去方式（①親会社説②経済的単一体説）",imp:"A"},
+   {id:"z16-25",name:"連結と持分法（関連会社）の①～④の会計処理の比較",imp:"B"},
+   {id:"z16-26",name:"非連結子会社と関連会社では持分法を適用する際の資産及び負債の評価方法が異なる理由",imp:"B"},
+   {id:"z16-27",name:"投資会社が持分法適用関連会社に資産を売却したことに伴う未実現損益の消去方式",imp:"B"},
+  ]},
+ {ch:"第17章", chName:"法人税等", items:[
+   {id:"z17-1",name:"税効果会計を適用しない場合の問題点（損益計算書及び貸借対照表の観点）",imp:"A"},
+   {id:"z17-2",name:"税効果会計の方法としての①繰延法と②資産負債法の意義",imp:"A"},
+   {id:"z17-3",name:"繰延法と資産負債法の考え方（税効果の意味・適用税率）",imp:"A"},
+   {id:"z17-4",name:"税効果会計の方法として資産負債法が採用されている理由２つ",imp:"A"},
+   {id:"z17-5",name:"期間差異と一時差異の意義と両者の違い・一時差異が税効果会計の対象とされる理由",imp:"A"},
+   {id:"z17-6",name:"税効果会計の適用上，税務上の繰越欠損金の取扱い",imp:"A"},
+   {id:"z17-7",name:"資産負債法を採用した場合における繰延税金資産及び繰延税金負債の性格",imp:"A"},
+   {id:"z17-8",name:"繰延税金資産についての将来の回収可能性の検討理由と判断要件３つ",imp:"A"},
+   {id:"z17-9",name:"未実現利益の消去に係る税効果の会計処理（①計上額②適用税率③回収可能性）",imp:"A"},
+   {id:"z17-10",name:"未実現損益の消去に係る一時差異の会計処理（①繰延法②資産負債法の損益計算への影響）",imp:"A"},
+   {id:"z17-11",name:"子会社株式等の取得に伴い認識したのれんについて税効果を認識しない理由",imp:"A"},
+   {id:"z17-12",name:"繰延税金資産及び繰延税金負債の表示の①流動・非流動区分と②すべて非流動区分の論拠",imp:"B"},
+  ]},
+ {ch:"第18章", chName:"外貨換算", items:[
+   {id:"z18-2",name:"外貨建資産・負債の換算方法としての貨幣・非貨幣法の論拠",imp:"A"},
+   {id:"z18-3",name:"外貨建資産・負債の換算方法としてのテンポラル法の論拠",imp:"A"},
+   {id:"z18-4",name:"外貨建金銭債権債務について流動・非流動法による区分を設けないこととした理由",imp:"B"},
+   {id:"z18-5",name:"外貨建金銭債権債務について決算時の為替相場による円換算額を付する理由",imp:"A"},
+   {id:"z18-6",name:"外貨建未収収益及び未払費用について決算時の為替相場による円換算額を付する理由",imp:"B"},
+   {id:"z18-8",name:"外貨建満期保有目的の債券について決算時の為替相場による円換算額を付する理由",imp:"B"},
+   {id:"z18-9",name:"外貨建売買目的有価証券及び外貨建その他有価証券について時価の算定に決算時の為替相場を用いる理由",imp:"A"},
+   {id:"z18-10",name:"市場価格のないその他有価証券のうち外貨建株式等の決算時の為替相場の使い方と理由",imp:"B"},
+   {id:"z18-11",name:"外貨建子会社株式及び外貨建関連会社株式について取得時の為替相場による円換算額を付する理由",imp:"B"},
+   {id:"z18-13",name:"外貨建新株予約権について決算時の円貨への換算方法とその理由",imp:"B"},
+   {id:"z18-14",name:"外貨建転換社債型新株予約権付社債の権利行使時の換算方法の２つの考え方",imp:"B"},
+   {id:"z18-15",name:"外貨建取引の処理基準である一取引基準と二取引基準の意義及び会計処理",imp:"A"},
+   {id:"z18-16",name:"外貨建取引の処理基準である一取引基準と二取引基準の論拠",imp:"B"},
+   {id:"z18-17",name:"外貨建金銭債権債務の為替変動リスクをヘッジする目的で為替予約等を行う場合にヘッジ会計は不要となる理由",imp:"B"},
+   {id:"z18-18",name:"その他有価証券に分類される外貨建有価証券に為替予約等の振当処理を行うことは可能か",imp:"B"},
+   {id:"z18-19",name:"①本国主義と②現地主義のそれぞれの考え方・在外事業体の外貨表示財務諸表の位置付け・換算方法",imp:"A"},
+   {id:"z18-20",name:"外貨表示財務諸表項目の換算方法としてのテンポラル法の長所及び短所",imp:"A"},
+   {id:"z18-21",name:"外貨表示財務諸表項目の換算方法としての決算日レート法の長所及び短所",imp:"A"},
+   {id:"z18-22",name:"在外支店の外貨表示財務諸表項目の換算に関する考え方と原則的な換算方法",imp:"A"},
+   {id:"z18-23",name:"在外子会社等の外貨表示財務諸表項目の換算に関する考え方と換算方法",imp:"A"},
+   {id:"z18-24",name:"在外子会社等の収益及び費用の換算の①期中平均相場と②決算時の為替相場の論拠",imp:"A"},
+   {id:"z18-25",name:"在外事業体の法的形態に基づいて換算方法を使い分けることの問題点",imp:"B"},
+   {id:"z18-26",name:"為替換算調整勘定を資産または負債としない理由",imp:"A"},
+   {id:"z18-27",name:"為替換算調整勘定を当期の損益としない理由",imp:"A"},
+   {id:"z18-28",name:"在外子会社ののれんの換算方法（①発生時の為替相場②決算時の為替相場）",imp:"B"},
+  ]},
+ {ch:"第19章", chName:"財務諸表", items:[
+   {id:"z19-1",name:"株主資本等変動計算書が導入された理由（会社法の計算規定との関連）",imp:"B"},
+   {id:"z19-2",name:"株主資本等変動計算書の記載範囲についての①純資産の部のすべて説②株主資本のみ説の論拠",imp:"B"},
+   {id:"z19-3",name:"株主資本等変動計算書の表示方法が株主資本とそれ以外の項目とで差異が設けられている理由",imp:"B"},
+   {id:"z19-4",name:"包括利益及びその他の包括利益の内訳を表示する目的と期待される効果",imp:"B"},
+   {id:"z19-5",name:"純利益の問題点を指摘することにより包括利益の優位性を主張する見解",imp:"B"},
+   {id:"z19-7",name:"その他の包括利益のリサイクリング（①リサイクリングしない方法②リサイクリングする方法）",imp:"A"},
+   {id:"z19-8",name:"リサイクリングの必要性を企業価値評価の観点から説明",imp:"A"},
+   {id:"z19-9",name:"包括利益を表示する計算書の形式についての①２計算書方式と②１計算書方式の利点",imp:"B"},
+   {id:"z19-11",name:"市場性のある一時所有の株式等が「現金同等物」に含まれない理由",imp:"B"},
+   {id:"z19-12",name:"運用期間が比較的長期の投資が「現金同等物」に含まれない理由",imp:"B"},
+   {id:"z19-13",name:"「現金及び現金同等物」の内容が会計方針としての注記を求められる理由",imp:"B"},
+   {id:"z19-14",name:"機械を割賦取引により取得した場合の割賦代金等の支払額のキャッシュ・フロー計算書における表示区分",imp:"B"},
+   {id:"z19-15",name:"法人税等に係るキャッシュ・フローを「営業活動によるキャッシュ・フロー」の区分に記載する理由",imp:"B"},
+   {id:"z19-16",name:"利息及び配当金に係るキャッシュ・フローの表示方法の①と②それぞれが重視している点",imp:"B"},
+   {id:"z19-17",name:"資産除去債務に係るキャッシュ・フローを「投資活動によるキャッシュ・フロー」の区分に記載する理由２つ",imp:"B"},
+   {id:"z19-18",name:"連結範囲の変動を伴わない子会社株式の追加取得または一部売却に係るキャッシュ・フローの表示区分",imp:"B"},
+   {id:"z19-20",name:"「営業活動によるキャッシュ・フロー」の区分において小計欄が設けられる理由",imp:"B"},
+   {id:"z19-21",name:"営業活動によるキャッシュ・フローに関する表示方法の①直接法と②間接法の論拠",imp:"B"},
+   {id:"z19-22",name:"営業活動によるキャッシュ・フローに関する表示方法として直接法と間接法が選択適用とされる理由",imp:"B"},
+   {id:"z19-23",name:"間接法のキャッシュ・フロー計算書において減価償却費・営業債権の貸倒損失・棚卸資産の評価損は非資金損益項目に含まれるか",imp:"B"},
+   {id:"z19-25",name:"キャッシュ・フロー計算書において重要な非資金取引を注記する理由",imp:"B"},
+   {id:"z19-27",name:"賃貸等不動産を時価評価しない理由",imp:"B"},
+   {id:"z19-30",name:"マネジメントアプローチの意義と長所３つ・短所２つ",imp:"B"},
+   {id:"z19-31",name:"セグメント情報等の開示とマネジメント・アプローチの採用理由（概念フレームワークの２つの特性の優劣関係）",imp:"B"},
+   {id:"z19-32",name:"セグメント情報の開示にあたりマネジメント・アプローチを採用することのメリット・デメリット",imp:"B"},
+  ]},
+ {ch:"第20章", chName:"会計上の変更等", items:[
+   {id:"z20-2",name:"会計基準等の改正に伴う以外の会計方針の変更を行うための正当な理由の要件２つ",imp:"B"},
+   {id:"z20-3",name:"会計方針の変更を行った場合に遡及適用を行う理由２つ",imp:"A"},
+   {id:"z20-6",name:"会計上の見積りの変更を行った場合に遡及処理しない理由",imp:"A"},
+   {id:"z20-7",name:"臨時償却（キャッチ・アップ方式）が廃止された理由３つ",imp:"A"},
+   {id:"z20-8",name:"固定資産の減価償却方法の変更の①会計方針の変更説と②会計上の見積りの変更説の論拠",imp:"B"},
+   {id:"z20-9",name:"固定資産の減価償却方法の変更を会計上の見積りの変更として捉える場合の問題点３つ",imp:"B"},
+   {id:"z20-10",name:"固定資産の減価償却方法の変更の制度会計上の取扱いと理由",imp:"B"},
+   {id:"z20-12",name:"「遡及適用」と「修正再表示」を区別した理由",imp:"B"},
+  ]},
+ {ch:"第21章", chName:"期中財務諸表", items:[
+   {id:"z21-1",name:"期中財務諸表の性格としての実績主義と予測主義",imp:"A"},
+   {id:"z21-2",name:"期中財務諸表について実績主義が採用されている理由３つ",imp:"A"},
+   {id:"z21-3",name:"期中財務諸表の作成にあたり年度の財務諸表と異なる会計処理を適用することは認められるか",imp:"B"},
+  ]},
+ {ch:"第22章", chName:"企業結合", items:[
+   {id:"z22-1",name:"①すべての結合当事企業の持分が継続している場合と②一方の持分が非継続の場合の企業結合後の損益計算",imp:"A"},
+   {id:"z22-2",name:"「取得」と判定された企業結合に適用すべき会計処理と理由",imp:"A"},
+   {id:"z22-3",name:"「持分の結合」と判定された企業結合に適用すべき会計処理と理由",imp:"B"},
+   {id:"z22-5",name:"取得原価を取得の対価となる財の時価で算定する理由",imp:"B"},
+   {id:"z22-6",name:"株式の交換による取得の場合の交付した株式の測定日の①主要な条件合意時と②支配獲得日の論拠",imp:"B"},
+   {id:"z22-7",name:"段階取得の取得原価の算定方法の①個々の取引ごとの原価の合計額説と②支配獲得日の時価説の論拠",imp:"A"},
+   {id:"z22-8",name:"「関連会社と企業結合した場合，取得原価は支配を獲得するに至った個々の取引すべての企業結合日における時価をもって算定すべきではない」という見解の論拠",imp:"B"},
+   {id:"z22-9",name:"取得関連費用の①取得原価に含める方法と②発生時の費用として処理する方法の論拠",imp:"B"},
+   {id:"z22-10",name:"条件付取得対価が特定の株式または社債の市場価格に依存する場合に取得原価を追加的に認識しない理由",imp:"B"},
+   {id:"z22-12",name:"企業結合に係る特定勘定を負債として認識する理由",imp:"A"},
+   {id:"z22-13",name:"企業結合により受入れた仕掛研究開発の取扱いの①費用処理方法と②資産計上方法の理由",imp:"A"},
+   {id:"z22-14",name:"のれんについて規則的な償却を行う方法が採用されている理由３つ",imp:"A"},
+   {id:"z22-15",name:"のれんの規則的な償却を行わず減損処理を行う方法の論拠",imp:"A"},
+   {id:"z22-16",name:"のれんの規則的な償却を行わず減損処理を行う方法の問題点",imp:"A"},
+   {id:"z22-17",name:"負ののれんの会計処理の①規則的な償却②非流動資産への配分③発生時に利益計上の論拠",imp:"B"},
+   {id:"z22-18",name:"負ののれんを利益計上する理由",imp:"B"},
+   {id:"z22-19",name:"消滅会社が取得企業となる吸収合併での存続会社の個別財務諸表における帳簿価額による計上理由",imp:"B"},
+   {id:"z22-20",name:"現物出資会社または吸収分割会社が取得企業となる場合の被取得企業株式の取得原価の算定理由",imp:"B"},
+  ]},
+ {ch:"第23章", chName:"事業分離等", items:[
+   {id:"z23-1",name:"①投資がそのまま継続しているとみる場合と②いったん投資を清算し改めて時価にて投資を行ったとみる場合の事業分離後の損益計算",imp:"A"},
+   {id:"z23-2",name:"①移転した事業に関する投資が清算されたとみる事業分離と②継続しているとみる事業分離の具体例と分離元企業の会計処理",imp:"A"},
+   {id:"z23-3",name:"現金を対価とする事業分離において移転した事業に対し買戻しの条件が付されている場合の分離元企業の会計処理と理由",imp:"B"},
+   {id:"z23-4",name:"現金等の財産のみを受取対価とする事業分離において子会社へ事業分離する場合に移転損益を認識する理由",imp:"B"},
+   {id:"z23-5",name:"分離先企業の株式のみを受取対価とする事業分離において事業分離後の分離先企業との関係によって会計処理が異なる理由",imp:"A"},
+   {id:"z23-6",name:"分離先企業の株式のみを受取対価とする事業分離において分離先企業が関連会社となる場合の①移転損益認識説と②認識しない説の論拠",imp:"A"},
+  ]},
+];
+
+// ── STORAGE ──
+const HIST_KEY='zaimu-ronten-history-v1', ANS_KEY='zaimu-ronten-answers-v1', EXCL_KEY='zaimu-ronten-exclude-v1', ALIAS_KEY='zaimu-ronten-alias-v1', REC_KEY='zaimu-ronten-record-v1';
+let gameHistory={}, answerData={}, excludeData={}, aliasData={}, recordData={};
+
+function loadStorage(){
+  try{const h=localStorage.getItem(HIST_KEY);if(h)gameHistory=JSON.parse(h);}catch(e){}
+  try{const a=localStorage.getItem(ANS_KEY);if(a)answerData=JSON.parse(a);}catch(e){}
+  try{const e=localStorage.getItem(EXCL_KEY);if(e)excludeData=JSON.parse(e);}catch(e){}
+  try{const al=localStorage.getItem(ALIAS_KEY);if(al)aliasData=JSON.parse(al);}catch(e){}
+  try{const r=localStorage.getItem(REC_KEY);if(r)recordData=JSON.parse(r);}catch(e){}
+}
+function saveRecord(){try{localStorage.setItem(REC_KEY,JSON.stringify(recordData));}catch(e){}}
+function recordResult(id,isOk){
+  if(!recordData[id])recordData[id]={ok:0,total:0};
+  recordData[id].total++;
+  if(isOk)recordData[id].ok++;
+  saveRecord();
+}
+function saveHistory(){try{localStorage.setItem(HIST_KEY,JSON.stringify(gameHistory));}catch(e){}}
+function saveAnswers(){try{localStorage.setItem(ANS_KEY,JSON.stringify(answerData));}catch(e){}}
+function saveExclude(){try{localStorage.setItem(EXCL_KEY,JSON.stringify(excludeData));}catch(e){}}
+function saveAlias(){try{localStorage.setItem(ALIAS_KEY,JSON.stringify(aliasData));}catch(e){}}
+function getAliases(id){return aliasData[id]||[];}
+function addAlias(id,word){
+  if(!word.trim())return;
+  if(!aliasData[id])aliasData[id]=[];
+  if(!aliasData[id].includes(word.trim()))aliasData[id].push(word.trim());
+  saveAlias();
+}
+function deleteAlias(id,idx){
+  if(!aliasData[id])return;
+  aliasData[id].splice(idx,1);
+  saveAlias();
+}
+function isExcluded(id){return excludeData[id]===true;}
+function toggleExclude(id){
+  excludeData[id]=!isExcluded(id);
+  saveExclude();
+  refreshManageItem(id);
+}
+
+// ── SIMILARITY ──
+function normalize(s){return s.replace(/^問題\d+[-－]\d+[　\s]*/,'').replace(/[　\s・。、「」『』【】（）()〔〕\-－―:：]/g,'').toLowerCase();}
+function ngramSet(s,n){const set=new Set();for(let i=0;i<=s.length-n;i++)set.add(s.slice(i,i+n));return set;}
+function ngramSim(a,b,n=2){
+  const na=ngramSet(a,n),nb=ngramSet(b,n);
+  if(!na.size&&!nb.size)return 1;if(!na.size||!nb.size)return 0;
+  let inter=0;na.forEach(g=>{if(nb.has(g))inter++;});
+  return inter/(na.size+nb.size-inter);
+}
+function charInclude(q,t){if(!q.length)return 0;let h=0;for(const c of q){if(t.includes(c))h++;}return h/q.length;}
+function scorePair(q,t){
+  return Math.max(ngramSim(q,t,2), ngramSim(q,t,1)*0.7, charInclude(q,t)*0.6);
+}
+function similarity(query,item){
+  const q=normalize(query);
+  const titleScore=scorePair(q,normalize(item.name));
+  let ansScore=0;
+  (answerData[item.id]||[]).forEach(a=>{const s=scorePair(q,normalize(a));if(s>ansScore)ansScore=s;});
+  // 別名（言い換え）もタイトルと同等に照合
+  (aliasData[item.id]||[]).forEach(a=>{const s=scorePair(q,normalize(a));if(s>ansScore)ansScore=s;});
+  return Math.max(titleScore,ansScore);
+}
+function findTopMatches(titleIn,answerIn,items,lockedIds,answeredIds,topN=5){
+  const q=[titleIn,answerIn].filter(Boolean).join(' ');
+  if(!q.trim())return[];
+  const avail=items.filter(i=>!lockedIds.has(i.id)&&!answeredIds.has(i.id));
+  const scored=avail.map(item=>({item,score:similarity(q,item)}));
+  scored.sort((a,b)=>b.score-a.score);
+  return scored.slice(0,topN).filter(s=>s.score>0.05);
+}
+
+// ── SCREENS ──
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+id).classList.add('active');window.scrollTo(0,0);}
+function goStart(){renderStartHistory();showScreen('start');}
+function goChapter(){renderChapterList();showScreen('chapter');}
+function goManage(){renderManage(0);showScreen('manage');}
+function goRecord(){renderRecord(0);showScreen('record');}
+
+// ── RECORD ──
+function getItemRecord(id){
+  // gameHistoryから各ラウンドの結果を集計
+  // resultsはroundごとに保存していないので、専用ストレージを使う
+  return recordData[id]||{ok:0,total:0};
+}
+function renderRecord(chIndex){
+  document.getElementById('record-tabs').innerHTML=DATA.map((ch,i)=>`<button class="mctab${i===chIndex?' active':''}" onclick="renderRecord(${i})">${ch.ch}</button>`).join('');
+  const ch=DATA[chIndex];
+  document.getElementById('record-content').innerHTML=ch.items.map(item=>{
+    const rec=getItemRecord(item.id);
+    const excl=isExcluded(item.id);
+    const hasRec=rec.total>0;
+    const rate=hasRec?Math.round(rec.ok/rec.total*100):null;
+    const rateColor=excl?'var(--text3)':rate===null?'var(--text3)':rate>=80?'var(--ok)':rate>=50?'#c07000':'var(--ng)';
+    return`<div class="record-item${excl?' excluded':''}">
+      <div class="record-item-name">${escHtml(item.name)}</div>
+      <div class="record-item-right">
+        <span class="record-score" style="color:${rateColor}">${hasRec?rec.ok+'/'+rec.total:'–'}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── START ──
+function renderStartHistory(){}
+
+// ── CHAPTER ──
+function renderChapterList(){
+  document.getElementById('chapter-list').innerHTML=DATA.map((ch,i)=>{
+    return`<button class="ch-btn" onclick="startGame(${i})">
+      <div class="ch-btn-num">${i+1}</div>
+      <div class="ch-btn-info"><div class="ch-btn-name">${ch.chName}</div></div>
+    </button>`;
+  }).join('');
+}
+
+// ── GAME ──
+let gameState={chIndex:null,items:[],answeredIds:new Set(),lockedIds:new Set(),results:[],score:0};
+let pendingConfirm=null,pendingTopMatches=[];
+
+function abortGame(){
+  goChapter();
+}
+
+function startGame(chIndex){
+  const ch=DATA[chIndex];
+  const activeItems=ch.items.filter(i=>!isExcluded(i.id));
+  gameState={chIndex,items:activeItems,answeredIds:new Set(),lockedIds:new Set(),results:[],score:0};
+  document.getElementById('game-chapter-name').textContent=`${ch.ch}　${ch.chName}`;
+  document.getElementById('score-display').textContent='0';
+  document.getElementById('prog-fill').style.width='0%';
+  document.getElementById('results-list').innerHTML='';
+  document.getElementById('results-count-lbl').textContent='回答済み: 0件';
+  document.getElementById('input-title').value='';
+  document.getElementById('input-answer').value='';
+  document.querySelector('.error-msg')?.remove();
+  showScreen('game');
+}
+
+function submitEntry(){
+  const tv=document.getElementById('input-title').value.trim();
+  const av=document.getElementById('input-answer').value.trim();
+  if(!tv&&!av){showError('タイトルか解答内容を入力してください');return;}
+  const avail=gameState.items.filter(i=>!gameState.answeredIds.has(i.id)&&!gameState.lockedIds.has(i.id));
+  if(!avail.length){showError('この章の全論点が回答済みまたはロックされています');return;}
+  const matches=findTopMatches(tv,av,gameState.items,gameState.lockedIds,gameState.answeredIds,1);
+  if(!matches.length){showError('一致する論点が見つかりませんでした。もう少し具体的に入力してください。');return;}
+  pendingTopMatches=matches;
+  const top=matches[0];
+  pendingConfirm={matchedItem:top.item,inputTitle:tv,inputAnswer:av};
+  document.getElementById('confirm-ronten').textContent=top.item.name;
+  const pct=Math.round(top.score*100);
+  document.getElementById('confirm-score-badge').textContent=`類似度 ${pct}%`;
+  document.getElementById('confirm-score-sub').textContent=pct>=60?'高い一致度です':pct>=35?'部分的に一致しています':'一致度が低めです。違う場合は「違う」を選んでください。';
+
+  document.getElementById('confirm-overlay').classList.add('open');
+}
+
+
+function confirmYes(){
+  document.getElementById('confirm-overlay').classList.remove('open');
+  if(!pendingConfirm)return;
+  const{matchedItem,inputTitle,inputAnswer}=pendingConfirm;
+  gameState.answeredIds.add(matchedItem.id);gameState.score++;
+  gameState.results.unshift({id:matchedItem.id,inputTitle,inputAnswer,status:'ok'});
+  recordResult(matchedItem.id,true);
+  document.getElementById('input-title').value='';document.getElementById('input-answer').value='';
+  pendingConfirm=null;updateGameUI();
+}
+function confirmNo(){
+  document.getElementById('confirm-overlay').classList.remove('open');
+  if(!pendingConfirm)return;
+  const{matchedItem,inputTitle,inputAnswer}=pendingConfirm;
+  gameState.lockedIds.add(matchedItem.id);
+  gameState.results.unshift({id:matchedItem.id,inputTitle,inputAnswer,status:'locked'});
+  recordResult(matchedItem.id,false);
+  document.getElementById('input-title').value='';document.getElementById('input-answer').value='';
+  pendingConfirm=null;updateGameUI();
+}
+
+function updateGameUI(){
+  const total=gameState.items.length,done=gameState.answeredIds.size+gameState.lockedIds.size;
+  document.getElementById('score-display').textContent=gameState.score;
+  document.getElementById('prog-fill').style.width=(total?Math.round(done/total*100):0)+'%';
+  document.getElementById('results-list').innerHTML=gameState.results.map(r=>{
+    const item=gameState.items.find(i=>i.id===r.id),name=item?item.name:r.id;
+    if(r.status==='ok')return`<div class="result-item ok"><div class="result-dot ok">○</div><div class="result-content"><div class="result-name">${escHtml(name)}</div>${r.inputTitle?`<div class="result-input-text">入力: ${escHtml(r.inputTitle)}</div>`:''}</div></div>`;
+    return`<div class="result-item locked"><div class="result-dot locked">✕</div><div class="result-content"><div class="result-name">${escHtml(name)}</div><div class="result-locked-msg">🔒 ロック（違う論点と判定したためネタバレ防止）</div></div></div>`;
+  }).join('');
+  document.getElementById('results-count-lbl').textContent=`回答済み: ${gameState.results.length}件（正解: ${gameState.score}）`;
+}
+
+function finishGame(){
+  const ch=DATA[gameState.chIndex],total=ch.items.length,score=gameState.score,locked=gameState.lockedIds.size,remain=total-score-locked,rate=Math.round(score/total*100);
+  // 未回答の論点を×として記録
+  gameState.items.forEach(item=>{
+    if(!gameState.answeredIds.has(item.id)&&!gameState.lockedIds.has(item.id)){
+      recordResult(item.id,false);
+    }
+  });
+  if(!gameHistory[gameState.chIndex])gameHistory[gameState.chIndex]=[];
+  gameHistory[gameState.chIndex].push({date:new Date().toLocaleDateString('ja-JP'),score,total,locked});
+  saveHistory();
+  document.getElementById('result-ch-lbl').textContent=`${ch.ch}　${ch.chName}`;
+  document.getElementById('result-big').innerHTML=`${score}<span>/${total}</span>`;
+  document.getElementById('bd-ok').textContent=score;document.getElementById('bd-locked').textContent=locked;document.getElementById('bd-remain').textContent=remain;
+  document.getElementById('result-rate').innerHTML=`達成率 <span class="rn${rate<50?' warn':''}">${rate}%</span>`;
+  const msgs=[[80,'素晴らしい！この章はほぼ完璧に把握できています。'],[60,'かなり上げられました。あと少しで完璧です。'],[40,'半分以上上げられました。繰り返しで定着させましょう。'],[0,'まだ伸びしろがあります。繰り返し挑戦して論点を定着させましょう。']];
+  document.getElementById('result-msg').textContent=(msgs.find(([t])=>rate>=t)||msgs[msgs.length-1])[1];
+  const recs=gameHistory[gameState.chIndex]||[],hs=document.getElementById('result-hist-sec');
+  if(recs.length>1){hs.style.display='block';document.getElementById('hist-bars').innerHTML=recs.map((r,i)=>{const p=r.total?Math.round(r.score/r.total*100):0;return`<div class="hist-bar-row"><div class="hist-bar-lbl">${i+1}回</div><div class="hist-bar-track"><div class="hist-bar-fill" style="width:${p}%"></div></div><div class="hist-bar-val">${r.score}/${r.total}</div></div>`;}).join('');}else{hs.style.display='none';}
+  const ai=gameState.answeredIds,li=gameState.lockedIds;
+  document.getElementById('result-detail-items').innerHTML=ch.items.map(item=>{
+    const isOk=ai.has(item.id),isL=li.has(item.id);
+    const dot=isOk?'<span class="rdi-dot ok">○</span>':isL?'<span class="rdi-dot locked">✕</span>':'<span class="rdi-dot none">–</span>';
+    return`<div class="rdi">${dot}<div class="rdi-name">${escHtml(item.name)}</div><span class="rdi-imp imp-${item.imp}">${item.imp}</span></div>`;
+  }).join('');
+  showScreen('result');
+}
+
+function retryChapter(){startGame(gameState.chIndex);}
+
+// ── MANAGE ──
+let manageChIndex=0;
+function renderManage(chIndex){
+  manageChIndex=chIndex;
+  document.getElementById('manage-tabs').innerHTML=DATA.map((ch,i)=>`<button class="mctab${i===chIndex?' active':''}" onclick="renderManage(${i})">${ch.ch}</button>`).join('');
+  const ch=DATA[chIndex];
+  document.getElementById('manage-content').innerHTML=ch.items.map(item=>{
+    const ans=answerData[item.id]||[],hasAns=ans.length>0,excl=isExcluded(item.id);
+    return`<div class="manage-item-card${excl?' excluded':''}" id="mc-${item.id}">
+      <div class="manage-item-header" onclick="toggleManageItem('${item.id}')">
+        <div class="manage-item-name">${escHtml(item.name)}</div>
+        <span class="manage-item-imp imp-${item.imp}">${item.imp}</span>
+        <div class="manage-item-status${hasAns?' has-ans':''}">${hasAns?ans.length+'件':'未登録'}</div>
+      </div>
+      <div class="manage-item-body">
+        <div class="manage-excl-row">
+          <span class="manage-excl-label">対象に含める</span>
+          <button class="manage-excl-toggle${excl?'':' on'}" id="excl-${item.id}" onclick="toggleExclude('${item.id}')">
+            ${excl?'OFF':'ON'}
+          </button>
+        </div>
+        <div class="manage-section-title">別名・言い換え</div>
+        <div class="manage-ans-list" id="aliaslist-${item.id}">${getAliases(item.id).map((a,i)=>`<div class="manage-ans-row alias-row"><div class="manage-ans-text">${escHtml(a)}</div><button class="manage-ans-del" onclick="deleteAlias('${item.id}',${i});refreshManageItem('${item.id}')">✕</button></div>`).join('')}</div>
+        <div class="manage-add-row" style="margin-bottom:14px">
+          <input class="manage-add-input-line" id="aliasinput-${item.id}" type="text" >
+          <button class="manage-add-btn" onclick="commitAlias('${item.id}')">追加</button>
+        </div>
+        <div class="manage-section-title">解答内容</div>
+        <div class="manage-ans-list" id="anslist-${item.id}">${ans.map((a,i)=>`<div class="manage-ans-row"><div class="manage-ans-text">${escHtml(a)}</div><button class="manage-ans-del" onclick="deleteAnswer('${item.id}',${i})">✕</button></div>`).join('')}</div>
+        <div class="manage-add-row">
+          <textarea class="manage-add-input" id="ansinput-${item.id}" placeholder="解答内容を入力..." rows="2"></textarea>
+          <button class="manage-add-btn" onclick="addAnswer('${item.id}')">追加</button>
+        </div>
+      </div></div>`;
+  }).join('');
+}
+
+function commitAlias(id){
+  const input=document.getElementById('aliasinput-'+id);if(!input)return;
+  const val=input.value.trim();if(!val)return;
+  addAlias(id,val);input.value='';refreshManageItem(id);
+}
+function toggleManageItem(id){
+  const card=document.getElementById('mc-'+id);card.classList.toggle('open');
+}
+function addAnswer(id){
+  const input=document.getElementById('ansinput-'+id);if(!input)return;
+  const val=input.value.trim();if(!val)return;
+  if(!answerData[id])answerData[id]=[];
+  answerData[id].push(val);saveAnswers();input.value='';refreshManageItem(id);
+}
+function deleteAnswer(id,idx){
+  if(!answerData[id])return;answerData[id].splice(idx,1);saveAnswers();refreshManageItem(id);
+}
+function refreshManageItem(id){
+  const ans=answerData[id]||[],hasAns=ans.length>0,excl=isExcluded(id);
+  const card=document.getElementById('mc-'+id);
+  const isOpen=card?.classList.contains('open');
+  if(card){card.className='manage-item-card'+(excl?' excluded':'')+(isOpen?' open':'');}
+  const aliaslist=document.getElementById('aliaslist-'+id);
+  if(aliaslist)aliaslist.innerHTML=getAliases(id).map((a,i)=>`<div class="manage-ans-row alias-row"><div class="manage-ans-text">${escHtml(a)}</div><button class="manage-ans-del" onclick="deleteAlias('${id}',${i});refreshManageItem('${id}')">✕</button></div>`).join('');
+  const list=document.getElementById('anslist-'+id);
+  if(list)list.innerHTML=ans.map((a,i)=>`<div class="manage-ans-row"><div class="manage-ans-text">${escHtml(a)}</div><button class="manage-ans-del" onclick="deleteAnswer('${id}',${i})">✕</button></div>`).join('');
+  const status=document.querySelector(`#mc-${id} .manage-item-status`);
+  if(status){status.textContent=hasAns?ans.length+'件':'未登録';status.className='manage-item-status'+(hasAns?' has-ans':'');}
+  const toggle=document.getElementById('excl-'+id);
+  if(toggle){toggle.textContent=excl?'OFF':'ON';toggle.className='manage-excl-toggle'+(excl?'':' on');}
+}
+
+// ── UTILS ──
+function showError(msg){
+  document.querySelector('.error-msg')?.remove();
+  const el=document.createElement('div');el.className='error-msg';el.textContent=msg;
+  document.querySelector('.input-card').after(el);setTimeout(()=>el.remove(),4000);
+}
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ── BACKUP ──
+function exportBackup(){
+  const d={
+    version:1,
+    label:'財務論点リコール バックアップ',
+    exportedAt:new Date().toISOString(),
+    itemState:JSON.parse(localStorage.getItem(HIST_KEY)||'{}'),
+    answerData:JSON.parse(localStorage.getItem(ANS_KEY)||'{}'),
+    excludeData:JSON.parse(localStorage.getItem(EXCL_KEY)||'{}'),
+    aliasData:JSON.parse(localStorage.getItem(ALIAS_KEY)||'{}'),
+    recordData:JSON.parse(localStorage.getItem(REC_KEY)||'{}'),
+  };
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));
+  a.download='ronten_backup_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+}
+function importBackup(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      const d=JSON.parse(ev.target.result);
+      if(d.version!==1)throw new Error('invalid');
+      if(d.itemState)  localStorage.setItem(HIST_KEY,  JSON.stringify(d.itemState));
+      if(d.answerData) localStorage.setItem(ANS_KEY,   JSON.stringify(d.answerData));
+      if(d.excludeData)localStorage.setItem(EXCL_KEY,  JSON.stringify(d.excludeData));
+      if(d.aliasData)  localStorage.setItem(ALIAS_KEY, JSON.stringify(d.aliasData));
+      if(d.recordData) localStorage.setItem(REC_KEY,   JSON.stringify(d.recordData));
+      location.reload();
+    }catch(err){alert('ファイルの読み込みに失敗しました。');}
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+
+// ── INIT ──
+loadStorage();renderStartHistory();
+document.getElementById('confirm-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('confirm-overlay')){}});
+</script>
+</body>
+</html>
