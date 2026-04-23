@@ -495,6 +495,7 @@ body {
       <div class="u-btns" id="new-prob-imp-btns">
         <button type="button" class="ub" onclick="selectNewProbImp('A')">A</button>
         <button type="button" class="ub" onclick="selectNewProbImp('B')">B</button>
+        <button type="button" class="ub" onclick="selectNewProbImp('C')">C</button>
       </div>
     </div>
     <div class="form-section">
@@ -1730,7 +1731,9 @@ function renderRonten() {
       const histCols = entries.map(e => {
         const label = EVAL_LABELS[e.eval] || '–';
         const prob = getProbById(e.probId);
-        const probShort = prob ? (prob.id.startsWith('custom-') ? (prob.num || '') : prob.id) : e.probId;
+        const probShort = prob
+          ? (prob.id.startsWith('custom-') ? (prob.num || prob.title || '') : prob.id)
+          : (e.probId.startsWith('custom-') ? '' : e.probId);
         const dateShort = fmtDate(e.date);
         return `
           <div class="ronten-hist-col">
@@ -1853,8 +1856,7 @@ let newProbImp = 'B';
 function selectNewProbImp(val) {
   newProbImp = val;
   document.querySelectorAll('#new-prob-imp-btns .ub').forEach(b => {
-    const bv = b.textContent.trim();
-    b.className = 'ub' + (bv === val ? (val === 'A' ? ' sel-x' : ' sel-n') : '');
+    b.className = 'ub' + (b.textContent.trim() === val ? ' sel-n' : '');
   });
 }
 
@@ -1865,7 +1867,7 @@ function openNewProbModal() {
   document.getElementById('new-prob-num').value = '';
   document.getElementById('new-prob-ronten-list').innerHTML = '';
   document.querySelectorAll('#new-prob-imp-btns .ub').forEach(b => {
-    b.className = 'ub' + (b.textContent.trim() === 'B' ? ' sel-n' : '');
+    b.className = 'ub' + (b.textContent.trim() === newProbImp ? ' sel-n' : '');
   });
 
   const chSel = document.getElementById('new-prob-ch');
