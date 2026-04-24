@@ -1963,7 +1963,9 @@ load();
 renderProblems();
 
 // ── MEMO POPUP ──
+let _memoPopupProbId = null;
 function openMemoPopup(probId) {
+  _memoPopupProbId = probId;
   const prob = getProbById(probId);
   const memo = (state.memos || {})[probId] || '';
   document.getElementById('memo-popup-title').textContent = prob ? prob.title : '';
@@ -1972,6 +1974,22 @@ function openMemoPopup(probId) {
 }
 function closeMemoPopup() {
   document.getElementById('memo-popup-overlay').classList.remove('open');
+}
+function openMemoEdit() {
+  const probId = _memoPopupProbId;
+  document.getElementById('memo-edit-area').value = (state.memos || {})[probId] || '';
+  document.getElementById('memo-edit-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('memo-edit-area').focus(), 50);
+}
+function closeMemoEdit() { document.getElementById('memo-edit-overlay').classList.remove('open'); }
+function saveMemoEdit() {
+  const val = document.getElementById('memo-edit-area').value;
+  if (!state.memos) state.memos = {};
+  if (val.trim()) { state.memos[_memoPopupProbId] = val; }
+  else { delete state.memos[_memoPopupProbId]; }
+  save();
+  document.getElementById('memo-popup-body').textContent = val.trim() ? val : '';
+  closeMemoEdit();
 }
 
 function openMemoInputPopup() {
@@ -2017,7 +2035,21 @@ function confirmMemoInput() {
     <div class="modal-title" id="memo-popup-title" style="font-size:13px;line-height:1.4;margin-bottom:10px;"></div>
     <div class="memo-popup-body" id="memo-popup-body"></div>
     <div class="modal-btns" style="margin-top:8px;">
+      <button class="btn-cancel" onclick="openMemoEdit()">編集</button>
       <button class="btn-next" onclick="closeMemoPopup()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- MEMO EDIT OVERLAY -->
+<div class="modal-overlay" id="memo-edit-overlay" onclick="if(event.target===this)closeMemoEdit()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-height:85vh;display:flex;flex-direction:column;overflow:hidden;padding-bottom:44px;">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="font-size:13px;font-weight:600;margin-bottom:8px;">メモを編集</div>
+    <textarea class="memo-input-area" id="memo-edit-area"></textarea>
+    <div class="modal-btns" style="margin-top:8px;flex-shrink:0;">
+      <button class="btn-cancel" onclick="closeMemoEdit()">キャンセル</button>
+      <button class="btn-next" onclick="saveMemoEdit()">保存</button>
     </div>
   </div>
 </div>

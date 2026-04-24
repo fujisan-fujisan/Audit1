@@ -1265,6 +1265,25 @@ function openMemoInput(itemId) {
   setTimeout(() => document.getElementById('memo-add-area').focus(), 50);
 }
 function closeMemoInput() { document.getElementById('memo-input-overlay').classList.remove('open'); }
+function openMemoEdit(itemId) {
+  _memoTargetId = itemId;
+  document.getElementById('memo-edit-area').value = memoState[itemId] || '';
+  document.getElementById('memo-edit-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('memo-edit-area').focus(), 50);
+}
+function closeMemoEdit() { document.getElementById('memo-edit-overlay').classList.remove('open'); }
+function saveMemoEdit() {
+  const val = document.getElementById('memo-edit-area').value;
+  if (val.trim()) { memoState[_memoTargetId] = val; }
+  else { delete memoState[_memoTargetId]; }
+  save();
+  closeMemoEdit();
+  const btn = document.getElementById('memo-btn-' + _memoTargetId);
+  if (btn) {
+    if (memoState[_memoTargetId]) { btn.className = 'item-memo-btn'; btn.textContent = 'メモ'; btn.onclick = () => openMemoView(_memoTargetId); }
+    else { btn.className = 'item-memo-btn no-memo'; btn.textContent = '＋メモ'; btn.onclick = () => openMemoInput(_memoTargetId); }
+  }
+}
 
 function saveMemoEntry() {
   const val = document.getElementById('memo-add-area').value.trim();
@@ -1287,6 +1306,7 @@ function saveMemoEntry() {
     <div class="memo-view-body" id="memo-view-body"></div>
     <div style="display:flex;gap:8px;margin-top:10px;flex-shrink:0;">
       <button class="ch-record-cancel" style="flex:1;" onclick="closeMemoView()">閉じる</button>
+      <button class="ch-record-cancel" style="flex:1;" onclick="closeMemoView();openMemoEdit(_memoTargetId)">編集</button>
       <button class="ch-record-save" style="flex:1;" onclick="closeMemoView();openMemoInput(_memoTargetId)">追記する</button>
     </div>
   </div>
@@ -1300,6 +1320,18 @@ function saveMemoEntry() {
     <div style="display:flex;gap:8px;margin-top:10px;flex-shrink:0;">
       <button class="ch-record-cancel" style="flex:1;" onclick="closeMemoInput()">キャンセル</button>
       <button class="ch-record-save" style="flex:1;" onclick="saveMemoEntry()">完了</button>
+    </div>
+  </div>
+</div>
+<!-- MEMO EDIT OVERLAY -->
+<div class="overlay" id="memo-edit-overlay" onclick="if(event.target===this)closeMemoEdit()">
+  <div class="scope-modal" style="display:flex;flex-direction:column;max-height:85vh;overflow:hidden;padding-bottom:44px;">
+    <div class="modal-handle"></div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:4px;">メモを編集</div>
+    <textarea class="memo-add-area" id="memo-edit-area"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-shrink:0;">
+      <button class="ch-record-cancel" style="flex:1;" onclick="closeMemoEdit()">キャンセル</button>
+      <button class="ch-record-save" style="flex:1;" onclick="saveMemoEdit()">保存</button>
     </div>
   </div>
 </div>
