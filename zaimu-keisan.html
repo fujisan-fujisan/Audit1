@@ -503,8 +503,13 @@ body {
       </div>
     </div>
     <div class="form-section">
-      <label class="form-label">論点（章の論点プールから選択）</label>
+      <label class="form-label">論点（複数の章から選択可）</label>
       <div class="ronten-edit-list" id="new-prob-ronten-list" style="margin-bottom:8px;"></div>
+      <div class="ronten-add-row" style="margin-bottom:6px;">
+        <select class="add-select" id="new-prob-ronten-ch" onchange="onRontenChChange()" style="flex:1;font-size:12px;padding:7px 10px;">
+          <option value="">① 章を選択...</option>
+        </select>
+      </div>
       <div class="ronten-add-row">
         <select class="add-select" id="new-prob-ronten-select" style="flex:1;font-size:12px;padding:7px 10px;">
           <option value="">まず章を選択してください</option>
@@ -1878,6 +1883,10 @@ function openNewProbModal() {
   chSel.innerHTML = '<option value="">章を選択...</option>'
     + Object.keys(CHAPTER_RONTEN_POOL).map(ch => `<option value="${ch}">${ch}</option>`).join('');
 
+  const rontenChSel = document.getElementById('new-prob-ronten-ch');
+  rontenChSel.innerHTML = '<option value="">① 章を選択...</option>'
+    + Object.keys(CHAPTER_RONTEN_POOL).map(ch => `<option value="${ch}">${ch}</option>`).join('');
+
   document.getElementById('new-prob-ronten-select').innerHTML = '<option value="">まず章を選択してください</option>';
 
   document.getElementById('new-prob-confirm').style.opacity = '.4';
@@ -1890,10 +1899,11 @@ function closeNewProbModal() {
 }
 
 function onNewProbChChange() {
-  newProbRonten = [];
-  renderNewProbRontenList();
-  renderNewProbRontenSelect();
   checkNewProbBtn();
+}
+
+function onRontenChChange() {
+  renderNewProbRontenSelect();
 }
 
 function renderNewProbRontenList() {
@@ -1908,13 +1918,17 @@ function renderNewProbRontenList() {
 }
 
 function renderNewProbRontenSelect() {
-  const ch = document.getElementById('new-prob-ch').value;
+  const ch = document.getElementById('new-prob-ronten-ch').value;
   const pool = CHAPTER_RONTEN_POOL[ch] || [];
   const available = pool.filter(n => !newProbRonten.includes(n));
   const sel = document.getElementById('new-prob-ronten-select');
+  if (!ch) {
+    sel.innerHTML = '<option value="">まず章を選択してください</option>';
+    return;
+  }
   sel.innerHTML = available.length === 0
     ? `<option value="">追加できる論点がありません</option>`
-    : `<option value="">論点を選択して追加...</option>`
+    : `<option value="">② 論点を選択して追加...</option>`
       + available.map(n => `<option value="${n}">${n}</option>`).join('');
 }
 

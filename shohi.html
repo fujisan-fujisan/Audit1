@@ -349,15 +349,11 @@ body {
 .hist-dot.dot-o { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
 .hist-dot.dot-x { background: var(--x-bg); border-color: var(--x-color); color: var(--x-color); }
 
-.item-memo {
-  width: 100%; font-size: 11px; background: var(--bg);
-  border: 1px solid var(--border); border-radius: var(--radius-sm);
-  padding: 6px 9px; color: var(--text); font-family: 'Noto Sans JP', sans-serif;
-  resize: none; outline: none; min-height: 28px; line-height: 1.5;
-  transition: border-color .15s;
-}
-.item-memo:focus { border-color: var(--text); }
-.item-memo::placeholder { color: var(--text-3); }
+.item-memo-btn { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; border: 1.5px solid #e5a400; background: #fffbe6; color: #c47f00; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; align-self: flex-start; touch-action: manipulation; line-height: 1.3; }
+.item-memo-btn:active { background: #e5a400; color: #fff; }
+.item-memo-btn.no-memo { border-color: var(--border-strong); background: transparent; color: var(--text-3); }
+.memo-view-body { font-size: 13px; line-height: 1.9; color: var(--text); white-space: pre-wrap; word-break: break-all; padding: 8px 0; max-height: 45vh; overflow-y: auto; }
+.memo-add-area { display: block; width: 100%; background: var(--bg); border: none; color: var(--text); font-family: 'Noto Sans JP', sans-serif; font-size: 16px; padding: 10px 0 8px; outline: none; resize: none; min-height: 200px; flex: 1; box-sizing: border-box; line-height: 1.8; }
 
 .ch-footer { border-top: 1px solid var(--border); background: var(--bg); }
 .ch-footer-row { padding: 8px 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -550,25 +546,28 @@ const FULL_DAYS = {
 };
 
 // ── STATE ──
+let memoState = {};
 let itemState = {}, chState = {}, appState = {rounds:[{label:'第1回', scope:null, deadline:null, startDate:null}], currentRound:0};
 let showingWeakness = false;
 
 function load() {
   try {
-    const i = localStorage.getItem('sozei-item');
-    const c = localStorage.getItem('sozei-ch');
-    const a = localStorage.getItem('sozei-app');
+    const i = localStorage.getItem('shohi-item');
+    const c = localStorage.getItem('shohi-ch');
+    const a = localStorage.getItem('shohi-app');
     if (i) itemState = JSON.parse(i);
     if (c) chState = JSON.parse(c);
     if (a) appState = JSON.parse(a);
+    const m = localStorage.getItem('shohi-memo'); if (m) memoState = JSON.parse(m);
   } catch(e) {}
 }
 
 function save() {
   try {
-    localStorage.setItem('sozei-item', JSON.stringify(itemState));
-    localStorage.setItem('sozei-ch', JSON.stringify(chState));
-    localStorage.setItem('sozei-app', JSON.stringify(appState));
+    localStorage.setItem('shohi-item', JSON.stringify(itemState));
+    localStorage.setItem('shohi-ch', JSON.stringify(chState));
+    localStorage.setItem('shohi-app', JSON.stringify(appState));
+    localStorage.setItem('shohi-memo', JSON.stringify(memoState));
   } catch(e) {}
 }
 
@@ -719,9 +718,6 @@ function applyFilter() {
       else if (curViewTab === 'urgent') { const s = calcUrgency(item.id); show = s !== null && s >= 70; }
       row.style.display = show ? '' : 'none';
       if (show) anyVisible = true;
-      // 要復習タブではメモを非表示
-      const memo = row.querySelector('.item-memo');
-      if (memo) memo.style.display = curViewTab === 'urgent' ? 'none' : '';
     });
     card.classList.toggle('hidden', !anyVisible);
   });
@@ -889,9 +885,7 @@ function buildItemRow(item, num) {
     </div>
     ${urgencyHTML}
     ${histHTML}
-    <textarea class="item-memo" placeholder="間違えた箇所・メモ..." rows="1"
-      onchange="saveMemo('${item.id}',this.value)"
-      oninput="autoResize(this)">${r.memo||''}</textarea>`;
+    <button id="memo-btn-${item.id}" class="item-memo-btn${memoState[item.id] ? '' : ' no-memo'}" onclick="memoState['${item.id}'] ? openMemoView('${item.id}') : openMemoInput('${item.id}')">${memoState[item.id] ? 'メモ' : '＋メモ'}</button>`;
   return row;
 }
 
@@ -1013,18 +1007,6 @@ function setU(itemId, type) {
   refreshChProg(itemId);
   updateProgress();
   updateNextRoundBtn();
-}
-
-function saveMemo(itemId, val) {
-  const r = getItemR(itemId);
-  r.memo = val;
-  setItemR(itemId, r);
-  save();
-}
-
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = el.scrollHeight + 'px';
 }
 
 // ── 復習評価 ──
@@ -1351,9 +1333,9 @@ function exportData() {
     version: 1,
     label: '消費税',
     exportedAt: new Date().toISOString(),
-    itemState: JSON.parse(localStorage.getItem('sozei-item') || '{}'),
-    chState: JSON.parse(localStorage.getItem('sozei-ch') || '{}'),
-    appState: JSON.parse(localStorage.getItem('sozei-app') || '{}'),
+    itemState: JSON.parse(localStorage.getItem('shohi-item') || '{}'),
+    chState: JSON.parse(localStorage.getItem('shohi-ch') || '{}'),
+    appState: JSON.parse(localStorage.getItem('shohi-app') || '{}'),
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
   const url = URL.createObjectURL(blob);
@@ -1373,9 +1355,9 @@ function importData(e) {
       const data = JSON.parse(ev.target.result);
       if (!data.itemState || !data.appState) throw new Error('invalid');
       if (!confirm('現在のデータを上書きして復元しますか？')) return;
-      localStorage.setItem('sozei-item', JSON.stringify(data.itemState));
-      localStorage.setItem('sozei-ch', JSON.stringify(data.chState || {}));
-      localStorage.setItem('sozei-app', JSON.stringify(data.appState));
+      localStorage.setItem('shohi-item', JSON.stringify(data.itemState));
+      localStorage.setItem('shohi-ch', JSON.stringify(data.chState || {}));
+      localStorage.setItem('shohi-app', JSON.stringify(data.appState));
       location.reload();
     } catch(err) {
       alert('ファイルの読み込みに失敗しました。');
@@ -1385,6 +1367,95 @@ function importData(e) {
   e.target.value = '';
 }
 
+// ===== 累積メモ =====
+let _memoTargetId = null;
+
+function openMemoView(itemId) {
+  _memoTargetId = itemId;
+  const memo = memoState[itemId] || '';
+  document.getElementById('memo-view-title').textContent = itemId;
+  document.getElementById('memo-view-body').textContent = memo || '（まだメモはありません）';
+  document.getElementById('memo-view-overlay').classList.add('open');
+}
+function closeMemoView() { document.getElementById('memo-view-overlay').classList.remove('open'); }
+
+function openMemoInput(itemId) {
+  _memoTargetId = itemId;
+  document.getElementById('memo-add-area').value = '';
+  document.getElementById('memo-input-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('memo-add-area').focus(), 50);
+}
+function closeMemoInput() { document.getElementById('memo-input-overlay').classList.remove('open'); }
+function openMemoEdit(itemId) {
+  _memoTargetId = itemId;
+  document.getElementById('memo-edit-area').value = memoState[itemId] || '';
+  document.getElementById('memo-edit-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('memo-edit-area').focus(), 50);
+}
+function closeMemoEdit() { document.getElementById('memo-edit-overlay').classList.remove('open'); }
+function saveMemoEdit() {
+  const val = document.getElementById('memo-edit-area').value;
+  if (val.trim()) { memoState[_memoTargetId] = val; }
+  else { delete memoState[_memoTargetId]; }
+  save();
+  closeMemoEdit();
+  const btn = document.getElementById('memo-btn-' + _memoTargetId);
+  if (btn) {
+    if (memoState[_memoTargetId]) { btn.className = 'item-memo-btn'; btn.textContent = 'メモ'; btn.onclick = () => openMemoView(_memoTargetId); }
+    else { btn.className = 'item-memo-btn no-memo'; btn.textContent = '＋メモ'; btn.onclick = () => openMemoInput(_memoTargetId); }
+  }
+}
+
+function saveMemoEntry() {
+  const val = document.getElementById('memo-add-area').value.trim();
+  if (!val) { closeMemoInput(); return; }
+  const d = new Date();
+  const ds = d.getFullYear()+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0');
+  memoState[_memoTargetId] = (memoState[_memoTargetId] ? memoState[_memoTargetId]+'\n' : '')+'〈'+ds+'〉'+val;
+  save();
+  closeMemoInput();
+  const btn = document.getElementById('memo-btn-'+_memoTargetId);
+  if (btn) { btn.className = 'item-memo-btn'; btn.textContent = 'メモ'; btn.onclick = () => openMemoView(_memoTargetId); }
+}
+
 </script>
+
+<!-- MEMO VIEW OVERLAY -->
+<div class="overlay" id="memo-view-overlay" onclick="if(event.target===this)closeMemoView()">
+  <div class="scope-modal" style="display:flex;flex-direction:column;max-height:85vh;overflow:hidden;padding-bottom:44px;">
+    <div class="modal-handle"></div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:6px;" id="memo-view-title"></div>
+    <div class="memo-view-body" id="memo-view-body"></div>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-shrink:0;">
+      <button class="ch-record-cancel" style="flex:1;" onclick="closeMemoView()">閉じる</button>
+      <button class="ch-record-cancel" style="flex:1;" onclick="closeMemoView();openMemoEdit(_memoTargetId)">編集</button>
+      <button class="ch-record-save" style="flex:1;" onclick="closeMemoView();openMemoInput(_memoTargetId)">追記する</button>
+    </div>
+  </div>
+</div>
+<!-- MEMO INPUT OVERLAY -->
+<div class="overlay" id="memo-input-overlay" onclick="if(event.target===this)closeMemoInput()">
+  <div class="scope-modal" style="display:flex;flex-direction:column;max-height:85vh;overflow:hidden;padding-bottom:44px;">
+    <div class="modal-handle"></div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:4px;">メモを追記</div>
+    <textarea class="memo-add-area" id="memo-add-area"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-shrink:0;">
+      <button class="ch-record-cancel" style="flex:1;" onclick="closeMemoInput()">キャンセル</button>
+      <button class="ch-record-save" style="flex:1;" onclick="saveMemoEntry()">完了</button>
+    </div>
+  </div>
+</div>
+<!-- MEMO EDIT OVERLAY -->
+<div class="overlay" id="memo-edit-overlay" onclick="if(event.target===this)closeMemoEdit()">
+  <div class="scope-modal" style="display:flex;flex-direction:column;max-height:85vh;overflow:hidden;padding-bottom:44px;">
+    <div class="modal-handle"></div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:4px;">メモを編集</div>
+    <textarea class="memo-add-area" id="memo-edit-area"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-shrink:0;">
+      <button class="ch-record-cancel" style="flex:1;" onclick="closeMemoEdit()">キャンセル</button>
+      <button class="ch-record-save" style="flex:1;" onclick="saveMemoEdit()">保存</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
