@@ -1567,11 +1567,12 @@ function openNotesModal(articleNum, pNum) {
   NOTES_FIELDS.forEach(f => {
     document.getElementById('notes-field-' + f.key).value = n[f.key] || '';
   });
-  document.getElementById('notes-modal-overlay').classList.add('open');
+  const el = document.getElementById('notes-modal-overlay');
+  el.style.display = 'flex';
 }
 
 function closeNotesModal() {
-  document.getElementById('notes-modal-overlay').classList.remove('open');
+  document.getElementById('notes-modal-overlay').style.display = 'none';
 }
 
 function saveNotesModal() {
@@ -2311,7 +2312,7 @@ renderArticles();
 </script>
 
 <!-- ノートモーダル -->
-<div class="overlay" id="notes-modal-overlay" onclick="if(event.target===this)closeNotesModal()" style="align-items:flex-end;justify-content:center;">
+<div id="notes-modal-overlay" onclick="if(event.target===this)closeNotesModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:500;align-items:flex-end;justify-content:center;">
   <div class="notes-modal-inner">
     <div style="width:32px;height:3px;background:#d0d0cb;border-radius:999px;margin:0 auto 16px;"></div>
     <div style="font-size:14px;font-weight:700;margin-bottom:14px;">ノート</div>
