@@ -764,6 +764,62 @@
   }
   .btn-tag-related:hover { background: var(--accent); color: white; }
 
+  /* ===== 章選択モーダル ===== */
+  #chselOverlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.45); z-index: 600;
+    align-items: flex-end; justify-content: center;
+  }
+  .chsel-sheet {
+    background: var(--surface); border-radius: 16px 16px 0 0;
+    width: 100%; max-width: 700px; max-height: 82vh;
+    display: flex; flex-direction: column; padding: 0 0 env(safe-area-inset-bottom);
+  }
+  .chsel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 16px 0; flex-shrink: 0;
+  }
+  .chsel-header h3 { font-size: 15px; font-weight: 700; margin: 0; }
+  .chsel-header-right { display: flex; align-items: center; gap: 8px; }
+  .chsel-allbtn {
+    font-size: 12px; padding: 4px 10px; border: 1px solid var(--border);
+    border-radius: 6px; background: var(--surface); color: var(--text-secondary);
+    cursor: pointer; font-family: 'Noto Sans JP', sans-serif;
+  }
+  .chsel-allbtn:hover { border-color: var(--accent); color: var(--accent); }
+  .chsel-close {
+    font-size: 18px; line-height: 1; border: none; background: none;
+    color: var(--text-secondary); cursor: pointer; padding: 4px 8px;
+  }
+  .chsel-body { overflow-y: auto; padding: 10px 16px; flex: 1; }
+  .chsel-part { margin-bottom: 4px; }
+  .chsel-part-header {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 700; color: var(--text-primary);
+    padding: 8px 0 4px; cursor: pointer; user-select: none;
+  }
+  .chsel-chapters { padding-left: 8px; }
+  .chsel-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 4px; font-size: 13px; cursor: pointer;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .chsel-item:last-child { border-bottom: none; }
+  .chsel-item-empty { opacity: 0.4; cursor: default; }
+  .chsel-label { flex: 1; color: var(--text-primary); }
+  .chsel-count { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+  .chsel-check { width: 16px; height: 16px; flex-shrink: 0; accent-color: var(--accent); cursor: pointer; }
+  .chsel-footer {
+    padding: 12px 16px; border-top: 1px solid var(--border-light);
+    display: flex; gap: 8px; flex-shrink: 0;
+  }
+  #chselStartBtn {
+    flex: 1; padding: 12px; border: none; border-radius: 8px;
+    background: var(--accent); color: white; font-size: 15px; font-weight: 700;
+    cursor: pointer; font-family: 'Noto Sans JP', sans-serif;
+  }
+  #chselStartBtn:disabled { background: var(--border); cursor: not-allowed; }
+
   /* ===== 編集ポップアップ ===== */
   .edit-popup-overlay {
     display: none;
@@ -2768,6 +2824,7 @@ function getChapterInfo(articleNum) {
 // トレーニング絞り込み状態
 let trainingPartIdx = null;
 let trainingChapterIdx = null;
+let _selectedChapters = new Set(); // "pi-ci" keys, empty = 全問題
 
 function openTrainingDrawer() {
   renderTrainingDrawer();
@@ -2863,13 +2920,24 @@ function updateTrainingNavButton() {
 }
 
 function getFilteredQuestions(questions) {
-  if (trainingPartIdx === null) return questions;
-  const ch = STRUCTURE.parts[trainingPartIdx].chapters[trainingChapterIdx];
+  if (_selectedChapters.size === 0) {
+    // 旧ドロワー絞り込みも互換対応
+    if (trainingPartIdx === null) return questions;
+    const ch = STRUCTURE.parts[trainingPartIdx].chapters[trainingChapterIdx];
+    return questions.filter(q => {
+      const match = q.answer.match(/^(\d+)条/);
+      if (!match) return false;
+      const n = parseInt(match[1]);
+      return ch.start <= n && n <= ch.end;
+    });
+  }
   return questions.filter(q => {
     const match = q.answer.match(/^(\d+)条/);
     if (!match) return false;
     const n = parseInt(match[1]);
-    return ch.start <= n && n <= ch.end;
+    const info = getChapterInfo(n);
+    if (!info) return false;
+    return _selectedChapters.has(`${info.partIdx}-${info.chapterIdx}`);
   });
 }
 
@@ -2878,6 +2946,146 @@ function renderTraining() {
 }
 
 function startTraining() {
+  openChapterSelectModal();
+}
+
+function openChapterSelectModal() {
+  const storage = getStorage();
+  const chapterCounts = {};
+  for (const q of storage.questions) {
+    const match = q.answer.match(/^(\d+)条/);
+    if (!match) continue;
+    const info = getChapterInfo(parseInt(match[1]));
+    if (!info) continue;
+    const key = `${info.partIdx}-${info.chapterIdx}`;
+    chapterCounts[key] = (chapterCounts[key] || 0) + 1;
+  }
+
+  let html = '';
+  STRUCTURE.parts.forEach((part, pi) => {
+    const chapters = part.chapters.map((ch, ci) => {
+      const key = `${pi}-${ci}`;
+      const count = chapterCounts[key] || 0;
+      const checked = _selectedChapters.has(key) ? 'checked' : '';
+      const disabled = count === 0 ? 'disabled' : '';
+      return `<label class="chsel-item${count === 0 ? ' chsel-item-empty' : ''}">
+        <input type="checkbox" class="chsel-check" data-key="${key}" ${checked} ${disabled} onchange="onChselChange()">
+        <span class="chsel-label">${ch.label}</span>
+        <span class="chsel-count">${count}問</span>
+      </label>`;
+    }).join('');
+
+    const partHasAny = part.chapters.some((_, ci) => chapterCounts[`${pi}-${ci}`] > 0);
+    const partAllChecked = part.chapters.every((_, ci) => {
+      const k = `${pi}-${ci}`;
+      return chapterCounts[k] > 0 && _selectedChapters.has(k);
+    });
+    const partSomeChecked = !partAllChecked && part.chapters.some((_, ci) => {
+      const k = `${pi}-${ci}`;
+      return _selectedChapters.has(k);
+    });
+
+    html += `<div class="chsel-part">
+      <label class="chsel-part-header">
+        <input type="checkbox" class="chsel-check chsel-part-check" data-pi="${pi}"
+          ${partAllChecked ? 'checked' : ''}
+          ${partSomeChecked ? 'data-indeterminate="true"' : ''}
+          ${!partHasAny ? 'disabled' : ''}
+          onchange="onChselPartChange(${pi})">
+        <span>${part.label}</span>
+      </label>
+      <div class="chsel-chapters">${chapters}</div>
+    </div>`;
+  });
+
+  document.getElementById('chselBody').innerHTML = html;
+  // indeterminate は JS で設定
+  document.querySelectorAll('[data-indeterminate="true"]').forEach(el => { el.indeterminate = true; });
+
+  updateChselStart();
+  const overlay = document.getElementById('chselOverlay');
+  overlay.style.display = 'flex';
+}
+
+function onChselChange() {
+  _selectedChapters.clear();
+  document.querySelectorAll('.chsel-check:not(.chsel-part-check):checked').forEach(el => {
+    _selectedChapters.add(el.dataset.key);
+  });
+  syncPartCheckboxes();
+  updateChselStart();
+}
+
+function onChselPartChange(pi) {
+  const part = STRUCTURE.parts[pi];
+  const partChk = document.querySelector(`.chsel-part-check[data-pi="${pi}"]`);
+  const checked = partChk.checked;
+  part.chapters.forEach((_, ci) => {
+    const key = `${pi}-${ci}`;
+    const el = document.querySelector(`.chsel-check[data-key="${key}"]`);
+    if (el && !el.disabled) {
+      el.checked = checked;
+      if (checked) _selectedChapters.add(key); else _selectedChapters.delete(key);
+    }
+  });
+  syncPartCheckboxes();
+  updateChselStart();
+}
+
+function syncPartCheckboxes() {
+  const storage = getStorage();
+  const chapterCounts = {};
+  for (const q of storage.questions) {
+    const match = q.answer.match(/^(\d+)条/);
+    if (!match) continue;
+    const info = getChapterInfo(parseInt(match[1]));
+    if (!info) continue;
+    const key = `${info.partIdx}-${info.chapterIdx}`;
+    chapterCounts[key] = (chapterCounts[key] || 0) + 1;
+  }
+  STRUCTURE.parts.forEach((part, pi) => {
+    const el = document.querySelector(`.chsel-part-check[data-pi="${pi}"]`);
+    if (!el) return;
+    const hasAny = part.chapters.some((_, ci) => chapterCounts[`${pi}-${ci}`] > 0);
+    if (!hasAny) return;
+    const allChecked = part.chapters.every((_, ci) => {
+      const k = `${pi}-${ci}`;
+      return chapterCounts[k] > 0 && _selectedChapters.has(k);
+    });
+    const someChecked = !allChecked && part.chapters.some((_, ci) => _selectedChapters.has(`${pi}-${ci}`));
+    el.checked = allChecked;
+    el.indeterminate = someChecked;
+  });
+}
+
+function updateChselStart() {
+  const storage = getStorage();
+  const total = getFilteredQuestions(storage.questions).length;
+  const btn = document.getElementById('chselStartBtn');
+  btn.textContent = `開始（${total}問）`;
+  btn.disabled = total === 0;
+}
+
+function closeChapterSelectModal() {
+  document.getElementById('chselOverlay').style.display = 'none';
+}
+
+function chselSelectAll(checked) {
+  _selectedChapters.clear();
+  if (checked) {
+    document.querySelectorAll('.chsel-check:not(.chsel-part-check):not(:disabled)').forEach(el => {
+      el.checked = true;
+      _selectedChapters.add(el.dataset.key);
+    });
+  } else {
+    document.querySelectorAll('.chsel-check:not(.chsel-part-check)').forEach(el => { el.checked = false; });
+  }
+  syncPartCheckboxes();
+  updateChselStart();
+}
+
+function confirmStartTraining() {
+  closeChapterSelectModal();
   const storage = getStorage();
   const filtered = getFilteredQuestions(storage.questions);
   if (!filtered.length) { showToast('この範囲に登録された問題がありません'); return; }
@@ -3458,6 +3666,24 @@ function showArticleQPopup(numKey) {
     <button class="info-popup-close" onclick="closeInfoPopup()">×</button>
   </div>
   <div class="info-popup-body" id="infoPopupBody"></div>
+</div>
+
+<!-- 章選択モーダル -->
+<div id="chselOverlay" onclick="if(event.target===this)closeChapterSelectModal()">
+  <div class="chsel-sheet">
+    <div class="chsel-header">
+      <h3>出題する章を選択</h3>
+      <div class="chsel-header-right">
+        <button class="chsel-allbtn" onclick="chselSelectAll(true)">全選択</button>
+        <button class="chsel-allbtn" onclick="chselSelectAll(false)">全解除</button>
+        <button class="chsel-close" onclick="closeChapterSelectModal()">✕</button>
+      </div>
+    </div>
+    <div class="chsel-body" id="chselBody"></div>
+    <div class="chsel-footer">
+      <button id="chselStartBtn" onclick="confirmStartTraining()">開始</button>
+    </div>
+  </div>
 </div>
 
 </body>
