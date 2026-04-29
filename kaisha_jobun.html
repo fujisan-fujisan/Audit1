@@ -319,6 +319,63 @@
     min-height: 38px;
   }
 
+  /* ノートボタン */
+  .btn-notes {
+    font-size: 13px;
+    padding: 7px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Noto Sans JP', sans-serif;
+    min-height: 36px;
+  }
+  .btn-notes:hover { border-color: #2a7a4a; color: #2a7a4a; background: #edf7f2; }
+  .btn-notes.has-notes { border-color: #2a7a4a; color: #2a7a4a; background: #edf7f2; }
+
+  /* ノートインライン表示 */
+  .para-notes-display {
+    display: none;
+    margin-top: 8px;
+    padding: 10px 12px;
+    border-left: 3px solid #2a7a4a;
+    background: #edf7f2;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: 12.5px;
+    line-height: 1.8;
+    color: #1a4a2e;
+  }
+  .para-notes-display.has-notes { display: block; }
+  .para-notes-display-label {
+    font-size: 9px; font-weight: 700; letter-spacing: .1em;
+    color: #2a7a4a; margin-bottom: 6px; text-transform: uppercase;
+  }
+  .para-notes-field { margin-bottom: 8px; }
+  .para-notes-field:last-child { margin-bottom: 0; }
+  .para-notes-field-name { font-size: 10px; font-weight: 700; color: #2a7a4a; margin-bottom: 2px; }
+  .para-notes-field-body { white-space: pre-wrap; word-break: break-all; }
+
+  /* ノートモーダル */
+  .notes-modal-inner {
+    background: var(--surface); border-radius: 16px 16px 0 0;
+    padding: 20px 16px 44px; width: 100%; max-width: 700px;
+    max-height: 90vh; overflow-y: auto;
+  }
+  .notes-field-label {
+    font-size: 11px; font-weight: 700; color: var(--text-secondary);
+    display: block; margin-bottom: 4px;
+  }
+  .notes-field-area {
+    display: block; width: 100%; padding: 10px 12px;
+    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    font-size: 14px; line-height: 1.8; font-family: 'Noto Sans JP', sans-serif;
+    color: var(--text-primary); background: var(--surface);
+    resize: vertical; min-height: 72px; outline: none;
+  }
+  .notes-field-area:focus { border-color: #2a7a4a; }
+
   /* 号 */
   .items-list {
     margin-top: 8px;
@@ -1168,6 +1225,7 @@ function saveStorage(data) {
 function getStorage() {
   const d = loadStorage();
   if (!d.edits) d.edits = {};
+  if (!d.notes) d.notes = {};
   if (!d.related) d.related = {};
   if (!d.questions) d.questions = [];
   if (!d.score) d.score = { correct: 0, wrong: 0 };
@@ -1394,8 +1452,10 @@ function buildArticleCard(a, storage) {
 function buildParagraph(articleNum, p, storage) {
   const key = `${articleNum}-${p.num}`;
   const editedText = storage.edits[key];
+  const notesText = (storage.notes || {})[key];
   const isViewingOriginal = storage.viewingOriginal && storage.viewingOriginal[key];
   const hasEdit = !!editedText;
+  const hasNotes = !!notesText;
 
   const displayHtml = escapeHtml(hasEdit ? editedText : p.text);
 
@@ -1427,12 +1487,14 @@ function buildParagraph(articleNum, p, storage) {
           <button class="btn-jump-back" id="back-${articleNum}-${p.num}" onclick="jumpBack(${articleNum}, ${p.num})">← 戻る</button>
         </div>
         <div class="paragraph-actions">
-          <button class="btn-edit" onclick="toggleEdit(${articleNum}, ${p.num})">編集</button>
+          <button class="btn-edit" onclick="toggleEdit(${articleNum}, ${p.num})">原文を編集</button>
+          <button class="btn-notes${hasNotes ? ' has-notes' : ''}" id="btn-notes-${articleNum}-${p.num}" onclick="openNotesModal(${articleNum}, ${p.num})">ノート</button>
           <button class="${originalBtnClass}" id="btn-orig-${articleNum}-${p.num}" onclick="toggleOriginal(${articleNum}, ${p.num})">${originalBtnLabel}</button>
         </div>
       </div>
       <div class="para-text-display" id="display-${articleNum}-${p.num}">${displayHtml}</div>
       ${itemsHtml}
+      <div class="para-notes-display${hasNotes ? ' has-notes' : ''}" id="notes-display-${articleNum}-${p.num}">${buildNotesDisplayHtml(notesText)}</div>
       <textarea class="para-edit-area" id="edit-${articleNum}-${p.num}" placeholder="編集・追記">${editedText || p.text}</textarea>
       <div class="edit-save-row" id="save-row-${articleNum}-${p.num}">
         <button class="btn btn-primary btn-sm" onclick="saveEdit(${articleNum}, ${p.num})">保存</button>
@@ -1479,6 +1541,59 @@ function toggleEdit(articleNum, pNum) {
   editArea.classList.toggle('open', !isOpen);
   saveRow.classList.toggle('open', !isOpen);
   if (!isOpen) editArea.focus();
+}
+
+const NOTES_FIELDS = [
+  { key: 'yoken',   label: '要件' },
+  { key: 'shuushi', label: '趣旨' },
+  { key: 'ronten',  label: '論点' },
+  { key: 'hanrei',  label: '判例' },
+];
+
+function buildNotesDisplayHtml(notesObj) {
+  if (!notesObj) return '';
+  const fields = NOTES_FIELDS.filter(f => notesObj[f.key]);
+  if (!fields.length) return '';
+  return '<div class="para-notes-display-label">ノート</div>'
+    + fields.map(f => `<div class="para-notes-field"><div class="para-notes-field-name">${f.label}</div><div class="para-notes-field-body">${escapeHtml(notesObj[f.key])}</div></div>`).join('');
+}
+
+let _notesTarget = null;
+
+function openNotesModal(articleNum, pNum) {
+  _notesTarget = `${articleNum}-${pNum}`;
+  const storage = getStorage();
+  const n = (storage.notes || {})[_notesTarget] || {};
+  NOTES_FIELDS.forEach(f => {
+    document.getElementById('notes-field-' + f.key).value = n[f.key] || '';
+  });
+  document.getElementById('notes-modal-overlay').classList.add('open');
+}
+
+function closeNotesModal() {
+  document.getElementById('notes-modal-overlay').classList.remove('open');
+}
+
+function saveNotesModal() {
+  const storage = getStorage();
+  const n = {};
+  NOTES_FIELDS.forEach(f => {
+    const v = document.getElementById('notes-field-' + f.key).value.trim();
+    if (v) n[f.key] = v;
+  });
+  const hasAny = Object.keys(n).length > 0;
+  if (hasAny) { storage.notes[_notesTarget] = n; }
+  else { delete storage.notes[_notesTarget]; }
+  saveStorage(storage);
+  const display = document.getElementById(`notes-display-${_notesTarget}`);
+  const btn = document.getElementById(`btn-notes-${_notesTarget}`);
+  if (display) {
+    display.innerHTML = buildNotesDisplayHtml(hasAny ? n : null);
+    display.classList.toggle('has-notes', hasAny);
+  }
+  if (btn) btn.classList.toggle('has-notes', hasAny);
+  closeNotesModal();
+  showToast('保存しました');
 }
 
 function saveEdit(articleNum, pNum) {
@@ -2194,5 +2309,33 @@ window.addEventListener('scroll', () => {
 updateNavButton();
 renderArticles();
 </script>
+
+<!-- ノートモーダル -->
+<div class="overlay" id="notes-modal-overlay" onclick="if(event.target===this)closeNotesModal()" style="align-items:flex-end;justify-content:center;">
+  <div class="notes-modal-inner">
+    <div style="width:32px;height:3px;background:#d0d0cb;border-radius:999px;margin:0 auto 16px;"></div>
+    <div style="font-size:14px;font-weight:700;margin-bottom:14px;">ノート</div>
+    <div style="margin-bottom:10px;">
+      <label class="notes-field-label">要件</label>
+      <textarea class="notes-field-area" id="notes-field-yoken" placeholder="要件をメモ..."></textarea>
+    </div>
+    <div style="margin-bottom:10px;">
+      <label class="notes-field-label">趣旨</label>
+      <textarea class="notes-field-area" id="notes-field-shuushi" placeholder="趣旨をメモ..."></textarea>
+    </div>
+    <div style="margin-bottom:10px;">
+      <label class="notes-field-label">論点</label>
+      <textarea class="notes-field-area" id="notes-field-ronten" placeholder="論点をメモ..."></textarea>
+    </div>
+    <div style="margin-bottom:16px;">
+      <label class="notes-field-label">判例</label>
+      <textarea class="notes-field-area" id="notes-field-hanrei" placeholder="判例をメモ..."></textarea>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn" style="flex:1;" onclick="closeNotesModal()">キャンセル</button>
+      <button class="btn btn-primary" style="flex:2;" onclick="saveNotesModal()">保存</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
