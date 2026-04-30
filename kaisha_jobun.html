@@ -3271,8 +3271,8 @@ function showRegSuggest() {
     a.paragraphs.map(p => ({
       article: a.article,
       paragraph: p.num,
-      label: `${a.article}条${p.num}項`,
-      key: `${a.article}-${p.num}`
+      label: `${keyToDisplay(a.num || String(a.article))}条${p.num}項`,
+      key: `${a.num || String(a.article)}-${p.num}`
     }))
   );
 
