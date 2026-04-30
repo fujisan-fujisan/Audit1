@@ -1813,6 +1813,10 @@
         <div style="display:flex;justify-content:flex-end;gap:8px">
           <button class="btn btn-primary btn-sm" onclick="addQuestion()">登録する</button>
         </div>
+        <div id="regExistingQs" style="display:none;margin-top:12px;padding:10px 12px;background:#fff8f0;border:1px solid #f0c080;border-radius:8px;font-size:13px;">
+          <div style="font-weight:700;color:#7a4000;margin-bottom:6px;">⚠️ この条文には登録済みの問題があります</div>
+          <ol id="regExistingQsList" style="margin:0;padding-left:18px;color:var(--text-primary);line-height:1.7;"></ol>
+        </div>
         <div id="regArticlePreview" style="display:none;margin-top:12px;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:13px;line-height:1.7;color:var(--text-primary);white-space:pre-wrap;word-break:break-all;"></div>
       </div>
     </div>
@@ -3254,6 +3258,7 @@ function resetScore() {
 // 問題登録
 function onRegArticleInput() {
   document.getElementById('regArticlePreview').style.display = 'none';
+  document.getElementById('regExistingQs').style.display = 'none';
   showRegSuggest();
 }
 
@@ -3294,6 +3299,18 @@ function selectRegArticle(label, key) {
     hintBox.style.display = 'block';
   } else {
     hintBox.style.display = 'none';
+  }
+
+  // 登録済み問題の表示
+  const storage = getStorage();
+  const existingQs = (storage.questions || []).filter(q => q.answer === label);
+  const existingDiv = document.getElementById('regExistingQs');
+  const existingList = document.getElementById('regExistingQsList');
+  if (existingQs.length) {
+    existingList.innerHTML = existingQs.map(q => `<li>${escapeHtml(q.question)}</li>`).join('');
+    existingDiv.style.display = 'block';
+  } else {
+    existingDiv.style.display = 'none';
   }
 
   // 条文プレビュー表示
@@ -3350,6 +3367,7 @@ function addQuestion() {
   document.getElementById('regQuestion').value = '';
   document.getElementById('claudeHintBox').style.display = 'none';
   document.getElementById('regArticlePreview').style.display = 'none';
+  document.getElementById('regExistingQs').style.display = 'none';
   showToast('問題を登録しました');
 }
 
