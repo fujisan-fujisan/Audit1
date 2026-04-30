@@ -106,6 +106,38 @@
     color: var(--accent);
     border-bottom-color: var(--accent);
   }
+  .tab.registering {
+    position: relative;
+  }
+  .tab.registering::after {
+    content: '●';
+    font-size: 7px;
+    color: #e06c00;
+    position: absolute;
+    top: 6px;
+    right: 4px;
+  }
+
+  /* 検索タブ内「登録に戻る」バナー */
+  #registerReturnBanner {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff8f0;
+    border: 1px solid #f0c080;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin: 8px 0 4px;
+    font-size: 13px;
+    color: #7a4000;
+  }
+  #registerReturnBanner.visible { display: flex; }
+  #registerReturnBanner button {
+    font-size: 12px; padding: 4px 10px;
+    border: 1px solid #e08020; border-radius: 6px;
+    background: #fff; color: #7a4000; cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
 
   /* メインレイアウト */
   .main {
@@ -1688,6 +1720,10 @@
 
   <!-- ===== 検索・閲覧 ===== -->
   <div id="panel-browse" class="panel active">
+    <div id="registerReturnBanner">
+      <span>📝 問題登録の途中です</span>
+      <button onclick="switchTab('training')">← 登録に戻る</button>
+    </div>
     <div class="search-bar">
       <input class="search-input" id="searchInput" type="text" placeholder="条番号 / キーワード" oninput="onSearch()" autocomplete="off">
       <button class="btn-mode-toggle" id="browseModeBtn" onclick="toggleBrowseMode()">編集モード</button>
@@ -1752,6 +1788,7 @@
       <div class="tv-back-bar">
         <button class="btn btn-sm" onclick="switchTrainingView('home')">← 戻る</button>
         <span class="tv-back-title">問題登録</span>
+        <button class="btn btn-sm" onclick="switchTab('browse')" style="font-size:11px;padding:5px 10px;margin-left:auto;">条文を参照 →</button>
       </div>
       <div class="reg-section">
         <div class="reg-row">
@@ -1867,23 +1904,56 @@ function positionSuggest(inputEl, suggestEl) {
 }
 
 
+let _lastTrainingView = null;
+
 function switchTab(name) {
   const tabs = ['browse','training'];
   const alreadyActive = document.getElementById('panel-' + name).classList.contains('active');
   if (alreadyActive) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+
+  // 現在 training タブなら、どのサブビューにいたか記憶
+  if (document.getElementById('panel-training').classList.contains('active')) {
+    const active = document.querySelector('.training-view.active');
+    _lastTrainingView = active ? active.id.replace('tv-', '') : null;
+  }
+
   document.querySelectorAll('.tab').forEach((t,i) => {
     t.classList.toggle('active', tabs[i] === name);
   });
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
-  if (name === 'training' && trainingQueue.length === 0) { switchTrainingView('home'); renderTrainingHome(); }
+
+  if (name === 'training') {
+    if (_lastTrainingView && _lastTrainingView !== 'home') {
+      // 登録フォームなど途中の画面に戻る
+      switchTrainingView(_lastTrainingView);
+    } else if (trainingQueue.length === 0) {
+      switchTrainingView('home');
+      renderTrainingHome();
+    }
+    _updateRegisterBanner();
+  } else if (name === 'browse') {
+    _updateRegisterBanner();
+  }
+
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function _updateRegisterBanner() {
+  const isRegistering = _lastTrainingView === 'register';
+  const banner = document.getElementById('registerReturnBanner');
+  if (banner) banner.classList.toggle('visible', isRegistering);
+  // タブに「登録中」ドット
+  const trainingTab = document.querySelector('.tab:nth-child(2)');
+  if (trainingTab) trainingTab.classList.toggle('registering', isRegistering);
 }
 
 function switchTrainingView(name) {
   document.querySelectorAll('.training-view').forEach(v => v.classList.remove('active'));
   document.getElementById('tv-' + name).classList.add('active');
   if (name === 'manage') { manageState = 'list'; renderManageView(); }
+  _lastTrainingView = name;
+  _updateRegisterBanner();
 }
 
 function renderTrainingHome() {
