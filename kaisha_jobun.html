@@ -3276,7 +3276,11 @@ function showRegSuggest() {
     }))
   );
 
-  const suggestions = allRefs.filter(r => r.label.includes(val)).slice(0, 8);
+  const suggestions = allRefs.filter(r => {
+    const normalizedLabel = r.label.replace(/の/g, '');
+    const normalizedVal = val.replace(/の/g, '');
+    return r.label.includes(val) || normalizedLabel.includes(normalizedVal);
+  }).slice(0, 8);
   if (!suggestions.length || !val) { box.style.display = 'none'; return; }
 
   box.innerHTML = suggestions.map(s =>
