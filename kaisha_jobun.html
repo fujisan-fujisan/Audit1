@@ -1795,7 +1795,7 @@
           <span class="reg-label">対象条文</span>
           <div style="flex:1">
             <div class="related-wrap">
-              <input class="reg-input" id="regArticleInput" placeholder="半角" oninput="showRegSuggest()" onblur="hideRegSuggestDelay()" style="flex:1;max-width:200px" autocomplete="off">
+              <input class="reg-input" id="regArticleInput" placeholder="半角" oninput="onRegArticleInput()" onblur="hideRegSuggestDelay()" style="flex:1;max-width:200px" autocomplete="off">
               <div id="regSuggestBox" class="related-suggest" style="display:none"></div>
             </div>
           </div>
@@ -1813,6 +1813,7 @@
         <div style="display:flex;justify-content:flex-end;gap:8px">
           <button class="btn btn-primary btn-sm" onclick="addQuestion()">登録する</button>
         </div>
+        <div id="regArticlePreview" style="display:none;margin-top:12px;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:13px;line-height:1.7;color:var(--text-primary);white-space:pre-wrap;word-break:break-all;"></div>
       </div>
     </div>
 
@@ -3251,6 +3252,11 @@ function resetScore() {
 }
 
 // 問題登録
+function onRegArticleInput() {
+  document.getElementById('regArticlePreview').style.display = 'none';
+  showRegSuggest();
+}
+
 function showRegSuggest() {
   const input = document.getElementById('regArticleInput');
   const box = document.getElementById('regSuggestBox');
@@ -3289,6 +3295,29 @@ function selectRegArticle(label, key) {
   } else {
     hintBox.style.display = 'none';
   }
+
+  // 条文プレビュー表示
+  const preview = document.getElementById('regArticlePreview');
+  const dashIdx = key.lastIndexOf('-');
+  const articlePart = key.slice(0, dashIdx);
+  const pNum = parseInt(key.slice(dashIdx + 1));
+  const article = LAW_DATA[articlePart];
+  if (article) {
+    const para = article.paragraphs.find(p => p.num === pNum);
+    if (para) {
+      let text = `第${keyToDisplay(articlePart)}条　${pNum}項\n\n${para.text}`;
+      if (para.items && para.items.length) {
+        para.items.forEach(item => {
+          text += `\n　${item.num}　${stripItemNum(item.num, item.text)}`;
+          if (item.subitems) item.subitems.forEach(s => {
+            text += `\n　　${s.num}　${stripItemNum(s.num, s.text)}`;
+          });
+        });
+      }
+      preview.textContent = text;
+      preview.style.display = 'block';
+    }
+  }
 }
 
 function hideRegSuggestDelay() {
@@ -3320,6 +3349,7 @@ function addQuestion() {
   document.getElementById('regArticleInput').value = '';
   document.getElementById('regQuestion').value = '';
   document.getElementById('claudeHintBox').style.display = 'none';
+  document.getElementById('regArticlePreview').style.display = 'none';
   showToast('問題を登録しました');
 }
 
