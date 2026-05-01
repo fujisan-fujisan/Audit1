@@ -44,6 +44,7 @@
 
   /* ヘッダー */
   header {
+    will-change: transform;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
     padding: 0 24px;
@@ -88,6 +89,7 @@
     top: 56px;
     z-index: 99;
     box-shadow: var(--shadow-sm);
+    will-change: transform;
   }
 
   .tab {
@@ -180,9 +182,11 @@
     border: 1px solid var(--border);
     border-radius: var(--radius);
     margin-bottom: 12px;
-    overflow: visible;
+    overflow: clip;
     box-shadow: var(--shadow-sm);
     transition: box-shadow 0.2s;
+    content-visibility: auto;
+    contain-intrinsic-size: 0 56px;
   }
 
   .article-card:hover { box-shadow: var(--shadow-md); }
@@ -1850,32 +1854,33 @@ function parseStorageKey(sk) {
   return { articleKey: sk.slice(0, li), pNum: Number(sk.slice(li + 1)) };
 }
 
-// ===== ストレージ =====
-function loadStorage() {
+// ===== ストレージ（メモリキャッシュ付き）=====
+let _storageCache = null;
+
+function getStorage() {
+  if (_storageCache) return _storageCache;
   try {
-    return JSON.parse(localStorage.getItem('kaishahoTool') || '{}');
-  } catch { return {}; }
+    _storageCache = JSON.parse(localStorage.getItem('kaishahoTool') || '{}');
+  } catch { _storageCache = {}; }
+  if (!_storageCache.edits) _storageCache.edits = {};
+  if (!_storageCache.related) _storageCache.related = {};
+  if (!_storageCache.questions) _storageCache.questions = [];
+  if (!_storageCache.score) _storageCache.score = { correct: 0, wrong: 0 };
+  if (!_storageCache.viewingOriginal) _storageCache.viewingOriginal = {};
+  if (!_storageCache.yoken) _storageCache.yoken = {};
+  if (!_storageCache.shushi) _storageCache.shushi = {};
+  if (!_storageCache.ronten) _storageCache.ronten = {};
+  if (!_storageCache.hanrei) _storageCache.hanrei = {};
+  if (!_storageCache.starred) _storageCache.starred = [];
+  if (!_storageCache.bookmarks) _storageCache.bookmarks = [];
+  if (!_storageCache.browseHistory) _storageCache.browseHistory = [];
+  return _storageCache;
 }
 
 function saveStorage(data) {
+  _storageCache = data;
+  _articleListDirty = true;
   localStorage.setItem('kaishahoTool', JSON.stringify(data));
-}
-
-function getStorage() {
-  const d = loadStorage();
-  if (!d.edits) d.edits = {};
-  if (!d.related) d.related = {};
-  if (!d.questions) d.questions = [];
-  if (!d.score) d.score = { correct: 0, wrong: 0 };
-  if (!d.viewingOriginal) d.viewingOriginal = {};
-  if (!d.yoken) d.yoken = {};
-  if (!d.shushi) d.shushi = {};
-  if (!d.ronten) d.ronten = {};
-  if (!d.hanrei) d.hanrei = {};
-  if (!d.starred) d.starred = [];
-  if (!d.bookmarks) d.bookmarks = [];
-  if (!d.browseHistory) d.browseHistory = [];
-  return d;
 }
 
 // ===== ユーティリティ =====
@@ -1910,6 +1915,7 @@ function positionSuggest(inputEl, suggestEl) {
 
 
 let _lastTrainingView = null;
+let _articleListDirty = true;
 
 function switchTab(name) {
   const tabs = ['browse','training'];
@@ -1938,7 +1944,7 @@ function switchTab(name) {
     }
     _updateRegisterBanner();
   } else if (name === 'browse') {
-    renderArticles();
+    if (_articleListDirty || !document.getElementById('articleList').children.length) renderArticles();
     _updateRegisterBanner();
   }
 
