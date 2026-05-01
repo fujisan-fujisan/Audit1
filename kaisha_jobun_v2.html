@@ -3602,9 +3602,17 @@ function deleteQuestion(i) {
 }
 
 // ===== バックアップ・復元 =====
-function exportData() {
+async function exportData() {
   const data = getStorage();
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const file = new File([blob], 'kaishaho_backup.json', { type: 'application/json' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: 'バックアップ' });
+      return;
+    } catch (e) { /* キャンセル時は何もしない */ }
+  }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'kaishaho_backup.json';
