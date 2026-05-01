@@ -2113,7 +2113,7 @@ function renderArticles() {
   const _noteFilter = (key, label) => {
     const noteKeys = Object.keys(storage[key] || {});
     const articleKeySet = new Set(noteKeys.map(sk => parseStorageKey(sk).articleKey));
-    articles = [...articleKeySet].map(k => LAW_DATA[k]).filter(Boolean);
+    articles = [...articleKeySet].map(k => LAW_DATA[k]).filter(Boolean).sort((a, b) => a.article - b.article);
     if (!articles.length) { list.innerHTML = `<div class="no-results" style="color:var(--text-muted);padding:40px 20px;text-align:center">${label}が登録された条文がありません</div>`; return true; }
     list.innerHTML = `<div class="breadcrumb">${label}あり（${articles.length}件）</div>` + articles.map(a => buildArticleCard(a, storage)).join('');
     return true;
