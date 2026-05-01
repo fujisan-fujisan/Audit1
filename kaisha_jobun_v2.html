@@ -1649,26 +1649,6 @@
     margin-left: auto;
     margin-right: 4px;
   }
-  .btn-article-star, .btn-article-bm {
-    font-size: 15px;
-    width: 32px;
-    height: 32px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0.25;
-    transition: opacity 0.15s, background 0.15s;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    flex-shrink: 0;
-  }
-  .btn-article-star:hover, .btn-article-bm:hover { opacity: 0.6; }
-  .btn-article-star.on { opacity: 1; color: #d4a017; }
-  .btn-article-bm.on { opacity: 1; color: var(--accent); }
 </style>
 </head>
 <body>
@@ -1730,10 +1710,9 @@
       <button class="btn-mode-toggle" id="browseModeBtn" onclick="toggleBrowseMode()">編集モード</button>
     </div>
     <div class="browse-quick-actions">
-      <button class="btn-quick-filter" id="qf-starred" onclick="setBrowseFilter('starred')">★ 重要</button>
-      <button class="btn-quick-filter" id="qf-bookmarks" onclick="setBrowseFilter('bookmarks')">🔖 ブックマーク</button>
-      <button class="btn-quick-filter" id="qf-history" onclick="setBrowseFilter('history')">最近見た</button>
-      <button class="btn-quick-filter" id="qf-hanrei" onclick="setBrowseFilter('hanrei')">判例あり</button>
+      <button class="btn-quick-filter" id="qf-shushi" onclick="setBrowseFilter('shushi')">趣旨</button>
+      <button class="btn-quick-filter" id="qf-ronten" onclick="setBrowseFilter('ronten')">論点</button>
+      <button class="btn-quick-filter" id="qf-hanrei" onclick="setBrowseFilter('hanrei')">判例</button>
     </div>
     <div id="articleList"></div>
   </div>
@@ -1866,8 +1845,6 @@ function getStorage() {
   if (!_storageCache.shushi) _storageCache.shushi = {};
   if (!_storageCache.ronten) _storageCache.ronten = {};
   if (!_storageCache.hanrei) _storageCache.hanrei = {};
-  if (!_storageCache.starred) _storageCache.starred = [];
-  if (!_storageCache.bookmarks) _storageCache.bookmarks = [];
   if (!_storageCache.browseHistory) _storageCache.browseHistory = [];
   return _storageCache;
 }
@@ -2133,32 +2110,17 @@ function renderArticles() {
   let articles, breadcrumb;
 
   // クイックフィルター（★重要 / ブックマーク / 履歴）
-  if (browseFilter === 'starred') {
-    articles = (storage.starred || []).map(k => LAW_DATA[k]).filter(Boolean);
-    if (!articles.length) { list.innerHTML = '<div class="no-results" style="color:var(--text-muted);padding:40px 20px;text-align:center">重要マークした条文がありません</div>'; return; }
-    list.innerHTML = `<div class="breadcrumb">★ 重要マーク（${articles.length}件）</div>` + articles.map(a => buildArticleCard(a, storage)).join('');
-    return;
-  }
-  if (browseFilter === 'bookmarks') {
-    articles = (storage.bookmarks || []).map(k => LAW_DATA[k]).filter(Boolean);
-    if (!articles.length) { list.innerHTML = '<div class="no-results" style="color:var(--text-muted);padding:40px 20px;text-align:center">ブックマークした条文がありません</div>'; return; }
-    list.innerHTML = `<div class="breadcrumb">🔖 ブックマーク（${articles.length}件）</div>` + articles.map(a => buildArticleCard(a, storage)).join('');
-    return;
-  }
-  if (browseFilter === 'history') {
-    articles = (storage.browseHistory || []).map(k => LAW_DATA[k]).filter(Boolean);
-    if (!articles.length) { list.innerHTML = '<div class="no-results" style="color:var(--text-muted);padding:40px 20px;text-align:center">まだ条文を開いていません</div>'; return; }
-    list.innerHTML = `<div class="breadcrumb">最近見た条文（${articles.length}件）</div>` + articles.map(a => buildArticleCard(a, storage)).join('');
-    return;
-  }
-  if (browseFilter === 'hanrei') {
-    const hanreiKeys = Object.keys(storage.hanrei || {});
-    const articleKeySet = new Set(hanreiKeys.map(sk => parseStorageKey(sk).articleKey));
+  const _noteFilter = (key, label) => {
+    const noteKeys = Object.keys(storage[key] || {});
+    const articleKeySet = new Set(noteKeys.map(sk => parseStorageKey(sk).articleKey));
     articles = [...articleKeySet].map(k => LAW_DATA[k]).filter(Boolean);
-    if (!articles.length) { list.innerHTML = '<div class="no-results" style="color:var(--text-muted);padding:40px 20px;text-align:center">判例が登録された条文がありません</div>'; return; }
-    list.innerHTML = `<div class="breadcrumb">判例あり（${articles.length}件）</div>` + articles.map(a => buildArticleCard(a, storage)).join('');
-    return;
-  }
+    if (!articles.length) { list.innerHTML = `<div class="no-results" style="color:var(--text-muted);padding:40px 20px;text-align:center">${label}が登録された条文がありません</div>`; return true; }
+    list.innerHTML = `<div class="breadcrumb">${label}あり（${articles.length}件）</div>` + articles.map(a => buildArticleCard(a, storage)).join('');
+    return true;
+  };
+  if (browseFilter === 'shushi' && _noteFilter('shushi', '趣旨')) return;
+  if (browseFilter === 'ronten' && _noteFilter('ronten', '論点')) return;
+  if (browseFilter === 'hanrei' && _noteFilter('hanrei', '判例')) return;
 
   if (q) {
     const qNum = q.replace(/[^0-9の]/g, '');
@@ -2208,8 +2170,6 @@ function buildArticleCard(a, storage) {
   const numKey = a.num || String(a.article);
   const displayNum = keyToDisplay(numKey);
   const caption = a.caption ? `<span class="article-caption">${a.caption}</span>` : '';
-  const isStarred = (storage.starred || []).includes(numKey);
-  const isBookmarked = (storage.bookmarks || []).includes(numKey);
   const hasQ = browseMode === 'view' && a.paragraphs.some(p => _qParaKeySet.has(`${numKey}-${p.num}`));
 
   return `
@@ -2218,10 +2178,6 @@ function buildArticleCard(a, storage) {
         <span class="article-num">${displayNum}条</span>
         ${hasQ ? `<button class="badge-q" onclick="event.stopPropagation();showArticleQPopup('${numKey}')">問</button>` : ''}
         ${caption}
-        <div class="article-header-actions" onclick="event.stopPropagation()">
-          <button class="btn-article-star${isStarred ? ' on' : ''}" id="star-btn-${numKey}" onclick="toggleStarred('${numKey}')">★</button>
-          <button class="btn-article-bm${isBookmarked ? ' on' : ''}" id="bm-btn-${numKey}" onclick="toggleBookmark('${numKey}')">🔖</button>
-        </div>
         <span class="article-toggle" id="toggle-${numKey}">▼</span>
       </div>
       <div class="article-body" id="body-${numKey}"></div>
@@ -3651,27 +3607,6 @@ updateNavButton();
 renderArticles();
 
 // ===== ★重要・ブックマーク・閲覧履歴 =====
-function toggleStarred(numKey) {
-  const storage = getStorage();
-  const idx = storage.starred.indexOf(numKey);
-  if (idx >= 0) storage.starred.splice(idx, 1);
-  else storage.starred.push(numKey);
-  saveStorage(storage);
-  const btn = document.getElementById(`star-btn-${numKey}`);
-  if (btn) btn.classList.toggle('on', storage.starred.includes(numKey));
-  showToast(storage.starred.includes(numKey) ? '重要マークしました' : 'マークを解除しました');
-}
-
-function toggleBookmark(numKey) {
-  const storage = getStorage();
-  const idx = storage.bookmarks.indexOf(numKey);
-  if (idx >= 0) storage.bookmarks.splice(idx, 1);
-  else storage.bookmarks.push(numKey);
-  saveStorage(storage);
-  const btn = document.getElementById(`bm-btn-${numKey}`);
-  if (btn) btn.classList.toggle('on', storage.bookmarks.includes(numKey));
-  showToast(storage.bookmarks.includes(numKey) ? 'ブックマークしました' : 'ブックマークを解除しました');
-}
 
 function recordBrowseHistory(numKey) {
   if (!LAW_DATA[numKey]) return;
