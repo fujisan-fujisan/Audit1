@@ -1346,6 +1346,16 @@
     margin-bottom: 16px;
   }
 
+  .session-timer {
+    font-size: 20px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+    min-width: 48px;
+    text-align: center;
+  }
+  .session-timer.urgent { color: #c0392b; }
+
   .session-score {
     font-size: 14px;
     font-weight: 500;
@@ -1745,6 +1755,7 @@
     <div id="tv-session" class="training-view">
       <div class="session-header">
         <button class="btn btn-sm" onclick="endSession()">← 終了</button>
+        <div class="session-timer" id="sessionTimer">1:00</div>
         <div class="session-score" id="sessionScore">0問中0問正解</div>
       </div>
       <div id="trainingCard" class="training-card">
@@ -1961,6 +1972,7 @@ function renderTrainingHome() {
 }
 
 function endSession() {
+  _clearTimer();
   trainingQueue = [];
   currentIdx = 0;
   document.getElementById('sessionArticleInput').value = '';
@@ -3139,8 +3151,39 @@ function confirmStartTraining() {
   updateCard();
 }
 
+let _timerInterval = null;
+let _timerSeconds = 0;
+
+function _startTimer() {
+  _clearTimer();
+  _timerSeconds = 60;
+  _renderTimer();
+  _timerInterval = setInterval(() => {
+    _timerSeconds--;
+    _renderTimer();
+    if (_timerSeconds <= 0) {
+      _clearTimer();
+      showAnswer();
+    }
+  }, 1000);
+}
+
+function _clearTimer() {
+  if (_timerInterval) { clearInterval(_timerInterval); _timerInterval = null; }
+}
+
+function _renderTimer() {
+  const el = document.getElementById('sessionTimer');
+  if (!el) return;
+  const m = Math.floor(_timerSeconds / 60);
+  const s = _timerSeconds % 60;
+  el.textContent = `${m}:${String(s).padStart(2, '0')}`;
+  el.classList.toggle('urgent', _timerSeconds <= 10);
+}
+
 function updateCard() {
   if (currentIdx >= trainingQueue.length) {
+    _clearTimer();
     document.getElementById('trainingCard').style.display = 'none';
     document.getElementById('trainingEmpty').style.display = 'block';
     document.getElementById('trainingEmpty').textContent = `完了！ ${sessionTotal}問中${sessionCorrect}問正解`;
@@ -3155,6 +3198,7 @@ function updateCard() {
   document.getElementById('btnShowAnswer').style.display = 'inline-block';
   document.getElementById('judgeButtons').classList.remove('show');
   document.getElementById('cardArticleId').textContent = `問題 ${currentIdx + 1} / ${trainingQueue.length}`;
+  _startTimer();
 }
 
 function getArticleText(answerStr) {
@@ -3177,6 +3221,7 @@ function getArticleText(answerStr) {
 }
 
 function showAnswer() {
+  _clearTimer();
   document.getElementById('cardAnswer').classList.add('show');
   document.getElementById('btnShowAnswer').style.display = 'none';
   document.getElementById('judgeButtons').classList.add('show');
