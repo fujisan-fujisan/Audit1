@@ -3631,8 +3631,14 @@ function showToast(msg) {
 }
 
 // スクロール時にサジェストを全部閉じる
+let _scrollRaf = false;
 window.addEventListener('scroll', () => {
-  document.querySelectorAll('.related-suggest').forEach(el => el.style.display = 'none');
+  if (_scrollRaf) return;
+  _scrollRaf = true;
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.related-suggest').forEach(el => el.style.display = 'none');
+    _scrollRaf = false;
+  });
 }, true);
 
 // ===== 初期化 =====
