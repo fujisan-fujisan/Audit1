@@ -1592,12 +1592,14 @@ function reviewItem(probId, type) {
 }
 
 // ── BACKUP / RESTORE ──
-function exportData() {
+async function exportData() {
   const data = { version:2, label:'管理会計論（計算）', exportedAt: new Date().toISOString(), state };
   const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href=url; a.download='zaimu_keisan_backup.json'; a.click();
-  URL.revokeObjectURL(url);
+  const file = new File([blob], 'zaimu_keisan_backup.json', {type:'application/json'});
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: 'バックアップ' }); return; } catch(e) {}
+  }
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='zaimu_keisan_backup.json'; a.click();
 }
 function importData(e) {
   const file = e.target.files[0]; if(!file) return;

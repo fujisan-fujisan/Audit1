@@ -994,7 +994,7 @@ function abortQuiz(){
   goStart();
 }
 // ── BACKUP / RESTORE ──
-function backupAll(){
+async function backupAll(){
   const d = {
     version: 1,
     type: 'backup',
@@ -1004,9 +1004,15 @@ function backupAll(){
     recData: recData,
     ansData: ansData,
   };
+  const fname = 'kansa_backup_' + new Date().toISOString().slice(0,10) + '.json';
+  const blob = new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+  const file = new File([blob], fname, {type:'application/json'});
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: 'バックアップ' }); return; } catch(e) {}
+  }
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));
-  a.download = 'kansa_backup_' + new Date().toISOString().slice(0,10) + '.json';
+  a.href = URL.createObjectURL(blob);
+  a.download = fname;
   a.click();
 }
 
@@ -1037,7 +1043,7 @@ function restoreAll(e){
   e.target.value = '';
 }
 
-function suspendSession(){
+async function suspendSession(){
   const d = {
     version: 1,
     type: 'session',
@@ -1051,9 +1057,15 @@ function suspendSession(){
       results:    quizState.results,
     }
   };
+  const fname = 'kansa_session_' + new Date().toISOString().slice(0,16).replace('T','_').replace(':','') + '.json';
+  const blob = new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+  const file = new File([blob], fname, {type:'application/json'});
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: 'セッション保存' }); goStart(); return; } catch(e) {}
+  }
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));
-  a.download = 'kansa_session_' + new Date().toISOString().slice(0,16).replace('T','_').replace(':','') + '.json';
+  a.href = URL.createObjectURL(blob);
+  a.download = fname;
   a.click();
   // ダウンロード後にトップへ遷移
   setTimeout(()=>{ goStart(); }, 800);

@@ -1210,7 +1210,7 @@ if (!appState.rounds[0].startDate) {
   openScopeModal(true);
 }
 
-function exportData() {
+async function exportData() {
   const data = {
     version: 1, label: '法人税法', exportedAt: new Date().toISOString(),
     itemState: JSON.parse(localStorage.getItem('hojin-item') || '{}'),
@@ -1218,10 +1218,14 @@ function exportData() {
     appState: JSON.parse(localStorage.getItem('hojin-app') || '{}'),
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-  const url = URL.createObjectURL(blob);
+  const file = new File([blob], 'hojin_backup.json', {type: 'application/json'});
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: 'バックアップ' }); return; } catch(e) {}
+  }
   const a = document.createElement('a');
-  a.href = url; a.download = 'hojin_backup.json'; a.click();
-  URL.revokeObjectURL(url);
+  a.href = URL.createObjectURL(blob);
+  a.download = 'hojin_backup.json';
+  a.click();
 }
 
 function importData(e) {

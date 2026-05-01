@@ -1325,7 +1325,7 @@ if (!appState.rounds[0].startDate) {
 }
 
 // ── BACKUP / RESTORE ──
-function exportData() {
+async function exportData() {
   const data = {
     version: 1,
     label: '消費税',
@@ -1335,12 +1335,14 @@ function exportData() {
     appState: JSON.parse(localStorage.getItem('shohi-app') || '{}'),
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-  const url = URL.createObjectURL(blob);
+  const file = new File([blob], 'shohi_backup.json', {type: 'application/json'});
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: 'バックアップ' }); return; } catch(e) {}
+  }
   const a = document.createElement('a');
-  a.href = url;
+  a.href = URL.createObjectURL(blob);
   a.download = 'shohi_backup.json';
   a.click();
-  URL.revokeObjectURL(url);
 }
 
 function importData(e) {

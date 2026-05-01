@@ -1545,7 +1545,7 @@ document.getElementById('deadline-overlay').addEventListener('click', e => {
   if (e.target === document.getElementById('deadline-overlay')) closeDeadlineModal();
 });
 
-function exportData() {
+async function exportData() {
   const data = {
     version: 1, label: '監査論', exportedAt: new Date().toISOString(),
     itemState: JSON.parse(localStorage.getItem('audit-item2') || '{}'),
@@ -1553,10 +1553,14 @@ function exportData() {
     appState: JSON.parse(localStorage.getItem('audit-app2') || '{}'),
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
+  const file = new File([blob], 'audit_backup.json', { type: 'application/json' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: 'バックアップ' }); return; } catch(e) {}
+  }
   const a = document.createElement('a');
-  a.href = url; a.download = 'audit_backup.json'; a.click();
-  URL.revokeObjectURL(url);
+  a.href = URL.createObjectURL(blob);
+  a.download = 'audit_backup.json';
+  a.click();
 }
 
 function importData(e) {

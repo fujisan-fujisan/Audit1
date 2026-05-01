@@ -2403,14 +2403,19 @@ document.getElementById('deadline-overlay').addEventListener('click',e=>{if(e.ta
 load();render();
 if(!appState.rounds[0].startDate)openScopeModal(true);
 
-function exportData(){
+async function exportData(){
   const d={version:1,label:'管理会計論（理論）',exportedAt:new Date().toISOString(),
     itemState:JSON.parse(localStorage.getItem(STORE_KEY+'-item')||'{}'),
     chState:JSON.parse(localStorage.getItem(STORE_KEY+'-ch')||'{}'),
     appState:JSON.parse(localStorage.getItem(STORE_KEY+'-app')||'{}'),
     kwState:JSON.parse(localStorage.getItem(STORE_KEY+'-kw')||'{}')};
+  const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+  const file=new File([blob],'kanri_riron_backup.json',{type:'application/json'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],title:'バックアップ'});return;}catch(e){}
+  }
   const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));
+  a.href=URL.createObjectURL(blob);
   a.download='kanri_riron_backup.json';a.click();
 }
 function importData(e){
