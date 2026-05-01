@@ -80,16 +80,19 @@
     display: flex;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
-    padding: 0 24px;
+    padding: 0;
     gap: 0;
     position: sticky;
     top: 56px;
     z-index: 99;
     box-shadow: var(--shadow-sm);
     will-change: transform;
+    justify-content: center;
   }
 
   .tab {
+    flex: 0 0 40%;
+    text-align: center;
     padding: 14px 20px;
     font-size: 13px;
     font-weight: 500;
@@ -1554,7 +1557,7 @@
     .header-subtitle { font-size: 12px; }
     .tabs { top: 64px; }
 
-    .tabs { padding: 0 32px; }
+    .tabs { padding: 0; }
     .tab { padding: 16px 24px; font-size: 14px; }
 
     .main { padding: 28px 32px; max-width: 100%; }
@@ -1610,8 +1613,8 @@
   @media (max-width: 480px) {
     header { padding: 0 16px; }
     .header-title { font-size: 14px; }
-    .tabs { padding: 0 8px; }
-    .tab { padding: 12px 12px; font-size: 12px; }
+    .tabs { padding: 0; }
+    .tab { padding: 12px 0; font-size: 12px; }
     .main { padding: 16px; }
     .article-header { padding: 12px 14px; }
     .article-num { font-size: 14px; min-width: 56px; }
