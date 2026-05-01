@@ -3603,7 +3603,7 @@ function deleteQuestion(i) {
 
 // ===== バックアップ・復元 =====
 function exportData() {
-  const data = loadStorage();
+  const data = getStorage();
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
