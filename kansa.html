@@ -965,6 +965,7 @@ function urgencyColor(score) {
 
 function setViewTab(tab, btn) {
   curViewTab = tab;
+  localStorage.setItem('kansa-uitab', tab);
   document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   applyFilter();
@@ -1053,7 +1054,12 @@ function buildSecCard(sec, ch) {
 
   const hd = document.createElement('div');
   hd.className = 'ch-header';
-  hd.onclick = () => card.classList.toggle('open');
+  hd.onclick = () => {
+    card.classList.toggle('open');
+    const set = new Set(JSON.parse(localStorage.getItem('kansa-chopen') || '[]'));
+    if (card.classList.contains('open')) set.add(sec.id); else set.delete(sec.id);
+    localStorage.setItem('kansa-chopen', JSON.stringify([...set]));
+  };
   hd.innerHTML = `
     <span class="ch-chevron">▶</span>
     <div class="ch-info">
@@ -1582,8 +1588,27 @@ function importData(e) {
   e.target.value = '';
 }
 
+const _savedTab = localStorage.getItem('kansa-uitab');
+if (_savedTab) curViewTab = _savedTab;
+
 load();
 render();
+
+if (_savedTab) {
+  document.querySelectorAll('.vtab').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('onclick').includes("'"+_savedTab+"'"));
+  });
+}
+
+JSON.parse(localStorage.getItem('kansa-chopen') || '[]').forEach(id => {
+  const card = document.getElementById('seccard-' + id);
+  if (card) card.classList.add('open');
+});
+
+const _savedScroll = localStorage.getItem('kansa-scroll');
+if (_savedScroll) requestAnimationFrame(() => { window.scrollTo(0, parseInt(_savedScroll)); });
+window.addEventListener('pagehide', () => { localStorage.setItem('kansa-scroll', window.scrollY); });
+
 if (!appState.rounds[0].startDate) {
   openScopeModal(true);
 }

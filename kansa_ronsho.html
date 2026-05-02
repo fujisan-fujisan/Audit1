@@ -627,7 +627,12 @@ function getLastUnderstanding(id){
 }
 
 // ── SCREENS ──
-function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById('screen-'+id).classList.add('active'); window.scrollTo(0,0); }
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  window.scrollTo(0,0);
+  if(['start','chapter','manage','record'].includes(id)) localStorage.setItem('kansa-ronsho-screen', id);
+}
 function goStart(){ showScreen('start'); }
 function goChapter(){ renderChapterList(); showScreen('chapter'); }
 function goManage(){ renderManage(0); showScreen('manage'); }
@@ -1251,6 +1256,13 @@ function copyTemplate(){
 // ── INIT ──
 loadStorage();
 initAnswers();
+
+const _savedScreen = localStorage.getItem('kansa-ronsho-screen');
+if (_savedScreen && _savedScreen !== 'start') {
+  if (_savedScreen === 'chapter') goChapter();
+  else if (_savedScreen === 'manage') goManage();
+  else if (_savedScreen === 'record') goRecord();
+}
 </script>
 </body>
 </html>
