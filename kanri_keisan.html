@@ -982,6 +982,7 @@ let curViewTab = 'all';
 
 function setViewTab(tab, btn) {
   curViewTab = tab;
+  localStorage.setItem('kanri-keisan-uitab', tab);
   document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   const mainView = document.getElementById('main-view');
@@ -1100,7 +1101,12 @@ function buildChCard(ch) {
 
   const hd = document.createElement('div');
   hd.className = 'ch-header';
-  hd.onclick = () => card.classList.toggle('open');
+  hd.onclick = () => {
+    card.classList.toggle('open');
+    const set = new Set(JSON.parse(localStorage.getItem('kanri-keisan-chopen') || '[]'));
+    if (card.classList.contains('open')) set.add(key); else set.delete(key);
+    localStorage.setItem('kanri-keisan-chopen', JSON.stringify([...set]));
+  };
   hd.innerHTML = `
     <span class="ch-chevron">▶</span>
     <div class="ch-info">
@@ -2358,7 +2364,28 @@ Object.entries(appState.removedLinks || {}).forEach(([itemId, tids]) => {
     if (TOPIC_BY_ID[tid]) TOPIC_BY_ID[tid].qs = (TOPIC_BY_ID[tid].qs||[]).filter(q => q !== itemId);
   });
 });
+const _savedTab = localStorage.getItem('kanri-keisan-uitab');
+if (_savedTab) curViewTab = _savedTab;
+
 render();
+
+if (_savedTab) {
+  document.querySelectorAll('.vtab').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('onclick').includes("'"+_savedTab+"'"));
+  });
+}
+
+const _savedOpenChs = JSON.parse(localStorage.getItem('kanri-keisan-chopen') || '[]');
+_savedOpenChs.forEach(k => {
+  const card = document.getElementById('chcard-' + k);
+  if (card) card.classList.add('open');
+});
+
+const _savedScroll = localStorage.getItem('kanri-keisan-scroll');
+if (_savedScroll) requestAnimationFrame(() => { window.scrollTo(0, parseInt(_savedScroll)); });
+
+window.addEventListener('pagehide', () => { localStorage.setItem('kanri-keisan-scroll', window.scrollY); });
+
 if (!appState.rounds[0].startDate) openScopeModal(true);
 
 // ===== 累積メモ =====
