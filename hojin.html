@@ -563,6 +563,7 @@ let curViewTab = 'all';
 
 function setViewTab(tab, btn) {
   curViewTab = tab;
+  localStorage.setItem('hojin-uitab', tab);
   document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   // タブ切り替え時にボタン表示を更新してからフィルタ
@@ -1205,7 +1206,29 @@ document.getElementById('deadline-overlay').addEventListener('click', e => {
 });
 
 load();
+
+// UIタブ復元
+const _savedTab = localStorage.getItem('hojin-uitab');
+if (_savedTab) curViewTab = _savedTab;
+
 render();
+
+// UIタブのactive反映
+if (_savedTab) {
+  document.querySelectorAll('.vtab').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('onclick').includes("'"+_savedTab+"'"));
+  });
+}
+
+// スクロール位置復元
+const _savedScroll = localStorage.getItem('hojin-scroll');
+if (_savedScroll) requestAnimationFrame(() => { window.scrollTo(0, parseInt(_savedScroll)); });
+
+// タブ離脱時にスクロール位置を保存
+window.addEventListener('pagehide', () => {
+  localStorage.setItem('hojin-scroll', window.scrollY);
+});
+
 if (!appState.rounds[0].startDate) {
   openScopeModal(true);
 }
