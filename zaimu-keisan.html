@@ -1258,6 +1258,7 @@ function scoreClass(score) {
 let curTab = 'problems';
 function setTab(tab, btn) {
   curTab = tab;
+  localStorage.setItem('zaimu-keisan-uitab', tab);
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   ['problems','ronten','urgent'].forEach(t => {
@@ -1271,7 +1272,7 @@ function setTab(tab, btn) {
 // ── PROBLEMS TAB ──
 function renderProblems() {
   const ct = document.getElementById('tab-problems');
-  const openChapters = new Set();
+  const openChapters = new Set(JSON.parse(localStorage.getItem('zaimu-keisan-chopen') || '[]'));
   document.querySelectorAll('.ch-group.open').forEach(el => openChapters.add(el.dataset.ch));
 
   ct.innerHTML = '';
@@ -1306,7 +1307,12 @@ function renderProblems() {
 
     const groupHeader = document.createElement('div');
     groupHeader.className = 'ch-group-header';
-    groupHeader.onclick = () => group.classList.toggle('open');
+    groupHeader.onclick = () => {
+      group.classList.toggle('open');
+      const set = new Set(JSON.parse(localStorage.getItem('zaimu-keisan-chopen') || '[]'));
+      if (group.classList.contains('open')) set.add(ch); else set.delete(ch);
+      localStorage.setItem('zaimu-keisan-chopen', JSON.stringify([...set]));
+    };
     const chScore = calcChapterScore(probIds);
     const chScoreLabel = chScore === null ? '–' : chScore;
     const chScoreCls = scoreClass(chScore);
@@ -1693,7 +1699,7 @@ function renderRonten() {
     return               { label: '××', cls: 'badge-xx' };
   };
 
-  const openChs = new Set();
+  const openChs = new Set(JSON.parse(localStorage.getItem('zaimu-keisan-rontenopen') || '[]'));
   document.querySelectorAll('.ronten-ch-group.open').forEach(el => openChs.add(el.dataset.ch));
 
   // 論点タブもテキスト章番号順にソート
@@ -1717,7 +1723,12 @@ function renderRonten() {
 
     const groupHeader = document.createElement('div');
     groupHeader.className = 'ch-group-header';
-    groupHeader.onclick = () => group.classList.toggle('open');
+    groupHeader.onclick = () => {
+      group.classList.toggle('open');
+      const set = new Set(JSON.parse(localStorage.getItem('zaimu-keisan-rontenopen') || '[]'));
+      if (group.classList.contains('open')) set.add(ch); else set.delete(ch);
+      localStorage.setItem('zaimu-keisan-rontenopen', JSON.stringify([...set]));
+    };
     groupHeader.innerHTML = `
       <span class="ch-group-title">${chDisplay}${textNumR ? ' <span style="font-size:11px;font-weight:500;opacity:0.7;">ー' + textNumR + '</span>' : ''}</span>`;
     group.appendChild(groupHeader);
@@ -1973,7 +1984,19 @@ document.getElementById('new-prob-modal').addEventListener('click', e => {
 
 // ── INIT ──
 load();
-renderProblems();
+
+const _savedTab = localStorage.getItem('zaimu-keisan-uitab');
+if (_savedTab && _savedTab !== 'problems') {
+  const btn = document.querySelector(`.tab[onclick*="'${_savedTab}'"]`);
+  if (btn) setTab(_savedTab, btn);
+} else {
+  renderProblems();
+}
+
+const _savedScroll = localStorage.getItem('zaimu-keisan-scroll');
+if (_savedScroll) requestAnimationFrame(() => { window.scrollTo(0, parseInt(_savedScroll)); });
+
+window.addEventListener('pagehide', () => { localStorage.setItem('zaimu-keisan-scroll', window.scrollY); });
 
 // ── MEMO POPUP ──
 let _memoPopupProbId = null;
