@@ -2222,6 +2222,7 @@ let curViewTab = 'all';
 
 function setViewTab(tab, btn) {
   curViewTab = tab;
+  localStorage.setItem('zaimu-riron-uitab', tab);
   document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   updateItemTopButtons();
@@ -2308,7 +2309,12 @@ function buildChCard(ch) {
 
   const hd = document.createElement('div');
   hd.className = 'ch-header';
-  hd.onclick = () => card.classList.toggle('open');
+  hd.onclick = () => {
+    card.classList.toggle('open');
+    const set = new Set(JSON.parse(localStorage.getItem('zaimu-riron-chopen') || '[]'));
+    if (card.classList.contains('open')) set.add(key); else set.delete(key);
+    localStorage.setItem('zaimu-riron-chopen', JSON.stringify([...set]));
+  };
   hd.innerHTML = `
     <span class="ch-chevron">▶</span>
     <div class="ch-info">
@@ -3076,7 +3082,29 @@ function importData(e) {
 
 // ── INIT ──
 load();
+
+const _savedTab = localStorage.getItem('zaimu-riron-uitab');
+if (_savedTab) curViewTab = _savedTab;
+
 render();
+
+if (_savedTab) {
+  document.querySelectorAll('.vtab').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('onclick').includes("'"+_savedTab+"'"));
+  });
+}
+
+const _savedOpenChs = JSON.parse(localStorage.getItem('zaimu-riron-chopen') || '[]');
+_savedOpenChs.forEach(k => {
+  const card = document.getElementById('chcard-' + k);
+  if (card) card.classList.add('open');
+});
+
+const _savedScroll = localStorage.getItem('zaimu-riron-scroll');
+if (_savedScroll) requestAnimationFrame(() => { window.scrollTo(0, parseInt(_savedScroll)); });
+
+window.addEventListener('pagehide', () => { localStorage.setItem('zaimu-riron-scroll', window.scrollY); });
+
 if (!appState.rounds[0].startDate) {
   openScopeModal(true);
 }
