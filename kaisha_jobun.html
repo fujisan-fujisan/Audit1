@@ -3595,7 +3595,7 @@ async function exportData() {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const file = new File([blob], 'kaishaho_backup.json', { type: 'application/json' });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    try { await navigator.share({ files: [file], title: 'バックアップ' }); return; } catch(e) {}
+    try { await navigator.share({ files: [file] }); return; } catch(e) {}
   }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
