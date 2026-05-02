@@ -1218,12 +1218,9 @@ async function exportData() {
     appState: JSON.parse(localStorage.getItem('hojin-app') || '{}'),
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-  const isStandalone = window.navigator.standalone === true;
-  if (isStandalone) {
-    const file = new File([blob], 'hojin_backup.json', {type: 'application/json'});
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try { await navigator.share({ files: [file] }); return; } catch(e) {}
-    }
+  const file = new File([blob], 'hojin_backup.json', {type: 'application/json'});
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file] }); return; } catch(e) {}
   }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
