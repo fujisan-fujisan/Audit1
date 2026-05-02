@@ -1907,6 +1907,7 @@ function switchTab(name) {
   const tabs = ['browse','training'];
   const alreadyActive = document.getElementById('panel-' + name).classList.contains('active');
   if (alreadyActive) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  localStorage.setItem('kaisha-v2-tab', name);
 
   // 現在 training タブなら、どのサブビューにいたか記憶
   if (document.getElementById('panel-training').classList.contains('active')) {
@@ -3660,7 +3661,25 @@ window.addEventListener('scroll', () => {
 
 // ===== 初期化 =====
 updateNavButton();
+
+// フィルター復元
+const _savedFilter = localStorage.getItem('kaisha-v2-filter');
+if (_savedFilter) {
+  browseFilter = _savedFilter;
+  const btn = document.getElementById(`qf-${browseFilter}`);
+  if (btn) btn.classList.add('active');
+}
+
 renderArticles();
+
+// タブ復元
+const _savedTab = localStorage.getItem('kaisha-v2-tab');
+if (_savedTab && _savedTab !== 'browse') switchTab(_savedTab);
+
+// スクロール位置復元
+const _savedScroll = localStorage.getItem('kaisha-v2-scroll');
+if (_savedScroll) requestAnimationFrame(() => { window.scrollTo(0, parseInt(_savedScroll)); });
+window.addEventListener('pagehide', () => { localStorage.setItem('kaisha-v2-scroll', window.scrollY); });
 
 // ===== ★重要・ブックマーク・閲覧履歴 =====
 
@@ -3678,6 +3697,7 @@ function setBrowseFilter(filter) {
   currentPartIdx = null;
   currentChapterIdx = null;
   browseFilter = browseFilter === filter ? null : filter;
+  localStorage.setItem('kaisha-v2-filter', browseFilter || '');
   document.querySelectorAll('.btn-quick-filter').forEach(b => b.classList.remove('active'));
   if (browseFilter) {
     const btn = document.getElementById(`qf-${browseFilter}`);
