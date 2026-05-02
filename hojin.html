@@ -655,7 +655,12 @@ function buildChCard(ch) {
 
   const hd = document.createElement('div');
   hd.className = 'ch-header';
-  hd.onclick = () => card.classList.toggle('open');
+  hd.onclick = () => {
+    card.classList.toggle('open');
+    const set = new Set(JSON.parse(localStorage.getItem('hojin-chopen') || '[]'));
+    if (card.classList.contains('open')) set.add(key); else set.delete(key);
+    localStorage.setItem('hojin-chopen', JSON.stringify([...set]));
+  };
   hd.innerHTML = `
     <span class="ch-chevron">▶</span>
     <div class="ch-info">
@@ -1219,6 +1224,13 @@ if (_savedTab) {
     b.classList.toggle('active', b.getAttribute('onclick').includes("'"+_savedTab+"'"));
   });
 }
+
+// 章の開閉状態復元
+const _savedOpenChs = JSON.parse(localStorage.getItem('hojin-chopen') || '[]');
+_savedOpenChs.forEach(k => {
+  const card = document.getElementById('chcard-' + k);
+  if (card) card.classList.add('open');
+});
 
 // スクロール位置復元
 const _savedScroll = localStorage.getItem('hojin-scroll');
