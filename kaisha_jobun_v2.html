@@ -3610,7 +3610,7 @@ async function exportData() {
   const file = new File([blob], 'kaishaho_backup.json', { type: 'application/json' });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
-      await navigator.share({ files: [file], title: 'バックアップ' });
+      await navigator.share({ files: [file] });
       return;
     } catch (e) { /* キャンセル時は何もしない */ }
   }
