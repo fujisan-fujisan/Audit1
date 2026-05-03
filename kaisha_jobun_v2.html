@@ -3679,7 +3679,11 @@ if (_savedTab && _savedTab !== 'browse') switchTab(_savedTab);
 // スクロール位置復元
 const _savedScroll = localStorage.getItem('kaisha-v2-scroll');
 if (_savedScroll) requestAnimationFrame(() => { window.scrollTo(0, parseInt(_savedScroll)); });
-window.addEventListener('pagehide', () => { localStorage.setItem('kaisha-v2-scroll', window.scrollY); });
+window.addEventListener('pagehide', () => {
+  localStorage.setItem('kaisha-v2-scroll', window.scrollY);
+  const activePanel = document.querySelector('.panel.active');
+  if (activePanel) localStorage.setItem('kaisha-v2-tab', activePanel.id.replace('panel-', ''));
+});
 
 // ===== ★重要・ブックマーク・閲覧履歴 =====
 
