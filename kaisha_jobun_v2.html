@@ -3660,6 +3660,27 @@ window.addEventListener('scroll', () => {
 }, true);
 
 // ===== 初期化 =====
+
+// partIdx/chapterIdxがnullの既存データを自動マイグレーション
+(function migrateQuestions() {
+  const storage = getStorage();
+  let changed = false;
+  (storage.questions || []).forEach(q => {
+    if (q.partIdx === null || q.partIdx === undefined) {
+      const m = (q.answer || '').match(/^(\d+(?:の\d+)?)条/);
+      if (m) {
+        const info = getChapterInfo(parseInt(m[1]));
+        if (info) {
+          q.partIdx = info.partIdx;
+          q.chapterIdx = info.chapterIdx;
+          changed = true;
+        }
+      }
+    }
+  });
+  if (changed) saveStorage(storage);
+})();
+
 updateNavButton();
 
 // フィルター復元
