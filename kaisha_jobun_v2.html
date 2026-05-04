@@ -2903,7 +2903,7 @@ function renderTrainingDrawer() {
   // 登録問題が属する編・章を集計
   const chapterCounts = {};
   for (const q of storage.questions) {
-    const match = q.answer.match(/^(\d+)条/);
+    const match = q.answer.match(/^(\d+(?:の\d+)?)条/);
     if (!match) continue;
     const info = getChapterInfo(parseInt(match[1]));
     if (!info) continue;
@@ -2977,14 +2977,14 @@ function getFilteredQuestions(questions) {
     if (trainingPartIdx === null) return questions;
     const ch = STRUCTURE.parts[trainingPartIdx].chapters[trainingChapterIdx];
     return questions.filter(q => {
-      const match = q.answer.match(/^(\d+)条/);
+      const match = q.answer.match(/^(\d+(?:の\d+)?)条/);
       if (!match) return false;
       const n = parseInt(match[1]);
       return ch.start <= n && n <= ch.end;
     });
   }
   return questions.filter(q => {
-    const match = q.answer.match(/^(\d+)条/);
+    const match = q.answer.match(/^(\d+(?:の\d+)?)条/);
     if (!match) return false;
     const n = parseInt(match[1]);
     const info = getChapterInfo(n);
@@ -3005,7 +3005,7 @@ function openChapterSelectModal() {
   const storage = getStorage();
   const chapterCounts = {};
   for (const q of storage.questions) {
-    const match = q.answer.match(/^(\d+)条/);
+    const match = q.answer.match(/^(\d+(?:の\d+)?)条/);
     if (!match) continue;
     const info = getChapterInfo(parseInt(match[1]));
     if (!info) continue;
@@ -3088,7 +3088,7 @@ function syncPartCheckboxes() {
   const storage = getStorage();
   const chapterCounts = {};
   for (const q of storage.questions) {
-    const match = q.answer.match(/^(\d+)条/);
+    const match = q.answer.match(/^(\d+(?:の\d+)?)条/);
     if (!match) continue;
     const info = getChapterInfo(parseInt(match[1]));
     if (!info) continue;
@@ -3363,7 +3363,7 @@ function addQuestion() {
   if (!articleInput || !question) { showToast('条文と要約文を入力してください'); return; }
 
   // 条番号から編・章を自動判定
-  const match = articleInput.match(/^(\d+)条/);
+  const match = articleInput.match(/^(\d+(?:の\d+)?)条/);
   const chapterInfo = match ? getChapterInfo(parseInt(match[1])) : null;
 
   const storage = getStorage();
@@ -3411,7 +3411,7 @@ function addQuestionFromEdit(articleNum, pNum) {
   const question = textarea.value.trim();
   if (!question) { showToast('要約文を入力してください'); return; }
   const answer = `${keyToDisplay(articleNum)}条${pNum}項`;
-  const match = answer.match(/^(\d+)条/);
+  const match = answer.match(/^(\d+(?:の\d+)?)条/);
   const chapterInfo = match ? getChapterInfo(parseInt(match[1])) : null;
   const storage = getStorage();
   storage.questions.push({ answer, question, partIdx: chapterInfo?.partIdx ?? null, chapterIdx: chapterInfo?.chapterIdx ?? null, correct: 0, attempted: 0 });
@@ -3514,7 +3514,7 @@ function renderManageQuestionList() {
   // 条文番号順にソート
   filtered.sort((a, b) => {
     const parseBase = s => { const m = (s||'').match(/^(\d+)/); return m ? parseInt(m[1]) : 9999; };
-    const parseSuffix = s => { const m = (s||'').match(/^(\d+)条の(\d+)/); return m ? parseInt(m[2]) : 0; };
+    const parseSuffix = s => { const m = (s||'').match(/^(\d+)の(\d+)条/); return m ? parseInt(m[2]) : 0; };
     const na = parseBase(a.q.answer), nb = parseBase(b.q.answer);
     if (na !== nb) return na - nb;
     return parseSuffix(a.q.answer) - parseSuffix(b.q.answer);
@@ -3558,7 +3558,7 @@ function saveEditQuestion(i) {
   const newQuestion = document.getElementById(`editQuestion-${i}`).value.trim();
   if (!newAnswer || !newQuestion) { showToast('条文と要約文を入力してください'); return; }
   const storage = getStorage();
-  const match = newAnswer.match(/^(\d+)条/);
+  const match = newAnswer.match(/^(\d+(?:の\d+)?)条/);
   const chapterInfo = match ? getChapterInfo(parseInt(match[1])) : null;
   storage.questions[i].answer = newAnswer;
   storage.questions[i].question = newQuestion;
