@@ -1,0 +1,3858 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="apple-touch-icon" href="icons/hojin_jyobun.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>法人税法学習ツール</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fafaf8;
+    --surface: #ffffff;
+    --surface2: #f5f5f2;
+    --border: #e8e8e4;
+    --border-light: #f0f0ec;
+    --text-primary: #1a1a1a;
+    --text-secondary: #666660;
+    --text-muted: #aaa9a4;
+    --accent: #2c5f8a;
+    --accent-light: #eaf1f8;
+    --accent-hover: #1e4a6e;
+    --red: #c0392b;
+    --green: #27724a;
+    --edited-color: #5a3e8a;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    --radius: 8px;
+    --radius-sm: 5px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  /* ヘッダー */
+  header {
+    will-change: transform;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .header-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: 0.05em;
+  }
+
+  .header-subtitle {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-left: 10px;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  /* タブ */
+  .tabs {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0;
+    gap: 0;
+    position: sticky;
+    top: 56px;
+    z-index: 99;
+    box-shadow: var(--shadow-sm);
+    will-change: transform;
+    justify-content: center;
+  }
+
+  .tab {
+    flex: 0 0 40%;
+    text-align: center;
+    padding: 14px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .tab:hover { color: var(--text-secondary); }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .tab.registering {
+    position: relative;
+  }
+  .tab.registering::after {
+    content: '●';
+    font-size: 7px;
+    color: #e06c00;
+    position: absolute;
+    top: 6px;
+    right: 4px;
+  }
+
+  /* 検索タブ内「登録に戻る」バナー */
+  #registerReturnBanner {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff8f0;
+    border: 1px solid #f0c080;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin: 8px 0 4px;
+    font-size: 13px;
+    color: #7a4000;
+  }
+  #registerReturnBanner.visible { display: flex; }
+  #registerReturnBanner button {
+    font-size: 12px; padding: 4px 10px;
+    border: 1px solid #e08020; border-radius: 6px;
+    background: #fff; color: #7a4000; cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+
+  /* メインレイアウト */
+  .main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 24px;
+  }
+
+  /* パネル */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ===== 検索・閲覧 ===== */
+  .search-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .search-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 16px;
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--surface);
+    color: var(--text-primary);
+    transition: border-color 0.2s;
+    outline: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .search-input:focus { border-color: var(--accent); }
+
+  /* 条文カード */
+  .article-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    overflow: clip;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.2s;
+    content-visibility: auto;
+    contain-intrinsic-size: 0 56px;
+  }
+
+  .article-card:hover { box-shadow: var(--shadow-md); }
+
+  .article-header {
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid transparent;
+    transition: background 0.15s;
+  }
+
+  .article-header:hover { background: var(--surface2); }
+  .article-header.open { border-bottom-color: var(--border-light); }
+
+  .article-num {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--accent);
+    min-width: 70px;
+  }
+
+  .article-caption {
+    font-size: 13px;
+    color: var(--text-secondary);
+    flex: 1;
+    margin-left: 10px;
+  }
+
+  .article-toggle {
+    font-size: 11px;
+    color: var(--text-muted);
+    transition: transform 0.2s;
+  }
+
+  .article-toggle.open { transform: rotate(180deg); }
+
+  /* 条文本文エリア */
+  .article-body {
+    display: none;
+    padding: 16px 18px;
+  }
+
+  .article-body.open { display: block; }
+
+  /* 項 */
+  .paragraph {
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .paragraph:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .paragraph-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .paragraph-num {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: var(--surface2);
+    padding: 2px 8px;
+    border-radius: 3px;
+    min-width: 36px;
+    text-align: center;
+  }
+
+  .paragraph-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  /* 編集・原文ボタン */
+  .btn-edit {
+    font-size: 13px;
+    padding: 7px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Noto Sans JP', sans-serif;
+    min-height: 36px;
+  }
+
+  .btn-edit:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  .btn-notes {
+    font-size: 13px;
+    padding: 7px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Noto Sans JP', sans-serif;
+    min-height: 36px;
+  }
+  .btn-notes:hover, .btn-notes.has-notes {
+    border-color: #2a7a4a;
+    color: #2a7a4a;
+    background: #edf7f2;
+  }
+
+  .btn-original {
+    font-size: 13px;
+    padding: 7px 16px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Noto Sans JP', sans-serif;
+    opacity: 0.3;
+    min-height: 36px;
+  }
+
+  .btn-original.has-edit {
+    opacity: 1;
+    border-color: var(--border);
+    color: var(--text-secondary);
+  }
+
+  .btn-original:hover.has-edit {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* 条文テキスト表示 */
+  .para-text-display {
+    font-size: 13.5px;
+    line-height: 1.85;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+  }
+
+  .para-text-display.edited-view {
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 500;
+    color: var(--edited-color);
+  }
+
+  /* 編集エリア */
+  .para-edit-area {
+    display: none;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    font-size: 13.5px;
+    line-height: 1.85;
+    font-family: 'Noto Sans JP', sans-serif;
+    color: var(--text-primary);
+    background: var(--accent-light);
+    resize: vertical;
+    min-height: 80px;
+    outline: none;
+    margin-top: 6px;
+  }
+
+  .para-edit-area.open { display: block; }
+
+  .edit-save-row {
+    display: none;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .edit-save-row.open { display: flex; }
+
+  .edit-save-row .btn {
+    padding: 9px 18px;
+    font-size: 13px;
+    min-height: 38px;
+  }
+
+  /* 号 */
+  .items-list {
+    margin-top: 8px;
+    padding-left: 16px;
+    border-left: 2px solid var(--border-light);
+  }
+
+  .item-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    line-height: 1.8;
+  }
+
+  .item-num {
+    color: var(--text-muted);
+    min-width: 24px;
+    font-size: 12px;
+    padding-top: 1px;
+  }
+
+  .item-text { color: var(--text-primary); }
+
+  .subitems-list {
+    margin-top: 4px;
+    padding-left: 16px;
+    border-left: 2px solid var(--border-light);
+  }
+
+  .subitem-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 4px;
+    font-size: 12.5px;
+    line-height: 1.8;
+    color: var(--text-secondary);
+  }
+
+  .subitem-num {
+    color: var(--text-muted);
+    min-width: 20px;
+    font-size: 11px;
+    padding-top: 2px;
+  }
+
+  .sub2items-list {
+    margin-top: 3px;
+    padding-left: 14px;
+    border-left: 1px solid var(--border-light);
+  }
+
+  .sub2item-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 3px;
+    font-size: 12px;
+    line-height: 1.8;
+    color: var(--text-muted);
+  }
+
+  /* サイドドロワー */
+  .drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 300;
+    opacity: 0;
+    pointer-events: none;
+    display: none;
+    transition: opacity 0.25s;
+  }
+  .drawer-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+    display: block;
+  }
+
+  .drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: min(320px, 85vw);
+    height: 100%;
+    background: var(--surface);
+    z-index: 400;
+    transform: translateX(-100%);
+    display: none;
+    flex-direction: column;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.12);
+    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+  }
+  .drawer.open { transform: translateX(0); }
+
+  .drawer-header {
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .drawer-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .drawer-close {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: var(--surface2);
+    border-radius: 50%;
+    font-size: 14px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .drawer-close:hover { background: var(--border); }
+
+  .drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+  }
+
+  .nav-part-header {
+    padding: 11px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .nav-part-header:hover { background: var(--surface2); }
+  .nav-part-header.active { color: var(--accent); }
+
+  .nav-chapters { display: none; }
+  .nav-chapters.open { display: block; }
+
+  .nav-chapter {
+    padding: 9px 18px 9px 32px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .nav-chapter:hover { background: var(--surface2); }
+  .nav-chapter.active {
+    color: var(--accent);
+    font-weight: 500;
+    background: var(--accent-light);
+    border-left-color: var(--accent);
+  }
+  .nav-chapter-count { font-size: 11px; color: var(--text-muted); margin-left: 8px; flex-shrink: 0; }
+  .nav-toggle { font-size: 10px; color: var(--text-muted); transition: transform 0.2s; }
+  .nav-toggle.open { transform: rotate(180deg); }
+
+  /* ヘッダーのナビボタン */
+  .btn-nav {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    font-size: 12px;
+    font-family: 'Noto Sans JP', sans-serif;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    max-width: 180px;
+    overflow: hidden;
+  }
+  .btn-nav:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-nav.selected { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+  .btn-nav-icon { font-size: 14px; flex-shrink: 0; }
+  .btn-nav-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .breadcrumb {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    padding: 6px 10px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+  }
+  .breadcrumb b { color: var(--accent); }
+
+  /* 関連条文 */
+  .related-section {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border);
+  }
+
+  .related-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .related-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 6px;
+  }
+
+  .related-tag {
+    font-size: 11px;
+    padding: 3px 10px;
+    background: var(--accent-light);
+    color: var(--accent);
+    border-radius: 20px;
+    cursor: pointer;
+    border: 1px solid #c5ddf0;
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+
+  .related-tag:hover { background: var(--accent); color: white; }
+
+  .related-tag .remove-tag {
+    margin-left: 5px;
+    opacity: 0.5;
+    font-size: 10px;
+  }
+
+  .related-tag:hover .remove-tag { opacity: 1; }
+
+  .related-add-row {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+
+  .related-input {
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-family: 'Noto Sans JP', sans-serif;
+    width: 110px;
+    outline: none;
+    color: var(--text-primary);
+  }
+
+  .related-input:focus { border-color: var(--accent); }
+
+  .related-suggest {
+    position: fixed;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-md);
+    z-index: 9999;
+    max-height: 200px;
+    overflow-y: auto;
+    min-width: 180px;
+  }
+
+  /* 項ハイライト（関連条文ジャンプ時） */
+  .paragraph.jumped {
+    border: 1.5px solid #f5a8a0;
+    background: #fff8f7;
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    transition: background 0.3s;
+  }
+
+  .btn-jump-back {
+    font-size: 11px;
+    padding: 3px 10px;
+    border: 1px solid #f5a8a0;
+    border-radius: var(--radius-sm);
+    background: #fff0ee;
+    color: var(--red);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Noto Sans JP', sans-serif;
+    display: none;
+  }
+
+  .btn-jump-back.show { display: inline-block; }
+  .btn-jump-back:hover { background: var(--red); color: white; border-color: var(--red); }
+  .related-suggest-item {
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--text-primary);
+  }
+
+  .related-suggest-item:hover { background: var(--accent-light); }
+  .related-suggest-item.auto { color: var(--accent); font-weight: 500; }
+  .related-suggest-item.auto::before { content: "↗ "; font-size: 10px; }
+
+  /* ===== 閲覧モード：ポップアップタグボタン ===== */
+  .para-tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 10px;
+  }
+
+  .btn-popup-tag {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid;
+    cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 500;
+    transition: all 0.15s;
+    line-height: 1.4;
+  }
+
+  .btn-tag-orig {
+    background: var(--surface);
+    color: var(--text-secondary);
+    border-color: var(--border);
+  }
+  .btn-tag-orig:hover { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
+
+  .btn-tag-yoken {
+    background: #fff3e0;
+    color: #e65100;
+    border-color: #ffb74d;
+  }
+  .btn-tag-yoken:hover { background: #e65100; color: white; }
+
+  .btn-tag-shushi {
+    background: #fffde7;
+    color: #f57f17;
+    border-color: #fff176;
+  }
+  .btn-tag-shushi:hover { background: #f9a825; color: white; }
+
+  .btn-tag-ronten {
+    background: #ffebee;
+    color: #c62828;
+    border-color: #ef9a9a;
+  }
+  .btn-tag-ronten:hover { background: #c62828; color: white; }
+
+  .btn-tag-hanrei {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-color: #a5d6a7;
+  }
+  .btn-tag-hanrei:hover { background: #2e7d32; color: white; }
+
+  .badge-q {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: #e3f2fd;
+    color: #1565c0;
+    border: 1px solid #90caf9;
+    margin-left: 4px;
+    vertical-align: middle;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .badge-q:hover { background: #1565c0; color: white; }
+
+  .q-popup-item {
+    display: flex;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 13.5px;
+    line-height: 1.8;
+  }
+  .q-popup-item:last-child { border-bottom: none; }
+  .q-popup-num {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: #1565c0;
+    background: #e3f2fd;
+    border-radius: 3px;
+    padding: 2px 5px;
+    height: fit-content;
+    margin-top: 2px;
+  }
+  .q-popup-para-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin: 10px 0 4px;
+  }
+  .q-popup-para-label:first-child { margin-top: 0; }
+
+  .btn-tag-related {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-color: #c5ddf0;
+  }
+  .btn-tag-related:hover { background: var(--accent); color: white; }
+
+  /* ===== 章選択モーダル ===== */
+  #chselOverlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.45); z-index: 600;
+    align-items: flex-end; justify-content: center;
+  }
+  .chsel-sheet {
+    background: var(--surface); border-radius: 16px 16px 0 0;
+    width: 100%; max-width: 700px; max-height: 82vh;
+    display: flex; flex-direction: column; padding: 0 0 env(safe-area-inset-bottom);
+  }
+  .chsel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 16px 0; flex-shrink: 0;
+  }
+  .chsel-header h3 { font-size: 15px; font-weight: 700; margin: 0; }
+  .chsel-header-right { display: flex; align-items: center; gap: 8px; }
+  .chsel-allbtn {
+    font-size: 12px; padding: 4px 10px; border: 1px solid var(--border);
+    border-radius: 6px; background: var(--surface); color: var(--text-secondary);
+    cursor: pointer; font-family: 'Noto Sans JP', sans-serif;
+  }
+  .chsel-allbtn:hover { border-color: var(--accent); color: var(--accent); }
+  .chsel-close {
+    font-size: 18px; line-height: 1; border: none; background: none;
+    color: var(--text-secondary); cursor: pointer; padding: 4px 8px;
+  }
+  .chsel-body { overflow-y: auto; padding: 10px 16px; flex: 1; }
+  .chsel-part { margin-bottom: 4px; }
+  .chsel-part-header {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 700; color: var(--text-primary);
+    padding: 8px 0 4px; cursor: pointer; user-select: none;
+  }
+  .chsel-chapters { padding-left: 8px; }
+  .chsel-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 4px; font-size: 13px; cursor: pointer;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .chsel-item:last-child { border-bottom: none; }
+  .chsel-item-empty { opacity: 0.4; cursor: default; }
+  .chsel-label { flex: 1; color: var(--text-primary); }
+  .chsel-count { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+  .chsel-check { width: 16px; height: 16px; flex-shrink: 0; accent-color: var(--accent); cursor: pointer; }
+  .chsel-footer {
+    padding: 12px 16px; border-top: 1px solid var(--border-light);
+    display: flex; gap: 8px; flex-shrink: 0;
+  }
+  #chselStartBtn {
+    flex: 1; padding: 12px; border: none; border-radius: 8px;
+    background: var(--accent); color: white; font-size: 15px; font-weight: 700;
+    cursor: pointer; font-family: 'Noto Sans JP', sans-serif;
+  }
+  #chselStartBtn:disabled { background: var(--border); cursor: not-allowed; }
+
+  /* ===== 編集ポップアップ ===== */
+  .edit-popup-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 800;
+  }
+  .edit-popup-overlay.open { display: block; }
+
+  .edit-popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+    z-index: 900;
+    width: min(640px, 96vw);
+    height: 72vh;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .edit-popup.open { display: flex; }
+
+  .edit-popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .edit-popup-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .edit-popup-close {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: var(--text-muted);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .edit-popup-close:hover { background: var(--accent-light); color: var(--accent); }
+
+  .edit-popup-area {
+    flex: 1;
+    padding: 16px 18px;
+    border: none;
+    font-size: 14px;
+    line-height: 1.85;
+    font-family: 'Noto Sans JP', sans-serif;
+    color: var(--text-primary);
+    background: var(--bg);
+    resize: none;
+    outline: none;
+    overflow-y: auto;
+  }
+
+  .edit-popup-footer {
+    display: flex;
+    gap: 8px;
+    padding: 12px 18px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    justify-content: flex-end;
+  }
+
+  /* ===== 情報ポップアップ ===== */
+  .info-popup-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 800;
+  }
+  .info-popup-overlay.open { display: block; }
+
+  .info-popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    z-index: 900;
+    width: min(480px, 90vw);
+    max-height: 70vh;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .info-popup.open { display: flex; }
+
+  .info-popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .info-popup-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .info-popup-close {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: var(--text-muted);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .info-popup-close:hover { background: var(--accent-light); color: var(--accent); }
+
+  .info-popup-body {
+    padding: 16px 18px;
+    overflow-y: auto;
+    flex: 1;
+    font-size: 13.5px;
+    line-height: 1.85;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  /* ===== 編集モード：追加フィールド ===== */
+  .extra-fields-section {
+    display: none;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+    gap: 10px;
+    flex-direction: column;
+  }
+  .extra-fields-section.open { display: flex; }
+
+  .extra-field-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .extra-field-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+  .extra-field-area {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    line-height: 1.75;
+    font-family: 'Noto Sans JP', sans-serif;
+    color: var(--text-primary);
+    background: var(--bg);
+    resize: vertical;
+    min-height: 64px;
+    outline: none;
+    box-sizing: border-box;
+  }
+  .extra-field-area:focus { border-color: var(--accent); }
+
+  /* ===== 問題追加セクション（編集モード） ===== */
+  .q-edit-section {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+  }
+  .q-edit-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .q-edit-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .q-edit-item-text { flex: 1; }
+  .q-edit-add-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .btn-mode-toggle {
+    padding: 9px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-family: 'Noto Sans JP', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    min-height: 42px;
+    touch-action: manipulation;
+  }
+  .btn-mode-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-mode-toggle.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+
+  .related-wrap { position: relative; }
+
+  /* ===== 逆引きトレーニング ===== */
+  .training-controls {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .card-counter {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-left: auto;
+  }
+
+  .training-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px 28px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  .training-question {
+    font-size: 16px;
+    line-height: 1.9;
+    color: var(--text-primary);
+    margin-bottom: 24px;
+    max-width: 640px;
+  }
+
+  .training-article-id {
+    font-size: 11px;
+    color: var(--text-muted);
+    position: absolute;
+    top: 12px;
+    right: 14px;
+  }
+
+  .training-answer {
+    display: none;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  .training-answer.show { display: block; }
+
+  .training-article-text {
+    display: none;
+    font-size: 13px;
+    line-height: 1.85;
+    color: var(--text-secondary);
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-bottom: 20px;
+    text-align: left;
+    max-width: 640px;
+    border-left: 3px solid var(--accent-light);
+  }
+
+  .training-article-text.show { display: block; }
+
+  .btn-show-answer {
+    padding: 10px 28px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-family: 'Noto Sans JP', sans-serif;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .btn-show-answer:hover { background: var(--accent-hover); }
+
+  .judge-buttons {
+    display: none;
+    gap: 12px;
+  }
+
+  .judge-buttons.show { display: flex; }
+
+  .btn-correct {
+    padding: 10px 32px;
+    background: white;
+    color: var(--green);
+    border: 2px solid var(--green);
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Noto Sans JP', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-correct:hover { background: var(--green); color: white; }
+
+  .btn-wrong {
+    padding: 10px 32px;
+    background: white;
+    color: var(--red);
+    border: 2px solid var(--red);
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Noto Sans JP', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-wrong:hover { background: var(--red); color: white; }
+
+  /* 問題登録 */
+  .reg-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .reg-section h3 {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .reg-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    align-items: flex-start;
+  }
+
+  .reg-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    min-width: 80px;
+    padding-top: 9px;
+  }
+
+  .reg-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-family: 'Noto Sans JP', sans-serif;
+    color: var(--text-primary);
+    outline: none;
+  }
+
+  .reg-input:focus { border-color: var(--accent); }
+
+  textarea.reg-input {
+    resize: vertical;
+    min-height: 72px;
+    line-height: 1.7;
+  }
+
+  .claude-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    margin-top: 4px;
+    line-height: 1.7;
+    opacity: 0.7;
+    border-left: 2px solid var(--border);
+  }
+
+  .claude-hint-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 3px;
+    opacity: 0.8;
+  }
+
+  /* 問題一覧 */
+  .question-list { margin-top: 8px; }
+
+  .question-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 6px;
+    font-size: 13px;
+  }
+
+  .question-item-text { flex: 1; color: var(--text-primary); }
+  .question-item-answer { color: var(--accent); font-weight: 500; min-width: 80px; font-size: 12px; }
+
+  /* スコア */
+  .score-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    display: flex;
+    gap: 24px;
+    margin-bottom: 20px;
+    align-items: center;
+  }
+
+  .score-item { text-align: center; }
+  .score-num { font-size: 24px; font-weight: 600; font-family: 'Noto Serif JP', serif; }
+  .score-num.correct { color: var(--green); }
+  .score-num.wrong { color: var(--red); }
+  .score-num.total { color: var(--text-secondary); }
+  .score-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* トレーニング サブビュー */
+  .training-view { display: none; }
+  .training-view.active { display: block; }
+
+  .tv-home-top { margin-bottom: 32px; }
+
+  .tv-home-start { text-align: center; margin-bottom: 16px; }
+  .tv-start-btn { padding: 14px 48px !important; font-size: 15px !important; }
+
+  .tv-home-sub {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .tv-sub-btn { padding: 10px 24px !important; }
+
+  .session-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .session-timer {
+    font-size: 20px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+    min-width: 48px;
+    text-align: center;
+  }
+  .session-timer.urgent { color: #c0392b; }
+
+  .session-score {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  .session-search { margin-top: 20px; }
+
+  .session-search-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 16px;
+    font-family: 'Noto Sans JP', sans-serif;
+    color: var(--text-primary);
+    background: var(--surface);
+    outline: none;
+    margin-bottom: 10px;
+    -moz-appearance: textfield;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .session-search-input::-webkit-outer-spin-button,
+  .session-search-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .session-search-input:focus { border-color: var(--accent); }
+
+  .session-article-display {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+
+  .session-article-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .session-para {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    line-height: 1.85;
+    color: var(--text-primary);
+  }
+
+  .session-para-num {
+    color: var(--text-muted);
+    font-size: 11px;
+    min-width: 20px;
+    padding-top: 3px;
+    flex-shrink: 0;
+  }
+
+  .tv-back-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .tv-back-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  .q-stats {
+    font-size: 11px;
+    color: var(--text-muted);
+    min-width: 36px;
+    text-align: right;
+  }
+
+  .manage-part-header {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    padding: 16px 4px 6px;
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: 4px;
+  }
+
+  .manage-chapter-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .manage-chapter-item:hover { border-color: var(--accent); background: var(--accent-light); }
+
+  .manage-chapter-label { font-size: 14px; color: var(--text-primary); }
+  .manage-chapter-count { font-size: 12px; color: var(--accent); font-weight: 500; }
+
+  .manage-edit-form { width: 100%; }
+
+  /* ===== 共通ボタン ===== */
+  .btn {
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-family: 'Noto Sans JP', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+  }
+
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
+  .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); color: white; }
+
+  .btn-sm {
+    padding: 5px 12px;
+    font-size: 11px;
+  }
+
+  .btn-danger { color: var(--red); }
+  .btn-danger:hover { border-color: var(--red); background: #fdf0ee; color: var(--red); }
+
+  /* バックアップ */
+  .backup-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .backup-section h3 {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  /* トースト */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--text-primary);
+    color: white;
+    padding: 10px 18px;
+    border-radius: var(--radius);
+    font-size: 12px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.3s;
+    z-index: 1000;
+    pointer-events: none;
+  }
+
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* セクションタイトル */
+  .section-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 12px;
+  }
+
+  .no-results {
+    text-align: center;
+    padding: 32px;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  /* ===== iPad（11インチ以上） ===== */
+  @media (min-width: 768px) {
+    body { font-size: 15px; }
+
+    header { height: 64px; padding: 0 32px; }
+    .header-title { font-size: 18px; }
+    .header-subtitle { font-size: 12px; }
+    .tabs { top: 64px; }
+
+    .tabs { padding: 0; }
+    .tab { padding: 16px 24px; font-size: 14px; }
+
+    .main { padding: 28px 32px; max-width: 100%; }
+
+    .search-input { font-size: 16px; padding: 12px 16px; }
+
+    .article-header { padding: 18px 22px; }
+    .article-num { font-size: 17px; }
+    .article-caption { font-size: 15px; }
+    .article-body { padding: 20px 22px; }
+
+    .paragraph { font-size: 15px; line-height: 1.9; }
+
+    .btn { padding: 10px 20px; font-size: 13px; }
+    .btn-sm { padding: 8px 16px; font-size: 12px; }
+
+    .training-question { font-size: 18px; }
+    .training-answer { font-size: 26px; }
+    .training-article-text { font-size: 14px; }
+    .btn-show-answer { padding: 13px 36px; font-size: 15px; }
+    .btn-correct, .btn-wrong { padding: 13px 40px; font-size: 16px; }
+
+    .tv-start-btn { padding: 18px 64px !important; font-size: 17px !important; }
+    .tv-sub-btn { padding: 13px 32px !important; font-size: 14px !important; }
+    .session-score { font-size: 16px; }
+
+    .reg-input { font-size: 15px; padding: 10px 14px; }
+    .reg-label { font-size: 13px; }
+    textarea.reg-input { min-height: 88px; }
+
+    .question-item { padding: 14px 18px; font-size: 15px; }
+
+    .drawer { width: 320px; }
+    .nav-part-header { font-size: 13px; padding: 14px 18px; }
+    .nav-chapter { font-size: 13px; padding: 11px 18px 11px 32px; }
+  }
+
+  /* ===== iPad 13インチ（ランドスケープ含む） ===== */
+  @media (min-width: 1024px) {
+    body { font-size: 16px; }
+
+    .main { max-width: 1000px; padding: 32px 40px; }
+
+    .article-num { font-size: 18px; }
+    .article-caption { font-size: 15px; }
+    .paragraph { font-size: 15px; }
+
+    .training-question { font-size: 19px; }
+    .training-card { padding: 40px 36px; min-height: 240px; }
+  }
+
+  /* ===== iPhone（小さい画面） ===== */
+  @media (max-width: 480px) {
+    header { padding: 0 16px; }
+    .header-title { font-size: 14px; }
+    .tabs { padding: 0; }
+    .tab { padding: 12px 0; font-size: 12px; }
+    .main { padding: 16px; }
+    .article-header { padding: 12px 14px; }
+    .article-num { font-size: 14px; min-width: 56px; }
+    .training-card { padding: 24px 18px; }
+    .btn-correct, .btn-wrong { padding: 10px 24px; font-size: 13px; }
+  }
+
+  /* ===== ブックマーク・重要・閲覧履歴 ===== */
+  .browse-quick-actions {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .btn-quick-filter {
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+    transition: all 0.15s;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-quick-filter:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-quick-filter.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+  .article-header-actions {
+    display: flex;
+    gap: 1px;
+    align-items: center;
+    margin-left: auto;
+    margin-right: 4px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:10px;min-width:0">
+    <button class="btn-nav" id="btnNav" onclick="openDrawer()">
+      <span class="btn-nav-icon">☰</span>
+      <span class="btn-nav-label" id="btnNavLabel">編・章を選択</span>
+    </button>
+  </div>
+  <div style="display:flex;align-items:center">
+    <span class="header-title">法人税法</span>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-sm" onclick="exportData()">バックアップ</button>
+    <label class="btn btn-sm" style="cursor:pointer">
+      復元
+      <input type="file" accept=".json" style="display:none" onchange="importData(event)">
+    </label>
+  </div>
+</header>
+
+<!-- サイドドロワー（検索・閲覧用） -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <span class="drawer-title">編・章を選択</span>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+</div>
+
+<!-- サイドドロワー（トレーニング絞り込み用） -->
+<div class="drawer-overlay" id="trainingDrawerOverlay" onclick="closeTrainingDrawer()"></div>
+<div class="drawer" id="trainingDrawer">
+  <div class="drawer-header">
+    <span class="drawer-title">出題範囲を選択</span>
+    <button class="drawer-close" onclick="closeTrainingDrawer()">✕</button>
+  </div>
+  <div class="drawer-body" id="trainingDrawerBody"></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('browse')">条文 検索・閲覧</div>
+  <div class="tab" onclick="switchTab('training')">逆引きトレーニング</div>
+</div>
+
+<div class="main">
+
+  <!-- ===== 検索・閲覧 ===== -->
+  <div id="panel-browse" class="panel active">
+    <div id="registerReturnBanner">
+      <span>📝 問題登録の途中です</span>
+      <button onclick="switchTab('training')">← 登録に戻る</button>
+    </div>
+    <div class="search-bar">
+      <input class="search-input" id="searchInput" type="text" placeholder="条番号 / キーワード" oninput="onSearch()" autocomplete="off">
+      <button class="btn-mode-toggle" id="browseModeBtn" onclick="toggleBrowseMode()">編集モード</button>
+    </div>
+    <div class="browse-quick-actions">
+      <button class="btn-quick-filter" id="qf-shushi" onclick="setBrowseFilter('shushi')">趣旨</button>
+      <button class="btn-quick-filter" id="qf-ronten" onclick="setBrowseFilter('ronten')">論点</button>
+      <button class="btn-quick-filter" id="qf-hanrei" onclick="setBrowseFilter('hanrei')">判例</button>
+    </div>
+    <div id="articleList"></div>
+  </div>
+
+  <!-- ===== 逆引きトレーニング ===== -->
+  <div id="panel-training" class="panel">
+
+    <!-- ① ホーム画面 -->
+    <div id="tv-home" class="training-view active">
+      <div class="tv-home-top">
+        <button class="btn-nav" id="btnTrainingNav" onclick="openTrainingDrawer()">
+          <span class="btn-nav-icon">☰</span>
+          <span class="btn-nav-label" id="btnTrainingNavLabel">全問題</span>
+        </button>
+      </div>
+      <div class="tv-home-start">
+        <button class="btn btn-primary tv-start-btn" onclick="startTraining()">開始</button>
+      </div>
+      <div class="tv-home-sub">
+        <button class="btn tv-sub-btn" onclick="switchTrainingView('register')">問題登録</button>
+        <button class="btn tv-sub-btn" onclick="switchTrainingView('manage')">問題管理</button>
+      </div>
+      <div id="trainingHomeMsg" class="empty-state" style="display:none"></div>
+    </div>
+
+    <!-- ② トレーニング中画面 -->
+    <div id="tv-session" class="training-view">
+      <div class="session-header">
+        <button class="btn btn-sm" onclick="endSession()">← 終了</button>
+        <div class="session-timer" id="sessionTimer">1:00</div>
+        <div class="session-score" id="sessionScore">0問中0問正解</div>
+      </div>
+      <div id="trainingCard" class="training-card">
+        <div class="training-article-id" id="cardArticleId"></div>
+        <div class="training-question" id="cardQuestion"></div>
+        <div class="training-answer" id="cardAnswer"></div>
+        <div class="training-article-text" id="cardArticleText"></div>
+        <button class="btn-show-answer" id="btnShowAnswer" onclick="showAnswer()">答えを見る</button>
+        <div class="judge-buttons" id="judgeButtons">
+          <button class="btn-correct" onclick="judge(true)">○ 正解</button>
+          <button class="btn-wrong" onclick="judge(false)">✕ 不正解</button>
+        </div>
+      </div>
+      <div id="trainingEmpty" class="empty-state" style="display:none"></div>
+      <div class="session-search">
+        <input type="number" class="session-search-input" id="sessionArticleInput"
+          placeholder="条番号を入力（例：300）" oninput="onSessionArticleSearch()" min="1">
+        <div id="sessionArticleDisplay" class="session-article-display" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- ③ 問題登録画面 -->
+    <div id="tv-register" class="training-view">
+      <div class="tv-back-bar">
+        <button class="btn btn-sm" onclick="switchTrainingView('home')">← 戻る</button>
+        <span class="tv-back-title">問題登録</span>
+        <button class="btn btn-sm" onclick="switchTab('browse')" style="font-size:11px;padding:5px 10px;margin-left:auto;">条文を参照 →</button>
+      </div>
+      <div class="reg-section">
+        <div class="reg-row">
+          <span class="reg-label">対象条文</span>
+          <div style="flex:1">
+            <div class="related-wrap">
+              <input class="reg-input" id="regArticleInput" placeholder="半角" oninput="onRegArticleInput()" onblur="hideRegSuggestDelay()" style="flex:1;max-width:200px" autocomplete="off">
+              <div id="regSuggestBox" class="related-suggest" style="display:none"></div>
+            </div>
+          </div>
+        </div>
+        <div class="reg-row">
+          <span class="reg-label">要約文</span>
+          <div style="flex:1">
+            <textarea class="reg-input" id="regQuestion" placeholder="要約を入力"></textarea>
+            <div id="claudeHintBox" style="display:none">
+              <div class="claude-hint-label">💡 Claudeの要約（参考・叩き台）</div>
+              <div class="claude-hint" id="claudeHintText"></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px">
+          <button class="btn btn-primary btn-sm" onclick="addQuestion()">登録する</button>
+        </div>
+        <div id="regExistingQs" style="display:none;margin-top:12px;padding:10px 12px;background:#fff8f0;border:1px solid #f0c080;border-radius:8px;font-size:13px;">
+          <div style="font-weight:700;color:#7a4000;margin-bottom:6px;">⚠️ この条文には登録済みの問題があります</div>
+          <ol id="regExistingQsList" style="margin:0;padding-left:18px;color:var(--text-primary);line-height:1.7;"></ol>
+        </div>
+        <div id="regArticlePreview" style="display:none;margin-top:12px;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:13px;line-height:1.7;color:var(--text-primary);white-space:pre-wrap;word-break:break-all;"></div>
+      </div>
+    </div>
+
+    <!-- ④ 問題管理画面 -->
+    <div id="tv-manage" class="training-view">
+      <div class="tv-back-bar">
+        <button class="btn btn-sm" onclick="manageBack()">← 戻る</button>
+        <span class="tv-back-title" id="manageTitle">問題管理</span>
+      </div>
+      <div id="manageBody"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="lawdata_hojin_jyobun.js"></script>
+<script>
+// STRUCTURE・LAW_DATA は lawdata_hojin_jyobun.js で定義済み
+
+// Claudeの要約（参考用）
+const CLAUDE_HINTS = {};
+
+function keyToDisplay(key) { return key.replace(/_(\d+)/g, 'の$1'); }
+function parseStorageKey(sk) {
+  const li = sk.lastIndexOf('-');
+  return { articleKey: sk.slice(0, li), pNum: Number(sk.slice(li + 1)) };
+}
+
+// ===== ストレージ（メモリキャッシュ付き）=====
+let _storageCache = null;
+
+function getStorage() {
+  if (_storageCache) return _storageCache;
+  try {
+    _storageCache = JSON.parse(localStorage.getItem('hojinJyobunTool') || '{}');
+  } catch { _storageCache = {}; }
+  if (!_storageCache.edits) _storageCache.edits = {};
+  if (!_storageCache.related) _storageCache.related = {};
+  if (!_storageCache.questions) _storageCache.questions = [];
+  if (!_storageCache.score) _storageCache.score = { correct: 0, wrong: 0 };
+  if (!_storageCache.viewingOriginal) _storageCache.viewingOriginal = {};
+  if (!_storageCache.yoken) _storageCache.yoken = {};
+  if (!_storageCache.shushi) _storageCache.shushi = {};
+  if (!_storageCache.ronten) _storageCache.ronten = {};
+  if (!_storageCache.hanrei) _storageCache.hanrei = {};
+  if (!_storageCache.browseHistory) _storageCache.browseHistory = [];
+  return _storageCache;
+}
+
+function saveStorage(data) {
+  _storageCache = data;
+  _articleListDirty = true;
+  localStorage.setItem('hojinJyobunTool', JSON.stringify(data));
+}
+
+// ===== ユーティリティ =====
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function stripItemNum(num, text) {
+  const escaped = num.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return text.replace(new RegExp('^' + escaped + '[\\s\u3000]*'), '');
+}
+
+// 文単位diff：原文と編集済みを比較してハイライトHTMLを返す
+// 原文の各文について、編集済みに残っているか・変わっているか・消えているかを判定
+// サジェストをfixed配置で画面座標に基づいて表示
+function positionSuggest(inputEl, suggestEl) {
+  const rect = inputEl.getBoundingClientRect();
+  const spaceBelow = window.innerHeight - rect.bottom;
+  const spaceAbove = rect.top;
+  suggestEl.style.width = Math.max(rect.width, 180) + 'px';
+  suggestEl.style.left = rect.left + 'px';
+  if (spaceBelow < 220 && spaceAbove > spaceBelow) {
+    // 上に表示
+    suggestEl.style.top = 'auto';
+    suggestEl.style.bottom = (window.innerHeight - rect.top + 4) + 'px';
+  } else {
+    // 下に表示
+    suggestEl.style.top = (rect.bottom + 4) + 'px';
+    suggestEl.style.bottom = 'auto';
+  }
+}
+
+
+let _lastTrainingView = null;
+let _articleListDirty = true;
+
+function switchTab(name) {
+  const tabs = ['browse','training'];
+  const alreadyActive = document.getElementById('panel-' + name).classList.contains('active');
+  if (alreadyActive) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  localStorage.setItem('hojin-jyobun-tab', name);
+
+  // 現在 training タブなら、どのサブビューにいたか記憶
+  if (document.getElementById('panel-training').classList.contains('active')) {
+    const active = document.querySelector('.training-view.active');
+    _lastTrainingView = active ? active.id.replace('tv-', '') : null;
+  }
+
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', tabs[i] === name);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+
+  if (name === 'training') {
+    document.getElementById('articleList').innerHTML = '';
+    if (_lastTrainingView && _lastTrainingView !== 'home') {
+      switchTrainingView(_lastTrainingView);
+    } else if (trainingQueue.length === 0) {
+      switchTrainingView('home');
+      renderTrainingHome();
+    }
+    _updateRegisterBanner();
+  } else if (name === 'browse') {
+    if (_articleListDirty || !document.getElementById('articleList').children.length) renderArticles();
+    _updateRegisterBanner();
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function _updateRegisterBanner() {
+  const isRegistering = _lastTrainingView === 'register';
+  const banner = document.getElementById('registerReturnBanner');
+  if (banner) banner.classList.toggle('visible', isRegistering);
+  // タブに「登録中」ドット
+  const trainingTab = document.querySelector('.tab:nth-child(2)');
+  if (trainingTab) trainingTab.classList.toggle('registering', isRegistering);
+}
+
+function switchTrainingView(name) {
+  document.querySelectorAll('.training-view').forEach(v => v.classList.remove('active'));
+  document.getElementById('tv-' + name).classList.add('active');
+  if (name === 'manage') { manageState = 'list'; renderManageView(); }
+  _lastTrainingView = name;
+  _updateRegisterBanner();
+}
+
+function renderTrainingHome() {
+  updateTrainingNavButton();
+  const storage = getStorage();
+  const filtered = getFilteredQuestions(storage.questions);
+  const msg = document.getElementById('trainingHomeMsg');
+  if (!storage.questions.length) {
+    msg.textContent = '問題を登録してトレーニングを開始してください';
+    msg.style.display = 'block';
+  } else if (!filtered.length) {
+    msg.textContent = 'この範囲に登録された問題がありません';
+    msg.style.display = 'block';
+  } else {
+    msg.textContent = '';
+    msg.style.display = 'none';
+  }
+}
+
+function endSession() {
+  _clearTimer();
+  trainingQueue = [];
+  currentIdx = 0;
+  document.getElementById('sessionArticleInput').value = '';
+  document.getElementById('sessionArticleDisplay').style.display = 'none';
+  switchTrainingView('home');
+  renderTrainingHome();
+}
+
+function onSessionArticleSearch() {
+  const val = document.getElementById('sessionArticleInput').value.trim();
+  const display = document.getElementById('sessionArticleDisplay');
+  if (!val) { display.style.display = 'none'; return; }
+  const numKey = val.replace(/の(\d+)/g, 'の$1');
+  const article = LAW_DATA[numKey] || LAW_DATA[val];
+  const num = numKey;
+  if (!article) {
+    display.style.display = 'none';
+    return;
+  }
+  const storage = getStorage();
+  const parasHtml = article.paragraphs.map(p => {
+    const key = `${num}-${p.num}`;
+    const text = (storage.edits && storage.edits[key]) ? storage.edits[key] : p.text;
+    const pNum = article.paragraphs.length > 1 ? `<span class="session-para-num">${p.num}</span>` : '';
+    return `<div class="session-para">${pNum}<span>${text}</span></div>`;
+  }).join('');
+  const caption = article.caption ? `　${article.caption}` : '';
+  const dispNum = keyToDisplay(article.num || String(article.article));
+  display.innerHTML = `<div class="session-article-title">第${dispNum}条${caption}</div>${parasHtml}`;
+  display.style.display = 'block';
+}
+
+function updateSessionScore() {
+  document.getElementById('sessionScore').textContent = `${sessionTotal}問中${sessionCorrect}問正解`;
+}
+
+// ===== サイドドロワー =====
+let browseMode = 'view';
+let currentPartIdx = null;
+let currentChapterIdx = null;
+
+function openDrawer() {
+  renderDrawer();
+  const el = document.getElementById('drawer');
+  el.style.display = 'flex';
+  el.offsetHeight;
+  el.classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDrawer() {
+  const el = document.getElementById('drawer');
+  el.classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  setTimeout(() => { el.style.display = 'none'; }, 280);
+}
+
+function renderDrawer() {
+  const body = document.getElementById('drawerBody');
+  body.innerHTML = STRUCTURE.parts.map((part, pi) => {
+    const isPartOpen = currentPartIdx === pi;
+    const chaptersHtml = part.chapters.map((ch, ci) => {
+      const isActive = currentPartIdx === pi && currentChapterIdx === ci;
+      const count = (ch.articles || []).length;
+      if (count === 0) return '';
+      const firstArt = ch.articles[0] ? keyToDisplay(ch.articles[0]) + '条' : '';
+      const lastArt = ch.articles.length > 1 ? '〜' + keyToDisplay(ch.articles[ch.articles.length - 1]) + '条' : '';
+      return `<div class="nav-chapter${isActive ? ' active' : ''}" onclick="selectChapter(${pi}, ${ci})">
+        <span>${ch.label}</span>
+        <span class="nav-chapter-count">${firstArt}${lastArt}</span>
+      </div>`;
+    }).join('');
+    if (!chaptersHtml) return '';
+    return `<div>
+      <div class="nav-part-header${isPartOpen ? ' active' : ''}" onclick="toggleDrawerPart(${pi})">
+        <span>${part.label}</span>
+        <span class="nav-toggle${isPartOpen ? ' open' : ''}">▼</span>
+      </div>
+      <div class="nav-chapters${isPartOpen ? ' open' : ''}">${chaptersHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleDrawerPart(pi) {
+  if (currentPartIdx === pi && currentChapterIdx === null) {
+    currentPartIdx = null;
+  } else {
+    currentPartIdx = pi;
+    currentChapterIdx = null;
+  }
+  renderDrawer();
+}
+
+function updateNavButton() {
+  const btn = document.getElementById('btnNav');
+  const label = document.getElementById('btnNavLabel');
+  if (currentPartIdx !== null && currentChapterIdx !== null) {
+    const ch = STRUCTURE.parts[currentPartIdx].chapters[currentChapterIdx];
+    label.textContent = ch.label;
+    btn.classList.add('selected');
+  } else if (currentPartIdx !== null) {
+    label.textContent = STRUCTURE.parts[currentPartIdx].label;
+    btn.classList.add('selected');
+  } else {
+    label.textContent = '編・章を選択';
+    btn.classList.remove('selected');
+  }
+}
+
+function selectChapter(pi, ci) {
+  currentPartIdx = pi;
+  currentChapterIdx = ci;
+  document.getElementById('searchInput').value = '';
+  updateNavButton();
+  closeDrawer();
+  renderArticles();
+}
+
+function onSearch() {
+  currentPartIdx = null;
+  currentChapterIdx = null;
+  browseFilter = null;
+  document.querySelectorAll('.btn-quick-filter').forEach(b => b.classList.remove('active'));
+  updateNavButton();
+  renderArticles();
+}
+
+// ナビ関数（旧renderNavは不要）
+function renderNav() {} // 互換性のため残す
+
+// ===== 検索・閲覧 =====
+let browseFilter = null;
+let _qParaKeySet = new Set();
+
+function refreshQParaKeys(questions) {
+  _qParaKeySet = new Set();
+  for (const q of questions || []) {
+    const m = q.answer.match(/^(\d+(?:の\d+)?)条(\d+)項/);
+    if (!m) continue;
+    _qParaKeySet.add(`${m[1]}-${m[2]}`);
+  }
+}
+
+function renderArticles() {
+  const q = document.getElementById('searchInput').value.trim();
+  const list = document.getElementById('articleList');
+  const storage = getStorage();
+  refreshQParaKeys(storage.questions);
+
+  let articles, breadcrumb;
+
+  // クイックフィルター（★重要 / ブックマーク / 履歴）
+  const _noteFilter = (key, label) => {
+    const noteKeys = Object.keys(storage[key] || {});
+    const articleKeySet = new Set(noteKeys.map(sk => parseStorageKey(sk).articleKey));
+    articles = [...articleKeySet].map(k => LAW_DATA[k]).filter(Boolean).sort((a, b) => a.article - b.article);
+    if (!articles.length) { list.innerHTML = `<div class="no-results" style="color:var(--text-muted);padding:40px 20px;text-align:center">${label}が登録された条文がありません</div>`; return true; }
+    list.innerHTML = `<div class="breadcrumb">${label}あり（${articles.length}件）</div>` + articles.map(a => buildArticleCard(a, storage)).join('');
+    return true;
+  };
+  if (browseFilter === 'shushi' && _noteFilter('shushi', '趣旨')) return;
+  if (browseFilter === 'ronten' && _noteFilter('ronten', '論点')) return;
+  if (browseFilter === 'hanrei' && _noteFilter('hanrei', '判例')) return;
+
+  if (q) {
+    const qNum = q.replace(/[^0-9の]/g, '');
+    articles = Object.values(LAW_DATA).filter(a => {
+      const dispNum = keyToDisplay(a.num || String(a.article));
+      if (qNum && dispNum.startsWith(qNum)) return true;
+      if (String(a.article) === q) return true;
+      const fullText = a.paragraphs.map(p => p.text + p.items.map(i => i.text).join('')).join('');
+      return (a.caption || '').includes(q) || fullText.includes(q);
+    });
+    breadcrumb = null;
+  } else if (currentPartIdx !== null && currentChapterIdx !== null) {
+    const part = STRUCTURE.parts[currentPartIdx];
+    const ch = part.chapters[currentChapterIdx];
+    const artSet = new Set(ch.articles || []);
+    articles = Object.values(LAW_DATA).filter(a => artSet.has(a.num));
+    breadcrumb = `${part.label} &gt; <b>${ch.label}</b>`;
+  } else if (currentPartIdx !== null) {
+    const part = STRUCTURE.parts[currentPartIdx];
+    const allArtKeys = part.chapters.flatMap(c => c.articles || []);
+    const artSet = new Set(allArtKeys);
+    articles = Object.values(LAW_DATA).filter(a => artSet.has(a.num));
+    breadcrumb = `<b>${part.label}</b>`;
+  } else {
+    list.innerHTML = '<div class="no-results" style="color:var(--text-muted);padding:40px 20px;text-align:center">編・章を選択するか、条番号・キーワードで検索してください</div>';
+    return;
+  }
+
+  if (!articles.length) {
+    list.innerHTML = '<div class="no-results">該当する条文が見つかりません</div>';
+    return;
+  }
+
+  const breadcrumbHtml = breadcrumb
+    ? `<div class="breadcrumb">${breadcrumb}（${articles.length}条）</div>`
+    : `<div class="breadcrumb">検索結果：${articles.length}件</div>`;
+
+  articles.sort((a, b) => {
+    if (a.article !== b.article) return a.article - b.article;
+    const aS = (a.num || '').includes('の') ? parseInt((a.num||'').split('の')[1]) : 0;
+    const bS = (b.num || '').includes('の') ? parseInt((b.num||'').split('の')[1]) : 0;
+    return aS - bS;
+  });
+  list.innerHTML = breadcrumbHtml + articles.map(a => buildArticleCard(a, storage)).join('');
+}
+
+function buildArticleCard(a, storage) {
+  const numKey = a.num || String(a.article);
+  const displayNum = keyToDisplay(numKey);
+  const caption = a.caption ? `<span class="article-caption">${a.caption}</span>` : '';
+  const hasQ = browseMode === 'view' && a.paragraphs.some(p => _qParaKeySet.has(`${numKey}-${p.num}`));
+
+  return `
+    <div class="article-card" id="card-${numKey}">
+      <div class="article-header" onclick="toggleArticle('${numKey}')">
+        <span class="article-num">${displayNum}条</span>
+        ${hasQ ? `<button class="badge-q" onclick="event.stopPropagation();showArticleQPopup('${numKey}')">問</button>` : ''}
+        ${caption}
+        <span class="article-toggle" id="toggle-${numKey}">▼</span>
+      </div>
+      <div class="article-body" id="body-${numKey}"></div>
+    </div>`;
+}
+
+function buildParagraph(articleNum, p, storage) {
+  const key = `${articleNum}-${p.num}`;
+  const editedText = storage.edits[key];
+  const isViewingOriginal = storage.viewingOriginal && storage.viewingOriginal[key];
+  const hasEdit = !!editedText;
+  const displayText = isViewingOriginal ? p.text : (hasEdit ? editedText : p.text);
+  const displayHtml = escapeHtml(displayText);
+
+  const itemsHtml = p.items.length ? `
+    <div class="items-list">
+      ${p.items.map(i => {
+        const subitemsHtml = i.subitems && i.subitems.length ? `
+          <div class="subitems-list">
+            ${i.subitems.map(s => {
+              const sub2Html = s.subitems && s.subitems.length ? `
+                <div class="sub2items-list">
+                  ${s.subitems.map(s2 => `<div class="sub2item-row"><span class="subitem-num">${s2.num}</span><span>${stripItemNum(s2.num, s2.text)}</span></div>`).join('')}
+                </div>` : '';
+              return `<div class="subitem-row"><span class="subitem-num">${s.num}</span><span>${stripItemNum(s.num, s.text)}</span></div>${sub2Html}`;
+            }).join('')}
+          </div>` : '';
+        return `<div class="item-row"><span class="item-num">${i.num}</span><span class="item-text">${stripItemNum(i.num, i.text)}</span></div>${subitemsHtml}`;
+      }).join('')}
+    </div>` : '';
+
+  // ===== 閲覧モード =====
+  if (browseMode === 'view') {
+    const yoken = (storage.yoken || {})[key];
+    const shushi = (storage.shushi || {})[key];
+    const ronten = (storage.ronten || {})[key];
+    const related = (storage.related || {})[key] || [];
+
+    const origBtn = hasEdit
+      ? `<button class="btn-popup-tag btn-tag-orig" id="btn-orig-${articleNum}-${p.num}" onclick="toggleOriginal('${articleNum}', ${p.num})">${isViewingOriginal ? '戻る' : '原文'}</button>`
+      : '';
+    const yokenBtn = yoken ? `<button class="btn-popup-tag btn-tag-yoken" onclick="showInfoPopup('要件', '${key}', 'yoken')">要件</button>` : '';
+    const shushiBtn = shushi ? `<button class="btn-popup-tag btn-tag-shushi" onclick="showInfoPopup('趣旨', '${key}', 'shushi')">趣旨</button>` : '';
+    const rontenBtn = ronten ? `<button class="btn-popup-tag btn-tag-ronten" onclick="showInfoPopup('論点', '${key}', 'ronten')">論点</button>` : '';
+    const hanrei = (storage.hanrei || {})[key];
+    const hanreiBtn = hanrei ? `<button class="btn-popup-tag btn-tag-hanrei" onclick="showInfoPopup('判例', '${key}', 'hanrei')">判例</button>` : '';
+
+    const relatedBtns = related.map((r, i) => {
+      const rKey = `${key}_view_${i}`;
+      _relatedTagData[rKey] = { article: r.article, numStr: r.numStr || String(r.article), paragraph: r.paragraph, label: r.label, storageKey: key };
+      return `<button class="btn-popup-tag btn-tag-related" onclick="jumpToArticleByKey('${rKey}')">${r.label}</button>`;
+    }).join('');
+
+    const hasTags = hasEdit || yoken || shushi || ronten || hanrei || related.length;
+    const tagsRow = hasTags ? `<div class="para-tags-row">${origBtn}${yokenBtn}${shushiBtn}${rontenBtn}${hanreiBtn}${relatedBtns}</div>` : '';
+
+    const qBadge = _qParaKeySet.has(key) ? `<button class="badge-q" onclick="showParaQPopup('${key}')">問</button>` : '';
+    return `
+      <div class="paragraph" id="para-${articleNum}-${p.num}" data-key="${articleNum}" data-pnum="${p.num}">
+        <div class="paragraph-header">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="paragraph-num">${p.num}項</span>
+            ${qBadge}
+            <button class="btn-jump-back" id="back-${articleNum}-${p.num}" data-key="${articleNum}" data-pnum="${p.num}" onclick="jumpBack('${articleNum}', ${p.num})">← 戻る</button>
+          </div>
+        </div>
+        <div class="para-text-display" id="display-${articleNum}-${p.num}">${displayHtml}</div>
+        ${itemsHtml}
+        ${tagsRow}
+      </div>`;
+  }
+
+  // ===== 編集モード =====
+  const originalBtnClass = hasEdit ? 'btn-original has-edit' : 'btn-original';
+  const originalBtnLabel = isViewingOriginal ? '戻る' : '原文';
+  const yokenVal = (storage.yoken || {})[key] || '';
+  const shushiVal = (storage.shushi || {})[key] || '';
+  const rontenVal = (storage.ronten || {})[key] || '';
+  const hanreiVal = (storage.hanrei || {})[key] || '';
+
+  return `
+    <div class="paragraph" id="para-${articleNum}-${p.num}" data-key="${articleNum}" data-pnum="${p.num}">
+      <div class="paragraph-header">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="paragraph-num">${p.num}項</span>
+          <button class="btn-jump-back" id="back-${articleNum}-${p.num}" data-key="${articleNum}" data-pnum="${p.num}" onclick="jumpBack('${articleNum}', ${p.num})">← 戻る</button>
+        </div>
+        <div class="paragraph-actions">
+          <button class="btn-edit" onclick="toggleEdit('${articleNum}', ${p.num})">編集</button>
+          <button class="btn-notes${(yokenVal || shushiVal || rontenVal || hanreiVal) ? ' has-notes' : ''}" id="btn-notes-${articleNum}-${p.num}" onclick="toggleNotes('${articleNum}', ${p.num})">ノート</button>
+          <button class="${originalBtnClass}" id="btn-orig-${articleNum}-${p.num}" onclick="toggleOriginal('${articleNum}', ${p.num})">${originalBtnLabel}</button>
+        </div>
+      </div>
+      <div class="para-text-display" id="display-${articleNum}-${p.num}">${displayHtml}</div>
+      ${itemsHtml}
+      <textarea class="para-edit-area" id="edit-${articleNum}-${p.num}" placeholder="編集・追記">${editedText || p.text}</textarea>
+      <div class="edit-save-row" id="save-row-${articleNum}-${p.num}">
+        <button class="btn btn-primary btn-sm" onclick="saveEdit('${articleNum}', ${p.num})">保存</button>
+        <button class="btn btn-sm" onclick="cancelEdit('${articleNum}', ${p.num})">キャンセル</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteEdit('${articleNum}', ${p.num})">編集を削除</button>
+      </div>
+      ${buildRelatedSection(articleNum, p.num, storage)}
+      <div class="extra-fields-section" id="extra-fields-${articleNum}-${p.num}">
+        <div class="extra-field-row">
+          <label class="extra-field-label">要件</label>
+          <textarea class="extra-field-area" id="yoken-${articleNum}-${p.num}" placeholder="要件を入力">${yokenVal}</textarea>
+        </div>
+        <div class="extra-field-row">
+          <label class="extra-field-label">趣旨</label>
+          <textarea class="extra-field-area" id="shushi-${articleNum}-${p.num}" placeholder="趣旨を入力">${shushiVal}</textarea>
+        </div>
+        <div class="extra-field-row">
+          <label class="extra-field-label">論点</label>
+          <textarea class="extra-field-area" id="ronten-${articleNum}-${p.num}" placeholder="論点を入力">${rontenVal}</textarea>
+        </div>
+        <div class="extra-field-row">
+          <label class="extra-field-label">判例</label>
+          <textarea class="extra-field-area" id="hanrei-${articleNum}-${p.num}" placeholder="判例を入力">${hanreiVal}</textarea>
+        </div>
+        ${buildQSection(articleNum, p.num, storage)}
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border-light)">
+          <button class="btn btn-sm" onclick="closeExtraFields('${articleNum}',${p.num})">閉じる</button>
+          <button class="btn btn-primary btn-sm" onclick="saveExtraFields('${articleNum}',${p.num})">保存</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function buildRelatedSection(articleNum, pNum, storage) {
+  const storageKey = `${articleNum}-${pNum}`;
+  const related = (storage.related[storageKey] || []);
+  const tagsHtml = buildRelatedTagsHtml(storageKey, related);
+
+  return `
+    <div class="related-section">
+      <div class="related-label">関連条文</div>
+      <div class="related-tags" id="related-tags-${storageKey}">${tagsHtml}</div>
+      <div class="related-add-row">
+        <div class="related-wrap">
+          <input class="related-input" id="related-input-${storageKey}" placeholder="半角" oninput="showRelatedSuggest('${storageKey}')" onblur="hideRelatedSuggestDelay('${storageKey}')" autocomplete="off">
+          <div class="related-suggest" id="related-suggest-${storageKey}" style="display:none"></div>
+        </div>
+        <button class="btn btn-sm" onclick="addRelated('${storageKey}')">追加</button>
+      </div>
+    </div>`;
+}
+
+function toggleArticle(num) {
+  const body = document.getElementById('body-' + num);
+  const toggle = document.getElementById('toggle-' + num);
+  const header = body.previousElementSibling;
+  const isOpen = body.classList.contains('open');
+  if (!isOpen && !body.dataset.rendered) {
+    const storage = getStorage();
+    const a = LAW_DATA[num];
+    if (a) body.innerHTML = a.paragraphs.map(p => buildParagraph(num, p, storage)).join('');
+    body.dataset.rendered = '1';
+  }
+  body.classList.toggle('open', !isOpen);
+  toggle.classList.toggle('open', !isOpen);
+  header.classList.toggle('open', !isOpen);
+  if (!isOpen) recordBrowseHistory(num);
+}
+
+let _editPopupArticle = null;
+let _editPopupPNum = null;
+
+function toggleEdit(articleNum, pNum) {
+  openEditPopup(articleNum, pNum);
+}
+
+function toggleNotes(articleNum, pNum) {
+  const extraFields = document.getElementById(`extra-fields-${articleNum}-${pNum}`);
+  if (!extraFields) return;
+  extraFields.classList.toggle('open');
+}
+
+function openEditPopup(articleNum, pNum) {
+  _editPopupArticle = articleNum;
+  _editPopupPNum = pNum;
+  const storage = getStorage();
+  const key = `${articleNum}-${pNum}`;
+  const p = LAW_DATA[articleNum].paragraphs.find(p => p.num === pNum);
+  const currentText = (storage.edits && storage.edits[key]) || p.text;
+  document.getElementById('editPopupTitle').textContent = `第${keyToDisplay(articleNum)}条 ${pNum}項`;
+  const area = document.getElementById('editPopupArea');
+  area.value = currentText;
+  document.getElementById('editPopup').classList.add('open');
+  document.getElementById('editPopupOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  area.focus();
+}
+
+function closeEditPopup() {
+  document.getElementById('editPopup').classList.remove('open');
+  document.getElementById('editPopupOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  _editPopupArticle = null;
+  _editPopupPNum = null;
+}
+
+function saveEditPopup() {
+  const articleNum = _editPopupArticle;
+  const pNum = _editPopupPNum;
+  if (!articleNum) return;
+  const val = document.getElementById('editPopupArea').value;
+  const inlineEl = document.getElementById(`edit-${articleNum}-${pNum}`);
+  if (inlineEl) inlineEl.value = val;
+  closeEditPopup();
+  saveEdit(articleNum, pNum);
+}
+
+function deleteEditFromPopup() {
+  const articleNum = _editPopupArticle;
+  const pNum = _editPopupPNum;
+  if (!articleNum) return;
+  closeEditPopup();
+  deleteEdit(articleNum, pNum);
+}
+
+function saveEdit(articleNum, pNum) {
+  const key = `${articleNum}-${pNum}`;
+  const val = document.getElementById(`edit-${articleNum}-${pNum}`).value.trim();
+  const storage = getStorage();
+  const p = LAW_DATA[articleNum].paragraphs.find(p => p.num === pNum);
+
+  if (val && val !== p.text) {
+    storage.edits[key] = val;
+    if (storage.viewingOriginal) delete storage.viewingOriginal[key];
+  } else {
+    delete storage.edits[key];
+  }
+
+  // 要件・趣旨・論点を保存
+  const yokenEl = document.getElementById(`yoken-${articleNum}-${pNum}`);
+  const shushiEl = document.getElementById(`shushi-${articleNum}-${pNum}`);
+  const rontenEl = document.getElementById(`ronten-${articleNum}-${pNum}`);
+  if (yokenEl) { const v = yokenEl.value.trim(); if (v) storage.yoken[key] = v; else delete storage.yoken[key]; }
+  if (shushiEl) { const v = shushiEl.value.trim(); if (v) storage.shushi[key] = v; else delete storage.shushi[key]; }
+  if (rontenEl) { const v = rontenEl.value.trim(); if (v) storage.ronten[key] = v; else delete storage.ronten[key]; }
+  const hanreiEl = document.getElementById(`hanrei-${articleNum}-${pNum}`);
+  if (hanreiEl) { const v = hanreiEl.value.trim(); if (v) storage.hanrei[key] = v; else delete storage.hanrei[key]; }
+
+  saveStorage(storage);
+
+  const display = document.getElementById(`display-${articleNum}-${pNum}`);
+  const origBtn = document.getElementById(`btn-orig-${articleNum}-${pNum}`);
+  const hasEdit = !!storage.edits[key];
+  display.innerHTML = escapeHtml(hasEdit ? storage.edits[key] : p.text);
+  display.className = 'para-text-display';
+  origBtn.className = hasEdit ? 'btn-original has-edit' : 'btn-original';
+  origBtn.textContent = '原文';
+
+  document.getElementById(`edit-${articleNum}-${pNum}`).classList.remove('open');
+  document.getElementById(`save-row-${articleNum}-${pNum}`).classList.remove('open');
+  const extraFields = document.getElementById(`extra-fields-${articleNum}-${pNum}`);
+  if (extraFields) extraFields.classList.remove('open');
+  showToast('保存しました');
+}
+
+function cancelEdit(articleNum, pNum) {
+  const storage = getStorage();
+  const key = `${articleNum}-${pNum}`;
+  const p = LAW_DATA[articleNum].paragraphs.find(p => p.num === pNum);
+  document.getElementById(`edit-${articleNum}-${pNum}`).value = storage.edits[key] || p.text;
+  document.getElementById(`edit-${articleNum}-${pNum}`).classList.remove('open');
+  document.getElementById(`save-row-${articleNum}-${pNum}`).classList.remove('open');
+  const extraFields = document.getElementById(`extra-fields-${articleNum}-${pNum}`);
+  if (extraFields) {
+    extraFields.classList.remove('open');
+    const key2 = `${articleNum}-${pNum}`;
+    const yokenEl = document.getElementById(`yoken-${articleNum}-${pNum}`);
+    const shushiEl = document.getElementById(`shushi-${articleNum}-${pNum}`);
+    const rontenEl = document.getElementById(`ronten-${articleNum}-${pNum}`);
+    if (yokenEl) yokenEl.value = (storage.yoken || {})[key2] || '';
+    if (shushiEl) shushiEl.value = (storage.shushi || {})[key2] || '';
+    if (rontenEl) rontenEl.value = (storage.ronten || {})[key2] || '';
+    const hanreiEl2 = document.getElementById(`hanrei-${articleNum}-${pNum}`);
+    if (hanreiEl2) hanreiEl2.value = (storage.hanrei || {})[key2] || '';
+  }
+}
+
+function saveExtraFields(articleNum, pNum) {
+  const key = `${articleNum}-${pNum}`;
+  const storage = getStorage();
+  const yokenEl = document.getElementById(`yoken-${articleNum}-${pNum}`);
+  const shushiEl = document.getElementById(`shushi-${articleNum}-${pNum}`);
+  const rontenEl = document.getElementById(`ronten-${articleNum}-${pNum}`);
+  const hanreiEl = document.getElementById(`hanrei-${articleNum}-${pNum}`);
+  if (yokenEl) { const v = yokenEl.value.trim(); if (v) storage.yoken[key] = v; else delete storage.yoken[key]; }
+  if (shushiEl) { const v = shushiEl.value.trim(); if (v) storage.shushi[key] = v; else delete storage.shushi[key]; }
+  if (rontenEl) { const v = rontenEl.value.trim(); if (v) storage.ronten[key] = v; else delete storage.ronten[key]; }
+  if (hanreiEl) { const v = hanreiEl.value.trim(); if (v) storage.hanrei[key] = v; else delete storage.hanrei[key]; }
+  saveStorage(storage);
+  const extraFields = document.getElementById(`extra-fields-${articleNum}-${pNum}`);
+  if (extraFields) extraFields.classList.remove('open');
+  const notesBtn = document.getElementById(`btn-notes-${articleNum}-${pNum}`);
+  if (notesBtn) {
+    const s = getStorage();
+    const k = `${articleNum}-${pNum}`;
+    const hasNotes = !!(( s.yoken||{})[k] || (s.shushi||{})[k] || (s.ronten||{})[k] || (s.hanrei||{})[k]);
+    notesBtn.classList.toggle('has-notes', hasNotes);
+  }
+  showToast('保存しました');
+}
+
+function closeExtraFields(articleNum, pNum) {
+  const storage = getStorage();
+  const key = `${articleNum}-${pNum}`;
+  const yokenEl = document.getElementById(`yoken-${articleNum}-${pNum}`);
+  const shushiEl = document.getElementById(`shushi-${articleNum}-${pNum}`);
+  const rontenEl = document.getElementById(`ronten-${articleNum}-${pNum}`);
+  const hanreiEl = document.getElementById(`hanrei-${articleNum}-${pNum}`);
+  if (yokenEl) yokenEl.value = (storage.yoken || {})[key] || '';
+  if (shushiEl) shushiEl.value = (storage.shushi || {})[key] || '';
+  if (rontenEl) rontenEl.value = (storage.ronten || {})[key] || '';
+  if (hanreiEl) hanreiEl.value = (storage.hanrei || {})[key] || '';
+  const extraFields = document.getElementById(`extra-fields-${articleNum}-${pNum}`);
+  if (extraFields) extraFields.classList.remove('open');
+}
+
+function deleteEdit(articleNum, pNum) {
+  const key = `${articleNum}-${pNum}`;
+  const storage = getStorage();
+  delete storage.edits[key];
+  if (storage.viewingOriginal) delete storage.viewingOriginal[key];
+  saveStorage(storage);
+  const p = LAW_DATA[articleNum].paragraphs.find(p => p.num === pNum);
+  const display = document.getElementById(`display-${articleNum}-${pNum}`);
+  display.innerHTML = escapeHtml(p.text);
+  display.className = 'para-text-display';
+  document.getElementById(`btn-orig-${articleNum}-${pNum}`).className = 'btn-original';
+  document.getElementById(`btn-orig-${articleNum}-${pNum}`).textContent = '原文';
+  document.getElementById(`edit-${articleNum}-${pNum}`).value = p.text;
+  document.getElementById(`edit-${articleNum}-${pNum}`).classList.remove('open');
+  document.getElementById(`save-row-${articleNum}-${pNum}`).classList.remove('open');
+  showToast('編集を削除しました');
+}
+
+function toggleOriginal(articleNum, pNum) {
+  const key = `${articleNum}-${pNum}`;
+  const storage = getStorage();
+  if (!storage.viewingOriginal) storage.viewingOriginal = {};
+  const hasEdit = !!storage.edits[key];
+  if (!hasEdit) return;
+
+  const isViewingOriginal = storage.viewingOriginal[key];
+  storage.viewingOriginal[key] = !isViewingOriginal;
+  saveStorage(storage);
+
+  const p = LAW_DATA[articleNum].paragraphs.find(p => p.num === pNum);
+  const display = document.getElementById(`display-${articleNum}-${pNum}`);
+  const origBtn = document.getElementById(`btn-orig-${articleNum}-${pNum}`);
+
+  if (storage.viewingOriginal[key]) {
+    // 原文表示
+    display.innerHTML = escapeHtml(p.text);
+    display.className = 'para-text-display';
+    origBtn.textContent = '戻る';
+  } else {
+    // 編集済みテキスト表示
+    display.innerHTML = escapeHtml(storage.edits[key]);
+    display.className = 'para-text-display';
+    origBtn.textContent = '原文';
+  }
+}
+
+// ===== 関連条文 =====
+function showRelatedSuggest(storageKey) {
+  const input = document.getElementById(`related-input-${storageKey}`);
+  const box = document.getElementById(`related-suggest-${storageKey}`);
+  const val = input.value.trim();
+  const storage = getStorage();
+
+  // 現在の項テキストから条番号を自動検出
+  const { articleKey: _sk_key, pNum: _sk_pnum } = parseStorageKey(storageKey);
+  const article = LAW_DATA[_sk_key];
+  const para = article && article.paragraphs.find(p => p.num === _sk_pnum);
+  const autoDetected = para ? detectArticleRefs(para.text) : [];
+
+  // 検索候補
+  const allRefs = Object.values(LAW_DATA).flatMap(a =>
+    a.paragraphs.map(p => ({
+      article: a.article,
+      numStr: a.num || String(a.article),
+      paragraph: p.num,
+      label: `${keyToDisplay(a.num || String(a.article))}条${p.num}項`,
+      caption: a.caption || ''
+    }))
+  );
+
+  const existing = (storage.related[storageKey] || []).map(r => r.label);
+
+  let suggestions = [];
+  if (!val) {
+    suggestions = autoDetected
+      .filter(r => !existing.includes(r.label))
+      .slice(0, 5)
+      .map(r => ({ ...r, auto: true }));
+  } else {
+    suggestions = allRefs
+      .filter(r => r.label.includes(val) || r.caption.includes(val))
+      .filter(r => !existing.includes(r.label))
+      .slice(0, 8);
+  }
+
+  if (!suggestions.length) { box.style.display = 'none'; return; }
+
+  box.innerHTML = suggestions.map(s =>
+    `<div class="related-suggest-item${s.auto ? ' auto' : ''}" onmousedown="selectRelated('${storageKey}', '${s.label}', '${s.numStr || String(s.article)}')">${s.label}${s.caption ? ' ' + s.caption : ''}</div>`
+  ).join('');
+  box.style.display = 'block';
+  positionSuggest(input, box);
+}
+
+function detectArticleRefs(text) {
+  const results = [];
+  // 「第○○条第○項」パターンを検出
+  const pattern = /第([一二三四五六七八九十百]+)条(?:第([一二三四五六七八九十]+)項)?/g;
+  const kanjiMap = {'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10,'百':100,'二百':200,'三百':300,'四百':400,'五百':500,'六百':600,'七百':700,'八百':800,'九百':900};
+
+  function kanjiToNum(s) {
+    if (!s) return null;
+    let n = 0;
+    s = s.replace('百', '');
+    const parts = s.split('十');
+    if (parts.length === 2) {
+      n = (parts[0] ? (kanjiMap[parts[0]] || 0) : 1) * 10 + (parts[1] ? (kanjiMap[parts[1]] || 0) : 0);
+    } else {
+      n = kanjiMap[s] || 0;
+    }
+    return n || null;
+  }
+
+  let m;
+  const seen = new Set();
+  while ((m = pattern.exec(text)) !== null) {
+    const artNum = kanjiToNum(m[1]);
+    const paraNum = m[2] ? kanjiToNum(m[2]) : 1;
+    if (artNum && LAW_DATA[artNum] && !seen.has(`${artNum}-${paraNum}`)) {
+      seen.add(`${artNum}-${paraNum}`);
+      results.push({ article: artNum, numStr: String(artNum), paragraph: paraNum, label: `${artNum}条${paraNum}項` });
+    }
+  }
+  return results;
+}
+
+function hideRelatedSuggestDelay(storageKey) {
+  setTimeout(() => {
+    const box = document.getElementById(`related-suggest-${storageKey}`);
+    if (box) box.style.display = 'none';
+  }, 200);
+}
+
+function selectRelated(storageKey, label, targetNumStr) {
+  document.getElementById(`related-input-${storageKey}`).value = label;
+  document.getElementById(`related-suggest-${storageKey}`).style.display = 'none';
+}
+
+function addRelated(storageKey) {
+  const input = document.getElementById(`related-input-${storageKey}`);
+  const val = input.value.trim();
+  if (!val) return;
+
+  const match = val.match(/(\d+)条(?:の(\d+))?(?:(\d+)項)?(?:(\d+)号)?/);
+  if (!match) { showToast('形式: 300条1項 / 300条の2 1項'); return; }
+
+  const baseArt = parseInt(match[1]);
+  const artSuffix = match[2] ? match[2] : null;
+  const numStr = artSuffix ? `${baseArt}の${artSuffix}` : String(baseArt);
+  const ref = {
+    article: baseArt,
+    numStr,
+    paragraph: match[3] ? parseInt(match[3]) : null,
+    item: match[4] ? parseInt(match[4]) : null,
+    label: val
+  };
+
+  const storage = getStorage();
+  if (!storage.related[storageKey]) storage.related[storageKey] = [];
+  if (storage.related[storageKey].find(r => r.label === ref.label)) {
+    showToast('既に追加済みです'); return;
+  }
+  storage.related[storageKey].push(ref);
+
+  // 項まで指定されている場合、逆向きリンクも自動追加
+  if (ref.paragraph != null) {
+    const { articleKey: srcKey, pNum: srcPNum } = parseStorageKey(storageKey);
+    const srcArticle = LAW_DATA[srcKey];
+    if (srcArticle) {
+      const srcDisplayNum = keyToDisplay(srcKey);
+      const reverseLabel = `${srcDisplayNum}条${srcPNum}項`;
+      const reverseRef = {
+        article: srcArticle.article,
+        numStr: srcKey,
+        paragraph: srcPNum,
+        item: null,
+        label: reverseLabel
+      };
+      const reverseKey = `${ref.numStr}-${ref.paragraph}`;
+      if (!storage.related[reverseKey]) storage.related[reverseKey] = [];
+      if (!storage.related[reverseKey].find(r => r.label === reverseLabel)) {
+        storage.related[reverseKey].push(reverseRef);
+      }
+    }
+  }
+
+  saveStorage(storage);
+  input.value = '';
+
+  const tagsDiv = document.getElementById(`related-tags-${storageKey}`);
+  tagsDiv.innerHTML = buildRelatedTagsHtml(storageKey, storage.related[storageKey]);
+  showToast('関連条文を追加しました');
+}
+
+function removeRelated(e, storageKey, index) {
+  e.stopPropagation();
+  const storage = getStorage();
+  storage.related[storageKey] = (storage.related[storageKey] || []).filter((_, i) => i !== index);
+  saveStorage(storage);
+  const tagsDiv = document.getElementById(`related-tags-${storageKey}`);
+  tagsDiv.innerHTML = buildRelatedTagsHtml(storageKey, storage.related[storageKey]);
+}
+
+// 関連条文タグのラベルをグローバルに保持（onclick属性内の文字列エスケープ問題を回避）
+const _relatedTagData = {};
+
+function buildRelatedTagsHtml(storageKey, relatedList) {
+  return relatedList.map((r, i) => {
+    const key = `${storageKey}_${i}`;
+    _relatedTagData[key] = { article: r.article, numStr: r.numStr || String(r.article), paragraph: r.paragraph, label: r.label, storageKey };
+    return `<span class="related-tag" onclick="jumpToArticleByKey('${key}')">${r.label}<span class="remove-tag" onclick="removeRelated(event, '${storageKey}', ${i})">×</span></span>`;
+  }).join('');
+}
+
+function jumpToArticleByKey(key) {
+  const d = _relatedTagData[key];
+  if (!d) return;
+  const fromArticleNum = d.storageKey ? parseStorageKey(d.storageKey).articleKey : null;
+  jumpToArticle(d.numStr || String(d.article), d.paragraph, fromArticleNum, d.label);
+}
+
+function jumpToArticle(articleNum, paragraphNum, fromArticleNum, fromLabel) {
+  // LAW_DATAに存在しない場合は未収録
+  if (!LAW_DATA[articleNum]) { showToast(`${articleNum}条はまだ未収録です`); return; }
+
+  // カードがDOMに存在しない場合→該当章を自動選択して再描画
+  const doJump = () => {
+    const card = document.getElementById(`card-${articleNum}`);
+    if (!card) return;
+
+    // まずカード位置までスクロール（ヘッダー分オフセット）
+    const top = card.getBoundingClientRect().top + window.scrollY - 120;
+    window.scrollTo({ top, behavior: 'instant' });
+
+    // 条文を開く
+    const body = document.getElementById(`body-${articleNum}`);
+    if (!body.classList.contains('open')) toggleArticle(articleNum);
+
+    // 項ハイライト＆戻るボタン表示
+    if (paragraphNum != null) {
+      clearJumpHighlights();
+      const paraEl = document.getElementById(`para-${articleNum}-${paragraphNum}`);
+      if (paraEl) {
+        paraEl.classList.add('jumped');
+        paraEl.scrollIntoView({ behavior: 'instant', block: 'center' });
+        const backBtn = document.getElementById(`back-${articleNum}-${paragraphNum}`);
+        if (backBtn) {
+          backBtn.classList.add('show');
+          backBtn._fromArticle = fromArticleNum;
+          backBtn._fromLabel = fromLabel;
+        }
+      }
+    }
+  };
+
+  if (!document.getElementById(`card-${articleNum}`)) {
+    // ジャンプ先の章を探して自動選択
+    let found = false;
+    for (let pi = 0; pi < STRUCTURE.parts.length; pi++) {
+      const part = STRUCTURE.parts[pi];
+      for (let ci = 0; ci < part.chapters.length; ci++) {
+        const ch = part.chapters[ci];
+        if ((ch.articles || []).includes(articleNum)) {
+          currentPartIdx = pi;
+          currentChapterIdx = ci;
+          // 検索ワードが残っていると章切替が無視されるのでクリア
+          document.getElementById('searchInput').value = '';
+          updateNavButton();
+          renderArticles();
+          found = true;
+          break;
+        }
+      }
+      if (found) break;
+    }
+    // 再描画後にジャンプ
+    setTimeout(doJump, 100);
+  } else {
+    doJump();
+  }
+}
+
+function clearJumpHighlights() {
+  document.querySelectorAll('.paragraph.jumped').forEach(el => {
+    el.classList.remove('jumped');
+    const articleNum = el.dataset.key || el.id.split('-')[1];
+    const pNum = el.dataset.pnum || el.id.split('-')[2];
+    const backBtn = document.getElementById(`back-${articleNum}-${pNum}`);
+    if (backBtn) backBtn.classList.remove('show');
+  });
+}
+
+function jumpBack(articleNum, pNum) {
+  const backBtn = document.getElementById(`back-${articleNum}-${pNum}`);
+  const fromArticle = backBtn ? backBtn._fromArticle : null;
+
+  // ハイライトをリセット
+  const paraEl = document.getElementById(`para-${articleNum}-${pNum}`);
+  if (paraEl) paraEl.classList.remove('jumped');
+  if (backBtn) backBtn.classList.remove('show');
+
+  // 元の条文にスクロールバック（章跨ぎ対応）
+  if (fromArticle != null) {
+    const doBack = () => {
+      const fromCard = document.getElementById(`card-${fromArticle}`);
+      if (!fromCard) return;
+      // ヘッダー・タブ分のオフセットを考慮してスクロール
+      const top = fromCard.getBoundingClientRect().top + window.scrollY - 120;
+      window.scrollTo({ top, behavior: 'instant' });
+      // 閉じていれば開く
+      const fromBody = document.getElementById(`body-${fromArticle}`);
+      if (fromBody && !fromBody.classList.contains('open')) toggleArticle(fromArticle);
+    };
+
+    if (!document.getElementById(`card-${fromArticle}`)) {
+      // 元の章を自動選択して再描画
+      for (let pi = 0; pi < STRUCTURE.parts.length; pi++) {
+        const part = STRUCTURE.parts[pi];
+        for (let ci = 0; ci < part.chapters.length; ci++) {
+          const ch = part.chapters[ci];
+          if ((ch.articles || []).includes(fromArticle)) {
+            currentPartIdx = pi;
+            currentChapterIdx = ci;
+            document.getElementById('searchInput').value = '';
+            updateNavButton();
+            renderArticles();
+            break;
+          }
+        }
+      }
+      setTimeout(doBack, 150);
+    } else {
+      doBack();
+    }
+  }
+}
+
+
+let trainingQueue = [];
+let currentIdx = 0;
+let sessionCorrect = 0;
+let sessionTotal = 0;
+
+// 条番号から編・章を判定するユーティリティ
+function getChapterInfo(articleKey) {
+  const data = LAW_DATA[String(articleKey)];
+  if (!data) return null;
+  const pi = data.partIdx;
+  const ci = data.chapterIdx;
+  const part = STRUCTURE.parts[pi];
+  const ch = part && part.chapters[ci];
+  return { partIdx: pi, chapterIdx: ci, partLabel: part ? part.label : '', chapterLabel: ch ? ch.label : '' };
+}
+
+// トレーニング絞り込み状態
+let trainingPartIdx = null;
+let trainingChapterIdx = null;
+let _selectedChapters = new Set(); // "pi-ci" keys, empty = 全問題
+
+function openTrainingDrawer() {
+  renderTrainingDrawer();
+  const el = document.getElementById('trainingDrawer');
+  el.style.display = 'flex';
+  el.offsetHeight;
+  el.classList.add('open');
+  document.getElementById('trainingDrawerOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeTrainingDrawer() {
+  const el = document.getElementById('trainingDrawer');
+  el.classList.remove('open');
+  document.getElementById('trainingDrawerOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  setTimeout(() => { el.style.display = 'none'; }, 280);
+}
+
+function renderTrainingDrawer() {
+  const storage = getStorage();
+  const body = document.getElementById('trainingDrawerBody');
+
+  // 登録問題が属する編・章を集計
+  const chapterCounts = {};
+  for (const q of storage.questions) {
+    const match = q.answer.match(/^(\d+(?:の\d+)?)条/);
+    if (!match) continue;
+    const info = getChapterInfo(match[1]);
+    if (!info) continue;
+    const key = `${info.partIdx}-${info.chapterIdx}`;
+    chapterCounts[key] = (chapterCounts[key] || 0) + 1;
+  }
+
+  // 「全問題」選択肢
+  const allActive = trainingPartIdx === null;
+  let html = `<div class="nav-chapter${allActive ? ' active' : ''}" style="padding-left:18px" onclick="selectTrainingChapter(null, null)">
+    <span>全問題</span>
+    <span class="nav-chapter-count">${storage.questions.length}問</span>
+  </div>`;
+
+  // 編・章ごと
+  html += STRUCTURE.parts.map((part, pi) => {
+    const partHasQuestions = part.chapters.some((ch, ci) => chapterCounts[`${pi}-${ci}`] > 0);
+    if (!partHasQuestions) return '';
+    const isPartOpen = trainingPartIdx === pi;
+    const chaptersHtml = part.chapters.map((ch, ci) => {
+      const count = chapterCounts[`${pi}-${ci}`] || 0;
+      if (count === 0) return '';
+      const isActive = trainingPartIdx === pi && trainingChapterIdx === ci;
+      return `<div class="nav-chapter${isActive ? ' active' : ''}" onclick="selectTrainingChapter(${pi}, ${ci})">
+        <span>${ch.label}</span>
+        <span class="nav-chapter-count">${count}問</span>
+      </div>`;
+    }).join('');
+    return `<div>
+      <div class="nav-part-header${isPartOpen ? ' active' : ''}" onclick="toggleTrainingPart(${pi})">
+        <span>${part.label}</span>
+        <span class="nav-toggle${isPartOpen ? ' open' : ''}">▼</span>
+      </div>
+      <div class="nav-chapters${isPartOpen ? ' open' : ''}">${chaptersHtml}</div>
+    </div>`;
+  }).join('');
+
+  body.innerHTML = html;
+}
+
+function toggleTrainingPart(pi) {
+  trainingPartIdx = (trainingPartIdx === pi && trainingChapterIdx === null) ? null : pi;
+  trainingChapterIdx = null;
+  renderTrainingDrawer();
+}
+
+function selectTrainingChapter(pi, ci) {
+  trainingPartIdx = pi;
+  trainingChapterIdx = ci;
+  updateTrainingNavButton();
+  closeTrainingDrawer();
+  trainingQueue = [];
+  renderTraining();
+}
+
+function updateTrainingNavButton() {
+  const btn = document.getElementById('btnTrainingNav');
+  const label = document.getElementById('btnTrainingNavLabel');
+  if (trainingPartIdx !== null && trainingChapterIdx !== null) {
+    label.textContent = STRUCTURE.parts[trainingPartIdx].chapters[trainingChapterIdx].label;
+    btn.classList.add('selected');
+  } else {
+    label.textContent = '全問題';
+    btn.classList.remove('selected');
+  }
+}
+
+function getFilteredQuestions(questions) {
+  if (_selectedChapters.size === 0) {
+    // 旧ドロワー絞り込みも互換対応
+    if (trainingPartIdx === null) return questions;
+    const ch = STRUCTURE.parts[trainingPartIdx].chapters[trainingChapterIdx];
+    const artSet = new Set(ch.articles || []);
+    return questions.filter(q => {
+      const match = q.answer.match(/^(\d+(?:の\d+)?)条/);
+      if (!match) return false;
+      return artSet.has(match[1]);
+    });
+  }
+  return questions.filter(q => {
+    const match = q.answer.match(/^(\d+(?:の\d+)?)条/);
+    if (!match) return false;
+    const n = match[1];
+    const info = getChapterInfo(n);
+    if (!info) return false;
+    return _selectedChapters.has(`${info.partIdx}-${info.chapterIdx}`);
+  });
+}
+
+function renderTraining() {
+  renderTrainingHome();
+}
+
+function startTraining() {
+  openChapterSelectModal();
+}
+
+function openChapterSelectModal() {
+  const storage = getStorage();
+  const chapterCounts = {};
+  for (const q of storage.questions) {
+    const match = q.answer.match(/^(\d+(?:の\d+)?)条/);
+    if (!match) continue;
+    const info = getChapterInfo(match[1]);
+    if (!info) continue;
+    const key = `${info.partIdx}-${info.chapterIdx}`;
+    chapterCounts[key] = (chapterCounts[key] || 0) + 1;
+  }
+
+  let html = '';
+  STRUCTURE.parts.forEach((part, pi) => {
+    const chapters = part.chapters.map((ch, ci) => {
+      const key = `${pi}-${ci}`;
+      const count = chapterCounts[key] || 0;
+      const checked = _selectedChapters.has(key) ? 'checked' : '';
+      const disabled = count === 0 ? 'disabled' : '';
+      return `<label class="chsel-item${count === 0 ? ' chsel-item-empty' : ''}">
+        <input type="checkbox" class="chsel-check" data-key="${key}" ${checked} ${disabled} onchange="onChselChange()">
+        <span class="chsel-label">${ch.label}</span>
+        <span class="chsel-count">${count}問</span>
+      </label>`;
+    }).join('');
+
+    const partHasAny = part.chapters.some((_, ci) => chapterCounts[`${pi}-${ci}`] > 0);
+    const partAllChecked = part.chapters.every((_, ci) => {
+      const k = `${pi}-${ci}`;
+      return chapterCounts[k] > 0 && _selectedChapters.has(k);
+    });
+    const partSomeChecked = !partAllChecked && part.chapters.some((_, ci) => {
+      const k = `${pi}-${ci}`;
+      return _selectedChapters.has(k);
+    });
+
+    html += `<div class="chsel-part">
+      <label class="chsel-part-header">
+        <input type="checkbox" class="chsel-check chsel-part-check" data-pi="${pi}"
+          ${partAllChecked ? 'checked' : ''}
+          ${partSomeChecked ? 'data-indeterminate="true"' : ''}
+          ${!partHasAny ? 'disabled' : ''}
+          onchange="onChselPartChange(${pi})">
+        <span>${part.label}</span>
+      </label>
+      <div class="chsel-chapters">${chapters}</div>
+    </div>`;
+  });
+
+  document.getElementById('chselBody').innerHTML = html;
+  // indeterminate は JS で設定
+  document.querySelectorAll('[data-indeterminate="true"]').forEach(el => { el.indeterminate = true; });
+
+  updateChselStart();
+  const overlay = document.getElementById('chselOverlay');
+  overlay.style.display = 'flex';
+}
+
+function onChselChange() {
+  _selectedChapters.clear();
+  document.querySelectorAll('.chsel-check:not(.chsel-part-check):checked').forEach(el => {
+    _selectedChapters.add(el.dataset.key);
+  });
+  syncPartCheckboxes();
+  updateChselStart();
+}
+
+function onChselPartChange(pi) {
+  const part = STRUCTURE.parts[pi];
+  const partChk = document.querySelector(`.chsel-part-check[data-pi="${pi}"]`);
+  const checked = partChk.checked;
+  part.chapters.forEach((_, ci) => {
+    const key = `${pi}-${ci}`;
+    const el = document.querySelector(`.chsel-check[data-key="${key}"]`);
+    if (el && !el.disabled) {
+      el.checked = checked;
+      if (checked) _selectedChapters.add(key); else _selectedChapters.delete(key);
+    }
+  });
+  syncPartCheckboxes();
+  updateChselStart();
+}
+
+function syncPartCheckboxes() {
+  const storage = getStorage();
+  const chapterCounts = {};
+  for (const q of storage.questions) {
+    const match = q.answer.match(/^(\d+(?:の\d+)?)条/);
+    if (!match) continue;
+    const info = getChapterInfo(match[1]);
+    if (!info) continue;
+    const key = `${info.partIdx}-${info.chapterIdx}`;
+    chapterCounts[key] = (chapterCounts[key] || 0) + 1;
+  }
+  STRUCTURE.parts.forEach((part, pi) => {
+    const el = document.querySelector(`.chsel-part-check[data-pi="${pi}"]`);
+    if (!el) return;
+    const hasAny = part.chapters.some((_, ci) => chapterCounts[`${pi}-${ci}`] > 0);
+    if (!hasAny) return;
+    const allChecked = part.chapters.every((_, ci) => {
+      const k = `${pi}-${ci}`;
+      return chapterCounts[k] > 0 && _selectedChapters.has(k);
+    });
+    const someChecked = !allChecked && part.chapters.some((_, ci) => _selectedChapters.has(`${pi}-${ci}`));
+    el.checked = allChecked;
+    el.indeterminate = someChecked;
+  });
+}
+
+function updateChselStart() {
+  const storage = getStorage();
+  const total = getFilteredQuestions(storage.questions).length;
+  const btn = document.getElementById('chselStartBtn');
+  btn.textContent = `開始（${total}問）`;
+  btn.disabled = total === 0;
+}
+
+function closeChapterSelectModal() {
+  document.getElementById('chselOverlay').style.display = 'none';
+}
+
+function chselSelectAll(checked) {
+  _selectedChapters.clear();
+  if (checked) {
+    document.querySelectorAll('.chsel-check:not(.chsel-part-check):not(:disabled)').forEach(el => {
+      el.checked = true;
+      _selectedChapters.add(el.dataset.key);
+    });
+  } else {
+    document.querySelectorAll('.chsel-check:not(.chsel-part-check)').forEach(el => { el.checked = false; });
+  }
+  syncPartCheckboxes();
+  updateChselStart();
+}
+
+function confirmStartTraining() {
+  closeChapterSelectModal();
+  const storage = getStorage();
+  const filtered = getFilteredQuestions(storage.questions);
+  if (!filtered.length) { showToast('この範囲に登録された問題がありません'); return; }
+  trainingQueue = filtered.map(q => ({ ...q, originalIdx: storage.questions.indexOf(q) })).sort(() => Math.random() - 0.5);
+  currentIdx = 0;
+  sessionCorrect = 0;
+  sessionTotal = 0;
+  switchTrainingView('session');
+  document.getElementById('trainingCard').style.display = 'flex';
+  document.getElementById('trainingEmpty').style.display = 'none';
+  updateSessionScore();
+  updateCard();
+}
+
+let _timerInterval = null;
+let _timerSeconds = 0;
+
+function _startTimer() {
+  _clearTimer();
+  _timerSeconds = 60;
+  _renderTimer();
+  _timerInterval = setInterval(() => {
+    _timerSeconds--;
+    _renderTimer();
+    if (_timerSeconds <= 0) {
+      _clearTimer();
+      showAnswer();
+    }
+  }, 1000);
+}
+
+function _clearTimer() {
+  if (_timerInterval) { clearInterval(_timerInterval); _timerInterval = null; }
+}
+
+function _renderTimer() {
+  const el = document.getElementById('sessionTimer');
+  if (!el) return;
+  const m = Math.floor(_timerSeconds / 60);
+  const s = _timerSeconds % 60;
+  el.textContent = `${m}:${String(s).padStart(2, '0')}`;
+  el.classList.toggle('urgent', _timerSeconds <= 10);
+}
+
+function updateCard() {
+  if (currentIdx >= trainingQueue.length) {
+    _clearTimer();
+    document.getElementById('trainingCard').style.display = 'none';
+    document.getElementById('trainingEmpty').style.display = 'block';
+    document.getElementById('trainingEmpty').textContent = `完了！ ${sessionTotal}問中${sessionCorrect}問正解`;
+    return;
+  }
+  const q = trainingQueue[currentIdx];
+  document.getElementById('cardQuestion').textContent = q.question;
+  document.getElementById('cardAnswer').textContent = q.answer;
+  document.getElementById('cardAnswer').classList.remove('show');
+  document.getElementById('cardArticleText').classList.remove('show');
+  document.getElementById('cardArticleText').textContent = '';
+  document.getElementById('btnShowAnswer').style.display = 'inline-block';
+  document.getElementById('judgeButtons').classList.remove('show');
+  document.getElementById('cardArticleId').textContent = `問題 ${currentIdx + 1} / ${trainingQueue.length}`;
+  _startTimer();
+}
+
+function getArticleText(answerStr) {
+  const match = answerStr.match(/(\d+)条(?:の(\d+))?(?:(\d+)項)?/);
+  if (!match) return null;
+  const baseNum = parseInt(match[1]);
+  const suffix = match[2] ? match[2] : null;
+  const numKey = suffix ? `${baseNum}の${suffix}` : String(baseNum);
+  const pNum = match[3] ? parseInt(match[3]) : 1;
+  const articleNum = numKey;
+  const article = LAW_DATA[numKey] || LAW_DATA[String(baseNum)];
+  if (!article) return null;
+  const para = article.paragraphs.find(p => p.num === pNum);
+  if (!para) return null;
+
+  // 編集済みテキストがあればそちらを優先
+  const storage = getStorage();
+  const key = `${numKey}-${pNum}`;
+  return storage.edits && storage.edits[key] ? storage.edits[key] : para.text;
+}
+
+function showAnswer() {
+  _clearTimer();
+  document.getElementById('cardAnswer').classList.add('show');
+  document.getElementById('btnShowAnswer').style.display = 'none';
+  document.getElementById('judgeButtons').classList.add('show');
+
+  // 条文テキストを取得して表示
+  const q = trainingQueue[currentIdx];
+  if (q) {
+    const text = getArticleText(q.answer);
+    if (text) {
+      const el = document.getElementById('cardArticleText');
+      el.textContent = text;
+      el.classList.add('show');
+    }
+  }
+}
+
+function judge(correct) {
+  const storage = getStorage();
+  const q = trainingQueue[currentIdx];
+  sessionTotal++;
+  if (correct) {
+    sessionCorrect++;
+    if (q.originalIdx !== undefined && storage.questions[q.originalIdx]) {
+      storage.questions[q.originalIdx].correct = (storage.questions[q.originalIdx].correct || 0) + 1;
+    }
+  }
+  if (q.originalIdx !== undefined && storage.questions[q.originalIdx]) {
+    storage.questions[q.originalIdx].attempted = (storage.questions[q.originalIdx].attempted || 0) + 1;
+  }
+  saveStorage(storage);
+  updateSessionScore();
+  currentIdx++;
+  updateCard();
+}
+
+function resetScore() {
+  const storage = getStorage();
+  storage.score = { correct: 0, wrong: 0 };
+  saveStorage(storage);
+  showToast('スコアをリセットしました');
+}
+
+// 問題登録
+function onRegArticleInput() {
+  document.getElementById('regArticlePreview').style.display = 'none';
+  document.getElementById('regExistingQs').style.display = 'none';
+  showRegSuggest();
+}
+
+function showRegSuggest() {
+  const input = document.getElementById('regArticleInput');
+  const box = document.getElementById('regSuggestBox');
+  const val = input.value.trim();
+
+  const allRefs = Object.values(LAW_DATA).flatMap(a =>
+    a.paragraphs.map(p => ({
+      article: a.article,
+      paragraph: p.num,
+      label: `${keyToDisplay(a.num || String(a.article))}条${p.num}項`,
+      key: `${a.num || String(a.article)}-${p.num}`
+    }))
+  );
+
+  const suggestions = allRefs.filter(r => {
+    const normalizedLabel = r.label.replace(/の/g, '');
+    const normalizedVal = val.replace(/の/g, '');
+    return r.label.includes(val) || normalizedLabel.includes(normalizedVal);
+  }).slice(0, 8);
+  if (!suggestions.length || !val) { box.style.display = 'none'; return; }
+
+  box.innerHTML = suggestions.map(s =>
+    `<div class="related-suggest-item" onmousedown="selectRegArticle('${s.label}', '${s.key}')">${s.label}</div>`
+  ).join('');
+  box.style.display = 'block';
+  positionSuggest(document.getElementById('regArticleInput'), box);
+}
+
+function selectRegArticle(label, key) {
+  document.getElementById('regArticleInput').value = label;
+  document.getElementById('regSuggestBox').style.display = 'none';
+
+  // Claudeヒント表示
+  const hint = CLAUDE_HINTS[key];
+  const hintBox = document.getElementById('claudeHintBox');
+  const hintText = document.getElementById('claudeHintText');
+  if (hint) {
+    hintText.textContent = hint;
+    hintBox.style.display = 'block';
+  } else {
+    hintBox.style.display = 'none';
+  }
+
+  // 登録済み問題の表示
+  const storage = getStorage();
+  const existingQs = (storage.questions || []).filter(q => q.answer === label);
+  const existingDiv = document.getElementById('regExistingQs');
+  const existingList = document.getElementById('regExistingQsList');
+  if (existingQs.length) {
+    existingList.innerHTML = existingQs.map(q => `<li>${escapeHtml(q.question)}</li>`).join('');
+    existingDiv.style.display = 'block';
+  } else {
+    existingDiv.style.display = 'none';
+  }
+
+  // 条文プレビュー表示
+  const preview = document.getElementById('regArticlePreview');
+  const dashIdx = key.lastIndexOf('-');
+  const articlePart = key.slice(0, dashIdx);
+  const pNum = parseInt(key.slice(dashIdx + 1));
+  const article = LAW_DATA[articlePart];
+  if (article) {
+    const para = article.paragraphs.find(p => p.num === pNum);
+    if (para) {
+      let text = `第${keyToDisplay(articlePart)}条　${pNum}項\n\n${para.text}`;
+      if (para.items && para.items.length) {
+        para.items.forEach(item => {
+          text += `\n　${item.num}　${stripItemNum(item.num, item.text)}`;
+          if (item.subitems) item.subitems.forEach(s => {
+            text += `\n　　${s.num}　${stripItemNum(s.num, s.text)}`;
+          });
+        });
+      }
+      preview.textContent = text;
+      preview.style.display = 'block';
+    }
+  }
+}
+
+function hideRegSuggestDelay() {
+  setTimeout(() => {
+    document.getElementById('regSuggestBox').style.display = 'none';
+  }, 200);
+}
+
+function addQuestion() {
+  const articleInput = document.getElementById('regArticleInput').value.trim();
+  const question = document.getElementById('regQuestion').value.trim();
+  if (!articleInput || !question) { showToast('条文と要約文を入力してください'); return; }
+
+  // 条番号から編・章を自動判定
+  const match = articleInput.match(/^(\d+(?:の\d+)?)条/);
+  const chapterInfo = match ? getChapterInfo(match[1]) : null;
+
+  const storage = getStorage();
+  storage.questions.push({
+    answer: articleInput,
+    question,
+    partIdx: chapterInfo ? chapterInfo.partIdx : null,
+    chapterIdx: chapterInfo ? chapterInfo.chapterIdx : null,
+    correct: 0,
+    attempted: 0,
+  });
+  saveStorage(storage);
+
+  document.getElementById('regArticleInput').value = '';
+  document.getElementById('regQuestion').value = '';
+  document.getElementById('claudeHintBox').style.display = 'none';
+  document.getElementById('regArticlePreview').style.display = 'none';
+  document.getElementById('regExistingQs').style.display = 'none';
+  showToast('問題を登録しました');
+}
+
+function buildQSection(articleNum, pNum, storage) {
+  const answer = `${keyToDisplay(articleNum)}条${pNum}項`;
+  const qs = (storage.questions || []).map((q, i) => ({q, i})).filter(({q}) => q.answer === answer);
+  const listHtml = qs.map(({q, i}) => `
+    <div class="q-edit-item">
+      <span class="q-edit-item-text">${escapeHtml(q.question)}</span>
+      <button class="btn btn-sm btn-danger" onclick="deleteQuestionFromEdit(${i},'${articleNum}',${pNum})">削除</button>
+    </div>`).join('');
+  return `
+    <div class="q-edit-section" id="q-section-${articleNum}-${pNum}">
+      <div class="q-edit-label">問題</div>
+      ${listHtml}
+      <div class="q-edit-add-row">
+        <textarea class="extra-field-area" id="q-new-${articleNum}-${pNum}" placeholder="要約文を入力"></textarea>
+        <div style="display:flex;justify-content:flex-end">
+          <button class="btn btn-primary btn-sm" onclick="addQuestionFromEdit('${articleNum}',${pNum})">登録する</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function addQuestionFromEdit(articleNum, pNum) {
+  const textarea = document.getElementById(`q-new-${articleNum}-${pNum}`);
+  const question = textarea.value.trim();
+  if (!question) { showToast('要約文を入力してください'); return; }
+  const answer = `${keyToDisplay(articleNum)}条${pNum}項`;
+  const match = answer.match(/^(\d+(?:の\d+)?)条/);
+  const chapterInfo = match ? getChapterInfo(match[1]) : null;
+  const storage = getStorage();
+  storage.questions.push({ answer, question, partIdx: chapterInfo?.partIdx ?? null, chapterIdx: chapterInfo?.chapterIdx ?? null, correct: 0, attempted: 0 });
+  saveStorage(storage);
+  refreshQParaKeys(storage.questions);
+  const section = document.getElementById(`q-section-${articleNum}-${pNum}`);
+  if (section) section.outerHTML = buildQSection(articleNum, pNum, storage);
+  showToast('問題を登録しました');
+}
+
+function deleteQuestionFromEdit(idx, articleNum, pNum) {
+  const storage = getStorage();
+  storage.questions.splice(idx, 1);
+  saveStorage(storage);
+  refreshQParaKeys(storage.questions);
+  const section = document.getElementById(`q-section-${articleNum}-${pNum}`);
+  if (section) section.outerHTML = buildQSection(articleNum, pNum, storage);
+  showToast('問題を削除しました');
+}
+
+let manageState = 'list';
+let manageSelectedPartIdx = null;
+let manageSelectedChapterIdx = null;
+
+function renderManageView() {
+  if (manageState === 'list') renderManageChapterList();
+  else renderManageQuestionList();
+}
+
+function manageBack() {
+  if (manageState === 'detail') {
+    manageState = 'list';
+    renderManageChapterList();
+  } else {
+    switchTrainingView('home');
+  }
+}
+
+function renderManageChapterList() {
+  document.getElementById('manageTitle').textContent = '問題管理';
+  const storage = getStorage();
+  const body = document.getElementById('manageBody');
+  if (!storage.questions.length) {
+    body.innerHTML = '<div class="empty-state">まだ問題が登録されていません</div>';
+    return;
+  }
+  const counts = {};
+  for (const q of storage.questions) {
+    const key = (q.partIdx !== null && q.partIdx !== undefined) ? `${q.partIdx}-${q.chapterIdx}` : 'other';
+    counts[key] = (counts[key] || 0) + 1;
+  }
+  let html = `<div class="manage-chapter-item" onclick="openManageChapter(null,null)">
+    <span class="manage-chapter-label">全問題</span>
+    <span class="manage-chapter-count">${storage.questions.length}問</span>
+  </div>`;
+  for (let pi = 0; pi < STRUCTURE.parts.length; pi++) {
+    const part = STRUCTURE.parts[pi];
+    const partHasQ = part.chapters.some((ch, ci) => counts[`${pi}-${ci}`] > 0);
+    if (!partHasQ) continue;
+    html += `<div class="manage-part-header">${part.label}</div>`;
+    for (let ci = 0; ci < part.chapters.length; ci++) {
+      const count = counts[`${pi}-${ci}`] || 0;
+      if (!count) continue;
+      html += `<div class="manage-chapter-item" onclick="openManageChapter(${pi},${ci})">
+        <span class="manage-chapter-label">${part.chapters[ci].label}</span>
+        <span class="manage-chapter-count">${count}問</span>
+      </div>`;
+    }
+  }
+  body.innerHTML = html;
+}
+
+function openManageChapter(pi, ci) {
+  manageSelectedPartIdx = pi;
+  manageSelectedChapterIdx = ci;
+  manageState = 'detail';
+  renderManageQuestionList();
+}
+
+function renderManageQuestionList() {
+  const storage = getStorage();
+  const body = document.getElementById('manageBody');
+  let filtered;
+  let title;
+  if (manageSelectedPartIdx === null) {
+    filtered = storage.questions.map((q, i) => ({ q, i }));
+    title = '全問題';
+  } else {
+    const ch = STRUCTURE.parts[manageSelectedPartIdx].chapters[manageSelectedChapterIdx];
+    title = ch.label;
+    filtered = storage.questions.map((q, i) => ({ q, i })).filter(({ q }) =>
+      q.partIdx === manageSelectedPartIdx && q.chapterIdx === manageSelectedChapterIdx
+    );
+  }
+  document.getElementById('manageTitle').textContent = title;
+  if (!filtered.length) {
+    body.innerHTML = '<div class="empty-state">この章に登録された問題がありません</div>';
+    return;
+  }
+  // 条文番号順にソート
+  filtered.sort((a, b) => {
+    const parseBase = s => { const m = (s||'').match(/^(\d+)/); return m ? parseInt(m[1]) : 9999; };
+    const parseSuffix = s => { const m = (s||'').match(/^(\d+)の(\d+)条/); return m ? parseInt(m[2]) : 0; };
+    const na = parseBase(a.q.answer), nb = parseBase(b.q.answer);
+    if (na !== nb) return na - nb;
+    return parseSuffix(a.q.answer) - parseSuffix(b.q.answer);
+  });
+
+  body.innerHTML = filtered.map(({ q, i }) => {
+    const correct = q.correct || 0;
+    const attempted = q.attempted || 0;
+    return `<div class="question-item" id="qitem-${i}">
+      <span class="question-item-text">${q.question}</span>
+      <span class="question-item-answer">${q.answer}</span>
+      <span class="q-stats">${correct}/${attempted}</span>
+      <button class="btn btn-sm" onclick="editQuestion(${i})">編集</button>
+      <button class="btn btn-sm btn-danger" onclick="deleteQuestion(${i})">削除</button>
+    </div>`;
+  }).join('');
+}
+
+function editQuestion(i) {
+  const storage = getStorage();
+  const q = storage.questions[i];
+  const item = document.getElementById(`qitem-${i}`);
+  item.innerHTML = `<div class="manage-edit-form">
+    <div class="reg-row">
+      <span class="reg-label">対象条文</span>
+      <input class="reg-input" id="editAnswer-${i}" value="${q.answer}" style="flex:1;max-width:200px">
+    </div>
+    <div class="reg-row">
+      <span class="reg-label">要約文</span>
+      <textarea class="reg-input" id="editQuestion-${i}">${q.question}</textarea>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">
+      <button class="btn btn-sm" onclick="cancelEditQuestion(${i})">キャンセル</button>
+      <button class="btn btn-sm btn-primary" onclick="saveEditQuestion(${i})">保存</button>
+    </div>
+  </div>`;
+}
+
+function saveEditQuestion(i) {
+  const newAnswer = document.getElementById(`editAnswer-${i}`).value.trim();
+  const newQuestion = document.getElementById(`editQuestion-${i}`).value.trim();
+  if (!newAnswer || !newQuestion) { showToast('条文と要約文を入力してください'); return; }
+  const storage = getStorage();
+  const match = newAnswer.match(/^(\d+(?:の\d+)?)条/);
+  const chapterInfo = match ? getChapterInfo(match[1]) : null;
+  storage.questions[i].answer = newAnswer;
+  storage.questions[i].question = newQuestion;
+  storage.questions[i].partIdx = chapterInfo ? chapterInfo.partIdx : null;
+  storage.questions[i].chapterIdx = chapterInfo ? chapterInfo.chapterIdx : null;
+  saveStorage(storage);
+  renderManageQuestionList();
+  showToast('保存しました');
+}
+
+function cancelEditQuestion(i) {
+  renderManageQuestionList();
+}
+
+function renderQuestionList() {
+  const storage = getStorage();
+  const list = document.getElementById('questionList');
+  if (!storage.questions.length) {
+    list.innerHTML = '<div class="empty-state">まだ問題が登録されていません</div>';
+    return;
+  }
+  list.innerHTML = storage.questions.map((q, i) => {
+    const correct = q.correct || 0;
+    const attempted = q.attempted || 0;
+    return `
+    <div class="question-item">
+      <span class="question-item-text">${q.question}</span>
+      <span class="question-item-answer">${q.answer}</span>
+      <span class="q-stats">${correct}/${attempted}</span>
+      <button class="btn btn-sm btn-danger" onclick="deleteQuestion(${i})">削除</button>
+    </div>`;
+  }).join('');
+}
+
+function deleteQuestion(i) {
+  const storage = getStorage();
+  storage.questions.splice(i, 1);
+  saveStorage(storage);
+  trainingQueue = [];
+  renderManageView();
+  showToast('問題を削除しました');
+}
+
+// ===== バックアップ・復元 =====
+async function exportData() {
+  const data = getStorage();
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const file = new File([blob], 'hojin_jyobun_backup.json', { type: 'application/json' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file] });
+      return;
+    } catch (e) { /* キャンセル時は何もしない */ }
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'hojin_jyobun_backup.json';
+  a.click();
+  showToast('バックアップを保存しました');
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      saveStorage(data);
+      renderArticles();
+      renderTraining();
+      showToast('データを復元しました');
+    } catch {
+      showToast('ファイルの読み込みに失敗しました');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ===== トースト =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// スクロール時にサジェストを全部閉じる
+let _scrollRaf = false;
+window.addEventListener('scroll', () => {
+  if (_scrollRaf) return;
+  _scrollRaf = true;
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.related-suggest').forEach(el => el.style.display = 'none');
+    _scrollRaf = false;
+  });
+}, true);
+
+// ===== 初期化 =====
+
+// partIdx/chapterIdxがnullの既存データを自動マイグレーション
+(function migrateQuestions() {
+  const storage = getStorage();
+  let changed = false;
+  (storage.questions || []).forEach(q => {
+    if (q.partIdx === null || q.partIdx === undefined) {
+      const m = (q.answer || '').match(/^(\d+(?:の\d+)?)条/);
+      if (m) {
+        const info = getChapterInfo(m[1]);
+        if (info) {
+          q.partIdx = info.partIdx;
+          q.chapterIdx = info.chapterIdx;
+          changed = true;
+        }
+      }
+    }
+  });
+  if (changed) saveStorage(storage);
+})();
+
+updateNavButton();
+
+// フィルター復元
+const _savedFilter = localStorage.getItem('hojin-jyobun-filter');
+if (_savedFilter) {
+  browseFilter = _savedFilter;
+  const btn = document.getElementById(`qf-${browseFilter}`);
+  if (btn) btn.classList.add('active');
+}
+
+renderArticles();
+
+// タブ復元
+const _savedTab = localStorage.getItem('hojin-jyobun-tab');
+if (_savedTab && _savedTab !== 'browse') switchTab(_savedTab);
+
+// スクロール位置復元
+const _savedScroll = localStorage.getItem('hojin-jyobun-scroll');
+if (_savedScroll) requestAnimationFrame(() => { window.scrollTo(0, parseInt(_savedScroll)); });
+window.addEventListener('pagehide', () => {
+  localStorage.setItem('hojin-jyobun-scroll', window.scrollY);
+  const activePanel = document.querySelector('.panel.active');
+  if (activePanel) localStorage.setItem('hojin-jyobun-tab', activePanel.id.replace('panel-', ''));
+});
+
+// ===== ★重要・ブックマーク・閲覧履歴 =====
+
+function recordBrowseHistory(numKey) {
+  if (!LAW_DATA[numKey]) return;
+  const storage = getStorage();
+  storage.browseHistory = storage.browseHistory.filter(k => k !== numKey);
+  storage.browseHistory.unshift(numKey);
+  storage.browseHistory = storage.browseHistory.slice(0, 30);
+  saveStorage(storage);
+}
+
+function setBrowseFilter(filter) {
+  document.getElementById('searchInput').value = '';
+  currentPartIdx = null;
+  currentChapterIdx = null;
+  browseFilter = browseFilter === filter ? null : filter;
+  localStorage.setItem('hojin-jyobun-filter', browseFilter || '');
+  document.querySelectorAll('.btn-quick-filter').forEach(b => b.classList.remove('active'));
+  if (browseFilter) {
+    const btn = document.getElementById(`qf-${browseFilter}`);
+    if (btn) btn.classList.add('active');
+  }
+  updateNavButton();
+  renderArticles();
+}
+
+// ===== 閲覧/編集モード切替 =====
+function toggleBrowseMode() {
+  browseMode = browseMode === 'view' ? 'edit' : 'view';
+  const btn = document.getElementById('browseModeBtn');
+  btn.textContent = browseMode === 'view' ? '編集モード' : '閲覧モード';
+  btn.classList.toggle('active', browseMode === 'edit');
+  renderArticles();
+}
+
+// ===== 情報ポップアップ（要件・趣旨・論点） =====
+function showInfoPopup(title, key, field) {
+  const storage = getStorage();
+  const content = (storage[field] || {})[key] || '';
+  document.getElementById('infoPopupTitle').textContent = title;
+  const body = document.getElementById('infoPopupBody');
+  body.style.whiteSpace = 'pre-wrap';
+  body.textContent = content;
+  document.getElementById('infoPopup').classList.add('open');
+  document.getElementById('infoPopupOverlay').classList.add('open');
+}
+
+function closeInfoPopup() {
+  document.getElementById('infoPopup').classList.remove('open');
+  document.getElementById('infoPopupOverlay').classList.remove('open');
+}
+
+function _openQPopup(title, qs) {
+  document.getElementById('infoPopupTitle').textContent = title;
+  const body = document.getElementById('infoPopupBody');
+  body.style.whiteSpace = 'normal';
+  if (qs.length === 1) {
+    body.style.whiteSpace = 'pre-wrap';
+    body.textContent = qs[0].question;
+  } else {
+    body.innerHTML = qs.map((q, i) =>
+      `<div class="q-popup-item"><span class="q-popup-num">${i + 1}</span><span>${escapeHtml(q.question)}</span></div>`
+    ).join('');
+  }
+  document.getElementById('infoPopup').classList.add('open');
+  document.getElementById('infoPopupOverlay').classList.add('open');
+}
+
+function showParaQPopup(paraKey) {
+  const { articleKey, pNum } = parseStorageKey(paraKey);
+  const storage = getStorage();
+  const qs = (storage.questions || []).filter(q => {
+    const m = q.answer.match(/^(\d+(?:の\d+)?)条(\d+)項/);
+    return m && m[1].replace(/の/g, '_') === articleKey && Number(m[2]) === pNum;
+  });
+  if (!qs.length) return;
+  _openQPopup(`${keyToDisplay(articleKey)}条 ${pNum}項 — 問題`, qs);
+}
+
+function showArticleQPopup(numKey) {
+  const storage = getStorage();
+  const qs = (storage.questions || []).filter(q => {
+    const m = q.answer.match(/^(\d+(?:の\d+)?)条(\d+)項/);
+    return m && m[1].replace(/の/g, '_') === numKey;
+  });
+  if (!qs.length) return;
+  document.getElementById('infoPopupTitle').textContent = `${keyToDisplay(numKey)}条 — 問題一覧`;
+  const body = document.getElementById('infoPopupBody');
+  body.style.whiteSpace = 'normal';
+  // 項ごとにグループ化
+  const byPara = {};
+  for (const q of qs) {
+    const m = q.answer.match(/(\d+)項/);
+    const pNum = m ? m[1] : '?';
+    (byPara[pNum] = byPara[pNum] || []).push(q);
+  }
+  body.innerHTML = Object.entries(byPara).map(([pNum, paraQs]) =>
+    `<div class="q-popup-para-label">${pNum}項</div>` +
+    paraQs.map((q, i) =>
+      `<div class="q-popup-item"><span class="q-popup-num">${i + 1}</span><span>${escapeHtml(q.question)}</span></div>`
+    ).join('')
+  ).join('');
+  document.getElementById('infoPopup').classList.add('open');
+  document.getElementById('infoPopupOverlay').classList.add('open');
+}
+</script>
+<!-- 編集ポップアップ -->
+<div class="edit-popup-overlay" id="editPopupOverlay" onclick="closeEditPopup()"></div>
+<div class="edit-popup" id="editPopup">
+  <div class="edit-popup-header">
+    <span class="edit-popup-title" id="editPopupTitle"></span>
+    <button class="edit-popup-close" onclick="closeEditPopup()">×</button>
+  </div>
+  <textarea class="edit-popup-area" id="editPopupArea"></textarea>
+  <div class="edit-popup-footer">
+    <button class="btn btn-sm btn-danger" onclick="deleteEditFromPopup()">編集を削除</button>
+    <button class="btn btn-sm" onclick="closeEditPopup()">キャンセル</button>
+    <button class="btn btn-primary btn-sm" onclick="saveEditPopup()">保存</button>
+  </div>
+</div>
+
+<!-- 情報ポップアップ（要件・趣旨・論点） -->
+<div class="info-popup-overlay" id="infoPopupOverlay" onclick="closeInfoPopup()"></div>
+<div class="info-popup" id="infoPopup">
+  <div class="info-popup-header">
+    <span class="info-popup-title" id="infoPopupTitle"></span>
+    <button class="info-popup-close" onclick="closeInfoPopup()">×</button>
+  </div>
+  <div class="info-popup-body" id="infoPopupBody"></div>
+</div>
+
+<!-- 章選択モーダル -->
+<div id="chselOverlay" onclick="if(event.target===this)closeChapterSelectModal()">
+  <div class="chsel-sheet">
+    <div class="chsel-header">
+      <h3>出題する章を選択</h3>
+      <div class="chsel-header-right">
+        <button class="chsel-allbtn" onclick="chselSelectAll(true)">全選択</button>
+        <button class="chsel-allbtn" onclick="chselSelectAll(false)">全解除</button>
+        <button class="chsel-close" onclick="closeChapterSelectModal()">✕</button>
+      </div>
+    </div>
+    <div class="chsel-body" id="chselBody"></div>
+    <div class="chsel-footer">
+      <button id="chselStartBtn" onclick="confirmStartTraining()">開始</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
