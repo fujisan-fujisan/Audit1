@@ -3119,22 +3119,26 @@ function updateCard() {
 }
 
 function getArticleText(answerStr) {
-  const match = answerStr.match(/(\d+)条(?:の(\d+))?(?:(\d+)項)?/);
+  // 形式: 4条1項 / 4の2条1項 / 4条1項一
+  const match = answerStr.match(/^(\d+(?:の\d+)?)条(\d+)項(.+)?$/);
   if (!match) return null;
-  const baseNum = parseInt(match[1]);
-  const suffix = match[2] ? match[2] : null;
-  const numKey = suffix ? `${baseNum}の${suffix}` : String(baseNum);
-  const pNum = match[3] ? parseInt(match[3]) : 1;
-  const articleNum = numKey;
-  const article = LAW_DATA[numKey] || LAW_DATA[String(baseNum)];
+  const numKey = match[1];
+  const pNum = parseInt(match[2]);
+  const itemTitle = match[3] ? match[3].trim() : null;
+  const article = LAW_DATA[numKey];
   if (!article) return null;
   const para = article.paragraphs.find(p => p.num === pNum);
   if (!para) return null;
 
-  // 編集済みテキストがあればそちらを優先
   const storage = getStorage();
   const key = `${numKey}-${pNum}`;
-  return storage.edits && storage.edits[key] ? storage.edits[key] : para.text;
+  const paraText = storage.edits && storage.edits[key] ? storage.edits[key] : para.text;
+
+  if (itemTitle) {
+    const item = (para.items || []).find(i => i.num === itemTitle);
+    if (item) return `${paraText}\n▶ ${item.num}　${stripItemNum(item.num, item.text)}`;
+  }
+  return paraText;
 }
 
 function showAnswer() {
@@ -3188,32 +3192,45 @@ function onRegArticleInput() {
   showRegSuggest();
 }
 
+// 項・号サジェスト一覧をキャッシュ
+let _allArticleRefs = null;
+function getAllArticleRefs() {
+  if (_allArticleRefs) return _allArticleRefs;
+  _allArticleRefs = [];
+  for (const a of Object.values(LAW_DATA)) {
+    const dispArt = keyToDisplay(a.num);
+    for (const p of a.paragraphs) {
+      const paraLabel = `${dispArt}条${p.num}項`;
+      const paraKey = `${a.num}-${p.num}`;
+      _allArticleRefs.push({ label: paraLabel, key: paraKey });
+      for (const item of (p.items || [])) {
+        _allArticleRefs.push({
+          label: `${paraLabel}${item.num}`,
+          key: `${paraKey}-${item.num}`
+        });
+      }
+    }
+  }
+  return _allArticleRefs;
+}
+
 function showRegSuggest() {
   const input = document.getElementById('regArticleInput');
   const box = document.getElementById('regSuggestBox');
   const val = input.value.trim();
+  if (!val) { box.style.display = 'none'; return; }
 
-  const allRefs = Object.values(LAW_DATA).flatMap(a =>
-    a.paragraphs.map(p => ({
-      article: a.article,
-      paragraph: p.num,
-      label: `${keyToDisplay(a.num || String(a.article))}条${p.num}項`,
-      key: `${a.num || String(a.article)}-${p.num}`
-    }))
-  );
-
-  const suggestions = allRefs.filter(r => {
-    const normalizedLabel = r.label.replace(/の/g, '');
-    const normalizedVal = val.replace(/の/g, '');
-    return r.label.includes(val) || normalizedLabel.includes(normalizedVal);
-  }).slice(0, 8);
-  if (!suggestions.length || !val) { box.style.display = 'none'; return; }
+  const normalizedVal = val.replace(/の/g, '');
+  const suggestions = getAllArticleRefs().filter(r => {
+    return r.label.includes(val) || r.label.replace(/の/g, '').includes(normalizedVal);
+  }).slice(0, 10);
+  if (!suggestions.length) { box.style.display = 'none'; return; }
 
   box.innerHTML = suggestions.map(s =>
-    `<div class="related-suggest-item" onmousedown="selectRegArticle('${s.label}', '${s.key}')">${s.label}</div>`
+    `<div class="related-suggest-item" onmousedown="selectRegArticle('${escapeHtml(s.label)}', '${escapeHtml(s.key)}')">${escapeHtml(s.label)}</div>`
   ).join('');
   box.style.display = 'block';
-  positionSuggest(document.getElementById('regArticleInput'), box);
+  positionSuggest(input, box);
 }
 
 function selectRegArticle(label, key) {
@@ -3243,23 +3260,35 @@ function selectRegArticle(label, key) {
     existingDiv.style.display = 'none';
   }
 
-  // 条文プレビュー表示
+  // 条文プレビュー表示（キー形式: artKey-pNum または artKey-pNum-itemNum）
   const preview = document.getElementById('regArticlePreview');
-  const dashIdx = key.lastIndexOf('-');
-  const articlePart = key.slice(0, dashIdx);
-  const pNum = parseInt(key.slice(dashIdx + 1));
-  const article = LAW_DATA[articlePart];
+  const firstDash = key.indexOf('-');
+  const artKey = key.slice(0, firstDash);
+  const rest = key.slice(firstDash + 1);
+  const secondDash = rest.indexOf('-');
+  const pNum = parseInt(secondDash === -1 ? rest : rest.slice(0, secondDash));
+  const itemTitle = secondDash === -1 ? null : rest.slice(secondDash + 1);
+  const article = LAW_DATA[artKey];
   if (article) {
     const para = article.paragraphs.find(p => p.num === pNum);
     if (para) {
-      let text = `第${keyToDisplay(articlePart)}条　${pNum}項\n\n${para.text}`;
-      if (para.items && para.items.length) {
-        para.items.forEach(item => {
-          text += `\n　${item.num}　${stripItemNum(item.num, item.text)}`;
+      let text = `第${keyToDisplay(artKey)}条　${pNum}項`;
+      if (itemTitle) {
+        const item = (para.items || []).find(i => i.num === itemTitle);
+        if (item) {
+          text += `\n\n${item.num}　${stripItemNum(item.num, item.text)}`;
           if (item.subitems) item.subitems.forEach(s => {
-            text += `\n　　${s.num}　${stripItemNum(s.num, s.text)}`;
+            text += `\n　${s.num}　${stripItemNum(s.num, s.text)}`;
           });
-        });
+        }
+      } else {
+        text += `\n\n${para.text}`;
+        if (para.items && para.items.length) {
+          para.items.slice(0, 8).forEach(item => {
+            text += `\n　${item.num}　${stripItemNum(item.num, item.text)}`;
+          });
+          if (para.items.length > 8) text += `\n　…（他${para.items.length - 8}号）`;
+        }
       }
       preview.textContent = text;
       preview.style.display = 'block';
@@ -3302,8 +3331,10 @@ function addQuestion() {
 }
 
 function buildQSection(articleNum, pNum, storage) {
-  const answer = `${keyToDisplay(articleNum)}条${pNum}項`;
-  const qs = (storage.questions || []).map((q, i) => ({q, i})).filter(({q}) => q.answer === answer);
+  const answerPrefix = `${keyToDisplay(articleNum)}条${pNum}項`;
+  const qs = (storage.questions || []).map((q, i) => ({q, i})).filter(({q}) =>
+    q.answer === answerPrefix || q.answer.startsWith(answerPrefix)
+  );
   const listHtml = qs.map(({q, i}) => `
     <div class="q-edit-item">
       <span class="q-edit-item-text">${escapeHtml(q.question)}</span>
