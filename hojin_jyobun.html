@@ -1722,11 +1722,6 @@
       <input class="search-input" id="searchInput" type="text" placeholder="条番号 / キーワード" oninput="onSearch()" autocomplete="off">
       <button class="btn-mode-toggle" id="browseModeBtn" onclick="toggleBrowseMode()">編集モード</button>
     </div>
-    <div class="browse-quick-actions">
-      <button class="btn-quick-filter" id="qf-shushi" onclick="setBrowseFilter('shushi')">趣旨</button>
-      <button class="btn-quick-filter" id="qf-ronten" onclick="setBrowseFilter('ronten')">論点</button>
-      <button class="btn-quick-filter" id="qf-hanrei" onclick="setBrowseFilter('hanrei')">判例</button>
-    </div>
     <div id="articleList"></div>
   </div>
 
@@ -2136,17 +2131,13 @@ function renderArticles() {
     list.innerHTML = `<div class="breadcrumb">${label}あり（${articles.length}件）</div>` + articles.map(a => buildArticleCard(a, storage)).join('');
     return true;
   };
-  if (browseFilter === 'shushi' && _noteFilter('shushi', '趣旨')) return;
-  if (browseFilter === 'ronten' && _noteFilter('ronten', '論点')) return;
-  if (browseFilter === 'hanrei' && _noteFilter('hanrei', '判例')) return;
-
   if (q) {
     const qNum = q.replace(/[^0-9の]/g, '');
     articles = Object.values(LAW_DATA).filter(a => {
       const dispNum = keyToDisplay(a.num || String(a.article));
       if (qNum && dispNum.startsWith(qNum)) return true;
       if (String(a.article) === q) return true;
-      const fullText = a.paragraphs.map(p => p.text + p.items.map(i => i.text).join('')).join('');
+      const fullText = a.paragraphs.map(p => p.text + (p.items || []).map(i => i.text).join('')).join('');
       return (a.caption || '').includes(q) || fullText.includes(q);
     });
     breadcrumb = null;
@@ -2211,9 +2202,9 @@ function buildParagraph(articleNum, p, storage) {
   const displayText = isViewingOriginal ? p.text : (hasEdit ? editedText : p.text);
   const displayHtml = escapeHtml(displayText);
 
-  const itemsHtml = p.items.length ? `
+  const itemsHtml = (p.items || []).length ? `
     <div class="items-list">
-      ${p.items.map(i => {
+      ${(p.items || []).map(i => {
         const subitemsHtml = i.subitems && i.subitems.length ? `
           <div class="subitems-list">
             ${i.subitems.map(s => {
@@ -2230,19 +2221,11 @@ function buildParagraph(articleNum, p, storage) {
 
   // ===== 閲覧モード =====
   if (browseMode === 'view') {
-    const yoken = (storage.yoken || {})[key];
-    const shushi = (storage.shushi || {})[key];
-    const ronten = (storage.ronten || {})[key];
     const related = (storage.related || {})[key] || [];
 
     const origBtn = hasEdit
       ? `<button class="btn-popup-tag btn-tag-orig" id="btn-orig-${articleNum}-${p.num}" onclick="toggleOriginal('${articleNum}', ${p.num})">${isViewingOriginal ? '戻る' : '原文'}</button>`
       : '';
-    const yokenBtn = yoken ? `<button class="btn-popup-tag btn-tag-yoken" onclick="showInfoPopup('要件', '${key}', 'yoken')">要件</button>` : '';
-    const shushiBtn = shushi ? `<button class="btn-popup-tag btn-tag-shushi" onclick="showInfoPopup('趣旨', '${key}', 'shushi')">趣旨</button>` : '';
-    const rontenBtn = ronten ? `<button class="btn-popup-tag btn-tag-ronten" onclick="showInfoPopup('論点', '${key}', 'ronten')">論点</button>` : '';
-    const hanrei = (storage.hanrei || {})[key];
-    const hanreiBtn = hanrei ? `<button class="btn-popup-tag btn-tag-hanrei" onclick="showInfoPopup('判例', '${key}', 'hanrei')">判例</button>` : '';
 
     const relatedBtns = related.map((r, i) => {
       const rKey = `${key}_view_${i}`;
@@ -2250,8 +2233,8 @@ function buildParagraph(articleNum, p, storage) {
       return `<button class="btn-popup-tag btn-tag-related" onclick="jumpToArticleByKey('${rKey}')">${r.label}</button>`;
     }).join('');
 
-    const hasTags = hasEdit || yoken || shushi || ronten || hanrei || related.length;
-    const tagsRow = hasTags ? `<div class="para-tags-row">${origBtn}${yokenBtn}${shushiBtn}${rontenBtn}${hanreiBtn}${relatedBtns}</div>` : '';
+    const hasTags = hasEdit || related.length;
+    const tagsRow = hasTags ? `<div class="para-tags-row">${origBtn}${relatedBtns}</div>` : '';
 
     const qBadge = _qParaKeySet.has(key) ? `<button class="badge-q" onclick="showParaQPopup('${key}')">問</button>` : '';
     return `
@@ -2272,10 +2255,6 @@ function buildParagraph(articleNum, p, storage) {
   // ===== 編集モード =====
   const originalBtnClass = hasEdit ? 'btn-original has-edit' : 'btn-original';
   const originalBtnLabel = isViewingOriginal ? '戻る' : '原文';
-  const yokenVal = (storage.yoken || {})[key] || '';
-  const shushiVal = (storage.shushi || {})[key] || '';
-  const rontenVal = (storage.ronten || {})[key] || '';
-  const hanreiVal = (storage.hanrei || {})[key] || '';
 
   return `
     <div class="paragraph" id="para-${articleNum}-${p.num}" data-key="${articleNum}" data-pnum="${p.num}">
@@ -2286,7 +2265,7 @@ function buildParagraph(articleNum, p, storage) {
         </div>
         <div class="paragraph-actions">
           <button class="btn-edit" onclick="toggleEdit('${articleNum}', ${p.num})">編集</button>
-          <button class="btn-notes${(yokenVal || shushiVal || rontenVal || hanreiVal) ? ' has-notes' : ''}" id="btn-notes-${articleNum}-${p.num}" onclick="toggleNotes('${articleNum}', ${p.num})">ノート</button>
+          <button class="btn-notes" id="btn-notes-${articleNum}-${p.num}" onclick="toggleNotes('${articleNum}', ${p.num})">ノート</button>
           <button class="${originalBtnClass}" id="btn-orig-${articleNum}-${p.num}" onclick="toggleOriginal('${articleNum}', ${p.num})">${originalBtnLabel}</button>
         </div>
       </div>
@@ -2300,22 +2279,6 @@ function buildParagraph(articleNum, p, storage) {
       </div>
       ${buildRelatedSection(articleNum, p.num, storage)}
       <div class="extra-fields-section" id="extra-fields-${articleNum}-${p.num}">
-        <div class="extra-field-row">
-          <label class="extra-field-label">要件</label>
-          <textarea class="extra-field-area" id="yoken-${articleNum}-${p.num}" placeholder="要件を入力">${yokenVal}</textarea>
-        </div>
-        <div class="extra-field-row">
-          <label class="extra-field-label">趣旨</label>
-          <textarea class="extra-field-area" id="shushi-${articleNum}-${p.num}" placeholder="趣旨を入力">${shushiVal}</textarea>
-        </div>
-        <div class="extra-field-row">
-          <label class="extra-field-label">論点</label>
-          <textarea class="extra-field-area" id="ronten-${articleNum}-${p.num}" placeholder="論点を入力">${rontenVal}</textarea>
-        </div>
-        <div class="extra-field-row">
-          <label class="extra-field-label">判例</label>
-          <textarea class="extra-field-area" id="hanrei-${articleNum}-${p.num}" placeholder="判例を入力">${hanreiVal}</textarea>
-        </div>
         ${buildQSection(articleNum, p.num, storage)}
         <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border-light)">
           <button class="btn btn-sm" onclick="closeExtraFields('${articleNum}',${p.num})">閉じる</button>
@@ -2430,16 +2393,6 @@ function saveEdit(articleNum, pNum) {
     delete storage.edits[key];
   }
 
-  // 要件・趣旨・論点を保存
-  const yokenEl = document.getElementById(`yoken-${articleNum}-${pNum}`);
-  const shushiEl = document.getElementById(`shushi-${articleNum}-${pNum}`);
-  const rontenEl = document.getElementById(`ronten-${articleNum}-${pNum}`);
-  if (yokenEl) { const v = yokenEl.value.trim(); if (v) storage.yoken[key] = v; else delete storage.yoken[key]; }
-  if (shushiEl) { const v = shushiEl.value.trim(); if (v) storage.shushi[key] = v; else delete storage.shushi[key]; }
-  if (rontenEl) { const v = rontenEl.value.trim(); if (v) storage.ronten[key] = v; else delete storage.ronten[key]; }
-  const hanreiEl = document.getElementById(`hanrei-${articleNum}-${pNum}`);
-  if (hanreiEl) { const v = hanreiEl.value.trim(); if (v) storage.hanrei[key] = v; else delete storage.hanrei[key]; }
-
   saveStorage(storage);
 
   const display = document.getElementById(`display-${articleNum}-${pNum}`);
@@ -2465,55 +2418,19 @@ function cancelEdit(articleNum, pNum) {
   document.getElementById(`edit-${articleNum}-${pNum}`).classList.remove('open');
   document.getElementById(`save-row-${articleNum}-${pNum}`).classList.remove('open');
   const extraFields = document.getElementById(`extra-fields-${articleNum}-${pNum}`);
-  if (extraFields) {
-    extraFields.classList.remove('open');
-    const key2 = `${articleNum}-${pNum}`;
-    const yokenEl = document.getElementById(`yoken-${articleNum}-${pNum}`);
-    const shushiEl = document.getElementById(`shushi-${articleNum}-${pNum}`);
-    const rontenEl = document.getElementById(`ronten-${articleNum}-${pNum}`);
-    if (yokenEl) yokenEl.value = (storage.yoken || {})[key2] || '';
-    if (shushiEl) shushiEl.value = (storage.shushi || {})[key2] || '';
-    if (rontenEl) rontenEl.value = (storage.ronten || {})[key2] || '';
-    const hanreiEl2 = document.getElementById(`hanrei-${articleNum}-${pNum}`);
-    if (hanreiEl2) hanreiEl2.value = (storage.hanrei || {})[key2] || '';
-  }
+  if (extraFields) extraFields.classList.remove('open');
 }
 
 function saveExtraFields(articleNum, pNum) {
   const key = `${articleNum}-${pNum}`;
   const storage = getStorage();
-  const yokenEl = document.getElementById(`yoken-${articleNum}-${pNum}`);
-  const shushiEl = document.getElementById(`shushi-${articleNum}-${pNum}`);
-  const rontenEl = document.getElementById(`ronten-${articleNum}-${pNum}`);
-  const hanreiEl = document.getElementById(`hanrei-${articleNum}-${pNum}`);
-  if (yokenEl) { const v = yokenEl.value.trim(); if (v) storage.yoken[key] = v; else delete storage.yoken[key]; }
-  if (shushiEl) { const v = shushiEl.value.trim(); if (v) storage.shushi[key] = v; else delete storage.shushi[key]; }
-  if (rontenEl) { const v = rontenEl.value.trim(); if (v) storage.ronten[key] = v; else delete storage.ronten[key]; }
-  if (hanreiEl) { const v = hanreiEl.value.trim(); if (v) storage.hanrei[key] = v; else delete storage.hanrei[key]; }
   saveStorage(storage);
   const extraFields = document.getElementById(`extra-fields-${articleNum}-${pNum}`);
   if (extraFields) extraFields.classList.remove('open');
-  const notesBtn = document.getElementById(`btn-notes-${articleNum}-${pNum}`);
-  if (notesBtn) {
-    const s = getStorage();
-    const k = `${articleNum}-${pNum}`;
-    const hasNotes = !!(( s.yoken||{})[k] || (s.shushi||{})[k] || (s.ronten||{})[k] || (s.hanrei||{})[k]);
-    notesBtn.classList.toggle('has-notes', hasNotes);
-  }
   showToast('保存しました');
 }
 
 function closeExtraFields(articleNum, pNum) {
-  const storage = getStorage();
-  const key = `${articleNum}-${pNum}`;
-  const yokenEl = document.getElementById(`yoken-${articleNum}-${pNum}`);
-  const shushiEl = document.getElementById(`shushi-${articleNum}-${pNum}`);
-  const rontenEl = document.getElementById(`ronten-${articleNum}-${pNum}`);
-  const hanreiEl = document.getElementById(`hanrei-${articleNum}-${pNum}`);
-  if (yokenEl) yokenEl.value = (storage.yoken || {})[key] || '';
-  if (shushiEl) shushiEl.value = (storage.shushi || {})[key] || '';
-  if (rontenEl) rontenEl.value = (storage.ronten || {})[key] || '';
-  if (hanreiEl) hanreiEl.value = (storage.hanrei || {})[key] || '';
   const extraFields = document.getElementById(`extra-fields-${articleNum}-${pNum}`);
   if (extraFields) extraFields.classList.remove('open');
 }
