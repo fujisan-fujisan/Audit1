@@ -659,12 +659,20 @@
     min-width: 180px;
   }
 
-  /* 項ハイライト（関連条文ジャンプ時） */
+  /* 項・号ハイライト（関連条文ジャンプ時） */
   .paragraph.jumped {
     border: 1.5px solid #f5a8a0;
     background: #fff8f7;
     border-radius: var(--radius-sm);
     padding: 10px 12px;
+    transition: background 0.3s;
+  }
+
+  .item-row.jumped {
+    background: #fff0ee;
+    border-radius: 3px;
+    outline: 1.5px solid #f5a8a0;
+    outline-offset: 2px;
     transition: background 0.3s;
   }
 
@@ -2215,7 +2223,7 @@ function buildParagraph(articleNum, p, storage) {
               return `<div class="subitem-row"><span class="subitem-num">${s.num}</span><span>${stripItemNum(s.num, s.text)}</span></div>${sub2Html}`;
             }).join('')}
           </div>` : '';
-        return `<div class="item-row"><span class="item-num">${i.num}</span><span class="item-text">${stripItemNum(i.num, i.text)}</span></div>${subitemsHtml}`;
+        return `<div class="item-row" id="item-${articleNum}-${p.num}-${i.num}"><span class="item-num">${i.num}</span><span class="item-text">${stripItemNum(i.num, i.text)}</span></div>${subitemsHtml}`;
       }).join('')}
     </div>` : '';
 
@@ -2229,7 +2237,7 @@ function buildParagraph(articleNum, p, storage) {
 
     const relatedBtns = related.map((r, i) => {
       const rKey = `${key}_view_${i}`;
-      _relatedTagData[rKey] = { article: r.article, numStr: r.numStr || String(r.article), paragraph: r.paragraph, label: r.label, storageKey: key };
+      _relatedTagData[rKey] = { article: r.article, numStr: r.numStr || String(r.article), paragraph: r.paragraph, itemNum: r.itemNum || null, label: r.label, storageKey: key };
       return `<button class="btn-popup-tag btn-tag-related" onclick="jumpToArticleByKey('${rKey}')">${r.label}</button>`;
     }).join('');
 
@@ -2494,18 +2502,8 @@ function showRelatedSuggest(storageKey) {
   const para = article && article.paragraphs.find(p => p.num === _sk_pnum);
   const autoDetected = para ? detectArticleRefs(para.text) : [];
 
-  // 検索候補
-  const allRefs = Object.values(LAW_DATA).flatMap(a =>
-    a.paragraphs.map(p => ({
-      article: a.article,
-      numStr: a.num || String(a.article),
-      paragraph: p.num,
-      label: `${keyToDisplay(a.num || String(a.article))}条${p.num}項`,
-      caption: a.caption || ''
-    }))
-  );
-
   const existing = (storage.related[storageKey] || []).map(r => r.label);
+  const normalizedVal = val ? val.replace(/の/g, '') : '';
 
   let suggestions = [];
   if (!val) {
@@ -2514,16 +2512,18 @@ function showRelatedSuggest(storageKey) {
       .slice(0, 5)
       .map(r => ({ ...r, auto: true }));
   } else {
-    suggestions = allRefs
-      .filter(r => r.label.includes(val) || r.caption.includes(val))
-      .filter(r => !existing.includes(r.label))
-      .slice(0, 8);
+    suggestions = getAllArticleRefs()
+      .filter(r =>
+        (r.label.includes(val) || r.label.replace(/の/g, '').includes(normalizedVal) || r.caption.includes(val)) &&
+        !existing.includes(r.label)
+      )
+      .slice(0, 10);
   }
 
   if (!suggestions.length) { box.style.display = 'none'; return; }
 
   box.innerHTML = suggestions.map(s =>
-    `<div class="related-suggest-item${s.auto ? ' auto' : ''}" onmousedown="selectRelated('${storageKey}', '${s.label}', '${s.numStr || String(s.article)}')">${s.label}${s.caption ? ' ' + s.caption : ''}</div>`
+    `<div class="related-suggest-item${s.auto ? ' auto' : ''}" onmousedown="selectRelated('${storageKey}', '${s.label}')">${s.label}${s.caption ? ' ' + s.caption : ''}</div>`
   ).join('');
   box.style.display = 'block';
   positionSuggest(input, box);
@@ -2568,7 +2568,7 @@ function hideRelatedSuggestDelay(storageKey) {
   }, 200);
 }
 
-function selectRelated(storageKey, label, targetNumStr) {
+function selectRelated(storageKey, label) {
   document.getElementById(`related-input-${storageKey}`).value = label;
   document.getElementById(`related-suggest-${storageKey}`).style.display = 'none';
 }
@@ -2578,17 +2578,17 @@ function addRelated(storageKey) {
   const val = input.value.trim();
   if (!val) return;
 
-  const match = val.match(/(\d+)条(?:の(\d+))?(?:(\d+)項)?(?:(\d+)号)?/);
-  if (!match) { showToast('形式: 300条1項 / 300条の2 1項'); return; }
+  // 形式: "4条1項" / "4の2条1項" / "4条1項一"
+  const match = val.match(/^(\d+(?:の\d+)?)条(\d+)項(.+)?$/);
+  if (!match) { showToast('形式: 300条1項 / 300条1項一'); return; }
 
-  const baseArt = parseInt(match[1]);
-  const artSuffix = match[2] ? match[2] : null;
-  const numStr = artSuffix ? `${baseArt}の${artSuffix}` : String(baseArt);
+  const numStr = match[1];
+  const baseArt = parseInt(numStr);
   const ref = {
     article: baseArt,
     numStr,
-    paragraph: match[3] ? parseInt(match[3]) : null,
-    item: match[4] ? parseInt(match[4]) : null,
+    paragraph: parseInt(match[2]),
+    itemNum: match[3] ? match[3].trim() : null,
     label: val
   };
 
@@ -2610,7 +2610,7 @@ function addRelated(storageKey) {
         article: srcArticle.article,
         numStr: srcKey,
         paragraph: srcPNum,
-        item: null,
+        itemNum: null,
         label: reverseLabel
       };
       const reverseKey = `${ref.numStr}-${ref.paragraph}`;
@@ -2644,7 +2644,7 @@ const _relatedTagData = {};
 function buildRelatedTagsHtml(storageKey, relatedList) {
   return relatedList.map((r, i) => {
     const key = `${storageKey}_${i}`;
-    _relatedTagData[key] = { article: r.article, numStr: r.numStr || String(r.article), paragraph: r.paragraph, label: r.label, storageKey };
+    _relatedTagData[key] = { article: r.article, numStr: r.numStr || String(r.article), paragraph: r.paragraph, itemNum: r.itemNum || null, label: r.label, storageKey };
     return `<span class="related-tag" onclick="jumpToArticleByKey('${key}')">${r.label}<span class="remove-tag" onclick="removeRelated(event, '${storageKey}', ${i})">×</span></span>`;
   }).join('');
 }
@@ -2653,10 +2653,10 @@ function jumpToArticleByKey(key) {
   const d = _relatedTagData[key];
   if (!d) return;
   const fromArticleNum = d.storageKey ? parseStorageKey(d.storageKey).articleKey : null;
-  jumpToArticle(d.numStr || String(d.article), d.paragraph, fromArticleNum, d.label);
+  jumpToArticle(d.numStr || String(d.article), d.paragraph, fromArticleNum, d.label, d.itemNum);
 }
 
-function jumpToArticle(articleNum, paragraphNum, fromArticleNum, fromLabel) {
+function jumpToArticle(articleNum, paragraphNum, fromArticleNum, fromLabel, itemNum) {
   // LAW_DATAに存在しない場合は未収録
   if (!LAW_DATA[articleNum]) { showToast(`${articleNum}条はまだ未収録です`); return; }
 
@@ -2679,12 +2679,23 @@ function jumpToArticle(articleNum, paragraphNum, fromArticleNum, fromLabel) {
       const paraEl = document.getElementById(`para-${articleNum}-${paragraphNum}`);
       if (paraEl) {
         paraEl.classList.add('jumped');
-        paraEl.scrollIntoView({ behavior: 'instant', block: 'center' });
         const backBtn = document.getElementById(`back-${articleNum}-${paragraphNum}`);
         if (backBtn) {
           backBtn.classList.add('show');
           backBtn._fromArticle = fromArticleNum;
           backBtn._fromLabel = fromLabel;
+        }
+        // 号ハイライト：指定があれば号行を強調してスクロール
+        if (itemNum) {
+          const itemEl = document.getElementById(`item-${articleNum}-${paragraphNum}-${itemNum}`);
+          if (itemEl) {
+            itemEl.classList.add('jumped');
+            itemEl.scrollIntoView({ behavior: 'instant', block: 'center' });
+          } else {
+            paraEl.scrollIntoView({ behavior: 'instant', block: 'center' });
+          }
+        } else {
+          paraEl.scrollIntoView({ behavior: 'instant', block: 'center' });
         }
       }
     }
@@ -2725,6 +2736,7 @@ function clearJumpHighlights() {
     const backBtn = document.getElementById(`back-${articleNum}-${pNum}`);
     if (backBtn) backBtn.classList.remove('show');
   });
+  document.querySelectorAll('.item-row.jumped').forEach(el => el.classList.remove('jumped'));
 }
 
 function jumpBack(articleNum, pNum) {
@@ -3199,14 +3211,16 @@ function getAllArticleRefs() {
   _allArticleRefs = [];
   for (const a of Object.values(LAW_DATA)) {
     const dispArt = keyToDisplay(a.num);
+    const caption = a.caption || '';
     for (const p of a.paragraphs) {
       const paraLabel = `${dispArt}条${p.num}項`;
       const paraKey = `${a.num}-${p.num}`;
-      _allArticleRefs.push({ label: paraLabel, key: paraKey });
+      _allArticleRefs.push({ label: paraLabel, key: paraKey, numStr: a.num, paragraph: p.num, itemNum: null, caption });
       for (const item of (p.items || [])) {
         _allArticleRefs.push({
           label: `${paraLabel}${item.num}`,
-          key: `${paraKey}-${item.num}`
+          key: `${paraKey}-${item.num}`,
+          numStr: a.num, paragraph: p.num, itemNum: item.num, caption: ''
         });
       }
     }
@@ -3548,6 +3562,7 @@ function deleteQuestion(i) {
   renderManageView();
   showToast('問題を削除しました');
 }
+
 
 // ===== バックアップ・復元 =====
 async function exportData() {
