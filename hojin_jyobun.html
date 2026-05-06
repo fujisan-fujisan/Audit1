@@ -1021,6 +1021,34 @@
   }
   .extra-fields-section.open { display: flex; }
 
+  /* 号レベルノートパネル */
+  .item-note-panel {
+    display: none;
+    margin: 2px 0 8px 0;
+    padding: 8px 12px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    border: 1px dashed var(--border);
+  }
+  .item-note-panel.open { display: block; }
+  .btn-item-notes {
+    font-size: 10px;
+    padding: 1px 7px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-left: auto;
+    line-height: 1.6;
+  }
+  .btn-item-notes:hover, .btn-item-notes.has-notes {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
   .extra-field-row {
     display: flex;
     flex-direction: column;
@@ -3607,6 +3635,7 @@ function deleteQuestion(i) {
   renderManageView();
   showToast('問題を削除しました');
 }
+
 
 
 // ===== バックアップ・復元 =====
