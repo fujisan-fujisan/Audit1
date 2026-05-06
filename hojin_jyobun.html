@@ -1887,14 +1887,18 @@ function stripItemNum(num, text) {
 // サジェストをfixed配置で画面座標に基づいて表示
 function positionSuggest(inputEl, suggestEl) {
   const rect = inputEl.getBoundingClientRect();
-  const spaceBelow = window.innerHeight - rect.bottom;
-  const spaceAbove = rect.top;
-  suggestEl.style.width = Math.max(rect.width, 180) + 'px';
-  suggestEl.style.left = rect.left + 'px';
+  // iOS ではキーボード表示時に visualViewport.height が実際の表示領域を返す
+  const vHeight = (window.visualViewport ? window.visualViewport.height : window.innerHeight);
+  const vOffsetTop = (window.visualViewport ? window.visualViewport.offsetTop : 0);
+  const rectBottomInVV = rect.bottom - vOffsetTop;
+  const spaceBelow = vHeight - rectBottomInVV;
+  const spaceAbove = rect.top - vOffsetTop;
+  suggestEl.style.width = Math.max(rect.width, 200) + 'px';
+  suggestEl.style.left = rect.left + (window.visualViewport ? window.visualViewport.offsetLeft : 0) + 'px';
   if (spaceBelow < 220 && spaceAbove > spaceBelow) {
     // 上に表示
     suggestEl.style.top = 'auto';
-    suggestEl.style.bottom = (window.innerHeight - rect.top + 4) + 'px';
+    suggestEl.style.bottom = (vHeight - rect.top + vOffsetTop + 4) + 'px';
   } else {
     // 下に表示
     suggestEl.style.top = (rect.bottom + 4) + 'px';
@@ -2307,7 +2311,7 @@ function buildRelatedSection(articleNum, pNum, storage) {
       <div class="related-tags" id="related-tags-${storageKey}">${tagsHtml}</div>
       <div class="related-add-row">
         <div class="related-wrap">
-          <input class="related-input" id="related-input-${storageKey}" placeholder="半角" oninput="showRelatedSuggest('${storageKey}')" onblur="hideRelatedSuggestDelay('${storageKey}')" autocomplete="off">
+          <input class="related-input" id="related-input-${storageKey}" placeholder="半角" oninput="showRelatedSuggest('${storageKey}')" onblur="hideRelatedSuggestDelay('${storageKey}')" autocomplete="nope" autocorrect="off" autocapitalize="off" spellcheck="false">
           <div class="related-suggest" id="related-suggest-${storageKey}" style="display:none"></div>
         </div>
         <button class="btn btn-sm" onclick="addRelated('${storageKey}')">追加</button>
