@@ -1013,6 +1013,34 @@
   }
   .extra-fields-section.open { display: flex; }
 
+  /* 号レベルノートパネル */
+  .item-note-panel {
+    display: none;
+    margin: 2px 0 8px 0;
+    padding: 8px 12px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    border: 1px dashed var(--border);
+  }
+  .item-note-panel.open { display: block; }
+  .btn-item-notes {
+    font-size: 10px;
+    padding: 1px 7px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-left: auto;
+    line-height: 1.6;
+  }
+  .btn-item-notes:hover, .btn-item-notes.has-notes {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
   .extra-field-row {
     display: flex;
     flex-direction: column;
@@ -1855,6 +1883,7 @@ function getStorage() {
   if (!_storageCache.ronten) _storageCache.ronten = {};
   if (!_storageCache.hanrei) _storageCache.hanrei = {};
   if (!_storageCache.browseHistory) _storageCache.browseHistory = [];
+  if (!_storageCache.itemRelated) _storageCache.itemRelated = {};
   return _storageCache;
 }
 
@@ -2215,7 +2244,19 @@ function buildParagraph(articleNum, p, storage) {
               return `<div class="subitem-row"><span class="subitem-num">${s.num}</span><span>${stripItemNum(s.num, s.text)}</span></div>${sub2Html}`;
             }).join('')}
           </div>` : '';
-        return `<div class="item-row"><span class="item-num">${i.num}</span><span class="item-text">${stripItemNum(i.num, i.text)}</span></div>${subitemsHtml}`;
+        const itemKey = `${articleNum}-${p.num}-${i.num}`;
+        const itemRelList = (storage.itemRelated || {})[itemKey] || [];
+        const hasItemNotes = itemRelList.length > 0;
+        const noteBtn = browseMode === 'edit'
+          ? `<button class="btn-item-notes${hasItemNotes ? ' has-notes' : ''}" id="btn-item-notes-${itemKey}" onclick="toggleItemNotes('${itemKey}')">ノート</button>`
+          : '';
+        const viewTags = browseMode === 'view' && hasItemNotes
+          ? `<div class="para-tags-row" style="margin-left:32px">${buildItemViewTags(itemKey, itemRelList)}</div>`
+          : '';
+        const notePanel = browseMode === 'edit'
+          ? `<div class="item-note-panel" id="item-note-${itemKey}">${buildItemNotePanel(articleNum, p.num, i.num, storage)}</div>`
+          : '';
+        return `<div class="item-row"><span class="item-num">${i.num}</span><span class="item-text">${stripItemNum(i.num, i.text)}</span>${noteBtn}</div>${subitemsHtml}${viewTags}${notePanel}`;
       }).join('')}
     </div>` : '';
 
@@ -3547,6 +3588,152 @@ function deleteQuestion(i) {
   trainingQueue = [];
   renderManageView();
   showToast('問題を削除しました');
+}
+
+// ===== 号レベル関連条文 =====
+
+const _itemRelatedTagData = {};
+
+function toggleItemNotes(itemKey) {
+  const panel = document.getElementById(`item-note-${itemKey}`);
+  if (panel) panel.classList.toggle('open');
+}
+
+// 閲覧モード：関連条文タグ行
+function buildItemViewTags(itemKey, relatedList) {
+  return relatedList.map((r, i) => {
+    const key = `${itemKey}_view_${i}`;
+    _itemRelatedTagData[key] = { article: r.article, numStr: r.numStr || String(r.article), paragraph: r.paragraph, label: r.label };
+    return `<button class="btn-popup-tag btn-tag-related" onclick="jumpToArticleByItemKey('${key}')">${r.label}</button>`;
+  }).join('');
+}
+
+function jumpToArticleByItemKey(key) {
+  const d = _itemRelatedTagData[key];
+  if (!d) return;
+  jumpToArticle(d.numStr || String(d.article), d.paragraph, null, d.label);
+}
+
+// 編集モード：ノートパネル全体
+function buildItemNotePanel(articleNum, pNum, itemNum, storage) {
+  const itemKey = `${articleNum}-${pNum}-${itemNum}`;
+  return `
+    <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">${keyToDisplay(articleNum)}条${pNum}項${itemNum}</div>
+    ${buildItemRelatedSection(itemKey, storage)}
+    <div style="display:flex;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-sm" onclick="toggleItemNotes('${itemKey}')">閉じる</button>
+    </div>`;
+}
+
+// 号用 関連条文セクション
+function buildItemRelatedSection(itemKey, storage) {
+  const related = (storage.itemRelated || {})[itemKey] || [];
+  const tagsHtml = buildItemRelatedTagsHtml(itemKey, related);
+  return `
+    <div class="related-section">
+      <div class="related-label">関連条文</div>
+      <div class="related-tags" id="item-related-tags-${itemKey}">${tagsHtml}</div>
+      <div class="related-add-row">
+        <div class="related-wrap">
+          <input class="related-input" id="item-related-input-${itemKey}" placeholder="半角" oninput="showItemRelatedSuggest('${itemKey}')" onblur="hideItemRelatedSuggestDelay('${itemKey}')" autocomplete="off">
+          <div class="related-suggest" id="item-related-suggest-${itemKey}" style="display:none"></div>
+        </div>
+        <button class="btn btn-sm" onclick="addItemRelated('${itemKey}')">追加</button>
+      </div>
+    </div>`;
+}
+
+function buildItemRelatedTagsHtml(itemKey, relatedList) {
+  return relatedList.map((r, i) => {
+    const key = `${itemKey}_${i}`;
+    _itemRelatedTagData[key] = { article: r.article, numStr: r.numStr || String(r.article), paragraph: r.paragraph, label: r.label };
+    return `<span class="related-tag" onclick="jumpToArticleByItemKey('${key}')">${r.label}<span class="remove-tag" onclick="removeItemRelated(event,'${itemKey}',${i})">×</span></span>`;
+  }).join('');
+}
+
+function showItemRelatedSuggest(itemKey) {
+  const input = document.getElementById(`item-related-input-${itemKey}`);
+  const box = document.getElementById(`item-related-suggest-${itemKey}`);
+  const val = input.value.trim();
+  if (!val) { box.style.display = 'none'; return; }
+  const storage = getStorage();
+  const existing = ((storage.itemRelated || {})[itemKey] || []).map(r => r.label);
+  const normalizedVal = val.replace(/の/g, '');
+  const suggestions = Object.values(LAW_DATA).flatMap(a =>
+    a.paragraphs.map(p => ({
+      article: a.article,
+      numStr: a.num || String(a.article),
+      paragraph: p.num,
+      label: `${keyToDisplay(a.num || String(a.article))}条${p.num}項`,
+      caption: a.caption || ''
+    }))
+  ).filter(r =>
+    (r.label.includes(val) || r.label.replace(/の/g, '').includes(normalizedVal) || r.caption.includes(val)) &&
+    !existing.includes(r.label)
+  ).slice(0, 8);
+  if (!suggestions.length) { box.style.display = 'none'; return; }
+  box.innerHTML = suggestions.map(s =>
+    `<div class="related-suggest-item" onmousedown="selectItemRelated('${itemKey}','${s.label}','${s.numStr}')">${s.label}${s.caption ? ' ' + s.caption : ''}</div>`
+  ).join('');
+  box.style.display = 'block';
+  positionSuggest(input, box);
+}
+
+function hideItemRelatedSuggestDelay(itemKey) {
+  setTimeout(() => {
+    const box = document.getElementById(`item-related-suggest-${itemKey}`);
+    if (box) box.style.display = 'none';
+  }, 200);
+}
+
+function selectItemRelated(itemKey, label, numStr) {
+  const input = document.getElementById(`item-related-input-${itemKey}`);
+  if (input) input.value = label;
+  const box = document.getElementById(`item-related-suggest-${itemKey}`);
+  if (box) box.style.display = 'none';
+}
+
+function addItemRelated(itemKey) {
+  const input = document.getElementById(`item-related-input-${itemKey}`);
+  const val = input.value.trim();
+  if (!val) return;
+  const match = val.match(/(\d+)条(?:の(\d+))?(?:(\d+)項)?/);
+  if (!match) { showToast('形式: 300条1項 / 300条の2 1項'); return; }
+  const baseArt = parseInt(match[1]);
+  const artSuffix = match[2] || null;
+  const numStr = artSuffix ? `${baseArt}の${artSuffix}` : String(baseArt);
+  const ref = {
+    article: baseArt,
+    numStr,
+    paragraph: match[3] ? parseInt(match[3]) : null,
+    label: val
+  };
+  const storage = getStorage();
+  if (!storage.itemRelated[itemKey]) storage.itemRelated[itemKey] = [];
+  if (storage.itemRelated[itemKey].find(r => r.label === ref.label)) {
+    showToast('既に追加済みです'); return;
+  }
+  storage.itemRelated[itemKey].push(ref);
+  saveStorage(storage);
+  input.value = '';
+  const tagsDiv = document.getElementById(`item-related-tags-${itemKey}`);
+  if (tagsDiv) tagsDiv.innerHTML = buildItemRelatedTagsHtml(itemKey, storage.itemRelated[itemKey]);
+  const noteBtn = document.getElementById(`btn-item-notes-${itemKey}`);
+  if (noteBtn) noteBtn.classList.add('has-notes');
+  showToast('関連条文を追加しました');
+}
+
+function removeItemRelated(e, itemKey, index) {
+  e.stopPropagation();
+  const storage = getStorage();
+  storage.itemRelated[itemKey] = (storage.itemRelated[itemKey] || []).filter((_, i) => i !== index);
+  saveStorage(storage);
+  const tagsDiv = document.getElementById(`item-related-tags-${itemKey}`);
+  if (tagsDiv) tagsDiv.innerHTML = buildItemRelatedTagsHtml(itemKey, storage.itemRelated[itemKey]);
+  if (!storage.itemRelated[itemKey].length) {
+    const noteBtn = document.getElementById(`btn-item-notes-${itemKey}`);
+    if (noteBtn) noteBtn.classList.remove('has-notes');
+  }
 }
 
 // ===== バックアップ・復元 =====
