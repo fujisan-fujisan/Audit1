@@ -1049,6 +1049,19 @@
   }
   .extra-field-area:focus { border-color: var(--accent); }
 
+  /* 閲覧モード：メモ表示 */
+  .para-memo {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: #fffdf0;
+    border-left: 3px solid #d4a800;
+    border-radius: 0 4px 4px 0;
+    font-size: 13px;
+    line-height: 1.75;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+  }
+
   /* ===== 問題追加セクション（編集モード） ===== */
   .q-edit-section {
     margin-top: 12px;
@@ -1863,6 +1876,7 @@ function getStorage() {
   if (!_storageCache.ronten) _storageCache.ronten = {};
   if (!_storageCache.hanrei) _storageCache.hanrei = {};
   if (!_storageCache.browseHistory) _storageCache.browseHistory = [];
+  if (!_storageCache.memo) _storageCache.memo = {};
   return _storageCache;
 }
 
@@ -2248,6 +2262,9 @@ function buildParagraph(articleNum, p, storage) {
     const hasTags = hasEdit || related.length;
     const tagsRow = hasTags ? `<div class="para-tags-row">${origBtn}${relatedBtns}</div>` : '';
 
+    const memoText = (storage.memo || {})[key] || '';
+    const memoHtml = memoText ? `<div class="para-memo">${escapeHtml(memoText)}</div>` : '';
+
     const qBadge = _qParaKeySet.has(key) ? `<button class="badge-q" onclick="showParaQPopup('${key}')">問</button>` : '';
     return `
       <div class="paragraph" id="para-${articleNum}-${p.num}" data-key="${articleNum}" data-pnum="${p.num}">
@@ -2261,12 +2278,16 @@ function buildParagraph(articleNum, p, storage) {
         <div class="para-text-display" id="display-${articleNum}-${p.num}">${displayHtml}</div>
         ${itemsHtml}
         ${tagsRow}
+        ${memoHtml}
       </div>`;
   }
 
   // ===== 編集モード =====
   const originalBtnClass = hasEdit ? 'btn-original has-edit' : 'btn-original';
   const originalBtnLabel = isViewingOriginal ? '戻る' : '原文';
+  const existingMemo = (storage.memo || {})[key] || '';
+  const existingRelated = (storage.related || {})[key] || [];
+  const noteBtnClass = (existingMemo || existingRelated.length) ? 'btn-notes has-notes' : 'btn-notes';
 
   return `
     <div class="paragraph" id="para-${articleNum}-${p.num}" data-key="${articleNum}" data-pnum="${p.num}">
@@ -2277,7 +2298,7 @@ function buildParagraph(articleNum, p, storage) {
         </div>
         <div class="paragraph-actions">
           <button class="btn-edit" onclick="toggleEdit('${articleNum}', ${p.num})">編集</button>
-          <button class="btn-notes" id="btn-notes-${articleNum}-${p.num}" onclick="toggleNotes('${articleNum}', ${p.num})">ノート</button>
+          <button class="${noteBtnClass}" id="btn-notes-${articleNum}-${p.num}" onclick="toggleNotes('${articleNum}', ${p.num})">ノート</button>
           <button class="${originalBtnClass}" id="btn-orig-${articleNum}-${p.num}" onclick="toggleOriginal('${articleNum}', ${p.num})">${originalBtnLabel}</button>
         </div>
       </div>
@@ -2291,6 +2312,10 @@ function buildParagraph(articleNum, p, storage) {
       </div>
       ${buildRelatedSection(articleNum, p.num, storage)}
       <div class="extra-fields-section" id="extra-fields-${articleNum}-${p.num}">
+        <div class="extra-field-row">
+          <div class="extra-field-label">メモ</div>
+          <textarea class="extra-field-area" id="memo-${articleNum}-${p.num}" placeholder="自由メモ（閲覧モードにも表示されます）">${escapeHtml(existingMemo)}</textarea>
+        </div>
         ${buildQSection(articleNum, p.num, storage)}
         <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border-light)">
           <button class="btn btn-sm" onclick="closeExtraFields('${articleNum}',${p.num})">閉じる</button>
@@ -2436,7 +2461,23 @@ function cancelEdit(articleNum, pNum) {
 function saveExtraFields(articleNum, pNum) {
   const key = `${articleNum}-${pNum}`;
   const storage = getStorage();
+  const memoEl = document.getElementById(`memo-${articleNum}-${pNum}`);
+  if (memoEl) {
+    const val = memoEl.value.trim();
+    if (val) {
+      storage.memo[key] = memoEl.value;
+    } else {
+      delete storage.memo[key];
+    }
+  }
   saveStorage(storage);
+  // メモ or 関連条文の有無でノートボタンの色を更新
+  const noteBtn = document.getElementById(`btn-notes-${articleNum}-${pNum}`);
+  if (noteBtn) {
+    const hasMemo = !!(storage.memo[key]);
+    const hasRelated = (storage.related[key] || []).length > 0;
+    noteBtn.className = (hasMemo || hasRelated) ? 'btn-notes has-notes' : 'btn-notes';
+  }
   const extraFields = document.getElementById(`extra-fields-${articleNum}-${pNum}`);
   if (extraFields) extraFields.classList.remove('open');
   showToast('保存しました');
