@@ -2413,7 +2413,7 @@ function saveMemoEntry() {
   if (!val) { closeMemoInput(); return; }
   const d = new Date();
   const ds = d.getFullYear()+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0');
-  memoState[_memoTargetId] = (memoState[_memoTargetId] ? memoState[_memoTargetId]+'\n' : '')+'〈'+ds+'〉'+val;
+  memoState[_memoTargetId] = (memoState[_memoTargetId] ? memoState[_memoTargetId]+'\n' : '')+ds+'\n'+val;
   save();
   closeMemoInput();
   const btn = document.getElementById('memo-btn-'+_memoTargetId);
@@ -2437,12 +2437,11 @@ function saveMemoEntry() {
 <div class="overlay" id="memo-input-overlay" onclick="if(event.target===this)closeMemoInput()">
   <div class="scope-modal" style="display:flex;flex-direction:column;max-height:85vh;overflow:hidden;padding-bottom:44px;">
     <div class="modal-handle"></div>
-    <div style="font-size:13px;font-weight:700;margin-bottom:4px;">メモを追記</div>
-    <textarea class="memo-add-area" id="memo-add-area"></textarea>
-    <div style="display:flex;gap:8px;margin-top:10px;flex-shrink:0;">
+    <div style="display:flex;gap:8px;margin-bottom:10px;flex-shrink:0;">
       <button class="ch-record-cancel" style="flex:1;" onclick="closeMemoInput()">キャンセル</button>
       <button class="ch-record-save" style="flex:1;" onclick="saveMemoEntry()">完了</button>
     </div>
+    <textarea class="memo-add-area" id="memo-add-area"></textarea>
   </div>
 </div>
 </body>

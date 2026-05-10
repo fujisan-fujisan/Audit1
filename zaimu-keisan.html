@@ -1571,7 +1571,7 @@ function saveRecord() {
   if (memoVal) {
     if (!state.memos) state.memos = {};
     const d = fmtDate(date);
-    const newLine = `〈${d}〉${memoVal}`;
+    const newLine = `${d}\n${memoVal}`;
     state.memos[modalProbId] = state.memos[modalProbId]
       ? state.memos[modalProbId] + '\n' + newLine
       : newLine;
@@ -2055,12 +2055,11 @@ function confirmMemoInput() {
 <div class="modal-overlay" id="memo-input-popup-overlay" onclick="closeMemoInputPopup()">
   <div class="modal" onclick="event.stopPropagation()" style="max-height:85vh;display:flex;flex-direction:column;overflow:hidden;padding-bottom:44px;">
     <div class="modal-handle"></div>
-    <div class="modal-title" style="font-size:13px;font-weight:600;margin-bottom:8px;">メモ（追記されます）</div>
-    <textarea class="memo-input-area" id="memo-input-popup-area"></textarea>
-    <div class="modal-btns" style="margin-top:8px;flex-shrink:0;">
+    <div class="modal-btns" style="margin-bottom:8px;flex-shrink:0;">
       <button class="btn-cancel" onclick="closeMemoInputPopup()">キャンセル</button>
       <button class="btn-next" onclick="confirmMemoInput()">完了</button>
     </div>
+    <textarea class="memo-input-area" id="memo-input-popup-area"></textarea>
   </div>
 </div>
 
