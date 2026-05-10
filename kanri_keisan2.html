@@ -1595,11 +1595,11 @@ function reviewItem(probId, type) {
 async function exportData() {
   const data = { version:2, label:'管理会計論（計算）', exportedAt: new Date().toISOString(), state };
   const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
-  const file = new File([blob], 'zaimu_keisan_backup.json', {type:'application/json'});
+  const file = new File([blob], 'kanri_keisan_backup.json', {type:'application/json'});
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try { await navigator.share({ files: [file] }); return; } catch(e) {}
   }
-  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='zaimu_keisan_backup.json'; a.click();
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='kanri_keisan_backup.json'; a.click();
 }
 function importData(e) {
   const file = e.target.files[0]; if(!file) return;
