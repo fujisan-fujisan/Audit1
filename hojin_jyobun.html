@@ -2312,15 +2312,15 @@ function buildParagraph(articleNum, p, storage) {
       </div>
       ${buildRelatedSection(articleNum, p.num, storage)}
       <div class="extra-fields-section" id="extra-fields-${articleNum}-${p.num}">
+        <div style="display:flex;justify-content:flex-end;gap:8px;padding-bottom:8px;border-bottom:1px solid var(--border-light)">
+          <button class="btn btn-sm" onclick="closeExtraFields('${articleNum}',${p.num})">閉じる</button>
+          <button class="btn btn-primary btn-sm" onclick="saveExtraFields('${articleNum}',${p.num})">保存</button>
+        </div>
         <div class="extra-field-row">
           <div class="extra-field-label">メモ</div>
           <textarea class="extra-field-area" id="memo-${articleNum}-${p.num}" placeholder="自由メモ（閲覧モードにも表示されます）">${escapeHtml(existingMemo)}</textarea>
         </div>
         ${buildQSection(articleNum, p.num, storage)}
-        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border-light)">
-          <button class="btn btn-sm" onclick="closeExtraFields('${articleNum}',${p.num})">閉じる</button>
-          <button class="btn btn-primary btn-sm" onclick="saveExtraFields('${articleNum}',${p.num})">保存</button>
-        </div>
       </div>
     </div>`;
 }
@@ -2465,7 +2465,14 @@ function saveExtraFields(articleNum, pNum) {
   if (memoEl) {
     const val = memoEl.value.trim();
     if (val) {
-      storage.memo[key] = memoEl.value;
+      const existing = storage.memo[key] || '';
+      if (!existing) {
+        const _d = new Date();
+        const _ds = _d.getFullYear()+'/'+String(_d.getMonth()+1).padStart(2,'0')+'/'+String(_d.getDate()).padStart(2,'0');
+        storage.memo[key] = _ds + '\n' + val;
+      } else {
+        storage.memo[key] = memoEl.value;
+      }
     } else {
       delete storage.memo[key];
     }
