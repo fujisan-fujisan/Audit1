@@ -1271,6 +1271,7 @@ function setTab(tab, btn) {
 
 // ── PROBLEMS TAB ──
 function renderProblems() {
+  const savedScroll = window.scrollY;
   const ct = document.getElementById('tab-problems');
   const openChapters = new Set(JSON.parse(localStorage.getItem('zaimu-keisan-chopen') || '[]'));
   document.querySelectorAll('.ch-group.open').forEach(el => openChapters.add(el.dataset.ch));
@@ -1381,9 +1382,8 @@ function renderProblems() {
   addDiv.className = 'add-section';
   addDiv.innerHTML = `<button class="btn-add" style="width:100%;padding:10px;" onclick="openNewProbModal()">＋ 問題を追加する</button>`;
   ct.appendChild(addDiv);
+  requestAnimationFrame(() => window.scrollTo(0, savedScroll));
 }
-
-function openProbDetail(probId) {
   const prob = getProbById(probId);
   const hist = getHistory(probId);
   const latest = getLatest(probId);
