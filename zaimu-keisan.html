@@ -1384,6 +1384,8 @@ function renderProblems() {
   ct.appendChild(addDiv);
   requestAnimationFrame(() => window.scrollTo(0, savedScroll));
 }
+
+function openProbDetail(probId) {
   const prob = getProbById(probId);
   const hist = getHistory(probId);
   const latest = getLatest(probId);
