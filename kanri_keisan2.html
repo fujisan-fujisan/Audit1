@@ -437,11 +437,16 @@ body {
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title" id="edit-modal-title"></div>
-    <div class="modal-subtitle" style="font-size:11px;color:var(--text-2);margin-bottom:14px;">論点を追加・削除できます（章の論点プールから選択）</div>
+    <div class="modal-subtitle" style="font-size:11px;color:var(--text-2);margin-bottom:14px;">論点を追加・削除できます（複数の章から選択可）</div>
     <div class="ronten-edit-list" id="ronten-edit-list"></div>
+    <div class="ronten-add-row" style="margin-bottom:6px;">
+      <select class="add-select" id="ronten-edit-ch" onchange="onEditRontenChChange()" style="flex:1;font-size:12px;padding:7px 10px;">
+        <option value="">① 章を選択...</option>
+      </select>
+    </div>
     <div class="ronten-add-row">
       <select class="add-select" id="ronten-add-select" style="flex:1;font-size:12px;padding:7px 10px;">
-        <option value="">論点を選択して追加...</option>
+        <option value="">まず章を選択してください</option>
       </select>
       <button class="btn-add-ronten" onclick="addRonten()">追加</button>
     </div>
@@ -1344,9 +1349,16 @@ function openEditModal(probId) {
   editProbId = probId;
   const prob = getProbById(probId);
   document.getElementById('edit-modal-title').textContent = `[${probId}] 論点を編集`;
+  const chSel = document.getElementById('ronten-edit-ch');
+  chSel.innerHTML = '<option value="">① 章を選択...</option>'
+    + CHAPTER_ORDER.map(ch => `<option value="${ch}"${ch === prob?.ch ? ' selected' : ''}>${ch}</option>`).join('');
   renderEditList();
   renderEditSelect();
   document.getElementById('edit-modal').classList.add('open');
+}
+
+function onEditRontenChChange() {
+  renderEditSelect();
 }
 
 function closeEditModal() {
@@ -1368,15 +1380,18 @@ function renderEditList() {
 }
 
 function renderEditSelect() {
-  const prob = getProbById(editProbId);
-  const ch = prob?.ch;
+  const ch = document.getElementById('ronten-edit-ch').value;
   const pool = CHAPTER_RONTEN_POOL[ch] || [];
   const current = getRonten(editProbId);
   const available = pool.filter(name => !current.includes(name));
   const sel = document.getElementById('ronten-add-select');
+  if (!ch) {
+    sel.innerHTML = '<option value="">まず章を選択してください</option>';
+    return;
+  }
   sel.innerHTML = available.length === 0
     ? `<option value="">追加できる論点がありません</option>`
-    : `<option value="">論点を選択して追加...</option>`
+    : `<option value="">② 論点を選択して追加...</option>`
       + available.map(name => `<option value="${name}">${name}</option>`).join('');
 }
 
