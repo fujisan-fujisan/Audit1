@@ -1009,7 +1009,7 @@ async function backupAll(){
     recData: recData,
     ansData: ansData,
   };
-  const fname = 'kansa_backup_' + new Date().toISOString().slice(0,10) + '.json';
+  const fname = 'kansa-ronsho.json';
   const blob = new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
   const file = new File([blob], fname, {type:'application/json'});
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
