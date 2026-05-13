@@ -328,6 +328,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
     <div class="confirm-handle"></div>
     <div class="confirm-lbl">最も近い論点</div>
     <div class="confirm-ronten" id="confirm-ronten"></div>
+    <div id="confirm-matched-text" style="font-size:12px;color:var(--text2);margin-bottom:8px;line-height:1.5;display:none;"></div>
     <div class="confirm-score-row">
       <div class="confirm-score-badge" id="confirm-score-badge"></div>
       <div class="confirm-score-sub" id="confirm-score-sub"></div>
@@ -674,18 +675,19 @@ function scorePair(q,t){
 }
 function similarity(query,item){
   const q=normalize(query);
-  const titleScore=scorePair(q,normalize(item.name));
-  let ansScore=0;
-  (answerData[item.id]||[]).forEach(a=>{const s=scorePair(q,normalize(a));if(s>ansScore)ansScore=s;});
+  let best={score:0,text:item.name};
+  const ts=scorePair(q,normalize(item.name));
+  if(ts>best.score)best={score:ts,text:item.name};
+  (answerData[item.id]||[]).forEach(a=>{const s=scorePair(q,normalize(a));if(s>best.score)best={score:s,text:a};});
   // 別名（言い換え）もタイトルと同等に照合
-  (aliasData[item.id]||[]).forEach(a=>{const s=scorePair(q,normalize(a));if(s>ansScore)ansScore=s;});
-  return Math.max(titleScore,ansScore);
+  (aliasData[item.id]||[]).forEach(a=>{const s=scorePair(q,normalize(a));if(s>best.score)best={score:s,text:a};});
+  return best;
 }
 function findTopMatches(titleIn,answerIn,items,lockedIds,answeredIds,topN=5){
   const q=[titleIn,answerIn].filter(Boolean).join(' ');
   if(!q.trim())return[];
   const avail=items.filter(i=>!lockedIds.has(i.id)&&!answeredIds.has(i.id));
-  const scored=avail.map(item=>({item,score:similarity(q,item)}));
+  const scored=avail.map(item=>{const r=similarity(q,item);return{item,score:r.score,matchedText:r.text};});
   scored.sort((a,b)=>b.score-a.score);
   return scored.slice(0,topN).filter(s=>s.score>0.05);
 }
@@ -774,6 +776,13 @@ function submitEntry(){
   const top=matches[0];
   pendingConfirm={matchedItem:top.item,inputTitle:tv,inputAnswer:av};
   document.getElementById('confirm-ronten').textContent=top.item.name;
+  const matchedEl=document.getElementById('confirm-matched-text');
+  if(top.matchedText&&top.matchedText!==top.item.name){
+    matchedEl.textContent='→ 「'+top.matchedText+'」で一致';
+    matchedEl.style.display='';
+  }else{
+    matchedEl.style.display='none';
+  }
   const pct=Math.round(top.score*100);
   document.getElementById('confirm-score-badge').textContent=`類似度 ${pct}%`;
   document.getElementById('confirm-score-sub').textContent=pct>=60?'高い一致度です':pct>=35?'部分的に一致しています':'一致度が低めです。違う場合は「違う」を選んでください。';
