@@ -350,6 +350,9 @@ body {
 .ch-score-badge.score-none   { color: var(--text-3); background: transparent; }
 .ch-group.open .ch-score-badge { opacity: 0.7; }
 
+.text-separator { font-size: 11px; font-weight: 700; color: var(--text-3); letter-spacing: .08em; padding: 16px 2px 4px; font-family: 'DM Mono', monospace; }
+.text-separator:first-child { padding-top: 4px; }
+
 .empty-state { text-align: center; padding: 48px 16px; color: var(--text-3); font-size: 13px; }
 </style>
 </head>
@@ -1297,10 +1300,19 @@ function renderProblems() {
     return ai - bi;
   });
 
+  let prevTextNum = null;
   chapterOrder.forEach(ch => {
     const probIds = chapters[ch];
     const chDisplay = ch.replace('第', '').replace(' ', '　');
     const textNum = CHAPTER_TEXT_NUM[ch] || '';
+
+    if (textNum && textNum !== prevTextNum) {
+      const sep = document.createElement('div');
+      sep.className = 'text-separator';
+      sep.textContent = 'テキスト' + textNum;
+      ct.appendChild(sep);
+      prevTextNum = textNum;
+    }
 
     const group = document.createElement('div');
     group.className = 'ch-group' + (openChapters.has(ch) ? ' open' : '');
