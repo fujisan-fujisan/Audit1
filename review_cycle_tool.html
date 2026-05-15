@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>復習周期管理</title>
+<meta name="theme-color" content="#0a0a0a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f9f9f8;
+  --surface: #ffffff;
+  --border: #e8e8e5;
+  --border-strong: #d0d0cb;
+  --text: #111111;
+  --text-2: #666666;
+  --text-3: #aaaaaa;
+  --radius: 10px;
+  --radius-sm: 6px;
+
+  /* 周回数バッジカラー */
+  --r5-color: #2a4a9a; --r5-bg: #eef1fb; --r5-border: #b8c6ed;
+  --r4-color: #1a7a4a; --r4-bg: #edf7f2; --r4-border: #90cfb0;
+  --r3-color: #7c5c00; --r3-bg: #fdf4e3; --r3-border: #e0c870;
+  --r2-color: #b85400; --r2-bg: #fff0e6; --r2-border: #f0b080;
+  --r1-color: #c0392b; --r1-bg: #fdf0ee; --r1-border: #e8a09a;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 80px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── Header ── */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.header-top { padding: 14px 16px 12px; }
+.header-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.app-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  color: var(--text-3);
+  text-transform: uppercase;
+}
+.header-actions { display: flex; gap: 6px; }
+.btn-icon {
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 11px;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.btn-icon:hover { background: var(--text); border-color: var(--text); color: #fff; }
+
+/* Remaining days */
+.remaining-row { display: flex; align-items: baseline; gap: 6px; }
+.remaining-num {
+  font-family: 'DM Mono', 'Courier New', monospace;
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1;
+}
+.remaining-num.warn { color: var(--r2-color); }
+.remaining-num.expired { color: var(--r1-color); }
+.remaining-days-label { font-size: 12px; color: var(--text-3); }
+.deadline-label { font-size: 11px; color: var(--text-3); margin-left: 2px; }
+
+/* ── Content ── */
+.content { padding: 14px 14px 0; max-width: 720px; margin: 0 auto; }
+
+/* ── Desktop table ── */
+.table-wrap {
+  display: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+@media (min-width: 600px) {
+  .table-wrap { display: block; }
+  .cards-wrap { display: none; }
+}
+
+table { width: 100%; border-collapse: collapse; }
+thead { background: var(--bg); border-bottom: 1px solid var(--border); }
+thead th {
+  padding: 10px 14px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-3);
+  text-align: center;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+thead th.col-name { text-align: left; }
+tbody tr { border-bottom: 1px solid var(--border); }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:nth-child(even) { background: #fafaf9; }
+tbody tr:hover { background: #f3f3f1; }
+td {
+  padding: 10px 14px;
+  font-size: 13px;
+  text-align: center;
+  vertical-align: middle;
+}
+td.col-name {
+  text-align: left;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+}
+td.col-calc {
+  font-family: 'DM Mono', 'Courier New', monospace;
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+/* Number inputs */
+.num-input {
+  width: 72px;
+  text-align: center;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 6px 6px;
+  font-size: 13px;
+  font-family: 'DM Mono', 'Courier New', monospace;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  -moz-appearance: textfield;
+}
+.num-input::-webkit-inner-spin-button,
+.num-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.num-input:focus {
+  border-color: #4a7edc;
+  box-shadow: 0 0 0 3px rgba(74,126,220,.12);
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-family: 'DM Mono', 'Courier New', monospace;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-3);
+  transition: all .2s;
+  white-space: nowrap;
+}
+.badge.r5 { background: var(--r5-bg); border-color: var(--r5-border); color: var(--r5-color); }
+.badge.r4 { background: var(--r4-bg); border-color: var(--r4-border); color: var(--r4-color); }
+.badge.r3 { background: var(--r3-bg); border-color: var(--r3-border); color: var(--r3-color); }
+.badge.r2 { background: var(--r2-bg); border-color: var(--r2-border); color: var(--r2-color); }
+.badge.r1 { background: var(--r1-bg); border-color: var(--r1-border); color: var(--r1-color); }
+.badge.expired { background: #f3f3f1; border-color: var(--border-strong); color: var(--text-3); }
+
+/* ── Mobile cards ── */
+.cards-wrap { display: flex; flex-direction: column; gap: 8px; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.card-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.card-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 6px; }
+.input-group label {
+  display: block;
+  font-size: 10px;
+  color: var(--text-3);
+  font-weight: 700;
+  letter-spacing: .06em;
+  margin-bottom: 4px;
+}
+.input-group .num-input { width: 100%; }
+.card-calc {
+  font-family: 'DM Mono', 'Courier New', monospace;
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+/* Progress bar (mobile) */
+.bar-track {
+  height: 3px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width .4s ease, background-color .3s;
+  background: var(--border-strong);
+}
+
+/* ── Legend ── */
+.legend {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.legend-label {
+  font-size: 10px;
+  color: var(--text-3);
+  font-weight: 700;
+  letter-spacing: .06em;
+  margin-right: 2px;
+}
+.legend-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-family: 'DM Mono', 'Courier New', monospace;
+  border: 1px solid;
+}
+.legend-badge.r5 { background: var(--r5-bg); border-color: var(--r5-border); color: var(--r5-color); }
+.legend-badge.r4 { background: var(--r4-bg); border-color: var(--r4-border); color: var(--r4-color); }
+.legend-badge.r3 { background: var(--r3-bg); border-color: var(--r3-border); color: var(--r3-color); }
+.legend-badge.r2 { background: var(--r2-bg); border-color: var(--r2-border); color: var(--r2-color); }
+.legend-badge.r1 { background: var(--r1-bg); border-color: var(--r1-border); color: var(--r1-color); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="header-meta">
+      <div class="app-title">復習周期管理</div>
+      <div class="header-actions">
+        <button class="btn-icon" onclick="exportData()">バックアップ</button>
+        <button class="btn-icon" onclick="document.getElementById('import-input').click()">復元</button>
+        <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)">
+      </div>
+    </div>
+    <div class="remaining-row">
+      <span class="remaining-num" id="remaining-num">–</span>
+      <span class="remaining-days-label" id="remaining-days-label">日</span>
+      <span class="deadline-label" id="deadline-label"></span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- Desktop table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="col-name">科目</th>
+          <th>① 1周の時間<br><span style="font-weight:400;text-transform:none;letter-spacing:0">(時間)</span></th>
+          <th>② 1日の時間<br><span style="font-weight:400;text-transform:none;letter-spacing:0">(時間/日)</span></th>
+          <th>1周の日数</th>
+          <th>最大周回数</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+
+  <!-- Mobile cards -->
+  <div class="cards-wrap" id="cards-wrap"></div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <span class="legend-label">周回数：</span>
+    <span class="legend-badge r5">8周以上</span>
+    <span class="legend-badge r4">6〜8周</span>
+    <span class="legend-badge r3">4〜6周</span>
+    <span class="legend-badge r2">2〜4周</span>
+    <span class="legend-badge r1">2周未満</span>
+  </div>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'review-cycle-tool-v1';
+
+const SUBJECTS = [
+  { id: 'zaimu_keisan', name: '財務計算' },
+  { id: 'zaimu_riron',  name: '財務理論' },
+  { id: 'kanri_keisan', name: '管理計算' },
+  { id: 'kanri_riron',  name: '管理理論' },
+  { id: 'kansa',        name: '監査論'   },
+  { id: 'kaisha',       name: '企業法'   },
+  { id: 'hojin',        name: '法人税'   },
+  { id: 'shotoku',      name: '所得税'   },
+  { id: 'shohi',        name: '消費税'   },
+  { id: 'sozei_riron',  name: '租税理論' },
+  { id: 'keiei',        name: '経営学'   },
+];
+
+let settings = {};
+
+// ── Storage ──────────────────────────────────────
+function loadSettings() {
+  try {
+    const s = localStorage.getItem(STORAGE_KEY);
+    if (s) settings = JSON.parse(s);
+  } catch(e) {}
+}
+
+function saveSettings() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+  } catch(e) {}
+}
+
+// ── Date calculation ──────────────────────────────
+function calcRemainingDays() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const deadline = new Date(today.getFullYear(), 7, 21); // 8月21日
+  return Math.floor((deadline - today) / (1000 * 60 * 60 * 24));
+}
+
+function getDeadlineLabel() {
+  const today = new Date();
+  const deadline = new Date(today.getFullYear(), 7, 21);
+  return `${deadline.getMonth() + 1}月${deadline.getDate()}日まで`;
+}
+
+// ── Per-subject calculation ───────────────────────
+function calcDaysPerReview(hoursPerReview, hoursPerDay) {
+  const h = parseFloat(hoursPerReview);
+  const d = parseFloat(hoursPerDay);
+  if (!h || !d || h <= 0 || d <= 0) return null;
+  return h / d;
+}
+
+function calcMaxReviews(hoursPerReview, hoursPerDay, remainingDays) {
+  const dpr = calcDaysPerReview(hoursPerReview, hoursPerDay);
+  if (dpr === null || remainingDays <= 0) return null;
+  return remainingDays / dpr;
+}
+
+function getBadgeClass(reviews, remainingDays) {
+  if (remainingDays <= 0) return 'expired';
+  if (reviews === null) return '';
+  if (reviews >= 8) return 'r5';
+  if (reviews >= 6) return 'r4';
+  if (reviews >= 4) return 'r3';
+  if (reviews >= 2) return 'r2';
+  return 'r1';
+}
+
+function getBadgeText(reviews, remainingDays) {
+  if (remainingDays <= 0) return '期限切れ';
+  if (reviews === null) return '–';
+  return reviews.toFixed(1) + '周';
+}
+
+function getBarColor(cls) {
+  const map = { r5: '#5c80d8', r4: '#3aac72', r3: '#c9a020', r2: '#d47030', r1: '#d04535' };
+  return map[cls] || '#d0d0cb';
+}
+
+function getBarWidth(reviews) {
+  if (!reviews || reviews <= 0) return 0;
+  return Math.min(100, reviews * 8.33); // 12周で100%
+}
+
+// ── Header update ─────────────────────────────────
+function updateHeader() {
+  const days = calcRemainingDays();
+  const numEl = document.getElementById('remaining-num');
+  const lblEl = document.getElementById('remaining-days-label');
+  const dlEl  = document.getElementById('deadline-label');
+
+  numEl.className = 'remaining-num';
+  if (days <= 0) {
+    numEl.textContent = '期限切れ';
+    numEl.classList.add('expired');
+    lblEl.textContent = '';
+  } else {
+    numEl.textContent = days;
+    lblEl.textContent = '日';
+    if (days <= 30) numEl.classList.add('warn');
+  }
+  dlEl.textContent = getDeadlineLabel();
+}
+
+// ── Setting change handler ────────────────────────
+function onInput(id, field, value) {
+  if (!settings[id]) settings[id] = {};
+  settings[id][field] = value;
+  saveSettings();
+  refreshRow(id);
+}
+
+// ── Refresh a single subject's display ───────────
+function refreshRow(id) {
+  const remainingDays = calcRemainingDays();
+  const s = settings[id] || {};
+  const reviews  = calcMaxReviews(s.hoursPerReview, s.hoursPerDay, remainingDays);
+  const dpr      = calcDaysPerReview(s.hoursPerReview, s.hoursPerDay);
+  const cls      = getBadgeClass(reviews, remainingDays);
+  const text     = getBadgeText(reviews, remainingDays);
+  const dprText  = dpr !== null ? dpr.toFixed(1) + '日' : '–';
+
+  // Desktop table
+  const calcCell  = document.getElementById('calc-' + id);
+  const badgeCell = document.getElementById('badge-' + id);
+  if (calcCell)  calcCell.textContent  = dprText;
+  if (badgeCell) {
+    badgeCell.textContent  = text;
+    badgeCell.className    = 'badge' + (cls ? ' ' + cls : '');
+  }
+
+  // Mobile card
+  const mCalc  = document.getElementById('m-calc-' + id);
+  const mBadge = document.getElementById('m-badge-' + id);
+  const mBar   = document.getElementById('m-bar-' + id);
+  if (mCalc)  mCalc.textContent  = dpr !== null ? '1周 = ' + dprText : '';
+  if (mBadge) {
+    mBadge.textContent = text;
+    mBadge.className   = 'badge' + (cls ? ' ' + cls : '');
+  }
+  if (mBar) {
+    mBar.style.width           = getBarWidth(reviews) + '%';
+    mBar.style.backgroundColor = getBarColor(cls);
+  }
+}
+
+// ── Build DOM ─────────────────────────────────────
+function buildTable() {
+  const remainingDays = calcRemainingDays();
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = '';
+
+  SUBJECTS.forEach(({ id, name }) => {
+    const s = settings[id] || {};
+    const reviews = calcMaxReviews(s.hoursPerReview, s.hoursPerDay, remainingDays);
+    const dpr     = calcDaysPerReview(s.hoursPerReview, s.hoursPerDay);
+    const cls     = getBadgeClass(reviews, remainingDays);
+    const text    = getBadgeText(reviews, remainingDays);
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="col-name">${name}</td>
+      <td><input class="num-input" type="number" min="0" step="0.5" placeholder="–"
+            value="${s.hoursPerReview || ''}"
+            oninput="onInput('${id}','hoursPerReview',this.value)"></td>
+      <td><input class="num-input" type="number" min="0" step="0.5" placeholder="–"
+            value="${s.hoursPerDay || ''}"
+            oninput="onInput('${id}','hoursPerDay',this.value)"></td>
+      <td class="col-calc" id="calc-${id}">${dpr !== null ? dpr.toFixed(1) + '日' : '–'}</td>
+      <td><span class="badge ${cls}" id="badge-${id}">${text}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function buildCards() {
+  const remainingDays = calcRemainingDays();
+  const wrap = document.getElementById('cards-wrap');
+  wrap.innerHTML = '';
+
+  SUBJECTS.forEach(({ id, name }) => {
+    const s = settings[id] || {};
+    const reviews = calcMaxReviews(s.hoursPerReview, s.hoursPerDay, remainingDays);
+    const dpr     = calcDaysPerReview(s.hoursPerReview, s.hoursPerDay);
+    const cls     = getBadgeClass(reviews, remainingDays);
+    const text    = getBadgeText(reviews, remainingDays);
+    const barW    = getBarWidth(reviews);
+    const barCol  = getBarColor(cls);
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-header">
+        <span class="card-name">${name}</span>
+        <span class="badge ${cls}" id="m-badge-${id}">${text}</span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" id="m-bar-${id}"
+        style="width:${barW}%;background-color:${barCol}"></div></div>
+      <div class="card-inputs">
+        <div class="input-group">
+          <label>① 1周の時間（時間）</label>
+          <input class="num-input" type="number" min="0" step="0.5" placeholder="–"
+            value="${s.hoursPerReview || ''}"
+            oninput="onInput('${id}','hoursPerReview',this.value)">
+        </div>
+        <div class="input-group">
+          <label>② 1日の時間（時間/日）</label>
+          <input class="num-input" type="number" min="0" step="0.5" placeholder="–"
+            value="${s.hoursPerDay || ''}"
+            oninput="onInput('${id}','hoursPerDay',this.value)">
+        </div>
+      </div>
+      <div class="card-calc" id="m-calc-${id}">${dpr !== null ? '1周 = ' + dpr.toFixed(1) + '日' : ''}</div>
+    `;
+    wrap.appendChild(card);
+  });
+}
+
+// ── Backup / Restore ──────────────────────────────
+async function exportData() {
+  const data = {
+    version: 1,
+    label: '復習周期管理ツール',
+    exportedAt: new Date().toISOString(),
+    settings,
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const file = new File([blob], 'review_cycle_backup.json', { type: 'application/json' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file] }); return; } catch(e) {}
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'review_cycle_backup.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.settings) throw new Error('invalid');
+      if (!confirm('現在のデータを上書きして復元しますか？')) return;
+      settings = data.settings;
+      saveSettings();
+      location.reload();
+    } catch(err) {
+      alert('ファイルの読み込みに失敗しました。');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ── Init ─────────────────────────────────────────
+loadSettings();
+updateHeader();
+buildTable();
+buildCards();
+</script>
+</body>
+</html>
