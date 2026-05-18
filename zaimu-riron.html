@@ -883,6 +883,32 @@ body {
 }
 
 
+.view-tabs {
+  display: flex;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.vtab {
+  flex: 1;
+  padding: 9px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Noto Sans JP', sans-serif;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-3);
+  border-bottom: 2px solid transparent;
+  transition: all .15s;
+  letter-spacing: .02em;
+}
+
+.vtab.active {
+  color: var(--text);
+  border-bottom-color: var(--text);
+}
+
 /* ── 次ラウンドスキップ ── */
 .item-row.item-skipped {
   opacity: 0.38;
@@ -1471,7 +1497,6 @@ body {
         <button class="btn-icon" onclick="exportData()">バックアップ</button>
         <button class="btn-icon" onclick="document.getElementById('import-input').click()">復元</button>
         <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)">
-        <button class="btn-icon" id="weakness-btn" onclick="toggleWeaknessPage()">履歴一覧</button>
         <button class="btn-icon" id="close-all-btn" onclick="closeAllOverlays()" style="display:none;background:var(--x-bg);border-color:var(--x-color);color:var(--x-color);">✕ 閉じる</button>
       </div>
     </div>
@@ -1483,6 +1508,10 @@ body {
   </div>
   <div class="tabs" id="round-tabs"></div>
   <div class="round-info-bar" id="round-info-bar"></div>
+  <div class="view-tabs" id="view-tabs">
+    <button class="vtab active" onclick="showPage('all', this)">全問題</button>
+    <button class="vtab" onclick="showPage('history', this)">履歴一覧</button>
+  </div>
 </div>
 
 <div id="main-view">
@@ -2535,11 +2564,12 @@ function refreshChProg(itemId) {
 }
 
 // ── 履歴一覧 ──
-function toggleWeaknessPage() {
-  showingWeakness = !showingWeakness;
+function showPage(page, btn) {
+  showingWeakness = page === 'history';
   document.getElementById('main-view').style.display = showingWeakness ? 'none' : 'block';
   document.getElementById('weakness-view').style.display = showingWeakness ? 'block' : 'none';
-  document.getElementById('weakness-btn').classList.toggle('active', showingWeakness);
+  document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
   if (showingWeakness) renderHistoryPage();
 }
 
