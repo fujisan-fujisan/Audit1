@@ -684,13 +684,6 @@ function buildItemRow(item) {
     histHTML += `</div>`;
   }
 
-  const nrpHTML = `
-    <div class="nrp" style="${u ? '' : 'display:none'}">
-      <span class="nrp-label">次回</span>
-      <button class="nrp-btn${skipNext === false ? ' nrp-include' : ''}" onclick="setSkipNext('${item.id}', false)">含める</button>
-      <button class="nrp-btn${skipNext === true ? ' nrp-skip' : ''}" onclick="setSkipNext('${item.id}', true)">スキップ</button>
-    </div>`;
-
   const impCls = item.imp === 'A' ? 'imp-A' : item.imp === 'B' ? 'imp-B' : item.imp === 'C+' ? 'imp-Cplus' : 'imp-C';
   const diffCls = item.diff === 'unknown' ? 'diff-unknown' : `diff-${item.diff}`;
   const diffLabel = item.diff === 'unknown' ? '－' : item.diff;
@@ -711,9 +704,15 @@ function buildItemRow(item) {
         </div>
       </div>
     </div>
-    ${nrpHTML}
     ${histHTML}
-    <button id="memo-btn-${item.id}" class="item-memo-btn${memoState[item.id] ? '' : ' no-memo'}" onclick="memoState['${item.id}'] ? openMemoView('${item.id}') : openMemoInput('${item.id}')">${memoState[item.id] ? 'メモ' : '＋メモ'}</button>`;
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+      <button id="memo-btn-${item.id}" class="item-memo-btn${memoState[item.id] ? '' : ' no-memo'}" onclick="memoState['${item.id}'] ? openMemoView('${item.id}') : openMemoInput('${item.id}')">${memoState[item.id] ? 'メモ' : '＋メモ'}</button>
+      <div class="nrp" style="${u ? '' : 'display:none'}">
+        <span class="nrp-label">次回</span>
+        <button class="nrp-btn${skipNext === false ? ' nrp-include' : ''}" onclick="setSkipNext('${item.id}', false)">含める</button>
+        <button class="nrp-btn${skipNext === true ? ' nrp-skip' : ''}" onclick="setSkipNext('${item.id}', true)">スキップ</button>
+      </div>
+    </div>`;
   return row;
 }
 
