@@ -464,45 +464,13 @@ body {
   font-weight:700
 }
 
-.review-eval-btns {
-  display:flex;
-  gap:3px;
-  flex-shrink:0;
-  align-items:center
-}
-
-.ub-rev {
-  width:34px;
-  height:26px;
-  border-radius:var(--radius-sm);
-  border:1px solid var(--border-strong);
-  background:var(--bg);
-  font-size:12px;
-  font-weight:700;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  transition:all .12s;
-  color:var(--text-3);
-  font-family:'Noto Sans JP',sans-serif
-}
-
-.ub-rev:active {
-  transform:scale(.88)
-}
-
-.ub-rev.sel-o {
-  background:var(--o-bg);
-  border-color:var(--o-color);
-  color:var(--o-color)
-}
-
-.ub-rev.sel-x {
-  background:var(--x-bg);
-  border-color:var(--x-color);
-  color:var(--x-color)
-}
+.item-row.item-skipped { opacity: 0.38; }
+.skip-chip { font-size:9px; font-weight:700; font-family:'DM Mono',monospace; padding:2px 5px; border-radius:4px; background:#f0f0ee; border:1px solid #ccc; color:#999; flex-shrink:0; }
+.nrp { display:flex; align-items:center; gap:6px; padding:3px 0 1px; }
+.nrp-label { font-size:10px; color:var(--text-3); font-family:'Noto Sans JP',sans-serif; flex-shrink:0; }
+.nrp-btn { height:28px; padding:0 11px; border-radius:var(--radius-sm); border:1px solid var(--border-strong); background:var(--bg); font-size:12px; font-weight:700; cursor:pointer; font-family:'Noto Sans JP',sans-serif; color:var(--text-3); transition:all .12s; white-space:nowrap; }
+.nrp-btn.nrp-include { background:var(--o-bg); border-color:var(--o-color); color:var(--o-color); }
+.nrp-btn.nrp-skip { background:var(--x-bg); border-color:var(--x-color); color:var(--x-color); }
 
 .item-history {
   display:flex;
@@ -567,34 +535,6 @@ body {
   background:#fde;
   border-color:#900;
   color:#900
-}
-
-.urgency-wrap {
-  display:flex;
-  align-items:center;
-  gap:7px
-}
-
-.urgency-score {
-  font-size:11px;
-  font-weight:700;
-  font-family:'DM Mono',monospace;
-  min-width:32px;
-  flex-shrink:0
-}
-
-.urgency-track {
-  flex:1;
-  height:5px;
-  background:var(--border);
-  border-radius:999px;
-  overflow:hidden
-}
-
-.urgency-fill {
-  height:100%;
-  border-radius:999px;
-  transition:width .4s ease,background .4s ease
 }
 
 /* ── キーワード ── */
@@ -1369,7 +1309,7 @@ body {
         <button class="btn-icon" onclick="exportData()">バックアップ</button>
         <button class="btn-icon" onclick="document.getElementById('import-input').click()">復元</button>
         <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)">
-        <button class="btn-icon" id="weakness-btn" onclick="toggleWeaknessPage()">履歴一覧</button>
+        <button class="btn-icon" id="kw-manage-btn" onclick="toggleKwManagePage()">キーワード</button>
       </div>
     </div>
     <div class="progress-row">
@@ -1381,8 +1321,8 @@ body {
   <div class="tabs" id="round-tabs"></div>
   <div class="round-info-bar" id="round-info-bar"></div>
   <div class="view-tabs" id="view-tabs">
-    <button class="vtab active" onclick="setViewTab('all',this)">全問題</button>
-    <button class="vtab" onclick="setViewTab('urgent',this)">要復習</button>
+    <button class="vtab active" onclick="showPage('all',this)">全問題</button>
+    <button class="vtab" onclick="showPage('history',this)">履歴一覧</button>
   </div>
 </div>
 <div id="main-view">
@@ -1391,7 +1331,8 @@ body {
     <button class="next-round-btn" onclick="openScopeModal()">次の回を始める →</button>
   </div>
 </div>
-<div id="weakness-view" class="content" style="display:none"></div>
+<div id="weakness-view" class="content" style="display:none;"></div>
+<div id="kw-manage-view" class="content" style="display:none;padding-bottom:100px;"></div>
 
 <div class="overlay" id="scope-overlay">
   <div class="scope-modal">
@@ -1903,50 +1844,28 @@ document.getElementById('kw-eval-overlay').addEventListener('click',e=>{
   if(e.target===document.getElementById('kw-eval-overlay'))closeKwEvalPopup();
 });
 
-/* ── urgency ── */
-function calcUrgency(id){
-  const r=getItemR(id);
-  if(r.reviewPassed===true)return null;
-  if(!r.u||!r.date)return null;
-  const item=DATA.flatMap(c=>c.items).find(i=>i.id===id);
-  if(!item||!itemInScope(item))return null;
-  const K=item.imp==='A'?'A':'B';
-  if(r.reviewDate){
-    const days={A:6,B:13}[K];
-    return Math.min(100,Math.round(Math.floor((Date.now()-new Date(r.reviewDate).getTime())/86400000)/days*100));
-  }
-  const DAYS={A:{oo:13,o:9,n:6,x:4,xx:3},B:{oo:18,o:14,n:11,x:9,xx:6}};
-  const days=(DAYS[K]||DAYS.B)[r.u]||11;
-  return Math.min(100,Math.round(Math.floor((Date.now()-new Date(r.date).getTime())/86400000)/days*100));
+function isSkippedThisRound(itemId) {
+  const prevRound = curRound() - 1;
+  if (prevRound < 0) return false;
+  return getItemR(itemId, prevRound).skipNext === true;
 }
-function urgencyColor(s){return s>=80?'#c0392b':s>=55?'#e67e22':s>=30?'#d4a017':'#1a7a4a'}
 
-let curViewTab='all';
-function setViewTab(tab,btn){
-  curViewTab=tab;
-  localStorage.setItem('kanri-riron-uitab',tab);
-  document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  updateItemTopButtons();applyFilter();
+function isGrayed(itemId) {
+  return isSkippedThisRound(itemId) && !getItemR(itemId).u;
 }
-function updateItemTopButtons(){
-  DATA.forEach(ch=>ch.items.forEach(item=>{
-    if(!itemInScope(item))return;
-    const row=document.getElementById('irow-'+item.id);if(!row)return;
-    const r=getItemR(item.id);
-    const urg=calcUrgency(item.id);
-    const showRev=urg!==null&&curViewTab==='urgent';
-    const rp=r.reviewPassed===true,hasRX=!rp&&!!r.reviewDate;
-    const uB=row.querySelector('.u-btns'),revB=row.querySelector('.review-eval-btns');
-    if(showRev){
-      if(uB)uB.style.display='none';
-      if(revB){revB.style.display='flex';
-        const[o,x]=revB.querySelectorAll('.ub-rev');
-        if(o)o.className='ub-rev'+(rp?' sel-o':'');
-        if(x)x.className='ub-rev'+(hasRX?' sel-x':'');
-      }
-    }else{if(uB)uB.style.display='flex';if(revB)revB.style.display='none';}
-  }));
+
+function setSkipNext(itemId, skip) {
+  const r = getItemR(itemId);
+  r.skipNext = skip;
+  setItemR(itemId, r);
+  save();
+  const row = document.getElementById('irow-' + itemId);
+  if (!row) return;
+  const nrp = row.querySelector('.nrp');
+  if (!nrp) return;
+  const [inclBtn, skipBtn] = nrp.querySelectorAll('.nrp-btn');
+  if (inclBtn) inclBtn.className = 'nrp-btn' + (skip === false ? ' nrp-include' : '');
+  if (skipBtn) skipBtn.className = 'nrp-btn' + (skip === true ? ' nrp-skip' : '');
 }
 function applyFilter(){
   DATA.forEach(ch=>{
