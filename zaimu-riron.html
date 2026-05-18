@@ -1497,6 +1497,7 @@ body {
         <button class="btn-icon" onclick="exportData()">バックアップ</button>
         <button class="btn-icon" onclick="document.getElementById('import-input').click()">復元</button>
         <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)">
+        <button class="btn-icon" id="kw-manage-btn" onclick="toggleKwManagePage()">キーワード</button>
         <button class="btn-icon" id="close-all-btn" onclick="closeAllOverlays()" style="display:none;background:var(--x-bg);border-color:var(--x-color);color:var(--x-color);">✕ 閉じる</button>
       </div>
     </div>
@@ -1522,6 +1523,8 @@ body {
 </div>
 
 <div id="weakness-view" class="content" style="display:none;"></div>
+
+<div id="kw-manage-view" class="content" style="display:none;padding-bottom:100px;"></div>
 
 <div class="overlay" id="scope-overlay">
   <div class="scope-modal">
@@ -2124,6 +2127,7 @@ function evalKwPopup(idx,result){
   setKwResult(kwEvalItemId,idx,result);
   renderKwEvalList();
   refreshKwSection(kwEvalItemId,true);
+  refreshKwManageItem(kwEvalItemId);
 }
 function closeKwEvalPopup(){
   document.getElementById('kw-eval-overlay').classList.remove('open');
@@ -2352,10 +2356,6 @@ function buildItemRow(item) {
     </div>
     ${nrpHTML}
     ${histHTML}`;
-  // キーワードセクションはappendChildで安全に追加
-  const kwTmp=document.createElement('div');
-  kwTmp.innerHTML=buildKwSection(item);
-  row.appendChild(kwTmp.firstElementChild);
   return row;
 }
 
@@ -2563,14 +2563,92 @@ function refreshChProg(itemId) {
   }
 }
 
-// ── 履歴一覧 ──
+// ── ページ切替 ──
 function showPage(page, btn) {
+  document.getElementById('kw-manage-view').style.display = 'none';
+  document.getElementById('kw-manage-btn').classList.remove('active');
+  showingKwManage = false;
   showingWeakness = page === 'history';
   document.getElementById('main-view').style.display = showingWeakness ? 'none' : 'block';
   document.getElementById('weakness-view').style.display = showingWeakness ? 'block' : 'none';
   document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   if (showingWeakness) renderHistoryPage();
+}
+
+let showingKwManage = false;
+
+function toggleKwManagePage() {
+  showingKwManage = !showingKwManage;
+  document.getElementById('kw-manage-btn').classList.toggle('active', showingKwManage);
+  if (showingKwManage) {
+    document.getElementById('main-view').style.display = 'none';
+    document.getElementById('weakness-view').style.display = 'none';
+    document.getElementById('kw-manage-view').style.display = 'block';
+    renderKwManagePage();
+  } else {
+    document.getElementById('kw-manage-view').style.display = 'none';
+    document.getElementById('main-view').style.display = showingWeakness ? 'none' : 'block';
+    document.getElementById('weakness-view').style.display = showingWeakness ? 'block' : 'none';
+  }
+}
+
+function renderKwManagePage() {
+  const view = document.getElementById('kw-manage-view');
+  let html = '<div style="padding:12px 0 6px;font-size:11px;font-weight:700;color:var(--text-3);letter-spacing:.1em;text-transform:uppercase;">キーワード管理</div>';
+  DATA.forEach(ch => {
+    const scopedChItems = ch.items.filter(itemInScope);
+    if (!scopedChItems.length) return;
+    html += `<div class="ch-card" style="margin-bottom:8px;">`;
+    html += `<div style="padding:10px 14px;font-size:12px;font-weight:700;color:var(--text);border-bottom:1px solid var(--border);">${ch.ch}　${ch.chName}</div>`;
+    scopedChItems.forEach(item => {
+      const kws = getKeywords(item.id);
+      html += `<div style="padding:10px 14px;border-bottom:1px solid var(--border);">`;
+      html += `<div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:6px;">`;
+      html += `<span class="imp-badge imp-${item.imp}">${item.imp}</span>`;
+      html += `<span style="font-size:11px;color:var(--text);flex:1;line-height:1.5;">${escHtml(item.name)}</span>`;
+      html += `</div>`;
+      html += `<div id="kwmlist-${item.id}" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;">${buildKwManageChips(item.id, kws)}</div>`;
+      html += `<div style="display:flex;gap:6px;align-items:center;">`;
+      html += `<input class="kw-input" id="kwfield-${item.id}" type="text" placeholder="＋ キーワードを追加..." maxlength="30" oncompositionstart="_isComposing=true" oncompositionend="_isComposing=false" onkeydown="if(event.key==='Enter'&&!event.isComposing&&!_isComposing){event.preventDefault();commitKwManage('${item.id}')}">`;
+      html += `<button class="kw-add-confirm-btn" onclick="commitKwManage('${item.id}')">追加</button>`;
+      html += `</div>`;
+      html += `</div>`;
+    });
+    html += `</div>`;
+  });
+  view.innerHTML = html;
+}
+
+function buildKwManageChips(id, kws) {
+  if (!kws.length) return `<span style="font-size:10px;color:var(--text-3);">キーワードなし</span>`;
+  return kws.map((kw, idx) =>
+    `<div style="display:inline-flex;align-items:center;gap:3px;background:var(--bg);border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:3px 6px 3px 9px;font-size:11px;">
+      <span style="color:var(--text);font-family:'Noto Sans JP',sans-serif;">${escHtml(kw.word)}</span>
+      <button class="kw-del" onclick="removeKwManage('${id}',${idx})">&#x2715;</button>
+    </div>`
+  ).join('');
+}
+
+function commitKwManage(id) {
+  const f = document.getElementById('kwfield-' + id);
+  if (!f) return;
+  const w = f.value.trim();
+  if (!w) return;
+  addKeyword(id, w);
+  f.value = '';
+  refreshKwManageItem(id);
+}
+
+function removeKwManage(id, idx) {
+  deleteKeyword(id, idx);
+  refreshKwManageItem(id);
+}
+
+function refreshKwManageItem(id) {
+  const el = document.getElementById('kwmlist-' + id);
+  if (!el) return;
+  el.innerHTML = buildKwManageChips(id, getKeywords(id));
 }
 
 let histActiveChIdx = 0;
