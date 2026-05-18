@@ -2593,31 +2593,72 @@ function toggleKwManagePage() {
   }
 }
 
+let kwActiveChIdx = 0;
+
 function renderKwManagePage() {
   const view = document.getElementById('kw-manage-view');
-  let html = '<div style="padding:12px 0 6px;font-size:11px;font-weight:700;color:var(--text-3);letter-spacing:.1em;text-transform:uppercase;">キーワード管理</div>';
-  DATA.forEach(ch => {
-    const scopedChItems = ch.items.filter(itemInScope);
-    if (!scopedChItems.length) return;
+  const visibleChs = DATA.filter(ch => ch.items.filter(itemInScope).length > 0);
+  if (kwActiveChIdx >= visibleChs.length) kwActiveChIdx = 0;
+
+  // 章タブ（横スクロール）
+  let html = `<div id="kw-ch-tabs" style="display:flex;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);margin:0 -14px;padding:0 14px;gap:0;">`;
+  visibleChs.forEach((ch, idx) => {
+    const active = idx === kwActiveChIdx;
+    html += `<button onclick="selectKwCh(${idx})" style="flex-shrink:0;padding:9px 12px;font-size:11px;font-weight:700;font-family:'Noto Sans JP',sans-serif;background:transparent;border:none;border-bottom:2px solid ${active ? 'var(--text)' : 'transparent'};color:${active ? 'var(--text)' : 'var(--text-3)'};cursor:pointer;white-space:nowrap;transition:all .15s;">${ch.ch}</button>`;
+  });
+  html += `</div>`;
+
+  html += `<div id="kw-ch-content">`;
+  html += buildKwChContent(visibleChs[kwActiveChIdx]);
+  html += `</div>`;
+
+  view.innerHTML = html;
+
+  // アクティブタブを中央付近にスクロール
+  const tabBar = view.querySelector('#kw-ch-tabs');
+  const activeBtn = tabBar?.querySelectorAll('button')[kwActiveChIdx];
+  if (tabBar && activeBtn) {
+    tabBar.scrollLeft = activeBtn.offsetLeft - tabBar.offsetWidth / 2 + activeBtn.offsetWidth / 2;
+  }
+}
+
+function buildKwChContent(ch) {
+  if (!ch) return '';
+  const scopedChItems = ch.items.filter(itemInScope);
+  let html = `<div style="font-size:10px;font-weight:700;color:var(--text-2);padding:10px 0 8px;letter-spacing:.06em;">${ch.ch}　${ch.chName}</div>`;
+  scopedChItems.forEach(item => {
+    const kws = getKeywords(item.id);
     html += `<div class="ch-card" style="margin-bottom:8px;">`;
-    html += `<div style="padding:10px 14px;font-size:12px;font-weight:700;color:var(--text);border-bottom:1px solid var(--border);">${ch.ch}　${ch.chName}</div>`;
-    scopedChItems.forEach(item => {
-      const kws = getKeywords(item.id);
-      html += `<div style="padding:10px 14px;border-bottom:1px solid var(--border);">`;
-      html += `<div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:6px;">`;
-      html += `<span class="imp-badge imp-${item.imp}">${item.imp}</span>`;
-      html += `<span style="font-size:11px;color:var(--text);flex:1;line-height:1.5;">${escHtml(item.name)}</span>`;
-      html += `</div>`;
-      html += `<div id="kwmlist-${item.id}" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;">${buildKwManageChips(item.id, kws)}</div>`;
-      html += `<div style="display:flex;gap:6px;align-items:center;">`;
-      html += `<input class="kw-input" id="kwfield-${item.id}" type="text" placeholder="＋ キーワードを追加..." maxlength="30" oncompositionstart="_isComposing=true" oncompositionend="_isComposing=false" onkeydown="if(event.key==='Enter'&&!event.isComposing&&!_isComposing){event.preventDefault();commitKwManage('${item.id}')}">`;
-      html += `<button class="kw-add-confirm-btn" onclick="commitKwManage('${item.id}')">追加</button>`;
-      html += `</div>`;
-      html += `</div>`;
-    });
+    html += `<div style="padding:10px 14px;">`;
+    html += `<div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:6px;">`;
+    html += `<span class="imp-badge imp-${item.imp}">${item.imp}</span>`;
+    html += `<span style="font-size:11px;color:var(--text);flex:1;line-height:1.5;">${escHtml(item.name)}</span>`;
+    html += `</div>`;
+    html += `<div id="kwmlist-${item.id}" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;">${buildKwManageChips(item.id, kws)}</div>`;
+    html += `<div style="display:flex;gap:6px;align-items:center;">`;
+    html += `<input class="kw-input" id="kwfield-${item.id}" type="text" placeholder="＋ キーワードを追加..." maxlength="30" oncompositionstart="_isComposing=true" oncompositionend="_isComposing=false" onkeydown="if(event.key==='Enter'&&!event.isComposing&&!_isComposing){event.preventDefault();commitKwManage('${item.id}')}">`;
+    html += `<button class="kw-add-confirm-btn" onclick="commitKwManage('${item.id}')">追加</button>`;
+    html += `</div>`;
+    html += `</div>`;
     html += `</div>`;
   });
-  view.innerHTML = html;
+  return html;
+}
+
+function selectKwCh(idx) {
+  kwActiveChIdx = idx;
+  const view = document.getElementById('kw-manage-view');
+
+  // タブのアクティブスタイル更新
+  view.querySelectorAll('#kw-ch-tabs button').forEach((btn, i) => {
+    btn.style.borderBottomColor = i === idx ? 'var(--text)' : 'transparent';
+    btn.style.color = i === idx ? 'var(--text)' : 'var(--text-3)';
+  });
+
+  // コンテンツ差し替え
+  const visibleChs = DATA.filter(ch => ch.items.filter(itemInScope).length > 0);
+  const contentEl = view.querySelector('#kw-ch-content');
+  if (contentEl) contentEl.innerHTML = buildKwChContent(visibleChs[idx]);
 }
 
 function buildKwManageChips(id, kws) {
