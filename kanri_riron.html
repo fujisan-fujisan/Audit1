@@ -1875,10 +1875,8 @@ function applyFilter(){
     ch.items.forEach(item=>{
       const row=document.getElementById('irow-'+item.id);if(!row)return;
       if(!itemInScope(item)){row.style.display='none';return;}
-      let show=true;
-      if(curViewTab==='urgent'){const s=calcUrgency(item.id);show=s!==null&&s>=70;}
-      row.style.display=show?'':'none';
-      if(show)any=true;
+      row.style.display='';
+      any=true;
     });
     card.classList.toggle('hidden',!any);
   });
@@ -1947,6 +1945,8 @@ function saveRecord(key){
 
 function buildItemRow(item){
   const r=getItemR(item.id),u=r.u||null;
+  const grayed=isGrayed(item.id);
+  const skipNext=r.skipNext;
   const totalR=appState.rounds.length;
   let histHTML='';
   if(totalR>1){
@@ -1959,35 +1959,26 @@ function buildItemRow(item){
     }
     histHTML+='</div>';
   }
-  const urg=calcUrgency(item.id),rp=r.reviewPassed===true,hasRX=!rp&&!!r.reviewDate;
-  const showRev=urg!==null&&curViewTab==='urgent';
-  const urgHTML=urg!==null?`<div class="urgency-wrap" id="urg-${item.id}">
-    <span class="urgency-score" style="color:${urgencyColor(urg)}">${urg}</span>
-    <div class="urgency-track"><div class="urgency-fill" style="width:${urg}%;background:${urgencyColor(urg)}"></div></div>
-  </div>`:'';
-  const row=document.createElement('div');row.className='item-row';row.id='irow-'+item.id;
-  // キーワードセクション以外を innerHTML で構築
+  const row=document.createElement('div');row.className='item-row'+(grayed?' item-skipped':'');row.id='irow-'+item.id;
   row.innerHTML=`
     <div class="item-top">
       <span class="item-name">${item.name}</span>
       <span class="imp-badge imp-${item.imp}">${item.imp}</span>
-      <div class="u-btns"${showRev?' style="display:none"':''}>
+      ${grayed?'<span class="skip-chip">SKIP</span>':''}
+      <div class="u-btns">
         <button class="ub${u==='oo'?' sel-oo':''}" onclick="setU('${item.id}','oo')">○○</button>
         <button class="ub${u==='o'?' sel-o':''}" onclick="setU('${item.id}','o')">○</button>
         <button class="ub${u==='n'?' sel-n':''}" onclick="setU('${item.id}','n')">ー</button>
         <button class="ub${u==='x'?' sel-x':''}" onclick="setU('${item.id}','x')">×</button>
         <button class="ub${u==='xx'?' sel-xx':''}" onclick="setU('${item.id}','xx')">××</button>
       </div>
-      <div class="review-eval-btns"${showRev?'':' style="display:none"'}>
-        <button class="ub-rev${rp?' sel-o':''}" onclick="reviewItem('${item.id}','o')">○</button>
-        <button class="ub-rev${hasRX?' sel-x':''}" onclick="reviewItem('${item.id}','x')">×</button>
-      </div>
     </div>
-    ${urgHTML}${histHTML}`;
-  // キーワードセクションは appendChild で安全に追加（× 文字が innerHTML を壊さないよう）
-  const kwTmp=document.createElement('div');
-  kwTmp.innerHTML=buildKwSection(item);
-  row.appendChild(kwTmp.firstElementChild);
+    ${histHTML}
+    <div class="nrp" style="${u?'':'display:none'}">
+      <span class="nrp-label">次回</span>
+      <button class="nrp-btn${skipNext===false?' nrp-include':''}" onclick="setSkipNext('${item.id}',false)">含める</button>
+      <button class="nrp-btn${skipNext===true?' nrp-skip':''}" onclick="setSkipNext('${item.id}',true)">スキップ</button>
+    </div>`;
   return row;
 }
 
@@ -2001,12 +1992,6 @@ function setU(id,type){
     openKwEvalPopup(id);
   }
 }
-function reviewItem(id,type){
-  const r=getItemR(id);
-  if(type==='o'){r.reviewPassed=true;r.reviewDate=today();}
-  else{r.reviewPassed=false;r.reviewDate=today();}
-  setItemR(id,r);save();refreshItem(id);applyFilter();
-}
 function refreshItem(id){
   const r=getItemR(id),row=document.getElementById('irow-'+id);if(!row)return;
   ['oo','o','n','x','xx'].forEach(t=>{
@@ -2014,28 +1999,28 @@ function refreshItem(id){
     btn.classList.remove('sel-oo','sel-o','sel-n','sel-x','sel-xx');
     if(r.u===t)btn.classList.add('sel-'+t);
   });
-  const urg=calcUrgency(id),showRev=urg!==null&&curViewTab==='urgent';
-  const rp=r.reviewPassed===true,hasRX=!rp&&!!r.reviewDate;
-  const uB=row.querySelector('.u-btns'),revB=row.querySelector('.review-eval-btns');
-  if(showRev){
-    if(uB)uB.style.display='none';
-    if(revB){revB.style.display='flex';
-      const[o,x]=revB.querySelectorAll('.ub-rev');
-      if(o)o.className='ub-rev'+(rp?' sel-o':'');
-      if(x)x.className='ub-rev'+(hasRX?' sel-x':'');
-    }
-  }else{if(uB)uB.style.display='flex';if(revB)revB.style.display='none';}
-  const wrap=row.querySelector('.urgency-wrap');
-  if(urg!==null){
-    const c=urgencyColor(urg);
-    const el=document.createElement('div');el.className='urgency-wrap';el.id='urg-'+id;
-    el.innerHTML=`<span class="urgency-score" style="color:${c}">${urg}</span><div class="urgency-track"><div class="urgency-fill" style="width:${urg}%;background:${c}"></div></div>`;
-    if(wrap)wrap.replaceWith(el);else row.querySelector('.item-top')?.insertAdjacentElement('afterend',el);
-  }else if(wrap)wrap.remove();
+  const nrp=row.querySelector('.nrp');
+  if(nrp){
+    nrp.style.display=r.u?'':'none';
+    const[inclBtn,skipBtn]=nrp.querySelectorAll('.nrp-btn');
+    if(inclBtn)inclBtn.className='nrp-btn'+(r.skipNext===false?' nrp-include':'');
+    if(skipBtn)skipBtn.className='nrp-btn'+(r.skipNext===true?' nrp-skip':'');
+  }
+  const grayed=isGrayed(id);
+  row.classList.toggle('item-skipped',grayed);
+  const topEl=row.querySelector('.item-top');
+  if(topEl){
+    const existing=topEl.querySelector('.skip-chip');
+    if(grayed&&!existing){
+      const chip=document.createElement('span');chip.className='skip-chip';chip.textContent='SKIP';
+      const impBadge=topEl.querySelector('.imp-badge');
+      if(impBadge)impBadge.insertAdjacentElement('afterend',chip);else topEl.appendChild(chip);
+    }else if(!grayed&&existing){existing.remove();}
+  }
 }
 function refreshChProg(id){
   const ch=DATA.find(c=>c.items.find(i=>i.id===id));if(!ch)return;
-  const key=chKey(ch),scoped=ch.items.filter(itemInScope);
+  const key=chKey(ch),scoped=ch.items.filter(itemInScope).filter(i=>!isGrayed(i.id));
   const done=scoped.filter(i=>getItemR(i.id).u).length;
   const el=document.getElementById('chprog-'+key);
   if(el){el.textContent=`${done}/${scoped.length}`;el.className='ch-badge'+(done===scoped.length&&scoped.length>0?' done':'');}
@@ -2070,7 +2055,7 @@ function renderRoundTabs(){
 function switchRound(i){appState.currentRound=i;save();render()}
 
 function updateProgress(){
-  const items=scopedItems(),total=items.length,done=items.filter(i=>getItemR(i.id).u).length;
+  const items=scopedItems().filter(i=>!isGrayed(i.id)),total=items.length,done=items.filter(i=>getItemR(i.id).u).length;
   const pct=total?Math.round(done/total*100):0;
   document.getElementById('prog-pct').textContent=pct+'%';
   document.getElementById('prog-lbl').textContent=`${done} / ${total} 完了`;
@@ -2102,17 +2087,128 @@ function updateRoundInfoBar(pct){
     ${pH}`;
 }
 function updateNextRoundBtn(){
-  const items=scopedItems(),pct=items.length?items.filter(i=>getItemR(i.id).u).length/items.length*100:0;
+  const items=scopedItems().filter(i=>!isGrayed(i.id)),pct=items.length?items.filter(i=>getItemR(i.id).u).length/items.length*100:0;
   document.getElementById('next-round-wrap').style.display=pct>=70?'block':'none';
 }
 
-function toggleWeaknessPage(){
-  showingWeakness=!showingWeakness;
-  document.getElementById('main-view').style.display=showingWeakness?'none':'block';
-  document.getElementById('weakness-view').style.display=showingWeakness?'block':'none';
-  document.getElementById('view-tabs').style.display=showingWeakness?'none':'flex';
-  document.getElementById('weakness-btn').classList.toggle('active',showingWeakness);
-  if(showingWeakness)renderHistoryPage();
+let showingKwManage = false;
+
+function showPage(page, btn) {
+  document.getElementById('kw-manage-view').style.display = 'none';
+  document.getElementById('kw-manage-btn').classList.remove('active');
+  showingKwManage = false;
+  showingWeakness = page === 'history';
+  document.getElementById('main-view').style.display = showingWeakness ? 'none' : 'block';
+  document.getElementById('weakness-view').style.display = showingWeakness ? 'block' : 'none';
+  document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (showingWeakness) renderHistoryPage();
+}
+
+function toggleKwManagePage() {
+  showingKwManage = !showingKwManage;
+  document.getElementById('kw-manage-btn').classList.toggle('active', showingKwManage);
+  if (showingKwManage) {
+    document.getElementById('main-view').style.display = 'none';
+    document.getElementById('weakness-view').style.display = 'none';
+    document.getElementById('kw-manage-view').style.display = 'block';
+    document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
+    renderKwManagePage();
+  } else {
+    document.getElementById('kw-manage-view').style.display = 'none';
+    document.getElementById('main-view').style.display = showingWeakness ? 'none' : 'block';
+    document.getElementById('weakness-view').style.display = showingWeakness ? 'block' : 'none';
+  }
+}
+
+let kwActiveChIdx = 0;
+let _isComposing = false;
+
+function renderKwManagePage() {
+  const view = document.getElementById('kw-manage-view');
+  const visibleChs = DATA.filter(ch => ch.items.filter(itemInScope).length > 0);
+  if (kwActiveChIdx >= visibleChs.length) kwActiveChIdx = 0;
+  let html = `<div id="kw-ch-tabs" style="display:flex;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);margin:0 -14px;padding:0 14px;gap:0;">`;
+  visibleChs.forEach((ch, idx) => {
+    const active = idx === kwActiveChIdx;
+    html += `<button onclick="selectKwCh(${idx})" style="flex-shrink:0;padding:9px 12px;font-size:11px;font-weight:700;font-family:'Noto Sans JP',sans-serif;background:transparent;border:none;border-bottom:2px solid ${active?'var(--text)':'transparent'};color:${active?'var(--text)':'var(--text-3)'};cursor:pointer;white-space:nowrap;transition:all .15s;">${ch.ch}</button>`;
+  });
+  html += `</div>`;
+  html += `<div id="kw-ch-content">`;
+  html += buildKwChContent(visibleChs[kwActiveChIdx]);
+  html += `</div>`;
+  view.innerHTML = html;
+  const tabBar = view.querySelector('#kw-ch-tabs');
+  const activeBtn = tabBar?.querySelectorAll('button')[kwActiveChIdx];
+  if (tabBar && activeBtn) {
+    tabBar.scrollLeft = activeBtn.offsetLeft - tabBar.offsetWidth / 2 + activeBtn.offsetWidth / 2;
+  }
+}
+
+function buildKwChContent(ch) {
+  if (!ch) return '';
+  const scopedChItems = ch.items.filter(itemInScope);
+  let html = `<div style="font-size:10px;font-weight:700;color:var(--text-2);padding:10px 0 8px;letter-spacing:.06em;">${ch.ch}　${ch.chName}</div>`;
+  scopedChItems.forEach(item => {
+    const kws = getKeywords(item.id);
+    html += `<div class="ch-card" style="margin-bottom:8px;">`;
+    html += `<div style="padding:10px 14px;">`;
+    html += `<div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:6px;">`;
+    html += `<span class="imp-badge imp-${item.imp}">${item.imp}</span>`;
+    html += `<span style="font-size:11px;color:var(--text);flex:1;line-height:1.5;">${escHtml(item.name)}</span>`;
+    html += `</div>`;
+    html += `<div id="kwmlist-${item.id}" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;">${buildKwManageChips(item.id, kws)}</div>`;
+    html += `<div style="display:flex;gap:6px;align-items:center;">`;
+    html += `<input class="kw-input" id="kwfield-${item.id}" type="text" placeholder="＋ キーワードを追加..." maxlength="30" oncompositionstart="_isComposing=true" oncompositionend="_isComposing=false" onkeydown="if(event.key==='Enter'&&!event.isComposing&&!_isComposing){event.preventDefault();commitKwManage('${item.id}')}">`;
+    html += `<button class="kw-add-confirm-btn" onclick="commitKwManage('${item.id}')">追加</button>`;
+    html += `</div>`;
+    html += `</div>`;
+    html += `</div>`;
+  });
+  return html;
+}
+
+function selectKwCh(idx) {
+  kwActiveChIdx = idx;
+  const view = document.getElementById('kw-manage-view');
+  view.querySelectorAll('#kw-ch-tabs button').forEach((btn, i) => {
+    btn.style.borderBottomColor = i === idx ? 'var(--text)' : 'transparent';
+    btn.style.color = i === idx ? 'var(--text)' : 'var(--text-3)';
+  });
+  const visibleChs = DATA.filter(ch => ch.items.filter(itemInScope).length > 0);
+  const contentEl = view.querySelector('#kw-ch-content');
+  if (contentEl) contentEl.innerHTML = buildKwChContent(visibleChs[idx]);
+}
+
+function buildKwManageChips(id, kws) {
+  if (!kws.length) return `<span style="font-size:10px;color:var(--text-3);">キーワードなし</span>`;
+  return kws.map((kw, idx) =>
+    `<div style="display:inline-flex;align-items:center;gap:3px;background:var(--bg);border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:3px 6px 3px 9px;font-size:11px;">
+      <span style="color:var(--text);font-family:'Noto Sans JP',sans-serif;">${escHtml(kw.word)}</span>
+      <button class="kw-del" onclick="removeKwManage('${id}',${idx})">&#x2715;</button>
+    </div>`
+  ).join('');
+}
+
+function commitKwManage(id) {
+  const f = document.getElementById('kwfield-' + id);
+  if (!f) return;
+  const w = f.value.trim();
+  if (!w) return;
+  addKeyword(id, w);
+  f.value = '';
+  refreshKwManageItem(id);
+}
+
+function removeKwManage(id, idx) {
+  deleteKeyword(id, idx);
+  refreshKwManageItem(id);
+}
+
+function refreshKwManageItem(id) {
+  const el = document.getElementById('kwmlist-' + id);
+  if (!el) return;
+  el.innerHTML = buildKwManageChips(id, getKeywords(id));
 }
 
 let histActiveChIdx=0;
@@ -2325,16 +2421,7 @@ function saveDeadline(){
 }
 document.getElementById('deadline-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('deadline-overlay'))closeDeadlineModal()});
 
-const _savedTab=localStorage.getItem('kanri-riron-uitab');
-if(_savedTab)curViewTab=_savedTab;
-
 load();render();
-
-if(_savedTab){
-  document.querySelectorAll('.vtab').forEach(b=>{
-    b.classList.toggle('active',b.getAttribute('onclick').includes("'"+_savedTab+"'"));
-  });
-}
 
 JSON.parse(localStorage.getItem('kanri-riron-chopen')||'[]').forEach(k=>{
   const card=document.getElementById('chcard-'+k);if(card)card.classList.add('open');
