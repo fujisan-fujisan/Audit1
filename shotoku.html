@@ -101,25 +101,13 @@ body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); color: va
 .ub.sel-o { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
 .ub.sel-x { background: var(--x-bg); border-color: var(--x-color); color: var(--x-color); }
 
-/* ── 復習評価ボタン ── */
-.review-eval-btns { display: flex; gap: 3px; flex-shrink: 0; align-items: center; }
-.review-eval-label { font-size: 9px; color: var(--text-3); font-family: 'DM Mono', monospace; white-space: nowrap; margin-right: 2px; }
-.ub-rev { width: 34px; height: 26px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--bg); font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s; color: var(--text-3); font-family: 'Noto Sans JP', sans-serif; }
-.ub-rev:active { transform: scale(.88); }
-.ub-rev.sel-o { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
-.ub-rev.sel-x { background: var(--x-bg); border-color: var(--x-color); color: var(--x-color); }
-
-.urgency-wrap { display: flex; align-items: center; gap: 7px; padding-left: 0; }
-.urgency-score { font-size: 11px; font-weight: 700; font-family: 'DM Mono', monospace; min-width: 32px; flex-shrink: 0; }
-.urgency-track { flex: 1; height: 5px; background: var(--border); border-radius: 999px; overflow: hidden; }
-.urgency-fill { height: 100%; border-radius: 999px; transition: width .4s ease, background .4s ease; }
-.urgency-wrap.reviewed .urgency-score { color: var(--text-3) !important; }
-.urgency-wrap.reviewed .urgency-fill { background: var(--border-strong) !important; }
-
-.reviewed-badge { font-size: 9px; font-weight: 700; font-family: 'DM Mono', monospace; padding: 2px 6px; border-radius: 4px; background: var(--bg); border: 1px solid var(--border-strong); color: var(--text-3); flex-shrink: 0; }
-.review-btn { font-size: 10px; padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border-strong); background: transparent; color: var(--text-3); cursor: pointer; font-family: 'Noto Sans JP', sans-serif; flex-shrink: 0; transition: all .15s; white-space: nowrap; }
-.review-btn:hover { border-color: var(--o-color); color: var(--o-color); }
-.review-btn.done { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
+.item-row.item-skipped { opacity: 0.38; }
+.skip-chip { font-size:9px; font-weight:700; font-family:'DM Mono',monospace; padding:2px 5px; border-radius:4px; background:#f0f0ee; border:1px solid #ccc; color:#999; flex-shrink:0; }
+.nrp { display:flex; align-items:center; gap:6px; padding:3px 0 1px; }
+.nrp-label { font-size:10px; color:var(--text-3); font-family:'Noto Sans JP',sans-serif; flex-shrink:0; }
+.nrp-btn { height:22px; padding:0 9px; border-radius:var(--radius-sm); border:1px solid var(--border-strong); background:var(--bg); font-size:11px; font-weight:700; cursor:pointer; font-family:'Noto Sans JP',sans-serif; color:var(--text-3); transition:all .12s; white-space:nowrap; }
+.nrp-btn.nrp-include { background:var(--o-bg); border-color:var(--o-color); color:var(--o-color); }
+.nrp-btn.nrp-skip { background:var(--x-bg); border-color:var(--x-color); color:var(--x-color); }
 
 .item-history { display: flex; gap: 4px; align-items: center; padding-left: 0; }
 .hist-dot-wrap { display: flex; align-items: center; gap: 2px; }
@@ -198,7 +186,6 @@ body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); color: va
         <button class="btn-icon" onclick="exportData()">バックアップ</button>
         <button class="btn-icon" onclick="document.getElementById('import-input').click()">復元</button>
         <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)">
-        <button class="btn-icon" id="weakness-btn" onclick="toggleWeaknessPage()">履歴一覧</button>
       </div>
     </div>
     <div class="progress-row">
@@ -210,9 +197,8 @@ body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); color: va
   <div class="tabs" id="round-tabs"></div>
   <div class="round-info-bar" id="round-info-bar"></div>
   <div class="view-tabs" id="view-tabs">
-    <button class="vtab active" onclick="setViewTab('all',this)">全問題</button>
-    <button class="vtab" onclick="setViewTab('wrong',this)">不正解</button>
-    <button class="vtab" onclick="setViewTab('urgent',this)">要復習</button>
+    <button class="vtab active" onclick="showPage('all',this)">全問題</button>
+    <button class="vtab" onclick="showPage('history',this)">履歴一覧</button>
   </div>
 </div>
 
@@ -359,11 +345,6 @@ const DATA = [
   ]},
 ];
 
-const FULL_DAYS = {
-  'A': { '易': { o: 14, x: 3 }, '普': { o: 10, x: 5 }, '難': { o: 8,  x: 8  } },
-  'B': { '易': { o: 20, x: 5 }, '普': { o: 14, x: 8 }, '難': { o: 10, x: 12 } },
-  'C': { '易': { o: 35, x: 10}, '普': { o: 28, x: 14}, '難': { o: 20, x: 20 } },
-};
 
 let memoState = {};
 let itemState = {}, chState = {}, appState = {rounds:[{label:'第1回', scope:null, deadline:null, startDate:null}], currentRound:0};
@@ -441,85 +422,28 @@ function chKey(ch) {
     .replace(/[^0-9]/g, '');
 }
 
-function calcUrgency(itemId) {
+function isSkippedThisRound(itemId) {
+  const prevRound = curRound() - 1;
+  if (prevRound < 0) return false;
+  return getItemR(itemId, prevRound).skipNext === true;
+}
+
+function isGrayed(itemId) {
+  return isSkippedThisRound(itemId) && !getItemR(itemId).u;
+}
+
+function setSkipNext(itemId, skip) {
   const r = getItemR(itemId);
-  // 復習○済みなら要復習から外す
-  if (r.reviewPassed === true) return null;
-  if (!r.u || !r.date) return null;
-  const item = DATA.flatMap(c => c.items).find(i => i.id === itemId);
-  if (!item || !itemInScope(item)) return null;
-
-  const impKey = item.imp === 'C+' ? 'C' : item.imp;
-  const diffKey = item.diff;
-  const resultKey = r.u === 'o' ? 'o' : 'x';
-  const table = FULL_DAYS[impKey] || FULL_DAYS['B'];
-  const diffTable = table[diffKey] || table['普'];
-  const fullDays = diffTable[resultKey] || 10;
-
-  // 復習×後は専用の短いサイクルで再カウント
-  if (r.reviewDate) {
-    const reviewDays = {
-      'A': { '易': 4, '普': 6, '難': 8 },
-      'B': { '易': 6, '普': 9, '難': 12 },
-      'C': { '易': 16, '普': 20, '難': 24 },
-    };
-    const days = (reviewDays[impKey] || reviewDays['B'])[diffKey] || 9;
-    const diff = Math.floor((Date.now() - new Date(r.reviewDate).getTime()) / 86400000);
-    return Math.min(100, Math.round(diff / days * 100));
-  }
-  const diff = Math.floor((Date.now() - new Date(r.date).getTime()) / 86400000);
-  return Math.min(100, Math.round(diff / fullDays * 100));
-}
-
-function urgencyColor(score) {
-  if (score >= 80) return '#c0392b';
-  if (score >= 55) return '#e67e22';
-  if (score >= 30) return '#d4a017';
-  return '#1a7a4a';
-}
-
-let curViewTab = 'all';
-
-function setViewTab(tab, btn) {
-  curViewTab = tab;
-  localStorage.setItem('shotoku-uitab', tab);
-  document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  // タブ切り替え時にボタン表示を更新してからフィルタ
-  updateItemTopButtons();
-  applyFilter();
-}
-
-// 全問題のitem-topボタンを現在のタブに合わせて切り替え
-function updateItemTopButtons() {
-  DATA.forEach(ch => {
-    ch.items.forEach(item => {
-      if (!itemInScope(item)) return;
-      const row = document.getElementById('irow-' + item.id);
-      if (!row) return;
-      const r = getItemR(item.id);
-      const urgency = calcUrgency(item.id);
-      const showRev = urgency !== null && curViewTab === 'urgent';
-      const badgesEl = row.querySelector('.item-badges');
-      if (!badgesEl) return;
-      const rpR = r.reviewPassed === true;
-      const hasRXR = !rpR && !!r.reviewDate;
-      const uBtns = badgesEl.querySelector('.u-btns');
-      const revBtns = badgesEl.querySelector('.review-eval-btns');
-      if (showRev) {
-        if (uBtns) uBtns.style.display = 'none';
-        if (revBtns) {
-          revBtns.style.display = 'flex';
-          const [oBtn, xBtn] = revBtns.querySelectorAll('.ub-rev');
-          if (oBtn) oBtn.className = 'ub-rev' + (rpR ? ' sel-o' : '');
-          if (xBtn) xBtn.className = 'ub-rev' + (hasRXR ? ' sel-x' : '');
-        }
-      } else {
-        if (uBtns) uBtns.style.display = 'flex';
-        if (revBtns) revBtns.style.display = 'none';
-      }
-    });
-  });
+  r.skipNext = skip;
+  setItemR(itemId, r);
+  save();
+  const row = document.getElementById('irow-' + itemId);
+  if (!row) return;
+  const nrp = row.querySelector('.nrp');
+  if (!nrp) return;
+  const [inclBtn, skipBtn] = nrp.querySelectorAll('.nrp-btn');
+  if (inclBtn) inclBtn.className = 'nrp-btn' + (skip === false ? ' nrp-include' : '');
+  if (skipBtn) skipBtn.className = 'nrp-btn' + (skip === true ? ' nrp-skip' : '');
 }
 
 function applyFilter() {
@@ -532,15 +456,8 @@ function applyFilter() {
       const row = document.getElementById('irow-' + item.id);
       if (!row) return;
       if (!itemInScope(item)) { row.style.display = 'none'; return; }
-      const u = getItemR(item.id).u;
-      let show = true;
-      if (curViewTab === 'wrong') show = u === 'x' || u === 'xx';
-      else if (curViewTab === 'urgent') { const s = calcUrgency(item.id); show = s !== null && s >= 70; }
-      row.style.display = show ? '' : 'none';
-      if (show) anyVisible = true;
-      // 要復習タブではメモを非表示
-      const memo = row.querySelector('.item-memo');
-      if (memo) memo.style.display = curViewTab === 'urgent' ? 'none' : '';
+      row.style.display = '';
+      anyVisible = true;
     });
     card.classList.toggle('hidden', !anyVisible);
   });
@@ -659,6 +576,8 @@ function saveRecord(key) {
 function buildItemRow(item, num) {
   const r = getItemR(item.id);
   const u = r.u || null;
+  const grayed = isGrayed(item.id);
+  const skipNext = r.skipNext;
 
   const totalRounds = appState.rounds.length;
   let histHTML = '';
@@ -675,24 +594,11 @@ function buildItemRow(item, num) {
     histHTML += `</div>`;
   }
 
-  const urgency = calcUrgency(item.id);
-  const reviewed = r.reviewed || false;
-  const rp = r.reviewPassed === true;
-  const hasReviewX = !rp && !!r.reviewDate;
-
-  // 要復習タブ表示中かつurgencyがある問題は復習評価ボタンをtopに表示
-  const showReviewEval = urgency !== null && curViewTab === 'urgent';
-  const urgencyHTML = urgency !== null ? `
-    <div class="urgency-wrap${reviewed ? ' reviewed' : ''}" id="urg-${item.id}">
-      <span class="urgency-score" style="color:${reviewed ? '' : urgencyColor(urgency)}">${urgency}</span>
-      <div class="urgency-track"><div class="urgency-fill" style="width:${urgency}%;background:${reviewed ? '' : urgencyColor(urgency)}"></div></div>
-    </div>` : '';
-
   const impCls = item.imp === 'A' ? 'imp-A' : item.imp === 'B' ? 'imp-B' : item.imp === 'C+' ? 'imp-Cplus' : 'imp-C';
   const diffCls = `diff-${item.diff}`;
 
   const row = document.createElement('div');
-  row.className = 'item-row';
+  row.className = 'item-row' + (grayed ? ' item-skipped' : '');
   row.id = 'irow-' + item.id;
   row.innerHTML = `
     <div class="item-top">
@@ -700,19 +606,22 @@ function buildItemRow(item, num) {
       <div class="item-badges">
         <span class="imp-badge ${impCls}">${item.imp}</span>
         <span class="diff-badge ${diffCls}">${item.diff}</span>
-        <div class="u-btns" style="${showReviewEval ? 'display:none' : ''}">
+        ${grayed ? '<span class="skip-chip">SKIP</span>' : ''}
+        <div class="u-btns">
           <button class="ub ${u==='o'?'sel-o':''}" onclick="setU('${item.id}','o')">○</button>
           <button class="ub ${u==='x'?'sel-x':''}" onclick="setU('${item.id}','x')">×</button>
         </div>
-        <div class="review-eval-btns" style="${showReviewEval ? '' : 'display:none'}">
-          <button class="ub-rev${rp ? ' sel-o' : ''}" onclick="reviewItem('${item.id}','o')">○</button>
-          <button class="ub-rev${hasReviewX ? ' sel-x' : ''}" onclick="reviewItem('${item.id}','x')">×</button>
-        </div>
       </div>
     </div>
-    ${urgencyHTML}
     ${histHTML}
-    <button id="memo-btn-${item.id}" class="item-memo-btn${memoState[item.id] ? '' : ' no-memo'}" onclick="memoState['${item.id}'] ? openMemoView('${item.id}') : openMemoInput('${item.id}')">${memoState[item.id] ? 'メモ' : '＋メモ'}</button>`;
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+      <button id="memo-btn-${item.id}" class="item-memo-btn${memoState[item.id] ? '' : ' no-memo'}" onclick="memoState['${item.id}'] ? openMemoView('${item.id}') : openMemoInput('${item.id}')">${memoState[item.id] ? 'メモ' : '＋メモ'}</button>
+      <div class="nrp" style="${u ? '' : 'display:none'}">
+        <span class="nrp-label">次回</span>
+        <button class="nrp-btn${skipNext === false ? ' nrp-include' : ''}" onclick="setSkipNext('${item.id}', false)">含める</button>
+        <button class="nrp-btn${skipNext === true ? ' nrp-skip' : ''}" onclick="setSkipNext('${item.id}', true)">スキップ</button>
+      </div>
+    </div>`;
   return row;
 }
 
@@ -770,9 +679,9 @@ function switchRound(i) {
 }
 
 function updateProgress() {
-  const items = scopedItems();
-  const total = items.length;
-  const done = items.filter(i => getItemR(i.id).u).length;
+  const activeItems = scopedItems().filter(i => !isGrayed(i.id));
+  const total = activeItems.length;
+  const done = activeItems.filter(i => getItemR(i.id).u).length;
   const pct = total ? Math.round(done / total * 100) : 0;
   document.getElementById('prog-pct').textContent = pct + '%';
   document.getElementById('prog-lbl').textContent = `${done} / ${total} 完了`;
@@ -817,9 +726,9 @@ function updateRoundInfoBar(pct) {
 }
 
 function updateNextRoundBtn() {
-  const items = scopedItems();
-  const total = items.length;
-  const done = items.filter(i => getItemR(i.id).u).length;
+  const activeItems = scopedItems().filter(i => !isGrayed(i.id));
+  const total = activeItems.length;
+  const done = activeItems.filter(i => getItemR(i.id).u).length;
   const pct = total ? done / total * 100 : 0;
   document.getElementById('next-round-wrap').style.display = pct >= 70 ? 'block' : 'none';
 }
@@ -848,110 +757,55 @@ function autoResize(el) {
   el.style.height = el.scrollHeight + 'px';
 }
 
-// ── 復習評価 ──
-// ○: 定着済み → 要復習タブから除外（reviewPassed = true）
-// ×: 再復習 → reviewDate をリセットして緊急度を再カウント開始
-function reviewItem(itemId, type) {
-  const r = getItemR(itemId);
-  if (type === 'o') {
-    r.reviewPassed = true;
-    r.reviewDate = today();
-  } else {
-    r.reviewPassed = false;
-    r.reviewDate = today();
-  }
-  setItemR(itemId, r);
-  save();
-  refreshItem(itemId);
-  applyFilter();
-}
-
-function toggleReview(itemId) {
-  const r = getItemR(itemId);
-  r.reviewed = !r.reviewed;
-  setItemR(itemId, r);
-  save();
-  const urgency = calcUrgency(itemId);
-  const wrap = document.getElementById('urg-' + itemId);
-  if (!wrap || urgency === null) return;
-  const reviewed = r.reviewed;
-  wrap.className = 'urgency-wrap' + (reviewed ? ' reviewed' : '');
-  wrap.querySelector('.urgency-score').style.color = reviewed ? '' : urgencyColor(urgency);
-  wrap.querySelector('.urgency-fill').style.background = reviewed ? '' : urgencyColor(urgency);
-}
-
 function refreshItem(itemId) {
   const r = getItemR(itemId);
   const row = document.getElementById('irow-' + itemId);
   if (!row) return;
-  // 要復習タブ中かどうかでitem-topのボタンを切り替え
-  const showReviewEvalR = calcUrgency(itemId) !== null && curViewTab === 'urgent';
-  const badgesEl = row.querySelector('.item-badges');
-  if (badgesEl) {
-    const rpR = r.reviewPassed === true;
-    const hasRXR = !rpR && !!r.reviewDate;
-    const uBtns = badgesEl.querySelector('.u-btns');
-    const revBtns = badgesEl.querySelector('.review-eval-btns');
-    if (showReviewEvalR) {
-      if (uBtns) uBtns.style.display = 'none';
-      if (revBtns) {
-        revBtns.style.display = 'flex';
-        const [oBtn, xBtn] = revBtns.querySelectorAll('.ub-rev');
-        if (oBtn) oBtn.className = 'ub-rev' + (rpR ? ' sel-o' : '');
-        if (xBtn) xBtn.className = 'ub-rev' + (hasRXR ? ' sel-x' : '');
-      }
-    } else {
-      if (uBtns) {
-        uBtns.style.display = 'flex';
-        ['o','x'].forEach(t => {
-          const btn = uBtns.querySelector(`[onclick*="'${t}'"]`);
-          if (!btn) return;
-          btn.classList.remove('sel-o','sel-x');
-          if (r.u === t) btn.classList.add('sel-' + t);
-        });
-      }
-      if (revBtns) revBtns.style.display = 'none';
-    }
-  } else {
+
+  // u-btns
+  const uBtns = row.querySelector('.u-btns');
+  if (uBtns) {
     ['o','x'].forEach(t => {
-      const btn = row.querySelector(`.ub[onclick*="'${t}'"]`);
+      const btn = uBtns.querySelector(`[onclick*="'${t}'"]`);
       if (!btn) return;
       btn.classList.remove('sel-o','sel-x');
       if (r.u === t) btn.classList.add('sel-' + t);
     });
   }
-  const urgency = calcUrgency(itemId);
-  const reviewed = r.reviewed || false;
-  const wrap = row.querySelector('.urgency-wrap');
 
-  function buildUrgencyEl(urgency, reviewed, itemId) {
-    const color = urgencyColor(urgency);
-    const rr = getItemR(itemId);
-    const rpInner = rr.reviewPassed === true;
-    const hasRX = !rpInner && !!rr.reviewDate;
-    const div = document.createElement('div');
-    div.className = 'urgency-wrap' + (reviewed ? ' reviewed' : '');
-    div.id = 'urg-' + itemId;
-    div.innerHTML = `
-      <span class="urgency-score" style="color:${reviewed ? '' : color}">${urgency}</span>
-      <div class="urgency-track"><div class="urgency-fill" style="width:${urgency}%;background:${reviewed ? '' : color}"></div></div>`;
-    return div;
+  // NRP
+  const nrp = row.querySelector('.nrp');
+  if (nrp) {
+    nrp.style.display = r.u ? '' : 'none';
+    const [inclBtn, skipBtn] = nrp.querySelectorAll('.nrp-btn');
+    if (inclBtn) inclBtn.className = 'nrp-btn' + (r.skipNext === false ? ' nrp-include' : '');
+    if (skipBtn) skipBtn.className = 'nrp-btn' + (r.skipNext === true ? ' nrp-skip' : '');
   }
 
-  if (urgency !== null) {
-    if (wrap) { wrap.replaceWith(buildUrgencyEl(urgency, reviewed, itemId)); }
-    else {
-      const topEl = row.querySelector('.item-top');
-      if (topEl) topEl.insertAdjacentElement('afterend', buildUrgencyEl(urgency, reviewed, itemId));
+  // skip-chip & item-skipped
+  const grayed = isGrayed(itemId);
+  row.classList.toggle('item-skipped', grayed);
+  const badges = row.querySelector('.item-badges');
+  if (badges) {
+    const existing = badges.querySelector('.skip-chip');
+    if (grayed && !existing) {
+      const chip = document.createElement('span');
+      chip.className = 'skip-chip';
+      chip.textContent = 'SKIP';
+      const diffBadge = badges.querySelector('.diff-badge');
+      if (diffBadge) diffBadge.insertAdjacentElement('afterend', chip);
+      else badges.prepend(chip);
+    } else if (!grayed && existing) {
+      existing.remove();
     }
-  } else if (wrap) { wrap.remove(); }
+  }
 }
 
 function refreshChProg(itemId) {
   const ch = DATA.find(c => c.items.find(i => i.id === itemId));
   if (!ch) return;
   const key = chKey(ch);
-  const scoped = ch.items.filter(itemInScope);
+  const scoped = ch.items.filter(itemInScope).filter(i => !isGrayed(i.id));
   const total = scoped.length;
   const done = scoped.filter(i => getItemR(i.id).u).length;
   const isDone = done === total && total > 0;
@@ -962,12 +816,12 @@ function refreshChProg(itemId) {
   }
 }
 
-function toggleWeaknessPage() {
-  showingWeakness = !showingWeakness;
+function showPage(page, btn) {
+  showingWeakness = page === 'history';
   document.getElementById('main-view').style.display = showingWeakness ? 'none' : 'block';
   document.getElementById('weakness-view').style.display = showingWeakness ? 'block' : 'none';
-  document.getElementById('view-tabs').style.display = showingWeakness ? 'none' : 'flex';
-  document.getElementById('weakness-btn').classList.toggle('active', showingWeakness);
+  document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
   if (showingWeakness) renderHistoryPage();
 }
 
@@ -1135,17 +989,8 @@ document.getElementById('deadline-overlay').addEventListener('click', e => {
   if (e.target === document.getElementById('deadline-overlay')) closeDeadlineModal();
 });
 
-const _savedTab = localStorage.getItem('shotoku-uitab');
-if (_savedTab) curViewTab = _savedTab;
-
 load();
 render();
-
-if (_savedTab) {
-  document.querySelectorAll('.vtab').forEach(b => {
-    b.classList.toggle('active', b.getAttribute('onclick').includes("'"+_savedTab+"'"));
-  });
-}
 
 JSON.parse(localStorage.getItem('shotoku-chopen') || '[]').forEach(k => {
   const card = document.getElementById('chcard-' + k);
