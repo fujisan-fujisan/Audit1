@@ -2575,6 +2575,7 @@ function showPage(page, btn) {
   document.getElementById('weakness-view').style.display = showingWeakness ? 'block' : 'none';
   document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  window.scrollTo(0, 0);
   if (showingWeakness) renderHistoryPage();
 }
 
@@ -2587,11 +2588,13 @@ function toggleKwManagePage() {
     document.getElementById('main-view').style.display = 'none';
     document.getElementById('weakness-view').style.display = 'none';
     document.getElementById('kw-manage-view').style.display = 'block';
+    window.scrollTo(0, 0);
     renderKwManagePage();
   } else {
     document.getElementById('kw-manage-view').style.display = 'none';
     document.getElementById('main-view').style.display = showingWeakness ? 'none' : 'block';
     document.getElementById('weakness-view').style.display = showingWeakness ? 'block' : 'none';
+    window.scrollTo(0, 0);
   }
 }
 
