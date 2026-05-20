@@ -968,6 +968,7 @@ function showPage(page, btn) {
   document.getElementById('weakness-view').style.display = showingWeakness ? 'block' : 'none';
   document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  window.scrollTo(0, 0);
   if (showingWeakness) renderHistoryPage();
 }
 
