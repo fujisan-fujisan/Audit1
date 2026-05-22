@@ -2096,6 +2096,11 @@ function commitKw(id){
 }
 function removeKw(id,idx){deleteKeyword(id,idx);refreshKwSection(id,true)}
 
+// ── SCROLL LOCK ──
+let _scrollLockDepth = 0;
+function _lockScroll() { if (++_scrollLockDepth === 1) document.body.style.overflow = 'hidden'; }
+function _unlockScroll() { if (--_scrollLockDepth <= 0) { _scrollLockDepth = 0; document.body.style.overflow = ''; } }
+
 /* ── キーワード評価ポップアップ ── */
 let kwEvalItemId=null;
 function openKwEvalPopup(id){
@@ -2105,6 +2110,7 @@ function openKwEvalPopup(id){
   const item=DATA.flatMap(c=>c.items).find(i=>i.id===id);
   document.getElementById('kw-eval-subtitle').textContent=item?item.name:'';
   renderKwEvalList();
+  _lockScroll();
   document.getElementById('kw-eval-overlay').classList.add('open');
 }
 function renderKwEvalList(){
@@ -2132,6 +2138,7 @@ function evalKwPopup(idx,result){
   refreshKwManageItem(kwEvalItemId);
 }
 function closeKwEvalPopup(){
+  _unlockScroll();
   document.getElementById('kw-eval-overlay').classList.remove('open');
   kwEvalItemId=null;
 }
@@ -2204,6 +2211,7 @@ function applyFilter() {
 // ── RENDER ──
 function render() {
   // オーバーレイが残っていたら必ず閉じる
+  _scrollLockDepth = 0; document.body.style.overflow = '';
   document.querySelectorAll('.overlay.open').forEach(el => el.classList.remove('open'));
   const ct = document.getElementById('content');
   ct.innerHTML = '';
@@ -3003,6 +3011,7 @@ function openScopeModal(isFirst) {
     document.getElementById('scope-confirm-btn').style.opacity = '.4';
     document.getElementById('scope-confirm-btn').style.pointerEvents = 'none';
   }
+  _lockScroll();
   document.getElementById('scope-overlay').classList.add('open');
 }
 
@@ -3044,20 +3053,24 @@ document.getElementById('scope-confirm-btn').onclick = function() {
     appState.currentRound = appState.rounds.length - 1;
   }
   save();
+  _unlockScroll();
   document.getElementById('scope-overlay').classList.remove('open');
   render();
 };
 
 document.getElementById('scope-overlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('scope-overlay'))
+  if (e.target === document.getElementById('scope-overlay')) {
+    _unlockScroll();
     document.getElementById('scope-overlay').classList.remove('open');
+  }
 });
 
 function openDeadlineModal() {
   document.getElementById('deadline-input').value = curDeadline() || '';
+  _lockScroll();
   document.getElementById('deadline-overlay').classList.add('open');
 }
-function closeDeadlineModal() { document.getElementById('deadline-overlay').classList.remove('open'); }
+function closeDeadlineModal() { _unlockScroll(); document.getElementById('deadline-overlay').classList.remove('open'); }
 function saveDeadline() {
   const newDeadline = document.getElementById('deadline-input').value || null;
   const rd = appState.rounds[curRound()];
@@ -3135,6 +3148,7 @@ if (!appState.rounds[0].startDate) {
 
 // ── 全オーバーレイを強制クローズ ──
 function closeAllOverlays() {
+  _scrollLockDepth = 0; document.body.style.overflow = '';
   document.querySelectorAll('.overlay.open').forEach(el => el.classList.remove('open'));
   document.getElementById('close-all-btn').style.display = 'none';
 }

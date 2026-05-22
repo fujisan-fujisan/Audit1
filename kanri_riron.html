@@ -1799,6 +1799,11 @@ function removeKw(id,idx){deleteKeyword(id,idx);refreshKwSection(id,true)}
 /* ── キーワード評価ポップアップ ── */
 let kwEvalItemId=null;
 
+// ── SCROLL LOCK ──
+let _scrollLockDepth = 0;
+function _lockScroll() { if (++_scrollLockDepth === 1) document.body.style.overflow = 'hidden'; }
+function _unlockScroll() { if (--_scrollLockDepth <= 0) { _scrollLockDepth = 0; document.body.style.overflow = ''; } }
+
 function openKwEvalPopup(id){
   const kws=getKeywords(id);
   if(!kws.length)return;
@@ -1806,6 +1811,7 @@ function openKwEvalPopup(id){
   const item=DATA.flatMap(c=>c.items).find(i=>i.id===id);
   document.getElementById('kw-eval-subtitle').textContent=item?item.name:'';
   renderKwEvalList();
+  _lockScroll();
   document.getElementById('kw-eval-overlay').classList.add('open');
 }
 
@@ -1836,6 +1842,7 @@ function evalKwPopup(idx,result){
 }
 
 function closeKwEvalPopup(){
+  _unlockScroll();
   document.getElementById('kw-eval-overlay').classList.remove('open');
   kwEvalItemId=null;
 }
@@ -2383,6 +2390,7 @@ function openScopeModal(isFirst){
     document.querySelectorAll('.scope-opt').forEach(b=>b.classList.remove('sel'));
     document.getElementById('scope-confirm-btn').style.cssText='width:100%;opacity:.4;pointer-events:none';
   }
+  _lockScroll();
   document.getElementById('scope-overlay').classList.add('open');
 }
 function checkScopeConfirmBtn(){
@@ -2410,12 +2418,12 @@ document.getElementById('scope-confirm-btn').onclick=function(){
   const bp=(bd&&bd>0)?bt/bd:null;
   if(pendingScopeIsFirst){Object.assign(appState.rounds[0],{scope:pendingScope,startDate:sd,deadline:dl,basePace:bp});}
   else{appState.rounds.push({label:`第${appState.rounds.length+1}回`,scope:pendingScope,startDate:sd,deadline:dl,basePace:bp});appState.currentRound=appState.rounds.length-1;}
-  save();document.getElementById('scope-overlay').classList.remove('open');render();
+  save();_unlockScroll();document.getElementById('scope-overlay').classList.remove('open');render();
 };
-document.getElementById('scope-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('scope-overlay'))document.getElementById('scope-overlay').classList.remove('open')});
+document.getElementById('scope-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('scope-overlay')){_unlockScroll();document.getElementById('scope-overlay').classList.remove('open');}});
 
-function openDeadlineModal(){document.getElementById('deadline-input').value=curDeadline()||'';document.getElementById('deadline-overlay').classList.add('open')}
-function closeDeadlineModal(){document.getElementById('deadline-overlay').classList.remove('open')}
+function openDeadlineModal(){document.getElementById('deadline-input').value=curDeadline()||'';_lockScroll();document.getElementById('deadline-overlay').classList.add('open')}
+function closeDeadlineModal(){_unlockScroll();document.getElementById('deadline-overlay').classList.remove('open')}
 function saveDeadline(){
   const nl=document.getElementById('deadline-input').value||null;
   const rd=appState.rounds[curRound()];rd.deadline=nl;

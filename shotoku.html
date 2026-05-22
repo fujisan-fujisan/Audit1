@@ -890,6 +890,11 @@ function weaknessItemHTML({item, ch, hist}) { return ''; }
 let pendingScope = null;
 let pendingScopeIsFirst = false;
 
+// ── SCROLL LOCK ──
+let _scrollLockDepth = 0;
+function _lockScroll() { if (++_scrollLockDepth === 1) document.body.style.overflow = 'hidden'; }
+function _unlockScroll() { if (--_scrollLockDepth <= 0) { _scrollLockDepth = 0; document.body.style.overflow = ''; } }
+
 function openScopeModal(isFirst) {
   pendingScope = null;
   pendingScopeIsFirst = isFirst || false;
@@ -917,6 +922,7 @@ function openScopeModal(isFirst) {
     document.getElementById('scope-confirm-btn').style.opacity = '.4';
     document.getElementById('scope-confirm-btn').style.pointerEvents = 'none';
   }
+  _lockScroll();
   document.getElementById('scope-overlay').classList.add('open');
 }
 
@@ -959,20 +965,25 @@ document.getElementById('scope-confirm-btn').onclick = function() {
     appState.currentRound = appState.rounds.length - 1;
   }
   save();
+  _unlockScroll();
   document.getElementById('scope-overlay').classList.remove('open');
   render();
 };
 
 document.getElementById('scope-overlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('scope-overlay'))
+  if (e.target === document.getElementById('scope-overlay')) {
+    _unlockScroll();
     document.getElementById('scope-overlay').classList.remove('open');
+  }
 });
 
 function openDeadlineModal() {
   document.getElementById('deadline-input').value = curDeadline() || '';
+  _lockScroll();
   document.getElementById('deadline-overlay').classList.add('open');
 }
 function closeDeadlineModal() {
+  _unlockScroll();
   document.getElementById('deadline-overlay').classList.remove('open');
 }
 function saveDeadline() {
@@ -1051,24 +1062,36 @@ function openMemoView(itemId) {
   const memo = memoState[itemId] || '';
   document.getElementById('memo-view-title').textContent = itemId;
   document.getElementById('memo-view-body').textContent = memo || '（まだメモはありません）';
+  _lockScroll();
   document.getElementById('memo-view-overlay').classList.add('open');
 }
-function closeMemoView() { document.getElementById('memo-view-overlay').classList.remove('open'); }
+function closeMemoView() {
+  _unlockScroll();
+  document.getElementById('memo-view-overlay').classList.remove('open');
+}
 
 function openMemoInput(itemId) {
   _memoTargetId = itemId;
   document.getElementById('memo-add-area').value = '';
+  _lockScroll();
   document.getElementById('memo-input-overlay').classList.add('open');
   setTimeout(() => document.getElementById('memo-add-area').focus(), 50);
 }
-function closeMemoInput() { document.getElementById('memo-input-overlay').classList.remove('open'); }
+function closeMemoInput() {
+  _unlockScroll();
+  document.getElementById('memo-input-overlay').classList.remove('open');
+}
 function openMemoEdit(itemId) {
   _memoTargetId = itemId;
   document.getElementById('memo-edit-area').value = memoState[itemId] || '';
+  _lockScroll();
   document.getElementById('memo-edit-overlay').classList.add('open');
   setTimeout(() => document.getElementById('memo-edit-area').focus(), 50);
 }
-function closeMemoEdit() { document.getElementById('memo-edit-overlay').classList.remove('open'); }
+function closeMemoEdit() {
+  _unlockScroll();
+  document.getElementById('memo-edit-overlay').classList.remove('open');
+}
 function saveMemoEdit() {
   const val = document.getElementById('memo-edit-area').value;
   if (val.trim()) { memoState[_memoTargetId] = val; }
