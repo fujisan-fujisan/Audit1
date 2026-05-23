@@ -464,45 +464,13 @@ body {
   font-weight:700
 }
 
-.review-eval-btns {
-  display:flex;
-  gap:3px;
-  flex-shrink:0;
-  align-items:center
-}
-
-.ub-rev {
-  width:34px;
-  height:26px;
-  border-radius:var(--radius-sm);
-  border:1px solid var(--border-strong);
-  background:var(--bg);
-  font-size:12px;
-  font-weight:700;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  transition:all .12s;
-  color:var(--text-3);
-  font-family:'Noto Sans JP',sans-serif
-}
-
-.ub-rev:active {
-  transform:scale(.88)
-}
-
-.ub-rev.sel-o {
-  background:var(--o-bg);
-  border-color:var(--o-color);
-  color:var(--o-color)
-}
-
-.ub-rev.sel-x {
-  background:var(--x-bg);
-  border-color:var(--x-color);
-  color:var(--x-color)
-}
+.item-row.item-skipped { opacity: 0.38; }
+.skip-chip { font-size:9px; font-weight:700; font-family:'DM Mono',monospace; padding:2px 5px; border-radius:4px; background:#f0f0ee; border:1px solid #ccc; color:#999; flex-shrink:0; }
+.nrp { display:flex; align-items:center; gap:6px; padding:3px 0 1px; }
+.nrp-label { font-size:10px; color:var(--text-3); font-family:'Noto Sans JP',sans-serif; flex-shrink:0; }
+.nrp-btn { height:28px; padding:0 11px; border-radius:var(--radius-sm); border:1px solid var(--border-strong); background:var(--bg); font-size:12px; font-weight:700; cursor:pointer; font-family:'Noto Sans JP',sans-serif; color:var(--text-3); transition:all .12s; white-space:nowrap; }
+.nrp-btn.nrp-include { background:var(--o-bg); border-color:var(--o-color); color:var(--o-color); }
+.nrp-btn.nrp-skip { background:var(--x-bg); border-color:var(--x-color); color:var(--x-color); }
 
 .item-history {
   display:flex;
@@ -567,34 +535,6 @@ body {
   background:#fde;
   border-color:#900;
   color:#900
-}
-
-.urgency-wrap {
-  display:flex;
-  align-items:center;
-  gap:7px
-}
-
-.urgency-score {
-  font-size:11px;
-  font-weight:700;
-  font-family:'DM Mono',monospace;
-  min-width:32px;
-  flex-shrink:0
-}
-
-.urgency-track {
-  flex:1;
-  height:5px;
-  background:var(--border);
-  border-radius:999px;
-  overflow:hidden
-}
-
-.urgency-fill {
-  height:100%;
-  border-radius:999px;
-  transition:width .4s ease,background .4s ease
 }
 
 /* ── キーワード ── */
@@ -1369,7 +1309,7 @@ body {
         <button class="btn-icon" onclick="exportData()">バックアップ</button>
         <button class="btn-icon" onclick="document.getElementById('import-input').click()">復元</button>
         <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)">
-        <button class="btn-icon" id="weakness-btn" onclick="toggleWeaknessPage()">履歴一覧</button>
+        <button class="btn-icon" id="kw-manage-btn" onclick="toggleKwManagePage()">キーワード</button>
       </div>
     </div>
     <div class="progress-row">
@@ -1381,8 +1321,8 @@ body {
   <div class="tabs" id="round-tabs"></div>
   <div class="round-info-bar" id="round-info-bar"></div>
   <div class="view-tabs" id="view-tabs">
-    <button class="vtab active" onclick="setViewTab('all',this)">全問題</button>
-    <button class="vtab" onclick="setViewTab('urgent',this)">要復習</button>
+    <button class="vtab active" onclick="showPage('all',this)">全問題</button>
+    <button class="vtab" onclick="showPage('history',this)">履歴一覧</button>
   </div>
 </div>
 <div id="main-view">
@@ -1391,7 +1331,8 @@ body {
     <button class="next-round-btn" onclick="openScopeModal()">次の回を始める →</button>
   </div>
 </div>
-<div id="weakness-view" class="content" style="display:none"></div>
+<div id="weakness-view" class="content" style="display:none;"></div>
+<div id="kw-manage-view" class="content" style="display:none;padding-bottom:100px;"></div>
 
 <div class="overlay" id="scope-overlay">
   <div class="scope-modal">
@@ -1443,11 +1384,11 @@ const DATA=[
    {id:"t1-8",name:"問題1-8　定時外作業手当の会計処理",imp:"B"},
    {id:"t1-9",name:"問題1-9　製造間接費の配賦基準の選択",imp:"B"},
    {id:"t1-10",name:"問題1-10　製造間接費実際配賦の問題点",imp:"A"},
-   {id:"t1-11",name:"問題1-11　製造間接費正常配賦の理論",imp:"B"},
+   {id:"t1-11",name:"問題1-11　製造間接費の「計算」と「管理」",imp:"B"},
    {id:"t1-12",name:"問題1-12　基準操業度の選択",imp:"B"},
    {id:"t1-13",name:"問題1-13　製造間接費予算の設定",imp:"B"},
    {id:"t1-14",name:"問題1-14　固定予算の問題点",imp:"A"},
-   {id:"t1-15",name:"問題1-15　複式簿記変動予算の限界",imp:"B"},
+   {id:"t1-15",name:"問題1-15　公式法変動予算の限界",imp:"B"},
    {id:"t1-16",name:"問題1-16　操業度差異の計算方法",imp:"B"},
    {id:"t1-17",name:"問題1-17　操業度差異分析の意義",imp:"B"},
    {id:"t1-18",name:"問題1-18　有利な操業度差異の解釈",imp:"A"},
@@ -1481,16 +1422,16 @@ const DATA=[
    {id:"t3-10",name:"問題3-10　加算法と非加算法の計算結果が相違する理由",imp:"C"},
    {id:"t3-11",name:"問題3-11　加算法と先入先出法の関係",imp:"C"},
    {id:"t3-12",name:"問題3-12　非加算法と後入法の関係",imp:"C"},
-   {id:"t3-13",name:"問題3-13　加算法の問題点と改善策",imp:"A"},
+   {id:"t3-13",name:"問題3-13　累加法の問題点と改善策",imp:"A"},
    {id:"t3-14",name:"問題3-14　非加算法のメリット",imp:"B"},
    {id:"t3-15",name:"問題3-15　工程別標準総合原価計算の簡略化を図る方法",imp:"C"},
    {id:"t3-16",name:"問題3-16　加工費法の適用要件",imp:"B"},
    {id:"t3-17",name:"問題3-17　個別原価計算と組別総合原価計算の相違",imp:"A"},
    {id:"t3-18",name:"問題3-18　等級別総合原価計算の方法",imp:"B"},
    {id:"t3-19",name:"問題3-19　組別総合原価計算と等級別総合原価計算の選択",imp:"A"},
-   {id:"t3-20",name:"問題3-20　連産品の原価計算方法の相違",imp:"B"},
-   {id:"t3-21",name:"問題3-21　副産物の計算の意義と妥当性",imp:"B"},
-   {id:"t3-22",name:"問題3-22　副産物の計算と等級別総合原価計算の相違",imp:"A"},
+   {id:"t3-20",name:"問題3-20　結合生産物の原価計算方法の相違",imp:"B"},
+   {id:"t3-21",name:"問題3-21　連産品の計算の意義と妥当性",imp:"B"},
+   {id:"t3-22",name:"問題3-22　連産品の計算と等級別総合原価計算の相違",imp:"A"},
   ]},
  {ch:"第4章",chName:"標準原価計算",items:[
    {id:"t4-1",name:"問題4-1　見積原価計算と標準原価計算",imp:"B"},
@@ -1578,13 +1519,13 @@ const DATA=[
    {id:"t8-4",name:"問題8-4　差額原価収益分析と原価計算目的の関係",imp:"B"},
    {id:"t8-5",name:"問題8-5　差額原価収益分析と固定費の取扱いの関係",imp:"B"},
    {id:"t8-6",name:"問題8-6　差額原価収益分析と遊休設備利用の関係",imp:"B"},
-   {id:"t8-7",name:"問題8-7　内製か外注かの意思決定に対しての批判",imp:"A"},
-   {id:"t8-8",name:"問題8-8　製品廃棄・製品ライン削除の意思決定に対しての批判",imp:"B"},
-   {id:"t8-9",name:"問題8-9　追加加工の意思決定に対しての批判",imp:"B"},
-   {id:"t8-10",name:"問題8-10　制約が生じる場合の差額原価収益分析",imp:"B"},
-   {id:"t8-11",name:"問題8-11　TOCモデルの批判的考察",imp:"B"},
-   {id:"t8-12",name:"問題8-12　意思決定のフォローアップ",imp:"B"},
-   {id:"t8-13",name:"問題8-13　コストドライバーの意思決定の意義",imp:"B"},
+   {id:"t8-7",name:"問題8-7　自製か外注かの意思決定に際しての留意点",imp:"A"},
+   {id:"t8-8",name:"問題8-8　特別注文引受可否の意思決定に際しての留意点",imp:"B"},
+   {id:"t8-9",name:"問題8-9　追加加工可否の意思決定に際しての留意点",imp:"B"},
+   {id:"t8-10",name:"問題8-10　材料在庫がある場合の差額原価収益分析",imp:"B"},
+   {id:"t8-11",name:"問題8-11　EOQモデルの一般的仮定",imp:"B"},
+   {id:"t8-12",name:"問題8-12　価格決定のアプローチ",imp:"B"},
+   {id:"t8-13",name:"問題8-13　コストベースの価格決定の特徴",imp:"B"},
   ]},
  {ch:"第9章",chName:"設備投資の経済性計算",items:[
    {id:"t9-1",name:"問題9-1　キャッシュ・フロー計算における減価償却費の取り扱い",imp:"A"},
@@ -1858,6 +1799,11 @@ function removeKw(id,idx){deleteKeyword(id,idx);refreshKwSection(id,true)}
 /* ── キーワード評価ポップアップ ── */
 let kwEvalItemId=null;
 
+// ── SCROLL LOCK ──
+let _scrollLockDepth = 0;
+function _lockScroll() { if (++_scrollLockDepth === 1) document.body.style.overflow = 'hidden'; }
+function _unlockScroll() { if (--_scrollLockDepth <= 0) { _scrollLockDepth = 0; document.body.style.overflow = ''; } }
+
 function openKwEvalPopup(id){
   const kws=getKeywords(id);
   if(!kws.length)return;
@@ -1865,6 +1811,7 @@ function openKwEvalPopup(id){
   const item=DATA.flatMap(c=>c.items).find(i=>i.id===id);
   document.getElementById('kw-eval-subtitle').textContent=item?item.name:'';
   renderKwEvalList();
+  _lockScroll();
   document.getElementById('kw-eval-overlay').classList.add('open');
 }
 
@@ -1895,6 +1842,7 @@ function evalKwPopup(idx,result){
 }
 
 function closeKwEvalPopup(){
+  _unlockScroll();
   document.getElementById('kw-eval-overlay').classList.remove('open');
   kwEvalItemId=null;
 }
@@ -1903,50 +1851,28 @@ document.getElementById('kw-eval-overlay').addEventListener('click',e=>{
   if(e.target===document.getElementById('kw-eval-overlay'))closeKwEvalPopup();
 });
 
-/* ── urgency ── */
-function calcUrgency(id){
-  const r=getItemR(id);
-  if(r.reviewPassed===true)return null;
-  if(!r.u||!r.date)return null;
-  const item=DATA.flatMap(c=>c.items).find(i=>i.id===id);
-  if(!item||!itemInScope(item))return null;
-  const K=item.imp==='A'?'A':'B';
-  if(r.reviewDate){
-    const days={A:6,B:13}[K];
-    return Math.min(100,Math.round(Math.floor((Date.now()-new Date(r.reviewDate).getTime())/86400000)/days*100));
-  }
-  const DAYS={A:{oo:13,o:9,n:6,x:4,xx:3},B:{oo:18,o:14,n:11,x:9,xx:6}};
-  const days=(DAYS[K]||DAYS.B)[r.u]||11;
-  return Math.min(100,Math.round(Math.floor((Date.now()-new Date(r.date).getTime())/86400000)/days*100));
+function isSkippedThisRound(itemId) {
+  const prevRound = curRound() - 1;
+  if (prevRound < 0) return false;
+  return getItemR(itemId, prevRound).skipNext === true;
 }
-function urgencyColor(s){return s>=80?'#c0392b':s>=55?'#e67e22':s>=30?'#d4a017':'#1a7a4a'}
 
-let curViewTab='all';
-function setViewTab(tab,btn){
-  curViewTab=tab;
-  localStorage.setItem('kanri-riron-uitab',tab);
-  document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  updateItemTopButtons();applyFilter();
+function isGrayed(itemId) {
+  return isSkippedThisRound(itemId) && !getItemR(itemId).u;
 }
-function updateItemTopButtons(){
-  DATA.forEach(ch=>ch.items.forEach(item=>{
-    if(!itemInScope(item))return;
-    const row=document.getElementById('irow-'+item.id);if(!row)return;
-    const r=getItemR(item.id);
-    const urg=calcUrgency(item.id);
-    const showRev=urg!==null&&curViewTab==='urgent';
-    const rp=r.reviewPassed===true,hasRX=!rp&&!!r.reviewDate;
-    const uB=row.querySelector('.u-btns'),revB=row.querySelector('.review-eval-btns');
-    if(showRev){
-      if(uB)uB.style.display='none';
-      if(revB){revB.style.display='flex';
-        const[o,x]=revB.querySelectorAll('.ub-rev');
-        if(o)o.className='ub-rev'+(rp?' sel-o':'');
-        if(x)x.className='ub-rev'+(hasRX?' sel-x':'');
-      }
-    }else{if(uB)uB.style.display='flex';if(revB)revB.style.display='none';}
-  }));
+
+function setSkipNext(itemId, skip) {
+  const r = getItemR(itemId);
+  r.skipNext = skip;
+  setItemR(itemId, r);
+  save();
+  const row = document.getElementById('irow-' + itemId);
+  if (!row) return;
+  const nrp = row.querySelector('.nrp');
+  if (!nrp) return;
+  const [inclBtn, skipBtn] = nrp.querySelectorAll('.nrp-btn');
+  if (inclBtn) inclBtn.className = 'nrp-btn' + (skip === false ? ' nrp-include' : '');
+  if (skipBtn) skipBtn.className = 'nrp-btn' + (skip === true ? ' nrp-skip' : '');
 }
 function applyFilter(){
   DATA.forEach(ch=>{
@@ -1956,10 +1882,8 @@ function applyFilter(){
     ch.items.forEach(item=>{
       const row=document.getElementById('irow-'+item.id);if(!row)return;
       if(!itemInScope(item)){row.style.display='none';return;}
-      let show=true;
-      if(curViewTab==='urgent'){const s=calcUrgency(item.id);show=s!==null&&s>=70;}
-      row.style.display=show?'':'none';
-      if(show)any=true;
+      row.style.display='';
+      any=true;
     });
     card.classList.toggle('hidden',!any);
   });
@@ -2028,6 +1952,8 @@ function saveRecord(key){
 
 function buildItemRow(item){
   const r=getItemR(item.id),u=r.u||null;
+  const grayed=isGrayed(item.id);
+  const skipNext=r.skipNext;
   const totalR=appState.rounds.length;
   let histHTML='';
   if(totalR>1){
@@ -2040,35 +1966,26 @@ function buildItemRow(item){
     }
     histHTML+='</div>';
   }
-  const urg=calcUrgency(item.id),rp=r.reviewPassed===true,hasRX=!rp&&!!r.reviewDate;
-  const showRev=urg!==null&&curViewTab==='urgent';
-  const urgHTML=urg!==null?`<div class="urgency-wrap" id="urg-${item.id}">
-    <span class="urgency-score" style="color:${urgencyColor(urg)}">${urg}</span>
-    <div class="urgency-track"><div class="urgency-fill" style="width:${urg}%;background:${urgencyColor(urg)}"></div></div>
-  </div>`:'';
-  const row=document.createElement('div');row.className='item-row';row.id='irow-'+item.id;
-  // キーワードセクション以外を innerHTML で構築
+  const row=document.createElement('div');row.className='item-row'+(grayed?' item-skipped':'');row.id='irow-'+item.id;
   row.innerHTML=`
     <div class="item-top">
       <span class="item-name">${item.name}</span>
       <span class="imp-badge imp-${item.imp}">${item.imp}</span>
-      <div class="u-btns"${showRev?' style="display:none"':''}>
+      ${grayed?'<span class="skip-chip">SKIP</span>':''}
+      <div class="u-btns">
         <button class="ub${u==='oo'?' sel-oo':''}" onclick="setU('${item.id}','oo')">○○</button>
         <button class="ub${u==='o'?' sel-o':''}" onclick="setU('${item.id}','o')">○</button>
         <button class="ub${u==='n'?' sel-n':''}" onclick="setU('${item.id}','n')">ー</button>
         <button class="ub${u==='x'?' sel-x':''}" onclick="setU('${item.id}','x')">×</button>
         <button class="ub${u==='xx'?' sel-xx':''}" onclick="setU('${item.id}','xx')">××</button>
       </div>
-      <div class="review-eval-btns"${showRev?'':' style="display:none"'}>
-        <button class="ub-rev${rp?' sel-o':''}" onclick="reviewItem('${item.id}','o')">○</button>
-        <button class="ub-rev${hasRX?' sel-x':''}" onclick="reviewItem('${item.id}','x')">×</button>
-      </div>
     </div>
-    ${urgHTML}${histHTML}`;
-  // キーワードセクションは appendChild で安全に追加（× 文字が innerHTML を壊さないよう）
-  const kwTmp=document.createElement('div');
-  kwTmp.innerHTML=buildKwSection(item);
-  row.appendChild(kwTmp.firstElementChild);
+    ${histHTML}
+    <div class="nrp" style="${u?'':'display:none'}">
+      <span class="nrp-label">次回</span>
+      <button class="nrp-btn${skipNext===false?' nrp-include':''}" onclick="setSkipNext('${item.id}',false)">含める</button>
+      <button class="nrp-btn${skipNext===true?' nrp-skip':''}" onclick="setSkipNext('${item.id}',true)">スキップ</button>
+    </div>`;
   return row;
 }
 
@@ -2082,12 +1999,6 @@ function setU(id,type){
     openKwEvalPopup(id);
   }
 }
-function reviewItem(id,type){
-  const r=getItemR(id);
-  if(type==='o'){r.reviewPassed=true;r.reviewDate=today();}
-  else{r.reviewPassed=false;r.reviewDate=today();}
-  setItemR(id,r);save();refreshItem(id);applyFilter();
-}
 function refreshItem(id){
   const r=getItemR(id),row=document.getElementById('irow-'+id);if(!row)return;
   ['oo','o','n','x','xx'].forEach(t=>{
@@ -2095,28 +2006,28 @@ function refreshItem(id){
     btn.classList.remove('sel-oo','sel-o','sel-n','sel-x','sel-xx');
     if(r.u===t)btn.classList.add('sel-'+t);
   });
-  const urg=calcUrgency(id),showRev=urg!==null&&curViewTab==='urgent';
-  const rp=r.reviewPassed===true,hasRX=!rp&&!!r.reviewDate;
-  const uB=row.querySelector('.u-btns'),revB=row.querySelector('.review-eval-btns');
-  if(showRev){
-    if(uB)uB.style.display='none';
-    if(revB){revB.style.display='flex';
-      const[o,x]=revB.querySelectorAll('.ub-rev');
-      if(o)o.className='ub-rev'+(rp?' sel-o':'');
-      if(x)x.className='ub-rev'+(hasRX?' sel-x':'');
-    }
-  }else{if(uB)uB.style.display='flex';if(revB)revB.style.display='none';}
-  const wrap=row.querySelector('.urgency-wrap');
-  if(urg!==null){
-    const c=urgencyColor(urg);
-    const el=document.createElement('div');el.className='urgency-wrap';el.id='urg-'+id;
-    el.innerHTML=`<span class="urgency-score" style="color:${c}">${urg}</span><div class="urgency-track"><div class="urgency-fill" style="width:${urg}%;background:${c}"></div></div>`;
-    if(wrap)wrap.replaceWith(el);else row.querySelector('.item-top')?.insertAdjacentElement('afterend',el);
-  }else if(wrap)wrap.remove();
+  const nrp=row.querySelector('.nrp');
+  if(nrp){
+    nrp.style.display=r.u?'':'none';
+    const[inclBtn,skipBtn]=nrp.querySelectorAll('.nrp-btn');
+    if(inclBtn)inclBtn.className='nrp-btn'+(r.skipNext===false?' nrp-include':'');
+    if(skipBtn)skipBtn.className='nrp-btn'+(r.skipNext===true?' nrp-skip':'');
+  }
+  const grayed=isGrayed(id);
+  row.classList.toggle('item-skipped',grayed);
+  const topEl=row.querySelector('.item-top');
+  if(topEl){
+    const existing=topEl.querySelector('.skip-chip');
+    if(grayed&&!existing){
+      const chip=document.createElement('span');chip.className='skip-chip';chip.textContent='SKIP';
+      const impBadge=topEl.querySelector('.imp-badge');
+      if(impBadge)impBadge.insertAdjacentElement('afterend',chip);else topEl.appendChild(chip);
+    }else if(!grayed&&existing){existing.remove();}
+  }
 }
 function refreshChProg(id){
   const ch=DATA.find(c=>c.items.find(i=>i.id===id));if(!ch)return;
-  const key=chKey(ch),scoped=ch.items.filter(itemInScope);
+  const key=chKey(ch),scoped=ch.items.filter(itemInScope).filter(i=>!isGrayed(i.id));
   const done=scoped.filter(i=>getItemR(i.id).u).length;
   const el=document.getElementById('chprog-'+key);
   if(el){el.textContent=`${done}/${scoped.length}`;el.className='ch-badge'+(done===scoped.length&&scoped.length>0?' done':'');}
@@ -2151,7 +2062,7 @@ function renderRoundTabs(){
 function switchRound(i){appState.currentRound=i;save();render()}
 
 function updateProgress(){
-  const items=scopedItems(),total=items.length,done=items.filter(i=>getItemR(i.id).u).length;
+  const items=scopedItems().filter(i=>!isGrayed(i.id)),total=items.length,done=items.filter(i=>getItemR(i.id).u).length;
   const pct=total?Math.round(done/total*100):0;
   document.getElementById('prog-pct').textContent=pct+'%';
   document.getElementById('prog-lbl').textContent=`${done} / ${total} 完了`;
@@ -2183,17 +2094,131 @@ function updateRoundInfoBar(pct){
     ${pH}`;
 }
 function updateNextRoundBtn(){
-  const items=scopedItems(),pct=items.length?items.filter(i=>getItemR(i.id).u).length/items.length*100:0;
+  const items=scopedItems().filter(i=>!isGrayed(i.id)),pct=items.length?items.filter(i=>getItemR(i.id).u).length/items.length*100:0;
   document.getElementById('next-round-wrap').style.display=pct>=70?'block':'none';
 }
 
-function toggleWeaknessPage(){
-  showingWeakness=!showingWeakness;
-  document.getElementById('main-view').style.display=showingWeakness?'none':'block';
-  document.getElementById('weakness-view').style.display=showingWeakness?'block':'none';
-  document.getElementById('view-tabs').style.display=showingWeakness?'none':'flex';
-  document.getElementById('weakness-btn').classList.toggle('active',showingWeakness);
-  if(showingWeakness)renderHistoryPage();
+let showingKwManage = false;
+
+function showPage(page, btn) {
+  document.getElementById('kw-manage-view').style.display = 'none';
+  document.getElementById('kw-manage-btn').classList.remove('active');
+  showingKwManage = false;
+  showingWeakness = page === 'history';
+  document.getElementById('main-view').style.display = showingWeakness ? 'none' : 'block';
+  document.getElementById('weakness-view').style.display = showingWeakness ? 'block' : 'none';
+  document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  window.scrollTo(0, 0);
+  if (showingWeakness) renderHistoryPage();
+}
+
+function toggleKwManagePage() {
+  showingKwManage = !showingKwManage;
+  document.getElementById('kw-manage-btn').classList.toggle('active', showingKwManage);
+  if (showingKwManage) {
+    document.getElementById('main-view').style.display = 'none';
+    document.getElementById('weakness-view').style.display = 'none';
+    document.getElementById('kw-manage-view').style.display = 'block';
+    document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
+    window.scrollTo(0, 0);
+    renderKwManagePage();
+  } else {
+    document.getElementById('kw-manage-view').style.display = 'none';
+    document.getElementById('main-view').style.display = showingWeakness ? 'none' : 'block';
+    document.getElementById('weakness-view').style.display = showingWeakness ? 'block' : 'none';
+    window.scrollTo(0, 0);
+  }
+}
+
+let kwActiveChIdx = 0;
+let _isComposing = false;
+
+function renderKwManagePage() {
+  const view = document.getElementById('kw-manage-view');
+  const visibleChs = DATA.filter(ch => ch.items.filter(itemInScope).length > 0);
+  if (kwActiveChIdx >= visibleChs.length) kwActiveChIdx = 0;
+  let html = `<div id="kw-ch-tabs" style="display:flex;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);margin:0 -14px;padding:0 14px;gap:0;">`;
+  visibleChs.forEach((ch, idx) => {
+    const active = idx === kwActiveChIdx;
+    html += `<button onclick="selectKwCh(${idx})" style="flex-shrink:0;padding:9px 12px;font-size:11px;font-weight:700;font-family:'Noto Sans JP',sans-serif;background:transparent;border:none;border-bottom:2px solid ${active?'var(--text)':'transparent'};color:${active?'var(--text)':'var(--text-3)'};cursor:pointer;white-space:nowrap;transition:all .15s;">${ch.ch}</button>`;
+  });
+  html += `</div>`;
+  html += `<div id="kw-ch-content">`;
+  html += buildKwChContent(visibleChs[kwActiveChIdx]);
+  html += `</div>`;
+  view.innerHTML = html;
+  const tabBar = view.querySelector('#kw-ch-tabs');
+  const activeBtn = tabBar?.querySelectorAll('button')[kwActiveChIdx];
+  if (tabBar && activeBtn) {
+    tabBar.scrollLeft = activeBtn.offsetLeft - tabBar.offsetWidth / 2 + activeBtn.offsetWidth / 2;
+  }
+}
+
+function buildKwChContent(ch) {
+  if (!ch) return '';
+  const scopedChItems = ch.items.filter(itemInScope);
+  let html = `<div style="font-size:10px;font-weight:700;color:var(--text-2);padding:10px 0 8px;letter-spacing:.06em;">${ch.ch}　${ch.chName}</div>`;
+  scopedChItems.forEach(item => {
+    const kws = getKeywords(item.id);
+    html += `<div class="ch-card" style="margin-bottom:8px;">`;
+    html += `<div style="padding:10px 14px;">`;
+    html += `<div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:6px;">`;
+    html += `<span class="imp-badge imp-${item.imp}">${item.imp}</span>`;
+    html += `<span style="font-size:11px;color:var(--text);flex:1;line-height:1.5;">${escHtml(item.name)}</span>`;
+    html += `</div>`;
+    html += `<div id="kwmlist-${item.id}" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;">${buildKwManageChips(item.id, kws)}</div>`;
+    html += `<div style="display:flex;gap:6px;align-items:center;">`;
+    html += `<input class="kw-input" id="kwfield-${item.id}" type="text" placeholder="＋ キーワードを追加..." maxlength="30" oncompositionstart="_isComposing=true" oncompositionend="_isComposing=false" onkeydown="if(event.key==='Enter'&&!event.isComposing&&!_isComposing){event.preventDefault();commitKwManage('${item.id}')}">`;
+    html += `<button class="kw-add-confirm-btn" onclick="commitKwManage('${item.id}')">追加</button>`;
+    html += `</div>`;
+    html += `</div>`;
+    html += `</div>`;
+  });
+  return html;
+}
+
+function selectKwCh(idx) {
+  kwActiveChIdx = idx;
+  const view = document.getElementById('kw-manage-view');
+  view.querySelectorAll('#kw-ch-tabs button').forEach((btn, i) => {
+    btn.style.borderBottomColor = i === idx ? 'var(--text)' : 'transparent';
+    btn.style.color = i === idx ? 'var(--text)' : 'var(--text-3)';
+  });
+  const visibleChs = DATA.filter(ch => ch.items.filter(itemInScope).length > 0);
+  const contentEl = view.querySelector('#kw-ch-content');
+  if (contentEl) contentEl.innerHTML = buildKwChContent(visibleChs[idx]);
+}
+
+function buildKwManageChips(id, kws) {
+  if (!kws.length) return `<span style="font-size:10px;color:var(--text-3);">キーワードなし</span>`;
+  return kws.map((kw, idx) =>
+    `<div style="display:inline-flex;align-items:center;gap:3px;background:var(--bg);border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:3px 6px 3px 9px;font-size:11px;">
+      <span style="color:var(--text);font-family:'Noto Sans JP',sans-serif;">${escHtml(kw.word)}</span>
+      <button class="kw-del" onclick="removeKwManage('${id}',${idx})">&#x2715;</button>
+    </div>`
+  ).join('');
+}
+
+function commitKwManage(id) {
+  const f = document.getElementById('kwfield-' + id);
+  if (!f) return;
+  const w = f.value.trim();
+  if (!w) return;
+  addKeyword(id, w);
+  f.value = '';
+  refreshKwManageItem(id);
+}
+
+function removeKwManage(id, idx) {
+  deleteKeyword(id, idx);
+  refreshKwManageItem(id);
+}
+
+function refreshKwManageItem(id) {
+  const el = document.getElementById('kwmlist-' + id);
+  if (!el) return;
+  el.innerHTML = buildKwManageChips(id, getKeywords(id));
 }
 
 let histActiveChIdx=0;
@@ -2365,6 +2390,7 @@ function openScopeModal(isFirst){
     document.querySelectorAll('.scope-opt').forEach(b=>b.classList.remove('sel'));
     document.getElementById('scope-confirm-btn').style.cssText='width:100%;opacity:.4;pointer-events:none';
   }
+  _lockScroll();
   document.getElementById('scope-overlay').classList.add('open');
 }
 function checkScopeConfirmBtn(){
@@ -2392,12 +2418,12 @@ document.getElementById('scope-confirm-btn').onclick=function(){
   const bp=(bd&&bd>0)?bt/bd:null;
   if(pendingScopeIsFirst){Object.assign(appState.rounds[0],{scope:pendingScope,startDate:sd,deadline:dl,basePace:bp});}
   else{appState.rounds.push({label:`第${appState.rounds.length+1}回`,scope:pendingScope,startDate:sd,deadline:dl,basePace:bp});appState.currentRound=appState.rounds.length-1;}
-  save();document.getElementById('scope-overlay').classList.remove('open');render();
+  save();_unlockScroll();document.getElementById('scope-overlay').classList.remove('open');render();
 };
-document.getElementById('scope-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('scope-overlay'))document.getElementById('scope-overlay').classList.remove('open')});
+document.getElementById('scope-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('scope-overlay')){_unlockScroll();document.getElementById('scope-overlay').classList.remove('open');}});
 
-function openDeadlineModal(){document.getElementById('deadline-input').value=curDeadline()||'';document.getElementById('deadline-overlay').classList.add('open')}
-function closeDeadlineModal(){document.getElementById('deadline-overlay').classList.remove('open')}
+function openDeadlineModal(){document.getElementById('deadline-input').value=curDeadline()||'';_lockScroll();document.getElementById('deadline-overlay').classList.add('open')}
+function closeDeadlineModal(){_unlockScroll();document.getElementById('deadline-overlay').classList.remove('open')}
 function saveDeadline(){
   const nl=document.getElementById('deadline-input').value||null;
   const rd=appState.rounds[curRound()];rd.deadline=nl;
@@ -2406,16 +2432,7 @@ function saveDeadline(){
 }
 document.getElementById('deadline-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('deadline-overlay'))closeDeadlineModal()});
 
-const _savedTab=localStorage.getItem('kanri-riron-uitab');
-if(_savedTab)curViewTab=_savedTab;
-
 load();render();
-
-if(_savedTab){
-  document.querySelectorAll('.vtab').forEach(b=>{
-    b.classList.toggle('active',b.getAttribute('onclick').includes("'"+_savedTab+"'"));
-  });
-}
 
 JSON.parse(localStorage.getItem('kanri-riron-chopen')||'[]').forEach(k=>{
   const card=document.getElementById('chcard-'+k);if(card)card.classList.add('open');

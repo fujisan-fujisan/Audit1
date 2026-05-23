@@ -235,31 +235,6 @@ body {
   text-underline-offset: 3px;
 }
 
-.view-tabs {
-  display: flex;
-  border-top: 1px solid var(--border);
-  background: var(--surface);
-}
-
-.vtab {
-  flex: 1;
-  padding: 9px 8px;
-  font-size: 12px;
-  font-weight: 700;
-  font-family: 'Noto Sans JP', sans-serif;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: var(--text-3);
-  border-bottom: 2px solid transparent;
-  transition: all .15s;
-  letter-spacing: .02em;
-}
-
-.vtab.active {
-  color: var(--text);
-  border-bottom-color: var(--text);
-}
 
 .content {
   padding: 12px 14px;
@@ -462,46 +437,6 @@ body {
   font-weight: 700;
 }
 
-/* ── 復習評価ボタン（要復習タブ用）── */
-.review-eval-btns {
-  display: flex;
-  gap: 3px;
-  flex-shrink: 0;
-  align-items: center;
-}
-
-.ub-rev {
-  width: 34px;
-  height: 26px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-strong);
-  background: var(--bg);
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all .12s;
-  color: var(--text-3);
-  font-family: 'Noto Sans JP', sans-serif;
-}
-
-.ub-rev:active {
-  transform: scale(.88);
-}
-
-.ub-rev.sel-o {
-  background: var(--o-bg);
-  border-color: var(--o-color);
-  color: var(--o-color);
-}
-
-.ub-rev.sel-x {
-  background: var(--x-bg);
-  border-color: var(--x-color);
-  color: var(--x-color);
-}
 
 .item-history {
   display: flex;
@@ -947,32 +882,94 @@ body {
   cursor:pointer
 }
 
-.urgency-wrap {
+
+.view-tabs {
   display: flex;
-  align-items: center;
-  gap: 7px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
 }
 
-.urgency-score {
-  font-size: 11px;
+.vtab {
+  flex: 1;
+  padding: 9px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Noto Sans JP', sans-serif;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-3);
+  border-bottom: 2px solid transparent;
+  transition: all .15s;
+  letter-spacing: .02em;
+}
+
+.vtab.active {
+  color: var(--text);
+  border-bottom-color: var(--text);
+}
+
+/* ── 次ラウンドスキップ ── */
+.item-row.item-skipped {
+  opacity: 0.38;
+}
+
+.skip-chip {
+  font-size: 9px;
   font-weight: 700;
   font-family: 'DM Mono', monospace;
-  min-width: 32px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: #f0f0ee;
+  border: 1px solid #ccc;
+  color: #999;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.nrp {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 0 1px;
+}
+
+.nrp-label {
+  font-size: 10px;
+  color: var(--text-3);
+  font-family: 'Noto Sans JP', sans-serif;
   flex-shrink: 0;
 }
 
-.urgency-track {
-  flex: 1;
-  height: 5px;
-  background: var(--border);
-  border-radius: 999px;
-  overflow: hidden;
+.nrp-btn {
+  height: 28px;
+  padding: 0 11px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--bg);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+  color: var(--text-3);
+  transition: all .12s;
+  white-space: nowrap;
 }
 
-.urgency-fill {
-  height: 100%;
-  border-radius: 999px;
-  transition: width .4s ease, background .4s ease;
+.nrp-btn:active {
+  transform: scale(.9);
+}
+
+.nrp-btn.nrp-include {
+  background: var(--o-bg);
+  border-color: var(--o-color);
+  color: var(--o-color);
+}
+
+.nrp-btn.nrp-skip {
+  background: var(--x-bg);
+  border-color: var(--x-color);
+  color: var(--x-color);
 }
 
 .ch-footer {
@@ -1500,7 +1497,7 @@ body {
         <button class="btn-icon" onclick="exportData()">バックアップ</button>
         <button class="btn-icon" onclick="document.getElementById('import-input').click()">復元</button>
         <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)">
-        <button class="btn-icon" id="weakness-btn" onclick="toggleWeaknessPage()">履歴一覧</button>
+        <button class="btn-icon" id="kw-manage-btn" onclick="toggleKwManagePage()">キーワード</button>
         <button class="btn-icon" id="close-all-btn" onclick="closeAllOverlays()" style="display:none;background:var(--x-bg);border-color:var(--x-color);color:var(--x-color);">✕ 閉じる</button>
       </div>
     </div>
@@ -1513,8 +1510,8 @@ body {
   <div class="tabs" id="round-tabs"></div>
   <div class="round-info-bar" id="round-info-bar"></div>
   <div class="view-tabs" id="view-tabs">
-    <button class="vtab active" onclick="setViewTab('all',this)">全問題</button>
-    <button class="vtab" onclick="setViewTab('urgent',this)">要復習</button>
+    <button class="vtab active" onclick="showPage('all', this)">全問題</button>
+    <button class="vtab" onclick="showPage('history', this)">履歴一覧</button>
   </div>
 </div>
 
@@ -1526,6 +1523,8 @@ body {
 </div>
 
 <div id="weakness-view" class="content" style="display:none;"></div>
+
+<div id="kw-manage-view" class="content" style="display:none;padding-bottom:100px;"></div>
 
 <div class="overlay" id="scope-overlay">
   <div class="scope-modal">
@@ -1798,6 +1797,8 @@ const DATA = [
    {id:"z15-17",name:"有償支給取引の原則的な会計処理（買い戻す義務を負っている場合と負っていない場合）",imp:"B"},
   ]},
  {ch:"第16章", chName:"連結財務諸表", items:[
+   {id:"z16-0",name:"連結基礎概念の要点6つ",imp:"A"},
+   {id:"z16-00",name:"連結基礎概念と現行会計処理の採用分類　9つ",imp:"A"},
    {id:"z16-1",name:"連結基礎概念の①親会社説と②経済的単一体説それぞれの考え方",imp:"A"},
    {id:"z16-2",name:"連結貸借対照表における非支配株主持分の表示区分（①親会社説②経済的単一体説）",imp:"A"},
    {id:"z16-3",name:"連結損益計算書における非支配株主に帰属する当期純利益の表示方法（①親会社説②経済的単一体説）",imp:"A"},
@@ -1835,7 +1836,7 @@ const DATA = [
    {id:"z17-7",name:"資産負債法を採用した場合における繰延税金資産及び繰延税金負債の性格",imp:"A"},
    {id:"z17-8",name:"繰延税金資産についての将来の回収可能性の検討理由と判断要件３つ",imp:"A"},
    {id:"z17-9",name:"未実現利益の消去に係る税効果の会計処理（①計上額②適用税率③回収可能性）",imp:"A"},
-   {id:"z17-10",name:"未実現損益の消去に係る一時差異の会計処理（①繰延法②資産負債法の損益計算への影響）",imp:"A"},
+   {id:"z17-10",name:"未実現損益の消去に係る一時差異の会計処理の損益計算への影響（①繰延法②資産負債法）",imp:"A"},
    {id:"z17-11",name:"子会社株式等の取得に伴い認識したのれんについて税効果を認識しない理由",imp:"A"},
    {id:"z17-12",name:"繰延税金資産及び繰延税金負債の表示の①流動・非流動区分と②すべて非流動区分の論拠",imp:"B"},
   ]},
@@ -2095,6 +2096,11 @@ function commitKw(id){
 }
 function removeKw(id,idx){deleteKeyword(id,idx);refreshKwSection(id,true)}
 
+// ── SCROLL LOCK ──
+let _scrollLockDepth = 0;
+function _lockScroll() { if (++_scrollLockDepth === 1) document.body.style.overflow = 'hidden'; }
+function _unlockScroll() { if (--_scrollLockDepth <= 0) { _scrollLockDepth = 0; document.body.style.overflow = ''; } }
+
 /* ── キーワード評価ポップアップ ── */
 let kwEvalItemId=null;
 function openKwEvalPopup(id){
@@ -2104,6 +2110,7 @@ function openKwEvalPopup(id){
   const item=DATA.flatMap(c=>c.items).find(i=>i.id===id);
   document.getElementById('kw-eval-subtitle').textContent=item?item.name:'';
   renderKwEvalList();
+  _lockScroll();
   document.getElementById('kw-eval-overlay').classList.add('open');
 }
 function renderKwEvalList(){
@@ -2128,8 +2135,10 @@ function evalKwPopup(idx,result){
   setKwResult(kwEvalItemId,idx,result);
   renderKwEvalList();
   refreshKwSection(kwEvalItemId,true);
+  refreshKwManageItem(kwEvalItemId);
 }
 function closeKwEvalPopup(){
+  _unlockScroll();
   document.getElementById('kw-eval-overlay').classList.remove('open');
   kwEvalItemId=null;
 }
@@ -2182,82 +2191,6 @@ function chKey(ch) {
     .replace(/[^0-9]/g, '');
 }
 
-// ── 緊急度計算（管理会計版と同じロジック）──
-function calcUrgency(itemId) {
-  const r = getItemR(itemId);
-  if (r.reviewPassed === true) return null;
-  if (!r.u || !r.date) return null;
-  const item = DATA.flatMap(c => c.items).find(i => i.id === itemId);
-  if (!item || !itemInScope(item)) return null;
-
-  const impKey = item.imp === 'A' ? 'A' : 'B';
-
-  // 復習×後は復習専用日数で再カウント
-  if (r.reviewDate) {
-    const reviewDays = { 'A': 6, 'B': 13 };
-    const days = reviewDays[impKey];
-    const diff = Math.floor((Date.now() - new Date(r.reviewDate).getTime()) / 86400000);
-    return Math.min(100, Math.round(diff / days * 100));
-  }
-
-  // 学習時スコア別日数
-  const LEARN_DAYS = {
-    'A': { 'oo': 13, 'o': 9, 'n': 6, 'x': 4, 'xx': 3 },
-    'B': { 'oo': 18, 'o': 14, 'n': 11, 'x': 9, 'xx': 6 },
-  };
-  const days = (LEARN_DAYS[impKey] || LEARN_DAYS['B'])[r.u] || 11;
-  const diff = Math.floor((Date.now() - new Date(r.date).getTime()) / 86400000);
-  return Math.min(100, Math.round(diff / days * 100));
-}
-
-function urgencyColor(score) {
-  if (score >= 80) return '#c0392b';
-  if (score >= 55) return '#e67e22';
-  if (score >= 30) return '#d4a017';
-  return '#1a7a4a';
-}
-
-// ── VIEW TABS ──
-let curViewTab = 'all';
-
-function setViewTab(tab, btn) {
-  curViewTab = tab;
-  localStorage.setItem('zaimu-riron-uitab', tab);
-  document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  updateItemTopButtons();
-  applyFilter();
-}
-
-function updateItemTopButtons() {
-  DATA.forEach(ch => {
-    ch.items.forEach(item => {
-      if (!itemInScope(item)) return;
-      const row = document.getElementById('irow-' + item.id);
-      if (!row) return;
-      const r = getItemR(item.id);
-      const urgency = calcUrgency(item.id);
-      const showRev = urgency !== null && curViewTab === 'urgent';
-      const rpR = r.reviewPassed === true;
-      const hasRXR = !rpR && !!r.reviewDate;
-      const uBtns = row.querySelector('.u-btns');
-      const revBtns = row.querySelector('.review-eval-btns');
-      if (showRev) {
-        if (uBtns) uBtns.style.display = 'none';
-        if (revBtns) {
-          revBtns.style.display = 'flex';
-          const [oBtn, xBtn] = revBtns.querySelectorAll('.ub-rev');
-          if (oBtn) oBtn.className = 'ub-rev' + (rpR ? ' sel-o' : '');
-          if (xBtn) xBtn.className = 'ub-rev' + (hasRXR ? ' sel-x' : '');
-        }
-      } else {
-        if (uBtns) uBtns.style.display = 'flex';
-        if (revBtns) revBtns.style.display = 'none';
-      }
-    });
-  });
-}
-
 function applyFilter() {
   DATA.forEach(ch => {
     const key = chKey(ch);
@@ -2268,11 +2201,8 @@ function applyFilter() {
       const row = document.getElementById('irow-' + item.id);
       if (!row) return;
       if (!itemInScope(item)) { row.style.display = 'none'; return; }
-      const u = getItemR(item.id).u;
-      let show = true;
-      if (curViewTab === 'urgent') { const s = calcUrgency(item.id); show = s !== null && s >= 70; }
-      row.style.display = show ? '' : 'none';
-      if (show) anyVisible = true;
+      row.style.display = '';
+      anyVisible = true;
     });
     card.classList.toggle('hidden', !anyVisible);
   });
@@ -2281,6 +2211,7 @@ function applyFilter() {
 // ── RENDER ──
 function render() {
   // オーバーレイが残っていたら必ず閉じる
+  _scrollLockDepth = 0; document.body.style.overflow = '';
   document.querySelectorAll('.overlay.open').forEach(el => el.classList.remove('open'));
   const ct = document.getElementById('content');
   ct.innerHTML = '';
@@ -2392,6 +2323,8 @@ function saveRecord(key) {
 function buildItemRow(item) {
   const r = getItemR(item.id);
   const u = r.u || null;
+  const grayed = isGrayed(item.id);
+  const skipNext = r.skipNext;
 
   const totalRounds = appState.rounds.length;
   let histHTML = '';
@@ -2408,42 +2341,31 @@ function buildItemRow(item) {
     histHTML += `</div>`;
   }
 
-  const urgency = calcUrgency(item.id);
-  const rp = r.reviewPassed === true;
-  const hasReviewX = !rp && !!r.reviewDate;
-  const showReviewEval = urgency !== null && curViewTab === 'urgent';
-
-  const urgencyHTML = urgency !== null ? `
-    <div class="urgency-wrap" id="urg-${item.id}">
-      <span class="urgency-score" style="color:${urgencyColor(urgency)}">${urgency}</span>
-      <div class="urgency-track"><div class="urgency-fill" style="width:${urgency}%;background:${urgencyColor(urgency)}"></div></div>
-    </div>` : '';
+  const nrpHTML = `
+    <div class="nrp" style="${u ? '' : 'display:none'}">
+      <span class="nrp-label">次回</span>
+      <button class="nrp-btn${skipNext === false ? ' nrp-include' : ''}" onclick="setSkipNext('${item.id}', false)">含める</button>
+      <button class="nrp-btn${skipNext === true ? ' nrp-skip' : ''}" onclick="setSkipNext('${item.id}', true)">スキップ</button>
+    </div>`;
 
   const row = document.createElement('div');
-  row.className = 'item-row';
+  row.className = 'item-row' + (grayed ? ' item-skipped' : '');
   row.id = 'irow-' + item.id;
   row.innerHTML = `
     <div class="item-top">
       <span class="item-name"><span style="color:var(--text-3);font-family:'DM Mono',monospace;font-size:12px;margin-right:5px;">${item.id.replace('z','')}</span>${item.name}</span>
       <span class="imp-badge imp-${item.imp}">${item.imp}</span>
-      <div class="u-btns" style="${showReviewEval ? 'display:none' : ''}">
+      ${grayed ? '<span class="skip-chip">SKIP</span>' : ''}
+      <div class="u-btns">
         <button class="ub ${u==='oo'?'sel-oo':''}" onclick="setU('${item.id}','oo')">○○</button>
         <button class="ub ${u==='o' ?'sel-o' :''}" onclick="setU('${item.id}','o')" >○</button>
         <button class="ub ${u==='n' ?'sel-n' :''}" onclick="setU('${item.id}','n')" >ー</button>
         <button class="ub ${u==='x' ?'sel-x' :''}" onclick="setU('${item.id}','x')" >×</button>
         <button class="ub ${u==='xx'?'sel-xx':''}" onclick="setU('${item.id}','xx')">××</button>
       </div>
-      <div class="review-eval-btns" style="${showReviewEval ? '' : 'display:none'}">
-        <button class="ub-rev${rp ? ' sel-o' : ''}" onclick="reviewItem('${item.id}','o')">○</button>
-        <button class="ub-rev${hasReviewX ? ' sel-x' : ''}" onclick="reviewItem('${item.id}','x')">×</button>
-      </div>
     </div>
-    ${urgencyHTML}
+    ${nrpHTML}
     ${histHTML}`;
-  // キーワードセクションはappendChildで安全に追加
-  const kwTmp=document.createElement('div');
-  kwTmp.innerHTML=buildKwSection(item);
-  row.appendChild(kwTmp.firstElementChild);
   return row;
 }
 
@@ -2503,8 +2425,9 @@ function switchRound(i) {
 
 function updateProgress() {
   const items = scopedItems();
-  const total = items.length;
-  const done = items.filter(i => getItemR(i.id).u).length;
+  const activeItems = items.filter(i => !isGrayed(i.id));
+  const total = activeItems.length;
+  const done = activeItems.filter(i => getItemR(i.id).u).length;
   const pct = total ? Math.round(done / total * 100) : 0;
   document.getElementById('prog-pct').textContent = pct + '%';
   document.getElementById('prog-lbl').textContent = `${done} / ${total} 完了`;
@@ -2523,11 +2446,12 @@ function updateRoundInfoBar(pct) {
   const daysClass = days === null ? '' : days <= 7 ? 'warn' : 'ok';
 
   const items = scopedItems();
-  const remaining = items.filter(i => !getItemR(i.id).u).length;
+  const activeItems = items.filter(i => !isGrayed(i.id));
+  const remaining = activeItems.filter(i => !getItemR(i.id).u).length;
   let paceHTML = '';
   if (days !== null && days > 0) {
     const perDay = remaining / days;
-    const basePace = rd.basePace || (items.length / days);
+    const basePace = rd.basePace || (activeItems.length / days);
     const ratio = perDay / basePace;
     const paceClass = ratio > 1.2 ? 'warn' : ratio > 1.0 ? '' : 'ok';
     const perDayStr = perDay >= 10 ? Math.round(perDay) + '問' : perDay.toFixed(1) + '問';
@@ -2550,8 +2474,9 @@ function updateRoundInfoBar(pct) {
 
 function updateNextRoundBtn() {
   const items = scopedItems();
-  const total = items.length;
-  const done = items.filter(i => getItemR(i.id).u).length;
+  const activeItems = items.filter(i => !isGrayed(i.id));
+  const total = activeItems.length;
+  const done = activeItems.filter(i => getItemR(i.id).u).length;
   const pct = total ? done / total * 100 : 0;
   document.getElementById('next-round-wrap').style.display = pct >= 70 ? 'block' : 'none';
 }
@@ -2572,20 +2497,29 @@ function setU(itemId, type) {
   }
 }
 
-// ── 復習評価（要復習タブ専用）──
-function reviewItem(itemId, type) {
+// ── 次ラウンドスキップ ──
+function isSkippedThisRound(itemId) {
+  const prevRound = curRound() - 1;
+  if (prevRound < 0) return false;
+  return getItemR(itemId, prevRound).skipNext === true;
+}
+
+function isGrayed(itemId) {
+  return isSkippedThisRound(itemId) && !getItemR(itemId).u;
+}
+
+function setSkipNext(itemId, skip) {
   const r = getItemR(itemId);
-  if (type === 'o') {
-    r.reviewPassed = true;
-    r.reviewDate = today();
-  } else {
-    r.reviewPassed = false;
-    r.reviewDate = today();
-  }
+  r.skipNext = skip;
   setItemR(itemId, r);
   save();
-  refreshItem(itemId);
-  applyFilter();
+  const row = document.getElementById('irow-' + itemId);
+  if (!row) return;
+  const nrp = row.querySelector('.nrp');
+  if (!nrp) return;
+  const [inclBtn, skipBtn] = nrp.querySelectorAll('.nrp-btn');
+  if (inclBtn) inclBtn.className = 'nrp-btn' + (skip === false ? ' nrp-include' : '');
+  if (skipBtn) skipBtn.className = 'nrp-btn' + (skip === true ? ' nrp-skip' : '');
 }
 
 function refreshItem(itemId) {
@@ -2600,43 +2534,28 @@ function refreshItem(itemId) {
     if (r.u === t) btn.classList.add('sel-' + t);
   });
 
-  const urgency = calcUrgency(itemId);
-  const showReviewEvalR = urgency !== null && curViewTab === 'urgent';
-  const rpR = r.reviewPassed === true;
-  const hasRXR = !rpR && !!r.reviewDate;
-  const uBtns = row.querySelector('.u-btns');
-  const revBtns = row.querySelector('.review-eval-btns');
-  if (showReviewEvalR) {
-    if (uBtns) uBtns.style.display = 'none';
-    if (revBtns) {
-      revBtns.style.display = 'flex';
-      const [oBtn, xBtn] = revBtns.querySelectorAll('.ub-rev');
-      if (oBtn) oBtn.className = 'ub-rev' + (rpR ? ' sel-o' : '');
-      if (xBtn) xBtn.className = 'ub-rev' + (hasRXR ? ' sel-x' : '');
-    }
-  } else {
-    if (uBtns) uBtns.style.display = 'flex';
-    if (revBtns) revBtns.style.display = 'none';
+  const nrp = row.querySelector('.nrp');
+  if (nrp) {
+    nrp.style.display = r.u ? '' : 'none';
+    const [inclBtn, skipBtn] = nrp.querySelectorAll('.nrp-btn');
+    if (inclBtn) inclBtn.className = 'nrp-btn' + (r.skipNext === false ? ' nrp-include' : '');
+    if (skipBtn) skipBtn.className = 'nrp-btn' + (r.skipNext === true ? ' nrp-skip' : '');
   }
 
-  const wrap = row.querySelector('.urgency-wrap');
-  function buildUrgencyEl(urgency, itemId) {
-    const color = urgencyColor(urgency);
-    const div = document.createElement('div');
-    div.className = 'urgency-wrap';
-    div.id = 'urg-' + itemId;
-    div.innerHTML = `
-      <span class="urgency-score" style="color:${color}">${urgency}</span>
-      <div class="urgency-track"><div class="urgency-fill" style="width:${urgency}%;background:${color}"></div></div>`;
-    return div;
-  }
-  if (urgency !== null) {
-    if (wrap) { wrap.replaceWith(buildUrgencyEl(urgency, itemId)); }
-    else {
-      const topEl = row.querySelector('.item-top');
-      if (topEl) topEl.insertAdjacentElement('afterend', buildUrgencyEl(urgency, itemId));
+  const grayed = isGrayed(itemId);
+  row.classList.toggle('item-skipped', grayed);
+  const skipChip = row.querySelector('.skip-chip');
+  if (grayed && !skipChip) {
+    const impBadge = row.querySelector('.imp-badge');
+    if (impBadge) {
+      const chip = document.createElement('span');
+      chip.className = 'skip-chip';
+      chip.textContent = 'SKIP';
+      impBadge.insertAdjacentElement('afterend', chip);
     }
-  } else if (wrap) { wrap.remove(); }
+  } else if (!grayed && skipChip) {
+    skipChip.remove();
+  }
 }
 
 function refreshChProg(itemId) {
@@ -2654,14 +2573,136 @@ function refreshChProg(itemId) {
   }
 }
 
-// ── 履歴一覧 ──
-function toggleWeaknessPage() {
-  showingWeakness = !showingWeakness;
+// ── ページ切替 ──
+function showPage(page, btn) {
+  document.getElementById('kw-manage-view').style.display = 'none';
+  document.getElementById('kw-manage-btn').classList.remove('active');
+  showingKwManage = false;
+  showingWeakness = page === 'history';
   document.getElementById('main-view').style.display = showingWeakness ? 'none' : 'block';
   document.getElementById('weakness-view').style.display = showingWeakness ? 'block' : 'none';
-  document.getElementById('view-tabs').style.display = showingWeakness ? 'none' : 'flex';
-  document.getElementById('weakness-btn').classList.toggle('active', showingWeakness);
+  document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  window.scrollTo(0, 0);
   if (showingWeakness) renderHistoryPage();
+}
+
+let showingKwManage = false;
+
+function toggleKwManagePage() {
+  showingKwManage = !showingKwManage;
+  document.getElementById('kw-manage-btn').classList.toggle('active', showingKwManage);
+  if (showingKwManage) {
+    document.getElementById('main-view').style.display = 'none';
+    document.getElementById('weakness-view').style.display = 'none';
+    document.getElementById('kw-manage-view').style.display = 'block';
+    window.scrollTo(0, 0);
+    renderKwManagePage();
+  } else {
+    document.getElementById('kw-manage-view').style.display = 'none';
+    document.getElementById('main-view').style.display = showingWeakness ? 'none' : 'block';
+    document.getElementById('weakness-view').style.display = showingWeakness ? 'block' : 'none';
+    window.scrollTo(0, 0);
+  }
+}
+
+let kwActiveChIdx = 0;
+
+function renderKwManagePage() {
+  const view = document.getElementById('kw-manage-view');
+  const visibleChs = DATA.filter(ch => ch.items.filter(itemInScope).length > 0);
+  if (kwActiveChIdx >= visibleChs.length) kwActiveChIdx = 0;
+
+  // 章タブ（横スクロール）
+  let html = `<div id="kw-ch-tabs" style="display:flex;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);margin:0 -14px;padding:0 14px;gap:0;">`;
+  visibleChs.forEach((ch, idx) => {
+    const active = idx === kwActiveChIdx;
+    html += `<button onclick="selectKwCh(${idx})" style="flex-shrink:0;padding:9px 12px;font-size:11px;font-weight:700;font-family:'Noto Sans JP',sans-serif;background:transparent;border:none;border-bottom:2px solid ${active ? 'var(--text)' : 'transparent'};color:${active ? 'var(--text)' : 'var(--text-3)'};cursor:pointer;white-space:nowrap;transition:all .15s;">${ch.ch}</button>`;
+  });
+  html += `</div>`;
+
+  html += `<div id="kw-ch-content">`;
+  html += buildKwChContent(visibleChs[kwActiveChIdx]);
+  html += `</div>`;
+
+  view.innerHTML = html;
+
+  // アクティブタブを中央付近にスクロール
+  const tabBar = view.querySelector('#kw-ch-tabs');
+  const activeBtn = tabBar?.querySelectorAll('button')[kwActiveChIdx];
+  if (tabBar && activeBtn) {
+    tabBar.scrollLeft = activeBtn.offsetLeft - tabBar.offsetWidth / 2 + activeBtn.offsetWidth / 2;
+  }
+}
+
+function buildKwChContent(ch) {
+  if (!ch) return '';
+  const scopedChItems = ch.items.filter(itemInScope);
+  let html = `<div style="font-size:10px;font-weight:700;color:var(--text-2);padding:10px 0 8px;letter-spacing:.06em;">${ch.ch}　${ch.chName}</div>`;
+  scopedChItems.forEach(item => {
+    const kws = getKeywords(item.id);
+    html += `<div class="ch-card" style="margin-bottom:8px;">`;
+    html += `<div style="padding:10px 14px;">`;
+    html += `<div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:6px;">`;
+    html += `<span class="imp-badge imp-${item.imp}">${item.imp}</span>`;
+    html += `<span style="font-size:11px;color:var(--text);flex:1;line-height:1.5;">${escHtml(item.name)}</span>`;
+    html += `</div>`;
+    html += `<div id="kwmlist-${item.id}" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;">${buildKwManageChips(item.id, kws)}</div>`;
+    html += `<div style="display:flex;gap:6px;align-items:center;">`;
+    html += `<input class="kw-input" id="kwfield-${item.id}" type="text" placeholder="＋ キーワードを追加..." maxlength="30" oncompositionstart="_isComposing=true" oncompositionend="_isComposing=false" onkeydown="if(event.key==='Enter'&&!event.isComposing&&!_isComposing){event.preventDefault();commitKwManage('${item.id}')}">`;
+    html += `<button class="kw-add-confirm-btn" onclick="commitKwManage('${item.id}')">追加</button>`;
+    html += `</div>`;
+    html += `</div>`;
+    html += `</div>`;
+  });
+  return html;
+}
+
+function selectKwCh(idx) {
+  kwActiveChIdx = idx;
+  const view = document.getElementById('kw-manage-view');
+
+  // タブのアクティブスタイル更新
+  view.querySelectorAll('#kw-ch-tabs button').forEach((btn, i) => {
+    btn.style.borderBottomColor = i === idx ? 'var(--text)' : 'transparent';
+    btn.style.color = i === idx ? 'var(--text)' : 'var(--text-3)';
+  });
+
+  // コンテンツ差し替え
+  const visibleChs = DATA.filter(ch => ch.items.filter(itemInScope).length > 0);
+  const contentEl = view.querySelector('#kw-ch-content');
+  if (contentEl) contentEl.innerHTML = buildKwChContent(visibleChs[idx]);
+}
+
+function buildKwManageChips(id, kws) {
+  if (!kws.length) return `<span style="font-size:10px;color:var(--text-3);">キーワードなし</span>`;
+  return kws.map((kw, idx) =>
+    `<div style="display:inline-flex;align-items:center;gap:3px;background:var(--bg);border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:3px 6px 3px 9px;font-size:11px;">
+      <span style="color:var(--text);font-family:'Noto Sans JP',sans-serif;">${escHtml(kw.word)}</span>
+      <button class="kw-del" onclick="removeKwManage('${id}',${idx})">&#x2715;</button>
+    </div>`
+  ).join('');
+}
+
+function commitKwManage(id) {
+  const f = document.getElementById('kwfield-' + id);
+  if (!f) return;
+  const w = f.value.trim();
+  if (!w) return;
+  addKeyword(id, w);
+  f.value = '';
+  refreshKwManageItem(id);
+}
+
+function removeKwManage(id, idx) {
+  deleteKeyword(id, idx);
+  refreshKwManageItem(id);
+}
+
+function refreshKwManageItem(id) {
+  const el = document.getElementById('kwmlist-' + id);
+  if (!el) return;
+  el.innerHTML = buildKwManageChips(id, getKeywords(id));
 }
 
 let histActiveChIdx = 0;
@@ -2970,6 +3011,7 @@ function openScopeModal(isFirst) {
     document.getElementById('scope-confirm-btn').style.opacity = '.4';
     document.getElementById('scope-confirm-btn').style.pointerEvents = 'none';
   }
+  _lockScroll();
   document.getElementById('scope-overlay').classList.add('open');
 }
 
@@ -3011,20 +3053,24 @@ document.getElementById('scope-confirm-btn').onclick = function() {
     appState.currentRound = appState.rounds.length - 1;
   }
   save();
+  _unlockScroll();
   document.getElementById('scope-overlay').classList.remove('open');
   render();
 };
 
 document.getElementById('scope-overlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('scope-overlay'))
+  if (e.target === document.getElementById('scope-overlay')) {
+    _unlockScroll();
     document.getElementById('scope-overlay').classList.remove('open');
+  }
 });
 
 function openDeadlineModal() {
   document.getElementById('deadline-input').value = curDeadline() || '';
+  _lockScroll();
   document.getElementById('deadline-overlay').classList.add('open');
 }
-function closeDeadlineModal() { document.getElementById('deadline-overlay').classList.remove('open'); }
+function closeDeadlineModal() { _unlockScroll(); document.getElementById('deadline-overlay').classList.remove('open'); }
 function saveDeadline() {
   const newDeadline = document.getElementById('deadline-input').value || null;
   const rd = appState.rounds[curRound()];
@@ -3083,16 +3129,7 @@ function importData(e) {
 // ── INIT ──
 load();
 
-const _savedTab = localStorage.getItem('zaimu-riron-uitab');
-if (_savedTab) curViewTab = _savedTab;
-
 render();
-
-if (_savedTab) {
-  document.querySelectorAll('.vtab').forEach(b => {
-    b.classList.toggle('active', b.getAttribute('onclick').includes("'"+_savedTab+"'"));
-  });
-}
 
 const _savedOpenChs = JSON.parse(localStorage.getItem('zaimu-riron-chopen') || '[]');
 _savedOpenChs.forEach(k => {
@@ -3111,6 +3148,7 @@ if (!appState.rounds[0].startDate) {
 
 // ── 全オーバーレイを強制クローズ ──
 function closeAllOverlays() {
+  _scrollLockDepth = 0; document.body.style.overflow = '';
   document.querySelectorAll('.overlay.open').forEach(el => el.classList.remove('open'));
   document.getElementById('close-all-btn').style.display = 'none';
 }

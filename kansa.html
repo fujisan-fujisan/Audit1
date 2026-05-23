@@ -1458,6 +1458,11 @@ function renderHistoryPage() {
 let pendingScope = null;
 let pendingScopeIsFirst = false;
 
+// ── SCROLL LOCK ──
+let _scrollLockDepth = 0;
+function _lockScroll() { if (++_scrollLockDepth === 1) document.body.style.overflow = 'hidden'; }
+function _unlockScroll() { if (--_scrollLockDepth <= 0) { _scrollLockDepth = 0; document.body.style.overflow = ''; } }
+
 function openScopeModal(isFirst) {
   pendingScope = null;
   pendingScopeIsFirst = !!isFirst;
@@ -1480,6 +1485,7 @@ function openScopeModal(isFirst) {
     document.querySelectorAll('.scope-opt').forEach(b => b.classList.remove('sel'));
   }
   checkScopeConfirmBtn();
+  _lockScroll();
   document.getElementById('scope-overlay').classList.add('open');
 }
 
@@ -1520,20 +1526,25 @@ document.getElementById('scope-confirm-btn').onclick = function() {
     appState.currentRound = appState.rounds.length - 1;
   }
   save();
+  _unlockScroll();
   document.getElementById('scope-overlay').classList.remove('open');
   render();
 };
 
 document.getElementById('scope-overlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('scope-overlay'))
+  if (e.target === document.getElementById('scope-overlay')) {
+    _unlockScroll();
     document.getElementById('scope-overlay').classList.remove('open');
+  }
 });
 
 function openDeadlineModal() {
   document.getElementById('deadline-input').value = curDeadline() || '';
+  _lockScroll();
   document.getElementById('deadline-overlay').classList.add('open');
 }
 function closeDeadlineModal() {
+  _unlockScroll();
   document.getElementById('deadline-overlay').classList.remove('open');
 }
 function saveDeadline() {
