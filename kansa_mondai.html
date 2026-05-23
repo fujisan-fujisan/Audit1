@@ -65,10 +65,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .type-badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;margin-right:4px;vertical-align:middle;font-family:'DM Mono',monospace;letter-spacing:.04em}
 .type-ronsh{background:var(--ronsh-bg);color:var(--ronsh)}
 .type-kihon{background:var(--kihon-bg);color:var(--kihon)}
-.imp-badge{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:5px;vertical-align:middle;font-family:'DM Mono',monospace}
-.imp-A{background:#fdecea;color:#b71c1c}
-.imp-B{background:#e3f0fb;color:#1565c0}
-.imp-C{background:#f0f0ee;color:#888}
 
 /* ── CHAPTER ── */
 .chapter-list{padding:12px 14px 40px;display:flex;flex-direction:column;gap:8px;overflow-y:auto}
@@ -256,9 +252,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .type-toggle-btn{flex:1;padding:11px;border-radius:var(--radius-sm);border:1.5px solid var(--border2);background:var(--surface2);font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:all .12s;text-align:center;color:var(--text2)}
 .type-toggle-btn.on-ronsh{background:var(--ronsh-bg);border-color:var(--ronsh);color:var(--ronsh)}
 .type-toggle-btn.on-kihon{background:var(--kihon-bg);border-color:var(--kihon);color:var(--kihon)}
-.imp-toggle{display:flex;gap:6px}
-.imp-toggle-btn{flex:1;padding:10px;border-radius:var(--radius-sm);border:1.5px solid var(--border2);background:var(--surface2);font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Mono',monospace;transition:all .12s;text-align:center;color:var(--text2)}
-.imp-toggle-btn.on{background:var(--text);border-color:var(--text);color:#fff}
 .btn-register{width:100%;padding:14px;border-radius:var(--radius-sm);border:none;background:var(--text);color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .12s;margin-top:8px}
 .btn-register:active{transform:scale(.97)}
 .form-divider{height:1px;background:var(--border);margin:20px 0}
@@ -424,16 +417,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
     <div class="form-field">
       <label class="form-label" id="reg-ans-label">④ 模範解答</label>
       <textarea class="form-textarea" id="reg-answer" rows="5"></textarea>
-    </div>
-
-    <div class="form-field">
-      <label class="form-label">⑤ 重要度</label>
-      <div class="imp-toggle">
-        <button class="imp-toggle-btn on" id="imp-btn-A" onclick="selectRegImp('A')">A</button>
-        <button class="imp-toggle-btn" id="imp-btn-B" onclick="selectRegImp('B')">B</button>
-        <button class="imp-toggle-btn" id="imp-btn-C" onclick="selectRegImp('C')">C</button>
-        <button class="imp-toggle-btn" id="imp-btn-" onclick="selectRegImp('')">なし</button>
-      </div>
     </div>
 
     <button class="btn-register" id="reg-submit-btn" onclick="submitRegister()">登録する</button>
@@ -643,7 +626,7 @@ function renderChapterList(){
     return `<button class="ch-btn" onclick="startQuiz(${chIdx})">
       <div class="ch-btn-num">${i+1}</div>
       <div class="ch-btn-info">
-        <div class="ch-btn-name">${escHtml(ch.chName)}${ch.importance?`<span class="imp-badge imp-${ch.importance}">${ch.importance}</span>`:''}</div>
+        <div class="ch-btn-name">${escHtml(ch.chName)}</div>
         <div class="ch-btn-sub">${ch.ch} · ${ch.items.length}問${sub?' ('+sub+')':''}</div>
       </div>
       ${histHTML}
@@ -678,10 +661,10 @@ function renderQuizScreen(){
   const typeBadge=item.type==='ronsh'
     ?`<span class="type-badge type-ronsh">論証</span>`
     :`<span class="type-badge type-kihon">監基報参照</span>`;
-  const impBadge=item.importance?`<span class="imp-badge imp-${item.importance}">${item.importance}</span>`:'';
+
   const rontenCard=`
     <div class="ronten-card">
-      <div class="ronten-label">問題 ${typeBadge}${impBadge}</div>
+      <div class="ronten-label">問題 ${typeBadge}</div>
       <div class="ronten-name">${escHtml(item.name)}</div>
     </div>`;
 
@@ -917,7 +900,7 @@ function renderManage(tabIdx){
 
     return `<div class="manage-item-card" id="mc-${item.id}">
       <div class="manage-item-header" onclick="toggleManageItem('${item.id}')">
-        <div class="manage-item-name">${typeBadge}${escHtml(item.name)}${item.importance?`<span class="imp-badge imp-${item.importance}">${item.importance}</span>`:''}</div>
+        <div class="manage-item-name">${typeBadge}${escHtml(item.name)}</div>
         <div class="manage-item-meta${kws.length?' has-kw':''}" id="meta-${item.id}">${isRonsh?(kws.length?kws.length+'KW':'KW未'):(ans?'参照済':'未登録')}</div>
       </div>
       <div class="manage-item-body">
@@ -1072,7 +1055,7 @@ function toggleRecordItem(id){ document.getElementById('ri-'+id)?.classList.togg
 
 // ── REGISTER ──
 let regType='ronsh';
-let regImp='A';
+
 
 function renderRegisterScreen(){
   const sel=document.getElementById('reg-chapter');
@@ -1085,9 +1068,8 @@ function renderRegisterScreen(){
   });
   document.getElementById('reg-name').value='';
   document.getElementById('reg-answer').value='';
-  regType='ronsh'; regImp='A';
+  regType='ronsh';
   updateRegTypeUI();
-  updateRegImpUI();
 }
 
 function selectRegType(type){ regType=type; updateRegTypeUI(); }
@@ -1110,14 +1092,6 @@ function updateRegTypeUI(){
   }
 }
 
-function selectRegImp(imp){ regImp=imp; updateRegImpUI(); }
-
-function updateRegImpUI(){
-  ['A','B','C',''].forEach(v=>{
-    const btn=document.getElementById('imp-btn-'+v);
-    if(btn) btn.className='imp-toggle-btn'+(regImp===v?' on':'');
-  });
-}
 
 function submitRegister(){
   const chIdx=document.getElementById('reg-chapter').value;
@@ -1135,7 +1109,7 @@ function submitRegister(){
     DATA.push(chEntry);
     sortDataByMaster();
   }
-  chEntry.items.push({id,type:regType,name,importance:regImp});
+  chEntry.items.push({id,type:regType,name});
   saveData();
   if(ans) setAns(id,ans);
 
