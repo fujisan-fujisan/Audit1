@@ -1197,13 +1197,11 @@ const INITIAL_DATA = [
       {id:"km_c1s1_028",type:"ronsh",name:"被監査会社にもたらす効果（≠機能）",importance:"A"}
     ]
   },
-  { ch:"第1章第2節", chName:"期待ギャップの解消", importance:"A", items:[
+  { ch:"第1章第2節", chName:"期待ギャップの解消・監査基準", importance:"A", items:[
     {id:"km_c1s2_001",type:"ronsh",name:"期待ギャップの定義"},
     {id:"km_c1s2_002",type:"ronsh",name:"期待ギャップを解消する必要性"},
     {id:"km_c1s2_003",type:"ronsh",name:"期待ギャップの発生原因と解消方法"},
-    {id:"km_c1s2_004",type:"ronsh",name:"期待ギャップの解消と監査基準の設定・改訂との関係"}
-  ]},
-  { ch:"第1章第3節", chName:"監査基準", importance:"A", items:[
+    {id:"km_c1s2_004",type:"ronsh",name:"期待ギャップの解消と監査基準の設定・改訂との関係"},
     {id:"km_c1s3_001",type:"ronsh",name:"監査基準の定義"},
     {id:"km_c1s3_002",type:"ronsh",name:"監査基準の性格"},
     {id:"km_c1s3_003",type:"ronsh",name:"監査基準が備える3つの性質"},
@@ -1383,6 +1381,18 @@ const INITIAL_ANS = {
 };
 
 function initData(){
+  // 第1章第3節→第1章第2節 移行（旧データが残っている場合）
+  const s3=DATA.find(d=>d.ch==='第1章第3節');
+  if(s3&&s3.items.length>0){
+    let s2=DATA.find(d=>d.ch==='第1章第2節');
+    if(!s2){ s2={ch:'第1章第2節',chName:'期待ギャップの解消・監査基準',importance:'A',items:[]}; DATA.push(s2); }
+    else { s2.chName='期待ギャップの解消・監査基準'; }
+    const ids=new Set(s2.items.map(it=>it.id));
+    s3.items.forEach(it=>{ if(!ids.has(it.id)) s2.items.push(it); });
+    DATA=DATA.filter(d=>d.ch!=='第1章第3節');
+    sortDataByMaster(); saveData();
+  }
+
   let updated=false;
   INITIAL_DATA.forEach(initCh=>{
     let chEntry=DATA.find(d=>d.ch===initCh.ch);
