@@ -418,12 +418,12 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 
     <div class="form-field">
       <label class="form-label">③ 問題文</label>
-      <textarea class="form-textarea" id="reg-name" rows="3" placeholder="例：内部統制報告制度（経営者の責任）"></textarea>
+      <textarea class="form-textarea" id="reg-name" rows="3"></textarea>
     </div>
 
     <div class="form-field">
       <label class="form-label" id="reg-ans-label">④ 模範解答</label>
-      <textarea class="form-textarea" id="reg-answer" rows="5" placeholder="例：経営者が，財務報告に係る内部統制の有効性を評価するとともに，当該評価結果を適正に表示した内部統制報告書を作成し開示する制度。"></textarea>
+      <textarea class="form-textarea" id="reg-answer" rows="5"></textarea>
     </div>
 
     <div class="form-field">
@@ -698,7 +698,7 @@ function renderQuizScreen(){
       content.innerHTML=rontenCard+`
         <div class="answer-card">
           <div class="answer-card-title">参照番号を入力</div>
-          <textarea class="answer-input ref-input" id="answer-input" placeholder="例: 200-12(13)" rows="1"></textarea>
+          <textarea class="answer-input ref-input" id="answer-input" placeholder="" rows="1"></textarea>
           <button class="btn-submit" onclick="submitAnswer()">確認する →</button>
         </div>
         <button class="btn-skip" onclick="skipItem()">この問題をスキップ</button>`;
@@ -911,7 +911,7 @@ function renderManage(tabIdx){
         </div>`).join('')}
       </div>
       <div class="manage-add-row">
-        <textarea class="manage-add-input" id="kwinput-${item.id}" rows="2" placeholder="キーワードや必須フレーズを入力..."></textarea>
+        <textarea class="manage-add-input" id="kwinput-${item.id}" rows="2"></textarea>
         <button class="manage-add-btn" onclick="commitKw('${item.id}')">追加</button>
       </div>`:'';
 
@@ -924,7 +924,7 @@ function renderManage(tabIdx){
         <div class="manage-section-title">問題文</div>
         <textarea class="manage-add-input" id="nameinput-${item.id}" rows="2">${escHtml(item.name)}</textarea>
         <div class="manage-section-title">${isRonsh?'模範解答':'参照番号（正解）'}</div>
-        <textarea class="manage-add-input${isRonsh?'':' ref-textarea'}" id="ansinput-${item.id}" rows="${isRonsh?4:1}" placeholder="${isRonsh?'模範解答...':'例: 200-12(13)'}">${escHtml(ans)}</textarea>
+        <textarea class="manage-add-input${isRonsh?'':' ref-textarea'}" id="ansinput-${item.id}" rows="${isRonsh?4:1}">${escHtml(ans)}</textarea>
         <button class="manage-save-btn" onclick="commitEdit('${item.id}')">変更を保存</button>
         ${kwSection}
         <button class="manage-del-btn" onclick="deleteItem('${item.id}')">この問題を削除する</button>
@@ -1099,12 +1099,12 @@ function updateRegTypeUI(){
   const ta=document.getElementById('reg-answer');
   if(regType==='kihon'){
     label.textContent='④ 参照番号（正解）';
-    ta.placeholder='例: 200-12(13)';
+    ta.placeholder='';
     ta.className='form-textarea ref-textarea';
     ta.rows=1;
   } else {
     label.textContent='④ 模範解答';
-    ta.placeholder='例：経営者が，財務報告に係る内部統制の有効性を評価するとともに…';
+    ta.placeholder='';
     ta.className='form-textarea';
     ta.rows=5;
   }
