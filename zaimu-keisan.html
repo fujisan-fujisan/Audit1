@@ -332,15 +332,12 @@ body {
 
 /* URGENT TAB */
 .urgent-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 8px; }
-.urgent-review-btns { display: flex; gap: 8px; }
-.ub-rev { flex: 1; height: 38px; border-radius: var(--radius-sm); border: 1.5px solid var(--border-strong); background: var(--bg); font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s; color: var(--text-3); font-family: 'Noto Sans JP', sans-serif; }
-.ub-rev:active { transform: scale(.95); }
-.ub-rev.sel-x { background: var(--x-bg); border-color: var(--x-color); color: var(--x-color); }
-.ub-rev.sel-o-btn { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
-.urgency-wrap { display: flex; align-items: center; gap: 9px; margin-top: 6px; }
-.urgency-score { font-size: 36px; font-weight: 800; font-family: 'DM Mono', monospace; min-width: 60px; flex-shrink: 0; line-height: 1; }
-.urgency-track { flex: 1; height: 8px; background: var(--border); border-radius: 999px; overflow: hidden; }
-.urgency-fill { height: 100%; border-radius: 999px; transition: width .4s ease; }
+.urgent-time-input-area { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 16px; }
+.urgent-time-row { display: flex; align-items: center; gap: 10px; }
+.urgent-time-input { width: 90px; height: 40px; font-size: 20px; font-weight: 700; font-family: 'DM Mono', monospace; text-align: center; border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--bg); color: var(--text-1); }
+.urgent-time-label { font-size: 14px; color: var(--text-2); }
+.urgent-summary { font-size: 12px; color: var(--text-3); margin-top: 8px; }
+.urgent-rank-num { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text-3); min-width: 18px; flex-shrink: 0; }
 
 /* 章理解度スコア */
 .ch-score-badge { font-size: 16px; font-weight: 800; font-family: 'DM Mono', monospace; min-width: 52px; text-align: center; flex-shrink: 0; padding: 3px 9px; border-radius: 99px; line-height: 1.3; }
@@ -1134,7 +1131,6 @@ const ALL_PROBLEMS = [
 
 const STORE_KEY = 'zaimu-keisan-v2';
 const EVAL_LABELS = { oo:'○○', o:'○', n:'ー', x:'×', xx:'××' };
-const LEARN_DAYS = { oo:14, o:10, n:7, x:4, xx:2 };
 
 let state = { problems: ALL_PROBLEMS.map(p=>p.id), ronten: {}, history: {} };
 
@@ -1175,33 +1171,39 @@ function fmtDate(dateStr) {
   if (p.length < 3) return dateStr;
   return `${parseInt(p[1])}/${parseInt(p[2])}`;
 }
-// 復習サイクル日数の定義（評価別）
-const REVIEW_DAYS_AFTER_X = { oo:7, o:5, n:3, x:2, xx:1 }; // 要復習タブで×を押した後の再復習サイクル
+// ランク付け用重み（重要度・評価）
+const IMP_RANK  = { 'A': 3, 'B': 2, 'C': 1 };
+const EVAL_RANK = { 'xx': 5, 'x': 4, 'n': 3, 'o': 2, 'oo': 1 };
 
-function calcUrgency(probId) {
-  const latest = getLatest(probId);
-  if (!latest || !latest.eval || !latest.date) return null;
+function buildTodayList(todayMins) {
+  const candidates = getAllProblems()
+    .filter(prob => {
+      if (prob.ch && prob.ch.includes('第29章')) return false;
+      const latest = getLatest(prob.id);
+      return latest && latest.eval && latest.date;
+    })
+    .map(prob => {
+      const latest = getLatest(prob.id);
+      const elapsedDays = Math.floor((Date.now() - new Date(latest.date).getTime()) / 86400000);
+      const probTime = parseInt(latest.time) || 10;
+      return { prob, latest, elapsedDays, probTime };
+    })
+    .sort((a, b) => {
+      const impDiff = (IMP_RANK[b.prob.imp] || 1) - (IMP_RANK[a.prob.imp] || 1);
+      if (impDiff !== 0) return impDiff;
+      const evalDiff = (EVAL_RANK[b.latest.eval] || 3) - (EVAL_RANK[a.latest.eval] || 3);
+      if (evalDiff !== 0) return evalDiff;
+      return b.elapsedDays - a.elapsedDays;
+    });
 
-  // ○覚えた済みは要復習に出さない
-  if (latest.reviewPassed === true) return null;
-
-  // 要復習タブで×を押した場合：reviewDate基準で短いサイクルで再表示
-  if (latest.reviewDate && !latest.reviewPassed) {
-    const days = REVIEW_DAYS_AFTER_X[latest.eval] || 3;
-    const diff = Math.floor((Date.now() - new Date(latest.reviewDate).getTime()) / 86400000);
-    return Math.min(100, Math.round(diff / days * 100));
+  let cumTime = 0;
+  const selected = [];
+  for (const item of candidates) {
+    selected.push(item);
+    cumTime += item.probTime;
+    if (cumTime >= todayMins) break;
   }
-
-  // 通常：問題を解いた日（date）からの経過日数で判定
-  const days = LEARN_DAYS[latest.eval] || 7;
-  const diff = Math.floor((Date.now() - new Date(latest.date).getTime()) / 86400000);
-  return Math.min(100, Math.round(diff / days * 100));
-}
-function urgencyColor(score) {
-  if (score >= 80) return '#c0392b';
-  if (score >= 55) return '#e67e22';
-  if (score >= 30) return '#d4a017';
-  return '#1a7a4a';
+  return { selected, cumTime };
 }
 
 
@@ -1811,60 +1813,75 @@ function renderUrgent() {
   const ct = document.getElementById('tab-urgent');
   ct.innerHTML = '';
 
-  const urgent = state.problems
-    .map(id => ({ id, score: calcUrgency(id) }))
-    .filter(x => x.score !== null && x.score >= 70)
-    .sort((a,b) => b.score - a.score);
+  const savedMins = parseInt(localStorage.getItem('zaimu-today-mins') || '60');
 
-  if (urgent.length === 0) {
-    ct.innerHTML = '<div class="empty-state">要復習の問題はありません 🎉</div>';
+  const inputArea = document.createElement('div');
+  inputArea.className = 'urgent-time-input-area';
+  inputArea.innerHTML = `
+    <div class="urgent-time-row">
+      <span class="urgent-time-label">今日の勉強時間</span>
+      <input type="number" class="urgent-time-input" id="today-mins-input" min="1" max="600" value="${savedMins}">
+      <span class="urgent-time-label">分</span>
+    </div>
+    <div class="urgent-summary" id="urgent-summary"></div>`;
+  ct.appendChild(inputArea);
+
+  const listEl = document.createElement('div');
+  listEl.id = 'urgent-list';
+  ct.appendChild(listEl);
+
+  document.getElementById('today-mins-input').addEventListener('input', e => {
+    const v = parseInt(e.target.value) || 0;
+    localStorage.setItem('zaimu-today-mins', v);
+    renderUrgentList(v);
+  });
+
+  renderUrgentList(savedMins);
+}
+
+function renderUrgentList(todayMins) {
+  const listEl = document.getElementById('urgent-list');
+  if (!listEl) return;
+  listEl.innerHTML = '';
+
+  const { selected, cumTime } = buildTodayList(todayMins);
+
+  const summaryEl = document.getElementById('urgent-summary');
+  if (summaryEl) {
+    summaryEl.textContent = selected.length > 0 ? `${selected.length}問 / 合計 ${cumTime}分` : '';
+  }
+
+  if (selected.length === 0) {
+    listEl.innerHTML = '<div class="empty-state">解いた記録のある問題がありません</div>';
     return;
   }
 
-  urgent.forEach(({ id, score }) => {
-    const prob = getProbById(id);
-    const latest = getLatest(id);
-    if (!prob || !latest) return;
-    const color = urgencyColor(score);
-    const hasReviewX = !!latest.reviewDate && !latest.reviewPassed;
+  const impColors = { A: '#c0392b', B: '#7c5c00', C: '#1a7a4a' };
+  const impBgs   = { A: '#fdf0ee', B: '#fdf4e3', C: '#edf7f2' };
 
+  selected.forEach(({ prob, latest, elapsedDays, probTime }, idx) => {
     const card = document.createElement('div');
     card.className = 'urgent-card';
-    card.dataset.probId = id;
     const chDisplay = (prob.ch || '').replace('第', '').replace(' ', '　');
     const textNum = CHAPTER_TEXT_NUM[prob.ch] || '';
+    const ic = impColors[prob.imp] || impColors.B;
+    const ib = impBgs[prob.imp]   || impBgs.B;
     card.innerHTML = `
-      <div style="font-size:10px;color:var(--text-3);margin-bottom:4px;font-family:'DM Mono',monospace;">${chDisplay}${textNum ? ' ー' + textNum : ''}</div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+        <span class="urgent-rank-num">${idx + 1}</span>
+        <span style="font-size:10px;color:var(--text-3);font-family:'DM Mono',monospace;">${chDisplay}${textNum ? ' ー' + textNum : ''}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
         <div style="flex:1;font-size:13px;font-weight:700;">${prob.title}</div>
         <span class="prob-meta-badge badge-${latest.eval}">${EVAL_LABELS[latest.eval]}</span>
-        <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-3)">${prob.num || (prob.id.startsWith('custom-') ? '' : prob.id)}</span>
+        <span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:99px;background:${ib};color:${ic};">${prob.imp || 'B'}</span>
       </div>
-      <div class="urgency-wrap" style="margin-bottom:12px;">
-        <span class="urgency-score" style="color:${color}">${score}</span>
-        <div class="urgency-track"><div class="urgency-fill" style="width:${score}%;background:${color}"></div></div>
-      </div>
-      <div class="urgent-review-btns">
-        <button class="ub-rev${hasReviewX ? ' sel-x' : ''}" onclick="reviewItem('${id}','x')">× もう一度</button>
-        <button class="ub-rev${latest.reviewPassed ? ' sel-o-btn' : ''}" onclick="reviewItem('${id}','o')">○ 覚えた</button>
+      <div style="display:flex;gap:12px;font-size:11px;color:var(--text-3);font-family:'DM Mono',monospace;">
+        <span>${elapsedDays}日前</span>
+        <span>${probTime}分</span>
       </div>`;
-    ct.appendChild(card);
+    listEl.appendChild(card);
   });
-}
-
-function reviewItem(probId, type) {
-  const hist = state.history[probId];
-  if (!hist || hist.length === 0) return;
-  const entry = hist[hist.length - 1];
-  if (type === 'o') {
-    entry.reviewPassed = true;
-    entry.reviewDate = today();
-  } else {
-    entry.reviewPassed = false;
-    entry.reviewDate = today();
-  }
-  save();
-  renderUrgent();
 }
 
 // ── BACKUP / RESTORE ──
