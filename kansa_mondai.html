@@ -33,6 +33,8 @@
   --ronsh-bg: #fdecea;
   --kihon: #1b5e20;
   --kihon-bg: #e8f5e9;
+  --jirei: #b7770d;
+  --jirei-bg: #fef9e7;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6;overflow-x:hidden}
@@ -65,6 +67,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .type-badge{display:inline-block;font-size:18px;font-weight:700;padding:5px 14px;border-radius:6px;margin-right:8px;vertical-align:middle;font-family:'DM Mono',monospace;letter-spacing:.04em}
 .type-ronsh{background:var(--ronsh-bg);color:var(--ronsh)}
 .type-kihon{background:var(--kihon-bg);color:var(--kihon)}
+.type-jirei{background:var(--jirei-bg);color:var(--jirei)}
 
 /* ── CHAPTER ── */
 .chapter-list{padding:12px 14px 40px;display:flex;flex-direction:column;gap:8px;overflow-y:auto}
@@ -252,6 +255,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .type-toggle-btn{flex:1;padding:11px;border-radius:var(--radius-sm);border:1.5px solid var(--border2);background:var(--surface2);font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:all .12s;text-align:center;color:var(--text2)}
 .type-toggle-btn.on-ronsh{background:var(--ronsh-bg);border-color:var(--ronsh);color:var(--ronsh)}
 .type-toggle-btn.on-kihon{background:var(--kihon-bg);border-color:var(--kihon);color:var(--kihon)}
+.type-toggle-btn.on-jirei{background:var(--jirei-bg);border-color:var(--jirei);color:var(--jirei)}
 .btn-register{width:100%;padding:14px;border-radius:var(--radius-sm);border:none;background:var(--text);color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .12s;margin-top:8px}
 .btn-register:active{transform:scale(.97)}
 .form-divider{height:1px;background:var(--border);margin:20px 0}
@@ -405,6 +409,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
       <label class="form-label">② 問題タイプ</label>
       <div class="type-toggle">
         <button class="type-toggle-btn on-ronsh" id="type-btn-ronsh" onclick="selectRegType('ronsh')">論証</button>
+        <button class="type-toggle-btn" id="type-btn-jirei" onclick="selectRegType('jirei')">事例</button>
         <button class="type-toggle-btn" id="type-btn-kihon" onclick="selectRegType('kihon')">監基報参照</button>
       </div>
     </div>
@@ -426,6 +431,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
     <div style="font-size:11px;color:var(--text3);line-height:1.8">
       <div style="font-weight:700;color:var(--text2);margin-bottom:4px">タイプについて</div>
       <span class="type-badge type-ronsh">論証</span> 長文解答が必要な問題。登録後に「問題管理」から採点用キーワードを追加できます。<br>
+      <span class="type-badge type-jirei">事例</span> 事例問題。論証と同様にキーワード採点で評価します。<br>
       <span class="type-badge type-kihon">監基報参照</span> 監査基準委員会報告書の参照番号を答える問題。解答欄に参照番号（例: 200-12(13)）を入力してください。
     </div>
   </div>
@@ -617,7 +623,8 @@ function renderChapterList(){
       :`<div class="ch-btn-hist" style="color:var(--text3)">未挑戦</div>`;
     const ronsh=ch.items.filter(it=>it.type==='ronsh').length;
     const kihon=ch.items.filter(it=>it.type==='kihon').length;
-    const sub=[ronsh?`論証${ronsh}`:'',kihon?`参照${kihon}`:''].filter(Boolean).join(' · ');
+    const jirei=ch.items.filter(it=>it.type==='jirei').length;
+    const sub=[ronsh?`論証${ronsh}`:'',kihon?`参照${kihon}`:'',jirei?`事例${jirei}`:''].filter(Boolean).join(' · ');
     const chIdx=DATA.indexOf(ch);
     return `<button class="ch-btn" onclick="startQuiz(${chIdx})">
       <div class="ch-btn-num">${i+1}</div>
@@ -654,8 +661,8 @@ function renderQuizScreen(){
   document.getElementById('quiz-progress-text').textContent=`${currentIdx+1} / ${total}`;
 
   const content=document.getElementById('quiz-content');
-  const typeBadge=item.type==='ronsh'
-    ?`<span class="type-badge type-ronsh">論証</span>`
+  const typeBadge=item.type==='ronsh'?`<span class="type-badge type-ronsh">論証</span>`
+    :item.type==='jirei'?`<span class="type-badge type-jirei">事例</span>`
     :`<span class="type-badge type-kihon">監基報参照</span>`;
 
   const rontenCard=`
@@ -665,7 +672,7 @@ function renderQuizScreen(){
     </div>`;
 
   if(phase==='input'){
-    if(item.type==='ronsh'){
+    if(item.type!=='kihon'){
       content.innerHTML=rontenCard+`
         <div class="answer-card">
           <div class="answer-card-title">解答を入力</div>
@@ -685,7 +692,7 @@ function renderQuizScreen(){
   } else {
     // eval phase
     const modelAns=getAns(item.id);
-    if(item.type==='ronsh'){
+    if(item.type!=='kihon'){
       const kws=getKws(item.id);
       const kwsHTML=kws.length===0
         ?`<div class="kw-no-keywords">キーワードが登録されていません。「問題管理」から追加してください。</div>`
@@ -792,11 +799,11 @@ function nextItem(){
   const date=new Date().toLocaleDateString('ja-JP');
   if(!recData[item.id]) recData[item.id]=[];
 
-  if(item.type==='ronsh'){
+  if(item.type!=='kihon'){
     const kws=getKws(item.id);
     const u=kws.length>0?calcUnderstanding(quizState.scores):null;
-    recData[item.id].push({date,type:'ronsh',scores:{...quizState.scores},understanding:u});
-    quizState.results.push({id:item.id,type:'ronsh',understanding:u,skipped:false});
+    recData[item.id].push({date,type:item.type,scores:{...quizState.scores},understanding:u});
+    quizState.results.push({id:item.id,type:item.type,understanding:u,skipped:false});
   } else {
     const u=quizState.oxResult==='o'?100:quizState.oxResult==='x'?0:null;
     recData[item.id].push({date,type:'kihon',result:quizState.oxResult||null});
@@ -838,8 +845,8 @@ function finishQuiz(){
   document.getElementById('result-detail-items').innerHTML=quizState.results.map(r=>{
     const item=ch.items.find(it=>it.id===r.id);
     const name=item?item.name:r.id;
-    const typeBadge=item?.type==='ronsh'
-      ?`<span class="type-badge type-ronsh">論証</span>`
+    const typeBadge=item?.type==='ronsh'?`<span class="type-badge type-ronsh">論証</span>`
+      :item?.type==='jirei'?`<span class="type-badge type-jirei">事例</span>`
       :`<span class="type-badge type-kihon">参照</span>`;
     const u=r.understanding;
     const col=uColor(u);
@@ -877,9 +884,9 @@ function renderManage(tabIdx){
   document.getElementById('manage-content').innerHTML=ch.items.map(item=>{
     const kws=getKws(item.id);
     const ans=getAns(item.id);
-    const isRonsh=item.type==='ronsh';
-    const typeBadge=isRonsh
-      ?`<span class="type-badge type-ronsh">論証</span>`
+    const isRonsh=item.type!=='kihon';
+    const typeBadge=item.type==='ronsh'?`<span class="type-badge type-ronsh">論証</span>`
+      :item.type==='jirei'?`<span class="type-badge type-jirei">事例</span>`
       :`<span class="type-badge type-kihon">参照</span>`;
     const kwSection=isRonsh?`
       <div class="manage-section-title">キーワード（採点用）</div>
@@ -988,9 +995,9 @@ function renderRecord(tabIdx){
     const u=getLastUnderstanding(item.id);
     const col=uColor(u);
     const total=recs.length;
-    const isRonsh=item.type==='ronsh';
-    const typeBadge=isRonsh
-      ?`<span class="type-badge type-ronsh">論証</span>`
+    const isRonsh=item.type!=='kihon';
+    const typeBadge=item.type==='ronsh'?`<span class="type-badge type-ronsh">論証</span>`
+      :item.type==='jirei'?`<span class="type-badge type-jirei">事例</span>`
       :`<span class="type-badge type-kihon">参照</span>`;
 
     let scoreDisp,barW;
@@ -1072,6 +1079,7 @@ function selectRegType(type){ regType=type; updateRegTypeUI(); }
 
 function updateRegTypeUI(){
   document.getElementById('type-btn-ronsh').className='type-toggle-btn'+(regType==='ronsh'?' on-ronsh':'');
+  document.getElementById('type-btn-jirei').className='type-toggle-btn'+(regType==='jirei'?' on-jirei':'');
   document.getElementById('type-btn-kihon').className='type-toggle-btn'+(regType==='kihon'?' on-kihon':'');
   const label=document.getElementById('reg-ans-label');
   const ta=document.getElementById('reg-answer');
