@@ -64,7 +64,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .page-header-sub{font-size:11px;color:var(--text2);margin-top:1px}
 
 /* ── TYPE / IMP BADGES ── */
-.type-badge{display:inline-block;font-size:18px;font-weight:700;padding:5px 14px;border-radius:6px;margin-right:8px;vertical-align:middle;font-family:'DM Mono',monospace;letter-spacing:.04em}
+.type-badge{display:inline-block;flex-shrink:0;font-size:18px;font-weight:700;padding:5px 14px;border-radius:6px;margin-right:8px;vertical-align:middle;font-family:'DM Mono',monospace;letter-spacing:.04em}
 .type-ronsh{background:var(--ronsh-bg);color:var(--ronsh)}
 .type-kihon{background:var(--kihon-bg);color:var(--kihon)}
 .type-jirei{background:var(--jirei-bg);color:var(--jirei)}
@@ -185,7 +185,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .manage-item-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden}
 .manage-item-header{padding:11px 13px;display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
 .manage-item-header:active{background:var(--surface2)}
-.manage-item-name{flex:1;font-size:12px;font-weight:700;color:var(--text);line-height:1.4}
+.manage-item-name{flex:1;display:flex;align-items:flex-start;font-size:12px;font-weight:700;color:var(--text);line-height:1.4}
+.manage-item-name .item-name-text{flex:1;min-width:0}
 .manage-item-meta{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);flex-shrink:0}
 .manage-item-meta.has-kw{color:var(--ok)}
 .manage-item-body{display:none;border-top:1px solid var(--border);padding:12px 13px}
@@ -216,7 +217,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .record-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden}
 .record-item-header{display:flex;align-items:center;gap:10px;padding:11px 13px;cursor:pointer;user-select:none}
 .record-item-header:active{background:var(--surface2)}
-.record-item-name{flex:1;font-size:12px;font-weight:700;color:var(--text);line-height:1.4}
+.record-item-name{flex:1;display:flex;align-items:flex-start;font-size:12px;font-weight:700;color:var(--text);line-height:1.4}
+.record-item-name .item-name-text{flex:1;min-width:0}
 .record-score{font-family:'DM Mono',monospace;font-size:12px;font-weight:700;flex-shrink:0}
 .record-u-track{width:46px;height:5px;background:var(--border);border-radius:999px;overflow:hidden;flex-shrink:0}
 .record-u-fill{height:100%;border-radius:999px}
@@ -906,7 +908,7 @@ function renderManage(tabIdx){
 
     return `<div class="manage-item-card" id="mc-${item.id}">
       <div class="manage-item-header" onclick="toggleManageItem('${item.id}')">
-        <div class="manage-item-name">${typeBadge}${escHtml(item.name)}</div>
+        <div class="manage-item-name">${typeBadge}<span class="item-name-text">${escHtml(item.name)}</span></div>
         <div class="manage-item-meta${kws.length?' has-kw':''}" id="meta-${item.id}">${isRonsh?(kws.length?kws.length+'KW':'KW未'):(ans?'参照済':'未登録')}</div>
       </div>
       <div class="manage-item-body">
@@ -1047,7 +1049,7 @@ function renderRecord(tabIdx){
 
     return `<div class="record-item" id="ri-${item.id}">
       <div class="record-item-header" onclick="toggleRecordItem('${item.id}')">
-        <div class="record-item-name">${typeBadge}${escHtml(item.name)}</div>
+        <div class="record-item-name">${typeBadge}<span class="item-name-text">${escHtml(item.name)}</span></div>
         <div class="record-u-track"><div class="record-u-fill" style="width:${barW}%;background:${col}"></div></div>
         <div class="record-score" style="color:${col}">${scoreDisp}</div>
         <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0">${total?total+'回':'–'}</div>
