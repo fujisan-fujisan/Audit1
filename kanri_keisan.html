@@ -1318,7 +1318,7 @@ function renderTopicsView() {
           <div class="topic-card-name">${cat.cat}</div>
           <div class="topic-card-sub">${(()=>{const all=getTopicsForCat(cat.catId);return `A:${all.filter(t=>t.imp==='A').length} B:${all.filter(t=>t.imp==='B').length} C:${all.filter(t=>t.imp==='C').length}`;})()}</div>
         </div>
-        <span class="ch-badge ${catAvg===null?'':catAvg>=4.5?'done':catAvg>=3.5?'done':''}">${catAvgLabel}</span>
+        ${catAvg===null?'':`<span class="ch-badge ${catAvg>=4.5?'done':catAvg>=3.5?'done':''}">${catAvgLabel}</span>`}
       </div>
       <div class="topic-items-wrap">`;
 

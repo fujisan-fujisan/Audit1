@@ -1535,7 +1535,7 @@ function renderRonten() {
           </div>`;
       }).join('');
 
-      const avgBadge = `<span class="prob-meta-badge ${avgCls}">${avgLabel}</span>`;
+      const avgBadge = avg === null ? '' : `<span class="prob-meta-badge ${avgCls}">${avgLabel}</span>`;
 
       row.innerHTML = `
         <div class="ronten-row-header" onclick="this.parentElement.classList.toggle('open')">
