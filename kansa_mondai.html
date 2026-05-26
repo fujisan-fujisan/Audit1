@@ -632,7 +632,7 @@ function renderKw(tabIdx){
   const chs=DATA.filter(ch=>ch.items.some(it=>it.type!=='kihon'));
   if(!chs.length) return;
   document.getElementById('kw-tabs').innerHTML=chs.map((ch,i)=>
-    `<button class="mctab${i===tabIdx?' active':''}" onclick="renderKw(${i})">${ch.ch}</button>`
+    `<button class="mctab${i===tabIdx?' active':''}" onclick="renderKw(${i})">${fmtCh(ch.ch)}</button>`
   ).join('');
   const ch=chs[tabIdx];
   const items=ch.items.filter(it=>it.type!=='kihon');
@@ -727,7 +727,7 @@ function renderChapterList(){
     const chIdx=DATA.indexOf(ch);
     return `<button class="ch-btn" onclick="startQuiz(${chIdx})">
       <div class="ch-btn-info">
-        <div class="ch-btn-name">${escHtml(ch.ch)}　${escHtml(ch.chName)}</div>
+        <div class="ch-btn-name">${fmtCh(ch.ch)}　${escHtml(ch.chName)}</div>
         <div class="ch-btn-sub">${ch.items.length}問${sub?' ('+sub+')':''}</div>
       </div>
       ${histHTML}
@@ -745,7 +745,7 @@ let quizState={
 function startQuiz(chIndex){
   const ch=DATA[chIndex];
   quizState={chIndex,items:[...ch.items],currentIdx:0,phase:'input',userAnswer:'',scores:{},oxResult:null,results:[]};
-  document.getElementById('quiz-chapter-name').textContent=`${ch.ch}　${ch.chName}`;
+  document.getElementById('quiz-chapter-name').textContent=`${fmtCh(ch.ch)}　${ch.chName}`;
   renderQuizScreen();
   showScreen('quiz');
 }
@@ -935,7 +935,7 @@ function finishQuiz(){
   const us=answered.map(r=>r.understanding).filter(u=>u!==null);
   const avg=us.length?Math.round(us.reduce((s,v)=>s+v,0)/us.length):null;
 
-  document.getElementById('result-ch-lbl').textContent=`${ch.ch}　${ch.chName}`;
+  document.getElementById('result-ch-lbl').textContent=`${fmtCh(ch.ch)}　${ch.chName}`;
   document.getElementById('result-big').innerHTML=avg!==null?`${avg}<span>%</span>`:`–<span></span>`;
   document.getElementById('bd-answered').textContent=answered.length;
   document.getElementById('bd-skipped').textContent=skipped.length;
@@ -975,7 +975,7 @@ function renderManage(tabIdx){
     return;
   }
   document.getElementById('manage-tabs').innerHTML=chs.map((ch,i)=>
-    `<button class="mctab${i===tabIdx?' active':''}" onclick="renderManage(${i})">${ch.ch}</button>`
+    `<button class="mctab${i===tabIdx?' active':''}" onclick="renderManage(${i})">${fmtCh(ch.ch)}</button>`
   ).join('');
   const ch=chs[tabIdx];
 
@@ -1084,7 +1084,7 @@ function renderRecord(tabIdx){
     return;
   }
   document.getElementById('record-tabs').innerHTML=chs.map((ch,i)=>
-    `<button class="mctab${i===tabIdx?' active':''}" onclick="renderRecord(${i})">${ch.ch}</button>`
+    `<button class="mctab${i===tabIdx?' active':''}" onclick="renderRecord(${i})">${fmtCh(ch.ch)}</button>`
   ).join('');
   const ch=chs[tabIdx];
 
@@ -1263,6 +1263,7 @@ function restoreAll(e){
 
 // ── UTILS ──
 function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmtCh(s){ return s.replace(/第(\d+)章第(\d+)節/,'$1-$2'); }
 
 // ── INITIAL DATA（HTML埋め込み：未登録のものだけ追加） ──
 const INITIAL_DATA = [
