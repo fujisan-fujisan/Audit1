@@ -726,10 +726,9 @@ function renderChapterList(){
     const sub=[ronsh?`論証${ronsh}`:'',kihon?`参照${kihon}`:'',jirei?`事例${jirei}`:''].filter(Boolean).join(' · ');
     const chIdx=DATA.indexOf(ch);
     return `<button class="ch-btn" onclick="startQuiz(${chIdx})">
-      <div class="ch-btn-num">${i+1}</div>
       <div class="ch-btn-info">
-        <div class="ch-btn-name">${escHtml(ch.chName)}</div>
-        <div class="ch-btn-sub">${ch.ch} · ${ch.items.length}問${sub?' ('+sub+')':''}</div>
+        <div class="ch-btn-name">${escHtml(ch.ch)}　${escHtml(ch.chName)}</div>
+        <div class="ch-btn-sub">${ch.items.length}問${sub?' ('+sub+')':''}</div>
       </div>
       ${histHTML}
     </button>`;
