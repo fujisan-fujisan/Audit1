@@ -189,6 +189,10 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .manage-item-name .item-name-text{flex:1;min-width:0}
 .manage-item-meta{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);flex-shrink:0}
 .manage-item-meta.has-kw{color:var(--ok)}
+/* キーワード登録ページ */
+.kw-page-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden}
+.kw-page-header{padding:11px 13px;display:flex;align-items:center;gap:8px}
+.kw-page-body{border-top:1px solid var(--border);padding:12px 13px}
 .manage-item-body{display:none;border-top:1px solid var(--border);padding:12px 13px}
 .manage-item-card.open .manage-item-body{display:block}
 .manage-section-title{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;margin-top:12px}
@@ -307,6 +311,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
     <button class="btn-mid" onclick="goRecord()">過去の記録を確認する</button>
     <div class="start-btn-row">
       <button class="btn-small" onclick="goManage()">問題管理</button>
+      <button class="btn-small" onclick="goKw()">KW登録</button>
       <button class="btn-small" onclick="goRegister()">問題登録</button>
     </div>
     <div class="start-btn-row">
@@ -387,6 +392,19 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
   </div>
   <div class="manage-tabs" id="record-tabs"></div>
   <div class="manage-content" id="record-content"></div>
+</div>
+
+<!-- KW PAGE -->
+<div class="screen" id="screen-kw">
+  <div class="page-header">
+    <button class="back-btn" onclick="goStart()">← トップ</button>
+    <div class="page-header-info">
+      <div class="page-header-title">キーワード登録</div>
+      <div class="page-header-sub">論証・事例の採点キーワードを管理</div>
+    </div>
+  </div>
+  <div class="manage-tabs" id="kw-tabs"></div>
+  <div class="manage-content" id="kw-content"></div>
 </div>
 
 <!-- REGISTER -->
@@ -590,6 +608,71 @@ function goManage(){
   }
   renderManage(0);
   showScreen('manage');
+}
+
+function goKw(){
+  const chs=DATA.filter(ch=>ch.items.some(it=>it.type!=='kihon'));
+  if(!chs.length){alert('論証・事例の問題が登録されていません。');return;}
+  renderKw(0);
+  showScreen('kw');
+}
+
+function renderKw(tabIdx){
+  const chs=DATA.filter(ch=>ch.items.some(it=>it.type!=='kihon'));
+  if(!chs.length) return;
+  document.getElementById('kw-tabs').innerHTML=chs.map((ch,i)=>
+    `<button class="mctab${i===tabIdx?' active':''}" onclick="renderKw(${i})">${ch.ch}</button>`
+  ).join('');
+  const ch=chs[tabIdx];
+  const items=ch.items.filter(it=>it.type!=='kihon');
+  document.getElementById('kw-content').innerHTML=items.map(item=>{
+    const kws=getKws(item.id);
+    const typeBadge=item.type==='ronsh'
+      ?`<span class="type-badge type-ronsh">論証</span>`
+      :`<span class="type-badge type-jirei">事例</span>`;
+    return `<div class="kw-page-card">
+      <div class="kw-page-header">
+        <div class="manage-item-name">${typeBadge}<span class="item-name-text">${escHtml(item.name)}</span></div>
+        <div class="manage-item-meta${kws.length?' has-kw':''}" id="kwmeta-${item.id}">${kws.length?kws.length+'KW':'KW未'}</div>
+      </div>
+      <div class="kw-page-body">
+        <div class="manage-kw-list" id="kwplist-${item.id}">
+          ${kws.map((kw,i)=>`<div class="manage-kw-row">
+            <div class="manage-kw-text">${escHtml(kw)}</div>
+            <button class="manage-kw-del" onclick="deleteKw('${item.id}',${i});refreshKwPage('${item.id}')">✕</button>
+          </div>`).join('')}
+        </div>
+        <div class="manage-add-row">
+          <textarea class="manage-add-input" id="kwpinput-${item.id}" rows="2" placeholder="キーワードを入力…"></textarea>
+          <button class="manage-add-btn" onclick="commitKwPage('${item.id}')">追加</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function commitKwPage(id){
+  const input=document.getElementById('kwpinput-'+id);
+  if(!input) return;
+  const val=input.value.trim();
+  if(!val) return;
+  addKw(id,val);
+  input.value='';
+  refreshKwPage(id);
+}
+
+function refreshKwPage(id){
+  const kws=getKws(id);
+  const list=document.getElementById('kwplist-'+id);
+  if(list) list.innerHTML=kws.map((kw,i)=>`<div class="manage-kw-row">
+    <div class="manage-kw-text">${escHtml(kw)}</div>
+    <button class="manage-kw-del" onclick="deleteKw('${id}',${i});refreshKwPage('${id}')">✕</button>
+  </div>`).join('');
+  const meta=document.getElementById('kwmeta-'+id);
+  if(meta){
+    meta.className='manage-item-meta'+(kws.length?' has-kw':'');
+    meta.textContent=kws.length?kws.length+'KW':'KW未';
+  }
 }
 
 function goRecord(){
