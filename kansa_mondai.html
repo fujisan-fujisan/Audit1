@@ -42,9 +42,12 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .screen.active{display:flex;flex-direction:column}
 
 /* ── START ── */
-#screen-start{align-items:center;justify-content:center;padding:60px 24px;gap:0}
+#screen-start{align-items:center;justify-content:center;padding:60px 24px;gap:0;position:relative}
 .start-logo{font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--text3);text-transform:uppercase;margin-bottom:28px;text-align:center}
 .start-btns{display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px}
+.start-corner-actions{position:absolute;top:12px;right:14px;display:flex;gap:6px}
+.btn-corner{padding:5px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--text3);font-size:11px;font-family:'Noto Sans JP',sans-serif;font-weight:500;cursor:pointer;transition:all .12s}
+.btn-corner:hover{color:var(--text2);border-color:var(--border2)}
 .btn-main{background:var(--text);color:#fff;border:none;border-radius:var(--radius);padding:26px 24px;font-size:16px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:all .12s;width:100%}
 .btn-main:active{transform:scale(.97)}
 .btn-mid{background:var(--surface);color:var(--text2);border:1.5px solid var(--border2);border-radius:var(--radius);padding:14px 24px;font-size:14px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:all .12s;width:100%}
@@ -310,6 +313,11 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 
 <!-- START -->
 <div class="screen active" id="screen-start">
+  <div class="start-corner-actions">
+    <button class="btn-corner" onclick="backupAll()">バックアップ</button>
+    <button class="btn-corner" onclick="document.getElementById('restore-input').click()">復元</button>
+    <input type="file" id="restore-input" accept=".json" style="display:none" onchange="restoreAll(event)">
+  </div>
   <div class="start-logo">監査論 問題登録・評価</div>
   <div class="start-btns">
     <button class="btn-main" onclick="goChapter()">問題を解く →</button>
@@ -319,9 +327,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
       <button class="btn-small" onclick="goManage()">問題管理</button>
       <button class="btn-small" onclick="goKw()">キーワード</button>
       <button class="btn-small" onclick="goRegister()">問題登録</button>
-      <button class="btn-small" onclick="backupAll()">バックアップ</button>
-      <button class="btn-small" onclick="document.getElementById('restore-input').click()">復元</button>
-      <input type="file" id="restore-input" accept=".json" style="display:none" onchange="restoreAll(event)">
     </div>
   </div>
 </div>
