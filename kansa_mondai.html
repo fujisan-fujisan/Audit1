@@ -54,6 +54,9 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .btn-small{background:var(--surface);color:var(--text3);border:1.5px solid var(--border);border-radius:var(--radius);padding:10px 8px;font-size:12px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:all .12s;flex:1}
 .btn-small:hover{border-color:var(--border2);color:var(--text2)}
 .btn-small:active{transform:scale(.97)}
+.admin-toggle-btn{width:100%;flex:none}
+.admin-panel{overflow:hidden;max-height:0;transition:max-height .22s ease,opacity .18s ease;opacity:0;display:flex;flex-direction:column;gap:8px;width:100%}
+.admin-panel.open{max-height:200px;opacity:1}
 
 /* ── COMMON HEADER ── */
 .page-header{padding:18px 16px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0}
@@ -309,15 +312,18 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
   <div class="start-btns">
     <button class="btn-main" onclick="goChapter()">問題を解く →</button>
     <button class="btn-mid" onclick="goRecord()">過去の記録を確認する</button>
-    <div class="start-btn-row">
-      <button class="btn-small" onclick="goManage()">問題管理</button>
-      <button class="btn-small" onclick="goKw()">KW登録</button>
-      <button class="btn-small" onclick="goRegister()">問題登録</button>
-    </div>
-    <div class="start-btn-row">
-      <button class="btn-small" onclick="backupAll()">バックアップ</button>
-      <button class="btn-small" onclick="document.getElementById('restore-input').click()">復元</button>
-      <input type="file" id="restore-input" accept=".json" style="display:none" onchange="restoreAll(event)">
+    <button class="btn-small admin-toggle-btn" id="admin-toggle-btn" onclick="toggleAdminPanel()">管理 ▼</button>
+    <div class="admin-panel" id="admin-panel">
+      <div class="start-btn-row">
+        <button class="btn-small" onclick="goManage()">問題管理</button>
+        <button class="btn-small" onclick="goKw()">KW登録</button>
+        <button class="btn-small" onclick="goRegister()">問題登録</button>
+      </div>
+      <div class="start-btn-row">
+        <button class="btn-small" onclick="backupAll()">バックアップ</button>
+        <button class="btn-small" onclick="document.getElementById('restore-input').click()">復元</button>
+        <input type="file" id="restore-input" accept=".json" style="display:none" onchange="restoreAll(event)">
+      </div>
     </div>
   </div>
 </div>
@@ -588,6 +594,13 @@ function getLastUnderstanding(id){
 }
 
 // ── SCREENS ──
+function toggleAdminPanel(){
+  const panel=document.getElementById('admin-panel');
+  const btn=document.getElementById('admin-toggle-btn');
+  const open=panel.classList.toggle('open');
+  btn.textContent=open?'管理 ▲':'管理 ▼';
+}
+
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+id).classList.add('active');
