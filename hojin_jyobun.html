@@ -1902,21 +1902,26 @@ function stripItemNum(num, text) {
 function positionSuggest(inputEl, suggestEl) {
   const rect = inputEl.getBoundingClientRect();
   // iOS ではキーボード表示時に visualViewport.height が実際の表示領域を返す
+  // ただし position:fixed の基準は window.innerHeight（レイアウトビューポート）のまま
   const vHeight = (window.visualViewport ? window.visualViewport.height : window.innerHeight);
   const vOffsetTop = (window.visualViewport ? window.visualViewport.offsetTop : 0);
+  const vOffsetLeft = (window.visualViewport ? window.visualViewport.offsetLeft : 0);
   const rectBottomInVV = rect.bottom - vOffsetTop;
   const spaceBelow = vHeight - rectBottomInVV;
   const spaceAbove = rect.top - vOffsetTop;
   suggestEl.style.width = Math.max(rect.width, 200) + 'px';
-  suggestEl.style.left = rect.left + (window.visualViewport ? window.visualViewport.offsetLeft : 0) + 'px';
+  suggestEl.style.left = (rect.left + vOffsetLeft) + 'px';
   if (spaceBelow < 220 && spaceAbove > spaceBelow) {
     // 上に表示
+    // bottom の基準は window.innerHeight（iOSでもAndroidでも fixed の基準はレイアウトVP）
     suggestEl.style.top = 'auto';
-    suggestEl.style.bottom = (vHeight - rect.top + vOffsetTop + 4) + 'px';
+    suggestEl.style.bottom = (window.innerHeight - rect.top - vOffsetTop + 4) + 'px';
+    suggestEl.style.maxHeight = Math.min(200, spaceAbove - 8) + 'px';
   } else {
     // 下に表示
-    suggestEl.style.top = (rect.bottom + 4) + 'px';
+    suggestEl.style.top = (rect.bottom + vOffsetTop + 4) + 'px';
     suggestEl.style.bottom = 'auto';
+    suggestEl.style.maxHeight = Math.min(200, Math.max(80, spaceBelow - 8)) + 'px';
   }
 }
 
@@ -3673,6 +3678,23 @@ window.addEventListener('scroll', () => {
     _scrollRaf = false;
   });
 }, true);
+
+// キーボード表示／非表示時（visualViewport リサイズ）に表示中のサジェストを再配置
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', () => {
+    document.querySelectorAll('.related-suggest').forEach(box => {
+      if (box.style.display === 'none') return;
+      let inputEl = null;
+      if (box.id === 'regSuggestBox') {
+        inputEl = document.getElementById('regArticleInput');
+      } else if (box.id.startsWith('related-suggest-')) {
+        const sk = box.id.replace('related-suggest-', '');
+        inputEl = document.getElementById('related-input-' + sk);
+      }
+      if (inputEl) positionSuggest(inputEl, box);
+    });
+  });
+}
 
 // ===== 初期化 =====
 
