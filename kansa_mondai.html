@@ -654,12 +654,19 @@ function renderKw(tabIdx){
           </div>`).join('')}
         </div>
         <div class="manage-add-row">
-          <textarea class="manage-add-input" id="kwpinput-${item.id}" rows="2" placeholder="キーワードを入力…"></textarea>
+          <textarea class="manage-add-input" id="kwpinput-${item.id}" rows="2" placeholder="キーワードを入力…" onkeydown="kwEnter(event,'${item.id}','kw')"></textarea>
           <button class="manage-add-btn" onclick="commitKwPage('${item.id}')">追加</button>
         </div>
       </div>
     </div>`;
   }).join('');
+}
+
+function kwEnter(e,id,mode){
+  if(e.key==='Enter'&&!e.shiftKey){
+    e.preventDefault();
+    if(mode==='manage') commitKw(id); else commitKwPage(id);
+  }
 }
 
 function commitKwPage(id){
@@ -995,7 +1002,7 @@ function renderManage(tabIdx){
         </div>`).join('')}
       </div>
       <div class="manage-add-row">
-        <textarea class="manage-add-input" id="kwinput-${item.id}" rows="2"></textarea>
+        <textarea class="manage-add-input" id="kwinput-${item.id}" rows="2" onkeydown="kwEnter(event,'${item.id}','manage')"></textarea>
         <button class="manage-add-btn" onclick="commitKw('${item.id}')">追加</button>
       </div>`:'';
 
