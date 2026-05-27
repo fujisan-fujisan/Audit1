@@ -657,7 +657,7 @@ function renderKw(tabIdx){
         ${ans?`<button class="kw-ans-btn" onclick="toggleKwAns('${item.id}')">解答</button>`:''}
         <div class="manage-item-meta${kws.length?' has-kw':''}" id="kwmeta-${item.id}">${kws.length?kws.length+'KW':'KW未'}</div>
       </div>
-      ${ans?`<div class="kw-ans-panel" id="kwans-${item.id}"><div class="kw-ans-text">${escHtml(ans)}</div></div>`:''}
+      ${ans?`<div class="kw-ans-panel open" id="kwans-${item.id}"><div class="kw-ans-text">${escHtml(ans)}</div></div>`:''}
       <div class="kw-page-body">
         <div class="manage-kw-list" id="kwplist-${item.id}">
           ${kws.map((kw,i)=>`<div class="manage-kw-row">
