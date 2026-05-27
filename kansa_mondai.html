@@ -2544,9 +2544,18 @@ function initData(){
       updated=true;
     }
     const existingIds=new Set(chEntry.items.map(it=>it.id));
+    let chUpdated=false;
     initCh.items.forEach(item=>{
-      if(!existingIds.has(item.id)){ chEntry.items.push(item); updated=true; }
+      if(!existingIds.has(item.id)){ chEntry.items.push(item); updated=true; chUpdated=true; }
     });
+    if(chUpdated){
+      const initOrder=new Map(initCh.items.map((it,i)=>[it.id,i]));
+      chEntry.items.sort((a,b)=>{
+        const ai=initOrder.has(a.id)?initOrder.get(a.id):Infinity;
+        const bi=initOrder.has(b.id)?initOrder.get(b.id):Infinity;
+        return ai-bi;
+      });
+    }
   });
   if(updated){ sortDataByMaster(); saveData(); }
   Object.entries(INITIAL_ANS).forEach(([id,ans])=>{
