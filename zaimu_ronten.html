@@ -864,7 +864,7 @@ function renderRecord(chIndex){
     const rate=hasRec?Math.round(rec.ok/rec.total*100):null;
     const rateColor=excl?'var(--text3)':rate===null?'var(--text3)':rate>=80?'var(--ok)':rate>=50?'#c07000':'var(--ng)';
     return`<div class="record-item${excl?' excluded':''}">
-      <div class="record-item-name">${escHtml(item.name)}${item.q?`<button class="q-btn" onclick="event.stopPropagation();showQ('${item.id}')">問題文</button>`:''}</div>
+      <div class="record-item-name">${item.q?`<button class="q-btn" style="margin-right:6px;margin-left:0" onclick="event.stopPropagation();showQ('${item.id}')">問題文</button>`:''}${escHtml(item.name)}</div>
       <div class="record-item-right">
         <span class="record-score" style="color:${rateColor}">${hasRec?rec.ok+'/'+rec.total:'–'}</span>
       </div>
@@ -965,8 +965,8 @@ function updateGameUI(){
   document.getElementById('results-list').innerHTML=gameState.results.map(r=>{
     const item=gameState.items.find(i=>i.id===r.id),name=item?item.name:r.id;
     const qbtn=item&&item.q?`<button class="q-btn" onclick="event.stopPropagation();showQ('${r.id}')">問題文</button>`:'';
-    if(r.status==='ok')return`<div class="result-item ok"><div class="result-dot ok">○</div><div class="result-content"><div class="result-name">${escHtml(name)}${qbtn}</div>${r.inputTitle?`<div class="result-input-text">入力: ${escHtml(r.inputTitle)}</div>`:''}</div></div>`;
-    return`<div class="result-item locked"><div class="result-dot locked">✕</div><div class="result-content"><div class="result-name">${escHtml(name)}${qbtn}</div><div class="result-locked-msg">🔒 ロック（違う論点と判定したためネタバレ防止）</div></div></div>`;
+    if(r.status==='ok')return`<div class="result-item ok"><div class="result-dot ok">○</div><div class="result-content"><div class="result-name">${qbtn}${escHtml(name)}</div>${r.inputTitle?`<div class="result-input-text">入力: ${escHtml(r.inputTitle)}</div>`:''}</div></div>`;
+    return`<div class="result-item locked"><div class="result-dot locked">✕</div><div class="result-content"><div class="result-name">${qbtn}${escHtml(name)}</div><div class="result-locked-msg">🔒 ロック（違う論点と判定したためネタバレ防止）</div></div></div>`;
   }).join('');
   document.getElementById('results-count-lbl').textContent=`回答済み: ${gameState.results.length}件（正解: ${gameState.score}）`;
 }
@@ -994,7 +994,7 @@ function finishGame(){
   document.getElementById('result-detail-items').innerHTML=ch.items.map(item=>{
     const isOk=ai.has(item.id),isL=li.has(item.id);
     const dot=isOk?'<span class="rdi-dot ok">○</span>':isL?'<span class="rdi-dot locked">✕</span>':'<span class="rdi-dot none">–</span>';
-    return`<div class="rdi">${dot}<div class="rdi-name">${escHtml(item.name)}${item.q?`<button class="q-btn" onclick="event.stopPropagation();showQ('${item.id}')">問題文</button>`:''}</div><span class="rdi-imp imp-${item.imp}">${item.imp}</span></div>`;
+    return`<div class="rdi">${dot}<div class="rdi-name">${item.q?`<button class="q-btn" style="margin-right:6px;margin-left:0" onclick="event.stopPropagation();showQ('${item.id}')">問題文</button>`:''}${escHtml(item.name)}</div><span class="rdi-imp imp-${item.imp}">${item.imp}</span></div>`;
   }).join('');
   showScreen('result');
 }
@@ -1011,7 +1011,7 @@ function renderManage(chIndex){
     const ans=answerData[item.id]||[],hasAns=ans.length>0,excl=isExcluded(item.id);
     return`<div class="manage-item-card${excl?' excluded':''}" id="mc-${item.id}">
       <div class="manage-item-header" onclick="toggleManageItem('${item.id}')">
-        <div class="manage-item-name">${escHtml(item.name)}${item.q?`<button class="q-btn" onclick="event.stopPropagation();showQ('${item.id}')">問題文</button>`:''}</div>
+        <div class="manage-item-name">${item.q?`<button class="q-btn" style="margin-right:6px;margin-left:0" onclick="event.stopPropagation();showQ('${item.id}')">問題文</button>`:''}${escHtml(item.name)}</div>
         <span class="manage-item-imp imp-${item.imp}">${item.imp}</span>
         <div class="manage-item-status${hasAns?' has-ans':''}">${hasAns?ans.length+'件':'未登録'}</div>
       </div>

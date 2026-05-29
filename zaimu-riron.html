@@ -2365,7 +2365,7 @@ function buildItemRow(item) {
   row.id = 'irow-' + item.id;
   row.innerHTML = `
     <div class="item-top">
-      <span class="item-name"><span style="color:var(--text-3);font-family:'DM Mono',monospace;font-size:12px;margin-right:5px;">${item.id.replace('z','')}</span>${escHtml(item.name)}${item.q?`<button class="q-btn" onclick="event.stopPropagation();showQ('${item.id}')">問題文</button>`:''}</span>
+      <span class="item-name"><span style="color:var(--text-3);font-family:'DM Mono',monospace;font-size:12px;margin-right:5px;">${item.id.replace('z','')}</span>${item.q?`<button class="q-btn" style="margin-right:6px;margin-left:0" onclick="event.stopPropagation();showQ('${item.id}')">問題文</button>`:''}${escHtml(item.name)}</span>
       <span class="imp-badge imp-${item.imp}">${item.imp}</span>
       ${grayed ? '<span class="skip-chip">SKIP</span>' : ''}
       <div class="u-btns">
@@ -2657,7 +2657,7 @@ function buildKwChContent(ch) {
     html += `<div style="padding:10px 14px;">`;
     html += `<div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:6px;">`;
     html += `<span class="imp-badge imp-${item.imp}">${item.imp}</span>`;
-    html += `<span style="font-size:11px;color:var(--text);flex:1;line-height:1.5;">${escHtml(item.name)}${item.q?`<button class="q-btn" onclick="event.stopPropagation();showQ('${item.id}')">問題文</button>`:''}</span>`;
+    html += `<span style="font-size:11px;color:var(--text);flex:1;line-height:1.5;">${item.q?`<button class="q-btn" style="margin-right:6px;margin-left:0" onclick="event.stopPropagation();showQ('${item.id}')">問題文</button>`:''}${escHtml(item.name)}</span>`;
     html += `</div>`;
     html += `<div id="kwmlist-${item.id}" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;">${buildKwManageChips(item.id, kws)}</div>`;
     html += `<div style="display:flex;gap:6px;align-items:center;">`;
@@ -2853,7 +2853,7 @@ function renderHistoryPage() {
 
     html += `<div class="rec-item" id="recitem-${item.id}">
       <div class="rec-item-header" onclick="this.closest('.rec-item').classList.toggle('open')">
-        <div class="rec-item-name">${escHtml(item.name)}${item.q?`<button class="q-btn" onclick="event.stopPropagation();showQ('${item.id}')">問題文</button>`:''}</div>
+        <div class="rec-item-name">${item.q?`<button class="q-btn" style="margin-right:6px;margin-left:0" onclick="event.stopPropagation();showQ('${item.id}')">問題文</button>`:''}${escHtml(item.name)}</div>
         <span class="rec-imp ${impCls}">${item.imp}</span>
         <div class="rec-u-track"><div class="rec-u-fill" style="width:${scorePct}%;background:${scoreColor}"></div></div>
         <div class="rec-score" style="color:${scoreColor}">${scoreVal !== null ? scoreVal+'%' : '–'}</div>
@@ -2979,7 +2979,7 @@ function selectHistCh(idx) {
 
     html += `<div class="rec-item" id="recitem-${item.id}">
       <div class="rec-item-header" onclick="this.closest('.rec-item').classList.toggle('open')">
-        <div class="rec-item-name">${escHtml(item.name)}${item.q?`<button class="q-btn" onclick="event.stopPropagation();showQ('${item.id}')">問題文</button>`:''}</div>
+        <div class="rec-item-name">${item.q?`<button class="q-btn" style="margin-right:6px;margin-left:0" onclick="event.stopPropagation();showQ('${item.id}')">問題文</button>`:''}${escHtml(item.name)}</div>
         <span class="rec-imp ${impCls}">${item.imp}</span>
         <div class="rec-u-track"><div class="rec-u-fill" style="width:${scorePct}%;background:${scoreColor}"></div></div>
         <div class="rec-score" style="color:${scoreColor}">${scoreVal !== null ? scoreVal+'%' : '–'}</div>
