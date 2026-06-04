@@ -17,17 +17,10 @@
   --text: #111111;
   --text-2: #666666;
   --text-3: #aaaaaa;
-  --accent: #111111;
   --o-color: #1a7a4a;
   --o-bg: #edf7f2;
   --x-color: #c0392b;
   --x-bg: #fdf0ee;
-  --A-color: #c0392b;
-  --A-bg: #fdf0ee;
-  --B-color: #7c5c00;
-  --B-bg: #fdf4e3;
-  --C-color: #4a6a9a;
-  --C-bg: #eef3fa;
   --radius: 10px;
   --radius-sm: 6px;
 }
@@ -163,16 +156,6 @@ body {
   text-underline-offset: 3px;
 }
 
-.filters {
-  display: flex;
-  gap: 5px;
-  padding: 8px 16px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  border-top: 1px solid var(--border);
-}
-.filters::-webkit-scrollbar { display: none; }
-
 .view-tabs {
   display: flex;
   border-top: 1px solid var(--border);
@@ -245,8 +228,6 @@ body {
 
 .item-top { display: flex; align-items: center; gap: 7px; }
 
-.item-num { font-size: 10px; color: var(--text-3); font-family: 'DM Mono', monospace; flex-shrink: 0; min-width: 22px; align-self: flex-start; padding-top: 2px; }
-
 .item-name { flex: 1; font-size: 12px; line-height: 1.5; color: var(--text); }
 
 .item-badges { display: flex; gap: 3px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
@@ -272,6 +253,7 @@ body {
 .diff-易 { background: #fdf0ee; border-color: #e8b0a8; color: #c0392b; }
 .diff-普 { background: #eef3fa; border-color: #a0b8dc; color: #2c5f9e; }
 .diff-難 { background: #edf7f2; border-color: #a8dcc0; color: #1a7a4a; }
+.diff-unknown { background: var(--bg); border-color: var(--border-strong); color: var(--text-3); }
 
 .u-btns { display: flex; gap: 4px; flex-shrink: 0; }
 
@@ -328,7 +310,7 @@ body {
 .ch-record-form.open { display: flex; }
 .ch-record-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .ch-record-form-lbl { font-size: 10px; font-weight: 700; color: var(--text-2); display: block; margin-bottom: 3px; }
-.ch-record-input { width: 100%; background: var(--surface); border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text); font-family: 'Noto Sans JP', sans-serif; font-size: 13px; padding: 8px 10px; outline: none; -webkit-appearance: none; appearance: none; }
+.ch-record-input { width: 100%; background: var(--surface); border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text); font-family: 'Noto Sans JP', sans-serif; font-size: 16px; padding: 8px 10px; outline: none; -webkit-appearance: none; appearance: none; touch-action: manipulation; }
 .ch-record-input:focus { border-color: var(--text); }
 .ch-record-form-btns { display: flex; gap: 6px; }
 .ch-record-save { flex: 1; padding: 10px; border-radius: var(--radius-sm); border: none; background: var(--text); color: #fff; font-family: 'Noto Sans JP', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; }
@@ -336,17 +318,6 @@ body {
 
 .next-round-wrap { padding: 14px; text-align: center; max-width: 700px; margin: 0 auto; }
 .next-round-btn { background: var(--text); color: #fff; border: none; border-radius: var(--radius); padding: 13px 28px; font-size: 13px; font-weight: 700; font-family: 'Noto Sans JP', sans-serif; cursor: pointer; letter-spacing: .04em; }
-
-.weakness-header { padding: 14px 0 10px; }
-.weakness-title { font-size: 12px; font-weight: 700; color: var(--text-2); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 4px; }
-.weakness-subtitle { font-size: 11px; color: var(--text-3); }
-.weakness-section { margin-bottom: 16px; }
-.weakness-section-title { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); padding: 6px 0; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
-.weakness-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 6px; display: flex; flex-direction: column; gap: 6px; }
-.weakness-item-top { display: flex; align-items: flex-start; gap: 8px; }
-.weakness-ch { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--text-3); flex-shrink: 0; padding-top: 1px; min-width: 40px; }
-.weakness-name { flex: 1; font-size: 12px; line-height: 1.5; color: var(--text); }
-.weakness-history { display: flex; gap: 3px; padding-left: 48px; align-items: center; }
 
 .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 200; align-items: flex-end; justify-content: center; }
 .overlay.open { display: flex; }
@@ -565,12 +536,6 @@ function setItemR(id, data) {
 
 function getChR(key) { return (chState[String(key)] || {})[curRound()] || {}; }
 
-function setChR(key, data) {
-  const k = String(key);
-  if (!chState[k]) chState[k] = {};
-  chState[k][curRound()] = data;
-}
-
 function chKey(ch) {
   return ch.ch
     .replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))
@@ -664,11 +629,9 @@ function buildChCard(ch) {
 
   const iw = document.createElement('div');
   iw.className = 'items-wrap';
-  let idx = 0;
   ch.items.forEach(item => {
     if (!itemInScope(item)) return;
-    idx++;
-    iw.appendChild(buildItemRow(item, idx));
+    iw.appendChild(buildItemRow(item));
   });
   card.appendChild(iw);
 
@@ -729,7 +692,7 @@ function saveRecord(key) {
   if (foot) foot.innerHTML = buildChFooter(key, { date: dateVal, time: timeVal });
 }
 
-function buildItemRow(item, num) {
+function buildItemRow(item) {
   const r = getItemR(item.id);
   const u = r.u || null;
   const grayed = isGrayed(item.id);
@@ -751,7 +714,8 @@ function buildItemRow(item, num) {
   }
 
   const impCls = item.imp === 'A' ? 'imp-A' : item.imp === 'B' ? 'imp-B' : item.imp === 'C+' ? 'imp-Cplus' : 'imp-C';
-  const diffCls = `diff-${item.diff}`;
+  const diffCls = item.diff === 'unknown' ? 'diff-unknown' : `diff-${item.diff}`;
+  const diffLabel = item.diff === 'unknown' ? '－' : item.diff;
 
   const row = document.createElement('div');
   row.className = 'item-row' + (grayed ? ' item-skipped' : '');
@@ -761,7 +725,7 @@ function buildItemRow(item, num) {
       <span class="item-name">${item.name}</span>
       <div class="item-badges">
         <span class="imp-badge ${impCls}">${item.imp}</span>
-        <span class="diff-badge ${diffCls}">${item.diff}</span>
+        <span class="diff-badge ${diffCls}">${diffLabel}</span>
         ${grayed ? '<span class="skip-chip">SKIP</span>' : ''}
         <div class="u-btns">
           <button class="ub ${u==='o'?'sel-o':''}" onclick="setU('${item.id}','o')">○</button>
@@ -853,14 +817,15 @@ function updateRoundInfoBar(pct) {
   const dl = rd.deadline;
   const days = daysUntil(dl);
   const daysStr = days === null ? '未設定' : days < 0 ? `${Math.abs(days)}日超過` : `残り${days}日`;
-  const daysClass = days === null ? '' : days <= 3 ? 'warn' : days <= 7 ? 'warn' : 'ok';
+  const daysClass = days === null ? '' : days <= 7 ? 'warn' : 'ok';
 
   const items = scopedItems();
-  const remaining = items.filter(i => !getItemR(i.id).u).length;
+  const activeItems = items.filter(i => !isGrayed(i.id));
+  const remaining = activeItems.filter(i => !getItemR(i.id).u).length;
   let paceHTML = '';
   if (days !== null && days > 0) {
     const perDay = remaining / days;
-    const basePace = rd.basePace || (items.length / days);
+    const basePace = rd.basePace || (activeItems.length / days);
     const ratio = perDay / basePace;
     const paceClass = ratio > 1.2 ? 'warn' : ratio > 1.0 ? '' : 'ok';
     const perDayStr = perDay >= 10 ? Math.round(perDay) + '問' : perDay.toFixed(1) + '問';
@@ -908,7 +873,6 @@ function refreshItem(itemId) {
   const row = document.getElementById('irow-' + itemId);
   if (!row) return;
 
-  // u-btns
   const uBtns = row.querySelector('.u-btns');
   if (uBtns) {
     ['o','x'].forEach(t => {
@@ -919,7 +883,6 @@ function refreshItem(itemId) {
     });
   }
 
-  // NRP
   const nrp = row.querySelector('.nrp');
   if (nrp) {
     nrp.style.cssText = r.u ? 'margin-left:auto' : 'display:none';
@@ -928,22 +891,19 @@ function refreshItem(itemId) {
     if (skipBtn) skipBtn.className = 'nrp-btn' + (r.skipNext === true ? ' nrp-skip' : '');
   }
 
-  // skip-chip & item-skipped
   const grayed = isGrayed(itemId);
   row.classList.toggle('item-skipped', grayed);
-  const badges = row.querySelector('.item-badges');
-  if (badges) {
-    const existing = badges.querySelector('.skip-chip');
-    if (grayed && !existing) {
+  const skipChip = row.querySelector('.skip-chip');
+  if (grayed && !skipChip) {
+    const diffBadge = row.querySelector('.diff-badge');
+    if (diffBadge) {
       const chip = document.createElement('span');
       chip.className = 'skip-chip';
       chip.textContent = 'SKIP';
-      const diffBadge = badges.querySelector('.diff-badge');
-      if (diffBadge) diffBadge.insertAdjacentElement('afterend', chip);
-      else badges.prepend(chip);
-    } else if (!grayed && existing) {
-      existing.remove();
+      diffBadge.insertAdjacentElement('afterend', chip);
     }
+  } else if (!grayed && skipChip) {
+    skipChip.remove();
   }
 }
 
@@ -951,7 +911,7 @@ function refreshChProg(itemId) {
   const ch = DATA.find(c => c.items.find(i => i.id === itemId));
   if (!ch) return;
   const key = chKey(ch);
-  const scoped = ch.items.filter(itemInScope).filter(i => !isGrayed(i.id));
+  const scoped = ch.items.filter(itemInScope);
   const total = scoped.length;
   const done = scoped.filter(i => getItemR(i.id).u).length;
   const isDone = done === total && total > 0;
@@ -1277,7 +1237,7 @@ function saveMemoEntry() {
   if (!val) { closeMemoInput(); return; }
   const d = new Date();
   const ds = d.getFullYear()+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0');
-  memoState[_memoTargetId] = (memoState[_memoTargetId] ? memoState[_memoTargetId]+'\n' : '')+ds+'\n'+val;
+  memoState[_memoTargetId] = (memoState[_memoTargetId] ? memoState[_memoTargetId]+'\n' : '')+'〈'+ds+'〉'+val;
   save();
   closeMemoInput();
   const btn = document.getElementById('memo-btn-'+_memoTargetId);
@@ -1303,11 +1263,12 @@ function saveMemoEntry() {
 <div class="overlay" id="memo-input-overlay" onclick="if(event.target===this)closeMemoInput()">
   <div class="scope-modal" style="display:flex;flex-direction:column;max-height:85vh;overflow:hidden;padding-bottom:44px;">
     <div class="modal-handle"></div>
-    <div style="display:flex;gap:8px;margin-bottom:10px;flex-shrink:0;">
+    <div style="font-size:13px;font-weight:700;margin-bottom:4px;">メモを追記</div>
+    <textarea class="memo-add-area" id="memo-add-area"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-shrink:0;">
       <button class="ch-record-cancel" style="flex:1;" onclick="closeMemoInput()">キャンセル</button>
       <button class="ch-record-save" style="flex:1;" onclick="saveMemoEntry()">完了</button>
     </div>
-    <textarea class="memo-add-area" id="memo-add-area"></textarea>
   </div>
 </div>
 <!-- MEMO EDIT OVERLAY -->
