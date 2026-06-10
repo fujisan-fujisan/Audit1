@@ -178,6 +178,18 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .btn-retry:active{transform:scale(.97)}
 .btn-back{background:transparent;color:var(--text2);border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:13px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
 .btn-back:hover{border-color:var(--text2);color:var(--text)}
+/* 回答時間入力 */
+.time-record-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:20px}
+.time-record-label{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.time-record-row{display:flex;gap:8px;align-items:center}
+.time-record-input{background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Mono',monospace;font-size:18px;padding:8px 10px;outline:none;transition:border-color .15s;width:90px;text-align:center}
+.time-record-input:focus{border-color:var(--text)}
+.time-record-unit{font-size:12px;color:var(--text2);flex-shrink:0}
+.time-record-btn{padding:8px 14px;border-radius:var(--radius-sm);border:none;background:var(--text);color:#fff;font-size:12px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:all .12s;flex-shrink:0}
+.time-record-btn:active{transform:scale(.97)}
+.time-record-saved{font-size:11px;color:var(--ok);margin-top:6px;min-height:16px}
+/* 章一覧 最終実施日 */
+.ch-last-date{font-size:9px;color:var(--text3);margin-top:3px;font-family:'DM Mono',monospace;text-align:right}
 
 /* ── MANAGE / RECORD 共通 ── */
 #screen-manage,#screen-record{padding:0}
@@ -372,6 +384,15 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
       <div class="bd-card"><div class="bd-num" id="bd-answered">0</div><div class="bd-lbl">回答済み</div></div>
       <div class="bd-card"><div class="bd-num" id="bd-skipped">0</div><div class="bd-lbl">スキップ</div></div>
     </div>
+    <div class="time-record-card">
+      <div class="time-record-label">回答時間</div>
+      <div class="time-record-row">
+        <input type="number" id="session-duration-input" class="time-record-input" placeholder="0" min="1" max="999">
+        <span class="time-record-unit">分</span>
+        <button class="time-record-btn" onclick="saveSessionDuration()">記録</button>
+      </div>
+      <div id="session-duration-saved" class="time-record-saved"></div>
+    </div>
     <div class="result-detail-title">問題別 理解度</div>
     <div id="result-detail-items"></div>
     <div class="result-btns">
@@ -534,16 +555,19 @@ const KW_KEY   = 'kmonday-kw-v1';
 const REC_KEY  = 'kmonday-rec-v1';
 const ANS_KEY  = 'kmonday-ans-v1';
 const DATA_KEY = 'kmonday-data-v1';
+const SESS_KEY = 'kmonday-sess-v1';
 
 let DATA    = []; // [{ch, chName, items:[{id, type, name, importance}]}]
 let kwData  = {}; // {itemId: [string, ...]}
 let recData = {}; // {itemId: [{date, type, scores?, result?, understanding?}]}
 let ansData = {}; // {itemId: string}
+let sessData = {}; // {chKey: [{date, isoDate, duration}]}
 
 function loadStorage(){
   try{ const k=localStorage.getItem(KW_KEY);  if(k) kwData=JSON.parse(k);  }catch(e){}
   try{ const r=localStorage.getItem(REC_KEY); if(r) recData=JSON.parse(r); }catch(e){}
   try{ const a=localStorage.getItem(ANS_KEY); if(a) ansData=JSON.parse(a); }catch(e){}
+  try{ const s=localStorage.getItem(SESS_KEY); if(s) sessData=JSON.parse(s); }catch(e){}
   try{
     const d=localStorage.getItem(DATA_KEY);
     if(d){ JSON.parse(d).forEach(ch=>DATA.push(ch)); sortDataByMaster(); }
@@ -560,6 +584,7 @@ function saveKw(){   try{ localStorage.setItem(KW_KEY,  JSON.stringify(kwData));
 function saveRec(){  try{ localStorage.setItem(REC_KEY, JSON.stringify(recData)); }catch(e){} }
 function saveAns(){  try{ localStorage.setItem(ANS_KEY, JSON.stringify(ansData)); }catch(e){} }
 function saveData(){ try{ localStorage.setItem(DATA_KEY,JSON.stringify(DATA));    }catch(e){} }
+function saveSess(){ try{ localStorage.setItem(SESS_KEY,JSON.stringify(sessData));  }catch(e){} }
 
 function getAns(id){ return ansData[id]||''; }
 function setAns(id,val){ ansData[id]=val; saveAns(); }
@@ -741,9 +766,13 @@ function renderChapterList(){
   document.getElementById('chapter-list').innerHTML=chsWithItems.map((ch,i)=>{
     const recs=ch.items.map(it=>getLastUnderstanding(it.id)).filter(u=>u!==null);
     const avg=recs.length?Math.round(recs.reduce((s,v)=>s+v,0)/recs.length):null;
+    const lastSess=(sessData[ch.ch]||[]).slice(-1)[0];
+    const lastDate=lastSess?lastSess.date.replace(/^\d{4}\//,''):null;
+    const durStr=(lastSess?.duration!=null)?' · '+lastSess.duration+'分':'';
+    const lastInfo=lastDate?`<div class="ch-last-date">${lastDate}${durStr}</div>`:'';
     const histHTML=avg!==null
-      ?`<div class="ch-btn-hist">平均 <span class="best">${avg}%</span></div>`
-      :`<div class="ch-btn-hist" style="color:var(--text3)">未挑戦</div>`;
+      ?`<div class="ch-btn-hist">平均 <span class="best">${avg}%</span>${lastInfo}</div>`
+      :`<div class="ch-btn-hist" style="color:var(--text3)">未挑戦${lastInfo}</div>`;
     const ronsh=ch.items.filter(it=>it.type==='ronsh').length;
     const kihon=ch.items.filter(it=>it.type==='kihon').length;
     const jirei=ch.items.filter(it=>it.type==='jirei').length;
@@ -964,6 +993,16 @@ function finishQuiz(){
   document.getElementById('bd-answered').textContent=answered.length;
   document.getElementById('bd-skipped').textContent=skipped.length;
 
+  const chKey=DATA[quizState.chIndex].ch;
+  if(!sessData[chKey]) sessData[chKey]=[];
+  const now=new Date();
+  sessData[chKey].push({date:now.toLocaleDateString('ja-JP'),isoDate:now.toISOString(),duration:null});
+  saveSess();
+  const dIn=document.getElementById('session-duration-input');
+  const dMsg=document.getElementById('session-duration-saved');
+  if(dIn) dIn.value='';
+  if(dMsg) dMsg.textContent='';
+
   document.getElementById('result-detail-items').innerHTML=quizState.results.map(r=>{
     const item=ch.items.find(it=>it.id===r.id);
     const name=item?item.name:r.id;
@@ -989,6 +1028,17 @@ function finishQuiz(){
 }
 
 function retryChapter(){ startQuiz(quizState.chIndex); }
+
+function saveSessionDuration(){
+  const val=parseInt(document.getElementById('session-duration-input')?.value||'',10);
+  if(!val||val<=0) return;
+  const chKey=DATA[quizState.chIndex]?.ch;
+  if(!chKey) return;
+  const recs=sessData[chKey];
+  if(recs&&recs.length>0){ recs[recs.length-1].duration=val; saveSess(); }
+  const msg=document.getElementById('session-duration-saved');
+  if(msg) msg.textContent=val+'分を記録しました ✓';
+}
 
 // ── MANAGE ──
 function renderManage(tabIdx){
@@ -1253,7 +1303,7 @@ function submitRegister(){
 
 // ── BACKUP / RESTORE ──
 async function backupAll(){
-  const d={version:1,type:'backup',savedAt:new Date().toISOString(),data:DATA,kwData,recData,ansData};
+  const d={version:1,type:'backup',savedAt:new Date().toISOString(),data:DATA,kwData,recData,ansData,sessData};
   const fname='kansa-mondai-backup.json';
   const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
   const file=new File([blob],fname,{type:'application/json'});
@@ -1278,6 +1328,7 @@ function restoreAll(e){
       if(d.kwData){  Object.keys(kwData).forEach(k=>delete kwData[k]);  Object.assign(kwData,d.kwData);  saveKw(); }
       if(d.recData){ Object.keys(recData).forEach(k=>delete recData[k]); Object.assign(recData,d.recData); saveRec(); }
       if(d.ansData){ Object.keys(ansData).forEach(k=>delete ansData[k]); Object.assign(ansData,d.ansData); saveAns(); }
+      if(d.sessData){ Object.keys(sessData).forEach(k=>delete sessData[k]); Object.assign(sessData,d.sessData); saveSess(); }
       alert('復元が完了しました！');
     }catch(err){ alert('ファイルの読み込みに失敗しました。'); }
   };
