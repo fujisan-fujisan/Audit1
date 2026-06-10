@@ -81,11 +81,11 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .ch-btn:hover{border-color:var(--border2);background:var(--surface2)}
 .ch-btn:active{transform:scale(.98)}
 .ch-btn-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);min-width:26px}
-.ch-btn-info{flex:1;min-width:0}
+.ch-btn-info{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .ch-btn-name{font-size:13px;font-weight:700;color:var(--text)}
-.ch-btn-sub{font-size:10px;color:var(--text2);margin-top:2px;font-family:'DM Mono',monospace}
-.ch-btn-hist{font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);text-align:right;flex-shrink:0}
-.ch-btn-hist .best{color:var(--ok);font-weight:700}
+.ch-btn-count{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace}
+.ch-btn-hist{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:var(--text2);text-align:right;flex-shrink:0;white-space:nowrap}
+.ch-btn-hist .best{color:var(--ok)}
 .empty-state{padding:40px 20px;text-align:center;color:var(--text3);font-size:12px;line-height:2}
 
 /* ── QUIZ ── */
@@ -189,7 +189,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .time-record-btn:active{transform:scale(.97)}
 .time-record-saved{font-size:11px;color:var(--ok);margin-top:6px;min-height:16px}
 /* 章一覧 最終実施日 */
-.ch-last-date{font-size:9px;color:var(--text3);margin-top:3px;font-family:'DM Mono',monospace;text-align:right}
+.ch-last-date{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:400}
 
 /* ── MANAGE / RECORD 共通 ── */
 #screen-manage,#screen-record{padding:0}
@@ -769,19 +769,18 @@ function renderChapterList(){
     const lastSess=(sessData[ch.ch]||[]).slice(-1)[0];
     const lastDate=lastSess?lastSess.date.replace(/^\d{4}\//,''):null;
     const durStr=(lastSess?.duration!=null)?' · '+lastSess.duration+'分':'';
-    const lastInfo=lastDate?`<div class="ch-last-date">${lastDate}${durStr}</div>`:'';
+    const lastInfo=lastDate?` <span class="ch-last-date">· ${lastDate}${durStr}</span>`:'';
     const histHTML=avg!==null
-      ?`<div class="ch-btn-hist">平均 <span class="best">${avg}%</span>${lastInfo}</div>`
-      :`<div class="ch-btn-hist" style="color:var(--text3)">未挑戦${lastInfo}</div>`;
+      ?`<div class="ch-btn-hist"><span class="best">${avg}%</span>${lastInfo}</div>`
+      :`<div class="ch-btn-hist" style="font-weight:400;color:var(--text3)">未挑戦${lastInfo}</div>`;
     const ronsh=ch.items.filter(it=>it.type==='ronsh').length;
     const kihon=ch.items.filter(it=>it.type==='kihon').length;
     const jirei=ch.items.filter(it=>it.type==='jirei').length;
-    const sub=[ronsh?`論証${ronsh}`:'',kihon?`参照${kihon}`:'',jirei?`事例${jirei}`:''].filter(Boolean).join(' · ');
+    const sub=[ronsh?`論証${ronsh}`:'',kihon?`参照${kihon}`:'',jirei?`事例${jirei}`:''].filter(Boolean).join('·');
     const chIdx=DATA.indexOf(ch);
     return `<button class="ch-btn" onclick="startQuiz(${chIdx})">
       <div class="ch-btn-info">
-        <div class="ch-btn-name">${fmtCh(ch.ch)}　${escHtml(ch.chName)}</div>
-        <div class="ch-btn-sub">${ch.items.length}問${sub?' ('+sub+')':''}</div>
+        <span class="ch-btn-name">${fmtCh(ch.ch)}　${escHtml(ch.chName)}</span><span class="ch-btn-count">　${ch.items.length}問${sub?' ('+sub+')':''}</span>
       </div>
       ${histHTML}
     </button>`;
