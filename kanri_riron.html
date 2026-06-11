@@ -965,6 +965,24 @@ body {
   color:var(--text)
 }
 
+.ch-timer-label {
+  font-size:11px;
+  color:var(--text-2);
+  font-style:italic;
+  margin-right:auto;
+}
+
+.ch-end-btn {
+  background:var(--o-color);
+  color:#fff;
+  border-color:var(--o-color);
+}
+
+.ch-end-btn:hover {
+  opacity:0.85;
+  color:#fff;
+}
+
 .ch-record-form {
   display:none;
   padding:10px 14px 14px;
@@ -1620,6 +1638,7 @@ const DATA=[
 const STORE_KEY='kanri-riron';
 let itemState={},chState={},appState={rounds:[{label:'第1回',scope:'all',deadline:null,startDate:null}],currentRound:0};
 let kwState={};
+let timerState={};
 let showingWeakness=false;
 
 function load(){
@@ -1632,6 +1651,7 @@ function load(){
     if(c)chState=JSON.parse(c);
     if(a)appState=JSON.parse(a);
     if(k)kwState=JSON.parse(k);
+    const tm=localStorage.getItem(STORE_KEY+'-timer');if(tm)timerState=JSON.parse(tm);
   }catch(e){}
 }
 function save(){
@@ -1640,6 +1660,7 @@ function save(){
     localStorage.setItem(STORE_KEY+'-ch',JSON.stringify(chState));
     localStorage.setItem(STORE_KEY+'-app',JSON.stringify(appState));
     localStorage.setItem(STORE_KEY+'-kw',JSON.stringify(kwState));
+    localStorage.setItem(STORE_KEY+'-timer',JSON.stringify(timerState));
   }catch(e){}
 }
 
@@ -1935,29 +1956,23 @@ function buildChFooter(key,r){
   let s='';
   if(r.date)s+=`<span class="ch-stat"><span class="ch-stat-lbl">実施日</span>${formatDate(r.date)}</span>`;
   if(r.time)s+=`<span class="ch-stat"><span class="ch-stat-lbl">所要時間</span>${r.time} 分</span>`;
-  return`<div class="ch-footer-row">${s}<button class="ch-record-btn" onclick="toggleRecordForm('${key}')">実施記録</button></div>
-    <div class="ch-record-form" id="chform-${key}">
-      <div class="ch-record-form-row">
-        <div><label class="ch-record-form-lbl">実施日</label><input type="date" class="ch-record-input" id="ch-date-${key}" value="${r.date||''}"></div>
-        <div><label class="ch-record-form-lbl">所要時間（分）</label><input type="text" inputmode="numeric" class="ch-record-input" id="ch-time-${key}" placeholder="例: 45" value="${r.time||''}"></div>
-      </div>
-      <div class="ch-record-form-btns">
-        <button class="ch-record-cancel" onclick="toggleRecordForm('${key}')">キャンセル</button>
-        <button class="ch-record-save" onclick="saveRecord('${key}')">保存</button>
-      </div>
-    </div>`;
+  if(timerState[key]){
+    return`<div class="ch-footer-row"><span class="ch-timer-label">計測中...</span><button class="ch-record-btn ch-end-btn" onclick="endTimer('${key}')">終了</button></div>`;
+  }
+  return`<div class="ch-footer-row">${s}<button class="ch-record-btn" onclick="startTimer('${key}')">開始</button></div>`;
 }
-function toggleRecordForm(key){
-  const f=document.getElementById('chform-'+key);if(!f)return;
-  const open=f.classList.contains('open');
-  document.querySelectorAll('.ch-record-form.open').forEach(x=>x.classList.remove('open'));
-  if(!open)f.classList.add('open');
+function startTimer(key){
+  timerState[key]=Date.now();save();
+  const ft=document.getElementById('chfoot-'+key);if(ft)ft.innerHTML=buildChFooter(key,(chState[key]||{})[curRound()]||{});
 }
-function saveRecord(key){
-  const d=document.getElementById('ch-date-'+key),t=document.getElementById('ch-time-'+key);if(!d||!t)return;
+function endTimer(key){
+  const start=timerState[key];if(!start)return;
+  const mins=Math.max(1,Math.round((Date.now()-start)/60000));
+  const dateVal=today();
   if(!chState[key])chState[key]={};
-  chState[key][curRound()]={date:d.value,time:t.value};save();
-  const ft=document.getElementById('chfoot-'+key);if(ft)ft.innerHTML=buildChFooter(key,{date:d.value,time:t.value});
+  chState[key][curRound()]={date:dateVal,time:String(mins)};
+  delete timerState[key];save();
+  const ft=document.getElementById('chfoot-'+key);if(ft)ft.innerHTML=buildChFooter(key,chState[key][curRound()]);
 }
 
 function buildItemRow(item){
