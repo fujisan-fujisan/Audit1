@@ -88,6 +88,27 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .ch-btn-hist .best{color:var(--ok)}
 .empty-state{padding:40px 20px;text-align:center;color:var(--text3);font-size:12px;line-height:2}
 
+/* ── FILTER OVERLAY ── */
+.filter-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:none;align-items:flex-end;justify-content:center}
+.filter-modal{background:var(--surface);border-radius:var(--radius) var(--radius) 0 0;padding:24px 20px 40px;width:100%;max-width:600px}
+.filter-modal-title{font-size:12px;font-family:'DM Mono',monospace;color:var(--text2);margin-bottom:4px}
+.filter-modal-sub{font-size:16px;font-weight:700;color:var(--text);margin-bottom:20px}
+.filter-options{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.filter-opt-btn{background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:all .15s;width:100%}
+.filter-opt-btn:not(:disabled):hover{border-color:var(--text2)}
+.filter-opt-btn:disabled{opacity:.38;cursor:default}
+.filter-opt-label{font-size:14px;font-weight:700;color:var(--text)}
+.filter-opt-count{font-size:12px;font-family:'DM Mono',monospace;color:var(--text2)}
+.filter-custom-row{display:flex;align-items:center;gap:8px;margin-bottom:16px;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px}
+.filter-custom-label{font-size:13px;font-weight:700;color:var(--text);flex-shrink:0}
+.filter-custom-input{width:60px;background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Mono',monospace;font-size:16px;padding:6px 8px;outline:none;text-align:center;transition:border-color .15s}
+.filter-custom-input:focus{border-color:var(--text)}
+.filter-custom-unit{font-size:13px;color:var(--text2);flex-shrink:0}
+.filter-custom-btn{margin-left:auto;padding:8px 14px;border-radius:var(--radius-sm);border:none;background:var(--text);color:#fff;font-size:12px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;flex-shrink:0;transition:all .12s}
+.filter-custom-btn:active{transform:scale(.97)}
+.filter-cancel-btn{width:100%;padding:12px;border-radius:var(--radius-sm);border:1.5px solid var(--border2);background:transparent;color:var(--text2);font-size:13px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:all .15s}
+.filter-cancel-btn:hover{border-color:var(--text2);color:var(--text)}
+
 /* ── QUIZ ── */
 .quiz-header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--border);padding:12px 16px;flex-shrink:0}
 .quiz-header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px}
@@ -357,6 +378,22 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
     </div>
   </div>
   <div class="chapter-list" id="chapter-list"></div>
+</div>
+
+<!-- FILTER OVERLAY -->
+<div id="filter-overlay" class="filter-overlay">
+  <div class="filter-modal">
+    <div class="filter-modal-title" id="filter-modal-ch"></div>
+    <div class="filter-modal-sub">解く問題を絞り込む</div>
+    <div class="filter-options" id="filter-options"></div>
+    <div class="filter-custom-row">
+      <span class="filter-custom-label">カスタム</span>
+      <input type="number" id="filter-custom-input" class="filter-custom-input" min="0" max="100" placeholder="60">
+      <span class="filter-custom-unit">% 以下</span>
+      <button class="filter-custom-btn" onclick="applyCustomFilter()">開始</button>
+    </div>
+    <button class="filter-cancel-btn" onclick="closeFilterOverlay()">キャンセル</button>
+  </div>
 </div>
 
 <!-- QUIZ -->
@@ -778,7 +815,7 @@ function renderChapterList(){
     const jirei=ch.items.filter(it=>it.type==='jirei').length;
     const sub=[ronsh?`論証${ronsh}`:'',kihon?`参照${kihon}`:'',jirei?`事例${jirei}`:''].filter(Boolean).join('·');
     const chIdx=DATA.indexOf(ch);
-    return `<button class="ch-btn" onclick="startQuiz(${chIdx})">
+    return `<button class="ch-btn" onclick="selectFilter(${chIdx})">
       <div class="ch-btn-info">
         <span class="ch-btn-name">${fmtCh(ch.ch)}　${escHtml(ch.chName)}</span><span class="ch-btn-count">　${ch.items.length}問${sub?' ('+sub+')':''}</span>
       </div>
@@ -794,9 +831,56 @@ let quizState={
   scores:{},oxResult:null,results:[],
 };
 
-function startQuiz(chIndex){
+const FILTER_THRESHOLDS=[
+  {label:'すべて',value:null},
+  {label:'75%以下',value:75},
+  {label:'50%以下',value:50},
+  {label:'25%以下',value:25},
+];
+
+function selectFilter(chIndex){
   const ch=DATA[chIndex];
-  quizState={chIndex,items:[...ch.items],currentIdx:0,phase:'input',userAnswer:'',scores:{},oxResult:null,results:[]};
+  const hasRecords=ch.items.some(it=>(recData[it.id]||[]).length>0);
+  if(!hasRecords){ startQuiz(chIndex); return; }
+  document.getElementById('filter-modal-ch').textContent=`${fmtCh(ch.ch)}　${ch.chName}`;
+  document.getElementById('filter-custom-input').value='';
+  document.getElementById('filter-options').innerHTML=FILTER_THRESHOLDS.map(t=>{
+    const count=t.value===null
+      ?ch.items.length
+      :ch.items.filter(it=>{const u=getLastUnderstanding(it.id);return u===null||u<=t.value;}).length;
+    return `<button class="filter-opt-btn" onclick="applyFilter(${chIndex},${t.value})" ${count===0?'disabled':''}>
+      <span class="filter-opt-label">${t.label}</span>
+      <span class="filter-opt-count">${count}問</span>
+    </button>`;
+  }).join('');
+  const ov=document.getElementById('filter-overlay');
+  ov.style.display='flex';
+  ov.dataset.chIndex=chIndex;
+}
+
+function applyFilter(chIndex,threshold){
+  closeFilterOverlay();
+  if(threshold===null){ startQuiz(chIndex); return; }
+  const ch=DATA[chIndex];
+  const filtered=ch.items.filter(it=>{const u=getLastUnderstanding(it.id);return u===null||u<=threshold;});
+  startQuiz(chIndex,filtered);
+}
+
+function applyCustomFilter(){
+  const chIndex=parseInt(document.getElementById('filter-overlay').dataset.chIndex,10);
+  const val=parseInt(document.getElementById('filter-custom-input').value,10);
+  if(isNaN(val)||val<0||val>100){alert('0〜100の数値を入力してください。');return;}
+  applyFilter(chIndex,val);
+}
+
+function closeFilterOverlay(){
+  document.getElementById('filter-overlay').style.display='none';
+}
+
+function startQuiz(chIndex,filteredItems){
+  const ch=DATA[chIndex];
+  const items=filteredItems||ch.items;
+  quizState={chIndex,items:[...items],currentIdx:0,phase:'input',userAnswer:'',scores:{},oxResult:null,results:[]};
   document.getElementById('quiz-chapter-name').textContent=`${fmtCh(ch.ch)}　${ch.chName}`;
   renderQuizScreen();
   showScreen('quiz');
