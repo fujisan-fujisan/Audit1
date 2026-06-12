@@ -880,7 +880,7 @@ function closeFilterOverlay(){
 function startQuiz(chIndex,filteredItems){
   const ch=DATA[chIndex];
   const items=filteredItems||ch.items;
-  quizState={chIndex,items:[...items],currentIdx:0,phase:'input',userAnswer:'',scores:{},oxResult:null,results:[]};
+  quizState={chIndex,items:[...items],currentIdx:0,phase:'input',userAnswer:'',scores:{},oxResult:null,results:[],startTime:Date.now()};
   document.getElementById('quiz-chapter-name').textContent=`${fmtCh(ch.ch)}　${ch.chName}`;
   renderQuizScreen();
   showScreen('quiz');
@@ -1079,12 +1079,13 @@ function finishQuiz(){
   const chKey=DATA[quizState.chIndex].ch;
   if(!sessData[chKey]) sessData[chKey]=[];
   const now=new Date();
-  sessData[chKey].push({date:now.toLocaleDateString('ja-JP'),isoDate:now.toISOString(),duration:null});
+  const elapsed=quizState.startTime?Math.max(1,Math.round((Date.now()-quizState.startTime)/60000)):null;
+  sessData[chKey].push({date:now.toLocaleDateString('ja-JP'),isoDate:now.toISOString(),duration:elapsed});
   saveSess();
   const dIn=document.getElementById('session-duration-input');
   const dMsg=document.getElementById('session-duration-saved');
-  if(dIn) dIn.value='';
-  if(dMsg) dMsg.textContent='';
+  if(dIn) dIn.value=elapsed||'';
+  if(dMsg) dMsg.textContent=elapsed?elapsed+'分を記録しました ✓':'';
 
   document.getElementById('result-detail-items').innerHTML=quizState.results.map(r=>{
     const item=ch.items.find(it=>it.id===r.id);
