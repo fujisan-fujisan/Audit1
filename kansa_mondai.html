@@ -84,8 +84,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .ch-btn-info{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .ch-btn-name{font-size:13px;font-weight:700;color:var(--text)}
 .ch-btn-count{font-size:13px;color:var(--text3);font-family:'DM Mono',monospace}
-.ch-btn-hist{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:var(--text2);text-align:right;flex-shrink:0;white-space:nowrap}
-.ch-btn-hist .best{color:var(--ok)}
+.ch-btn-hist{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:var(--text2);text-align:right;flex-shrink:0;white-space:nowrap;display:flex;align-items:center;gap:4px}
+.ch-btn-hist .best{color:var(--ok);font-size:1.5em}
 .empty-state{padding:40px 20px;text-align:center;color:var(--text3);font-size:12px;line-height:2}
 
 /* ── FILTER OVERLAY ── */
@@ -809,7 +809,7 @@ function renderChapterList(){
     const durStr=(lastSess?.duration!=null)?' · '+lastSess.duration+'分':'';
     const lastInfo=lastDate?` <span class="ch-last-date">· ${lastDate}${durStr}</span>`:'';
     const histHTML=avg!==null
-      ?`<div class="ch-btn-hist"><span class="best">${avg}%</span>${lastInfo}</div>`
+      ?`<div class="ch-btn-hist">${lastInfo}<span class="best">${avg}%</span></div>`
       :`<div class="ch-btn-hist" style="font-weight:400;color:var(--text3)">未挑戦${lastInfo}</div>`;
     const ronsh=ch.items.filter(it=>it.type==='ronsh').length;
     const kihon=ch.items.filter(it=>it.type==='kihon').length;
