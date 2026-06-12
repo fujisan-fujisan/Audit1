@@ -350,7 +350,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 <body>
 
 <!-- START -->
-<div class="screen active" id="screen-start">
+<div class="screen" id="screen-start">
   <div class="start-corner-actions">
     <button class="btn-corner" onclick="backupAll()">バックアップ</button>
     <button class="btn-corner" onclick="document.getElementById('restore-input').click()">復元</button>
@@ -370,7 +370,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 </div>
 
 <!-- CHAPTER -->
-<div class="screen" id="screen-chapter">
+<div class="screen active" id="screen-chapter">
   <div class="page-header">
     <button class="back-btn" onclick="goStart()">← トップ</button>
     <div class="page-header-info">
@@ -2714,6 +2714,7 @@ function initData(){
 // ── INIT ──
 loadStorage();
 initData();
+renderChapterList();
 </script>
 </body>
 </html>
