@@ -326,6 +326,7 @@ body {
 .ch-stat-lbl { font-size: 9px; font-weight: 500; color: #7a8fa8; font-family: 'Noto Sans JP', sans-serif; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 1px; }
 .ch-record-btn { font-size: 11px; padding: 4px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-2); cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: all .15s; white-space: nowrap; }
 .ch-record-btn:hover { border-color: var(--text); color: var(--text); }
+.ch-timer-label { font-size: 11px; color: var(--text-2); font-style: italic; }
 
 .ch-record-form { display: none; padding: 10px 14px 14px; border-top: 1px solid var(--border); gap: 8px; flex-direction: column; }
 .ch-record-form.open { display: flex; }
@@ -867,6 +868,7 @@ let itemState = {}, secState = {}, appState = {
   rounds: [{ label: '第1回', scope: null, deadline: null, startDate: null }],
   currentRound: 0
 };
+let timerState = {};
 let showingHistory = false;
 let curViewTab = 'all';
 
@@ -878,6 +880,7 @@ function load() {
     if (i) itemState = JSON.parse(i);
     if (s) secState = JSON.parse(s);
     if (a) appState = JSON.parse(a);
+    const tm = localStorage.getItem('audit-timer'); if (tm) timerState = JSON.parse(tm);
   } catch(e) {}
 }
 
@@ -886,6 +889,7 @@ function save() {
     localStorage.setItem('audit-item2', JSON.stringify(itemState));
     localStorage.setItem('audit-sec2', JSON.stringify(secState));
     localStorage.setItem('audit-app2', JSON.stringify(appState));
+    localStorage.setItem('audit-timer', JSON.stringify(timerState));
   } catch(e) {}
 }
 
@@ -1092,47 +1096,10 @@ function buildSecFooter(secId, r) {
   let statHTML = '';
   if (r.date) statHTML += `<span class="ch-stat"><span class="ch-stat-lbl">実施日</span>${formatDate(r.date)}</span>`;
   if (r.time) statHTML += `<span class="ch-stat"><span class="ch-stat-lbl">所要時間</span>${r.time} 分</span>`;
-  return `
-    <div class="ch-footer-row">
-      ${statHTML}
-      <button class="ch-record-btn" onclick="toggleRecordForm('${secId}')">実施記録</button>
-    </div>
-    <div class="ch-record-form" id="secform-${secId}">
-      <div class="ch-record-form-row">
-        <div>
-          <label class="ch-record-form-lbl">実施日</label>
-          <input type="date" class="ch-record-input" id="sec-date-${secId}" value="${r.date || ''}">
-        </div>
-        <div>
-          <label class="ch-record-form-lbl">所要時間（分）</label>
-          <input type="text" inputmode="numeric" pattern="[0-9]*" class="ch-record-input" id="sec-time-${secId}" placeholder="例: 30" value="${r.time || ''}">
-        </div>
-      </div>
-      <div class="ch-record-form-btns">
-        <button class="ch-record-cancel" onclick="toggleRecordForm('${secId}')">キャンセル</button>
-        <button class="ch-record-save" onclick="saveRecord('${secId}')">保存</button>
-      </div>
-    </div>`;
-}
-
-function toggleRecordForm(secId) {
-  const form = document.getElementById('secform-' + secId);
-  if (!form) return;
-  const isOpen = form.classList.contains('open');
-  document.querySelectorAll('.ch-record-form.open').forEach(f => f.classList.remove('open'));
-  if (!isOpen) form.classList.add('open');
-}
-
-function saveRecord(secId) {
-  const dateEl = document.getElementById('sec-date-' + secId);
-  const timeEl = document.getElementById('sec-time-' + secId);
-  if (!dateEl || !timeEl) return;
-  const dateVal = dateEl.value;
-  const timeVal = timeEl.value;
-  setSecR(secId, { date: dateVal, time: timeVal });
-  save();
-  const foot = document.getElementById('secfoot-' + secId);
-  if (foot) foot.innerHTML = buildSecFooter(secId, { date: dateVal, time: timeVal });
+  if (!r.date && timerState[secId]) {
+    return `<div class="ch-footer-row"><span class="ch-timer-label">計測中...</span></div>`;
+  }
+  return `<div class="ch-footer-row">${statHTML}</div>`;
 }
 
 // ── 変更4: buildItemRow（review-eval-btns 追加）──
@@ -1305,6 +1272,29 @@ function setU(itemId, type) {
   if (r.u === type) { r.u = null; r.date = null; }
   else { r.u = type; r.date = today(); }
   setItemR(itemId, r);
+
+  // Auto timer per section
+  const secId = itemId.split('-').slice(0, 2).join('-');
+  const existing = getSecR(secId);
+  if (!timerState[secId] && !existing.date) {
+    timerState[secId] = Date.now();
+    const foot = document.getElementById('secfoot-' + secId);
+    if (foot) foot.innerHTML = buildSecFooter(secId, existing);
+  }
+  if (timerState[secId]) {
+    const sec = CHAPTERS.flatMap(ch => ch.sections).find(s => s.id === secId);
+    if (sec) {
+      const allDone = sec.items.filter(itemInScope).every(item => getItemR(item.id).u != null);
+      if (allDone) {
+        const elapsed = Math.max(1, Math.round((Date.now() - timerState[secId]) / 60000));
+        setSecR(secId, { date: today(), time: String(elapsed) });
+        delete timerState[secId];
+        const foot = document.getElementById('secfoot-' + secId);
+        if (foot) foot.innerHTML = buildSecFooter(secId, getSecR(secId));
+      }
+    }
+  }
+
   save();
   refreshItem(itemId);
   refreshSecProg(itemId);
