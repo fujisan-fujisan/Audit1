@@ -665,21 +665,6 @@ function buildItemRow(item) {
   const grayed = isGrayed(item.id);
   const skipNext = r.skipNext;
 
-  const totalRounds = appState.rounds.length;
-  let histHTML = '';
-  if (totalRounds > 1) {
-    histHTML = `<div class="item-history">`;
-    for (let ri = 0; ri < totalRounds; ri++) {
-      const rd = getItemR(item.id, ri);
-      const ru = rd.u || null;
-      const label = (appState.rounds[ri].label || '').replace('第','').replace('回','');
-      const cls = ru === 'o' ? 'dot-o' : ru === 'x' ? 'dot-x' : '';
-      const sym = ru === 'o' ? '○' : ru === 'x' ? '×' : '–';
-      histHTML += `<div class="hist-dot-wrap"><div class="hist-label">${label}回</div><div class="hist-dot ${cls}">${sym}</div></div>`;
-    }
-    histHTML += `</div>`;
-  }
-
   const impCls = item.imp === 'A' ? 'imp-A' : item.imp === 'B' ? 'imp-B' : item.imp === 'C+' ? 'imp-Cplus' : 'imp-C';
   const diffCls = item.diff === 'unknown' ? 'diff-unknown' : `diff-${item.diff}`;
   const diffLabel = item.diff === 'unknown' ? '－' : item.diff;
@@ -700,7 +685,6 @@ function buildItemRow(item) {
         </div>
       </div>
     </div>
-    ${histHTML}
     <div style="display:flex;align-items:center;">
       <button id="memo-btn-${item.id}" class="item-memo-btn${memoState[item.id] ? '' : ' no-memo'}" onclick="memoState['${item.id}'] ? openMemoView('${item.id}') : openMemoInput('${item.id}')">${memoState[item.id] ? 'メモ' : '＋メモ'}</button>
       <div class="nrp" style="${u ? 'margin-left:auto' : 'display:none'}">
