@@ -1979,18 +1979,6 @@ function buildItemRow(item){
   const r=getItemR(item.id),u=r.u||null;
   const grayed=isGrayed(item.id);
   const skipNext=r.skipNext;
-  const totalR=appState.rounds.length;
-  let histHTML='';
-  if(totalR>1){
-    histHTML='<div class="item-history">';
-    for(let ri=0;ri<totalR;ri++){
-      const rd=getItemR(item.id,ri),ru=rd.u||null;
-      const lbl=(appState.rounds[ri].label||'').replace('第','').replace('回','');
-      const sym=ru==='oo'?'○○':ru==='o'?'○':ru==='n'?'ー':ru==='x'?'×':ru==='xx'?'××':'–';
-      histHTML+=`<div class="hist-dot-wrap"><div class="hist-label">${lbl}回</div><div class="hist-dot${ru?' dot-'+ru:''}">${sym}</div></div>`;
-    }
-    histHTML+='</div>';
-  }
   const row=document.createElement('div');row.className='item-row'+(grayed?' item-skipped':'');row.id='irow-'+item.id;
   row.innerHTML=`
     <div class="item-top">
@@ -2005,7 +1993,6 @@ function buildItemRow(item){
         <button class="ub${u==='xx'?' sel-xx':''}" onclick="setU('${item.id}','xx')">××</button>
       </div>
     </div>
-    ${histHTML}
     <div class="nrp" style="${u?'':'display:none'}">
       <span class="nrp-label">次回</span>
       <button class="nrp-btn${skipNext===false?' nrp-include':''}" onclick="setSkipNext('${item.id}',false)">含める</button>

@@ -2360,21 +2360,6 @@ function buildItemRow(item) {
   const grayed = isGrayed(item.id);
   const skipNext = r.skipNext;
 
-  const totalRounds = appState.rounds.length;
-  let histHTML = '';
-  if (totalRounds > 1) {
-    histHTML = `<div class="item-history">`;
-    for (let ri = 0; ri < totalRounds; ri++) {
-      const rd = getItemR(item.id, ri);
-      const ru = rd.u || null;
-      const label = (appState.rounds[ri].label || '').replace('第','').replace('回','');
-      const cls = ru ? 'dot-' + ru : '';
-      const sym = ru === 'oo' ? '○○' : ru === 'o' ? '○' : ru === 'n' ? 'ー' : ru === 'x' ? '×' : ru === 'xx' ? '××' : '–';
-      histHTML += `<div class="hist-dot-wrap"><div class="hist-label">${label}回</div><div class="hist-dot ${cls}">${sym}</div></div>`;
-    }
-    histHTML += `</div>`;
-  }
-
   const nrpHTML = `
     <div class="nrp" style="${u ? '' : 'display:none'}">
       <span class="nrp-label">次回</span>
@@ -2398,8 +2383,7 @@ function buildItemRow(item) {
         <button class="ub ${u==='xx'?'sel-xx':''}" onclick="setU('${item.id}','xx')">××</button>
       </div>
     </div>
-    ${nrpHTML}
-    ${histHTML}`;
+    ${nrpHTML}`;
   return row;
 }
 
