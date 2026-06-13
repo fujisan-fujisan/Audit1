@@ -1360,6 +1360,31 @@
   }
   .tv-sub-btn { padding: 10px 24px !important; }
 
+  .training-mode-row {
+    display: flex;
+    gap: 0;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    align-self: center;
+  }
+  .btn-mode-sel {
+    flex: 1;
+    padding: 9px 28px;
+    border: none;
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-family: 'Noto Sans JP', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+  .btn-mode-sel + .btn-mode-sel { border-left: 1px solid var(--border); }
+  .btn-mode-sel.active { background: var(--accent); color: white; }
+  .btn-mode-sel:hover:not(.active) { background: var(--accent-light); color: var(--accent); }
+
   .session-header {
     display: flex;
     align-items: center;
@@ -1757,10 +1782,14 @@
           <span class="btn-nav-label" id="btnTrainingNavLabel">全問題</span>
         </button>
       </div>
+      <div class="training-mode-row">
+        <button class="btn-mode-sel active" id="modeSelReverse" onclick="setTrainingMode('reverse')">逆引き</button>
+        <button class="btn-mode-sel" id="modeSelArticle" onclick="setTrainingMode('article')">条文読取</button>
+      </div>
       <div class="tv-home-start">
         <button class="btn btn-primary tv-start-btn" onclick="startTraining()">開始</button>
       </div>
-      <div class="tv-home-sub">
+      <div class="tv-home-sub" id="tvHomeSub">
         <button class="btn tv-sub-btn" onclick="switchTrainingView('register')">問題登録</button>
         <button class="btn tv-sub-btn" onclick="switchTrainingView('manage')">問題管理</button>
       </div>
@@ -1983,9 +2012,17 @@ function switchTrainingView(name) {
 
 function renderTrainingHome() {
   updateTrainingNavButton();
+  const msg = document.getElementById('trainingHomeMsg');
+  const sub = document.getElementById('tvHomeSub');
+  if (trainingMode === 'article') {
+    if (sub) sub.style.display = 'none';
+    msg.textContent = '';
+    msg.style.display = 'none';
+    return;
+  }
+  if (sub) sub.style.display = 'flex';
   const storage = getStorage();
   const filtered = getFilteredQuestions(storage.questions);
-  const msg = document.getElementById('trainingHomeMsg');
   if (!storage.questions.length) {
     msg.textContent = '問題を登録してトレーニングを開始してください';
     msg.style.display = 'block';
@@ -1996,6 +2033,37 @@ function renderTrainingHome() {
     msg.textContent = '';
     msg.style.display = 'none';
   }
+}
+
+function setTrainingMode(mode) {
+  trainingMode = mode;
+  document.getElementById('modeSelReverse').classList.toggle('active', mode === 'reverse');
+  document.getElementById('modeSelArticle').classList.toggle('active', mode === 'article');
+  renderTrainingHome();
+}
+
+function getFilteredArticles() {
+  const all = Object.values(LAW_DATA);
+  if (_selectedChapters.size === 0) return all;
+  return all.filter(a => {
+    const info = getChapterInfo(a.num);
+    return info && _selectedChapters.has(`${info.partIdx}-${info.chapterIdx}`);
+  });
+}
+
+function buildArticleTextForCard(article) {
+  const lines = [];
+  for (const para of article.paragraphs) {
+    const pNum = para.num > 1 ? `${para.num}　` : '';
+    lines.push(pNum + para.text);
+    for (const item of (para.items || [])) {
+      lines.push(`　${item.num}　${item.text}`);
+      for (const sub of (item.subitems || [])) {
+        lines.push(`　　${sub.num}　${sub.text}`);
+      }
+    }
+  }
+  return lines.join('\n');
 }
 
 function endSession() {
@@ -2846,6 +2914,7 @@ let trainingQueue = [];
 let currentIdx = 0;
 let sessionCorrect = 0;
 let sessionTotal = 0;
+let trainingMode = 'reverse';
 
 // 条番号から編・章を判定するユーティリティ
 function getChapterInfo(articleKey) {
@@ -2989,13 +3058,23 @@ function startTraining() {
 function openChapterSelectModal() {
   const storage = getStorage();
   const chapterCounts = {};
-  for (const q of storage.questions) {
-    const match = q.answer.match(/^(\d+(?:の\d+)?)条/);
-    if (!match) continue;
-    const info = getChapterInfo(match[1]);
-    if (!info) continue;
-    const key = `${info.partIdx}-${info.chapterIdx}`;
-    chapterCounts[key] = (chapterCounts[key] || 0) + 1;
+  const isArticleMode = trainingMode === 'article';
+  if (isArticleMode) {
+    for (const a of Object.values(LAW_DATA)) {
+      const info = getChapterInfo(a.num);
+      if (!info) continue;
+      const key = `${info.partIdx}-${info.chapterIdx}`;
+      chapterCounts[key] = (chapterCounts[key] || 0) + 1;
+    }
+  } else {
+    for (const q of storage.questions) {
+      const match = q.answer.match(/^(\d+(?:の\d+)?)条/);
+      if (!match) continue;
+      const info = getChapterInfo(match[1]);
+      if (!info) continue;
+      const key = `${info.partIdx}-${info.chapterIdx}`;
+      chapterCounts[key] = (chapterCounts[key] || 0) + 1;
+    }
   }
 
   let html = '';
@@ -3004,15 +3083,16 @@ function openChapterSelectModal() {
       const key = `${pi}-${ci}`;
       const count = chapterCounts[key] || 0;
       const checked = _selectedChapters.has(key) ? 'checked' : '';
-      const disabled = count === 0 ? 'disabled' : '';
-      return `<label class="chsel-item${count === 0 ? ' chsel-item-empty' : ''}">
+      const disabled = (!isArticleMode && count === 0) ? 'disabled' : '';
+      const unit = isArticleMode ? '条' : '問';
+      return `<label class="chsel-item${(!isArticleMode && count === 0) ? ' chsel-item-empty' : ''}">
         <input type="checkbox" class="chsel-check" data-key="${key}" ${checked} ${disabled} onchange="onChselChange()">
         <span class="chsel-label">${ch.label}</span>
-        <span class="chsel-count">${count}問</span>
+        <span class="chsel-count">${count}${unit}</span>
       </label>`;
     }).join('');
 
-    const partHasAny = part.chapters.some((_, ci) => chapterCounts[`${pi}-${ci}`] > 0);
+    const partHasAny = isArticleMode || part.chapters.some((_, ci) => chapterCounts[`${pi}-${ci}`] > 0);
     const partAllChecked = part.chapters.every((_, ci) => {
       const k = `${pi}-${ci}`;
       return chapterCounts[k] > 0 && _selectedChapters.has(k);
@@ -3096,11 +3176,17 @@ function syncPartCheckboxes() {
 }
 
 function updateChselStart() {
-  const storage = getStorage();
-  const total = getFilteredQuestions(storage.questions).length;
   const btn = document.getElementById('chselStartBtn');
-  btn.textContent = `開始（${total}問）`;
-  btn.disabled = total === 0;
+  if (trainingMode === 'article') {
+    const total = getFilteredArticles().length;
+    btn.textContent = `開始（${total}条）`;
+    btn.disabled = total === 0;
+  } else {
+    const storage = getStorage();
+    const total = getFilteredQuestions(storage.questions).length;
+    btn.textContent = `開始（${total}問）`;
+    btn.disabled = total === 0;
+  }
 }
 
 function closeChapterSelectModal() {
@@ -3123,10 +3209,16 @@ function chselSelectAll(checked) {
 
 function confirmStartTraining() {
   closeChapterSelectModal();
-  const storage = getStorage();
-  const filtered = getFilteredQuestions(storage.questions);
-  if (!filtered.length) { showToast('この範囲に登録された問題がありません'); return; }
-  trainingQueue = filtered.map(q => ({ ...q, originalIdx: storage.questions.indexOf(q) })).sort(() => Math.random() - 0.5);
+  if (trainingMode === 'article') {
+    const articles = getFilteredArticles();
+    if (!articles.length) { showToast('この範囲に条文がありません'); return; }
+    trainingQueue = articles.sort(() => Math.random() - 0.5).map(a => ({ type: 'article', articleKey: a.num }));
+  } else {
+    const storage = getStorage();
+    const filtered = getFilteredQuestions(storage.questions);
+    if (!filtered.length) { showToast('この範囲に登録された問題がありません'); return; }
+    trainingQueue = filtered.map(q => ({ ...q, type: 'reverse', originalIdx: storage.questions.indexOf(q) })).sort(() => Math.random() - 0.5);
+  }
   currentIdx = 0;
   sessionCorrect = 0;
   sessionTotal = 0;
@@ -3176,15 +3268,24 @@ function updateCard() {
     return;
   }
   const q = trainingQueue[currentIdx];
-  document.getElementById('cardQuestion').textContent = q.question;
-  document.getElementById('cardAnswer').textContent = q.answer;
-  document.getElementById('cardAnswer').classList.remove('show');
+  if (q.type === 'article') {
+    const article = LAW_DATA[q.articleKey];
+    const displayNum = keyToDisplay(q.articleKey);
+    document.getElementById('cardQuestion').textContent = `第${displayNum}条${article ? (article.caption || '') : ''}`;
+    document.getElementById('cardAnswer').textContent = '';
+    document.getElementById('cardAnswer').classList.remove('show');
+    document.getElementById('sessionTimer').textContent = '';
+  } else {
+    document.getElementById('cardQuestion').textContent = q.question;
+    document.getElementById('cardAnswer').textContent = q.answer;
+    document.getElementById('cardAnswer').classList.remove('show');
+    _startTimer();
+  }
   document.getElementById('cardArticleText').classList.remove('show');
   document.getElementById('cardArticleText').textContent = '';
   document.getElementById('btnShowAnswer').style.display = 'inline-block';
   document.getElementById('judgeButtons').classList.remove('show');
-  document.getElementById('cardArticleId').textContent = `問題 ${currentIdx + 1} / ${trainingQueue.length}`;
-  _startTimer();
+  document.getElementById('cardArticleId').textContent = `${currentIdx + 1} / ${trainingQueue.length}`;
 }
 
 function getArticleText(answerStr) {
@@ -3212,13 +3313,20 @@ function getArticleText(answerStr) {
 
 function showAnswer() {
   _clearTimer();
-  document.getElementById('cardAnswer').classList.add('show');
   document.getElementById('btnShowAnswer').style.display = 'none';
   document.getElementById('judgeButtons').classList.add('show');
 
-  // 条文テキストを取得して表示
   const q = trainingQueue[currentIdx];
-  if (q) {
+  if (!q) return;
+  if (q.type === 'article') {
+    const article = LAW_DATA[q.articleKey];
+    if (article) {
+      const el = document.getElementById('cardArticleText');
+      el.textContent = buildArticleTextForCard(article);
+      el.classList.add('show');
+    }
+  } else {
+    document.getElementById('cardAnswer').classList.add('show');
     const text = getArticleText(q.answer);
     if (text) {
       const el = document.getElementById('cardArticleText');
@@ -3229,19 +3337,17 @@ function showAnswer() {
 }
 
 function judge(correct) {
-  const storage = getStorage();
   const q = trainingQueue[currentIdx];
   sessionTotal++;
-  if (correct) {
-    sessionCorrect++;
-    if (q.originalIdx !== undefined && storage.questions[q.originalIdx]) {
-      storage.questions[q.originalIdx].correct = (storage.questions[q.originalIdx].correct || 0) + 1;
+  if (correct) sessionCorrect++;
+  if (q.type !== 'article' && q.originalIdx !== undefined) {
+    const storage = getStorage();
+    if (storage.questions[q.originalIdx]) {
+      if (correct) storage.questions[q.originalIdx].correct = (storage.questions[q.originalIdx].correct || 0) + 1;
+      storage.questions[q.originalIdx].attempted = (storage.questions[q.originalIdx].attempted || 0) + 1;
+      saveStorage(storage);
     }
   }
-  if (q.originalIdx !== undefined && storage.questions[q.originalIdx]) {
-    storage.questions[q.originalIdx].attempted = (storage.questions[q.originalIdx].attempted || 0) + 1;
-  }
-  saveStorage(storage);
   updateSessionScore();
   currentIdx++;
   updateCard();
