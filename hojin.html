@@ -133,6 +133,9 @@ body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); color: va
 .ch-stat-lbl { font-size: 9px; font-weight: 500; color: #7a8fa8; font-family: 'Noto Sans JP', sans-serif; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 1px; }
 .ch-record-btn { font-size: 11px; padding: 4px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-2); cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: all .15s; white-space: nowrap; }
 .ch-record-btn:hover { border-color: var(--text); color: var(--text); }
+.ch-timer-label { font-size: 11px; color: var(--text-2); font-style: italic; margin-right: auto; }
+.ch-end-btn { background: var(--o-color); color: #fff; border-color: var(--o-color); }
+.ch-end-btn:hover { opacity: 0.85; color: #fff; }
 .ch-record-form { display: none; padding: 10px 14px 14px; border-top: 1px solid var(--border); gap: 8px; flex-direction: column; }
 .ch-record-form.open { display: flex; }
 .ch-record-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -446,6 +449,7 @@ const FULL_DAYS = {
 let memoState = {};
 let itemState = {}, chState = {}, appState = {rounds:[{label:'第1回', scope:null, deadline:null, startDate:null}], currentRound:0};
 let showingWeakness = false;
+let timerState = {};
 
 function load() {
   try {
@@ -456,6 +460,7 @@ function load() {
     if (c) chState = JSON.parse(c);
     if (a) appState = JSON.parse(a);
     const m = localStorage.getItem('hojin-memo'); if (m) memoState = JSON.parse(m);
+    const tm = localStorage.getItem('hojin-timer'); if (tm) timerState = JSON.parse(tm);
   } catch(e) {}
 }
 
@@ -465,6 +470,7 @@ function save() {
     localStorage.setItem('hojin-ch', JSON.stringify(chState));
     localStorage.setItem('hojin-app', JSON.stringify(appState));
     localStorage.setItem('hojin-memo', JSON.stringify(memoState));
+    localStorage.setItem('hojin-timer', JSON.stringify(timerState));
   } catch(e) {}
 }
 
@@ -619,48 +625,38 @@ function buildChFooter(key, r) {
   let statHTML = '';
   if (r.date) statHTML += `<span class="ch-stat"><span class="ch-stat-lbl">実施日</span>${formatDate(r.date)}</span>`;
   if (r.time) statHTML += `<span class="ch-stat"><span class="ch-stat-lbl">所要時間</span>${r.time} 分</span>`;
+  if (timerState[key]) {
+    return `
+      <div class="ch-footer-row">
+        <span class="ch-timer-label">計測中...</span>
+        <button class="ch-record-btn ch-end-btn" onclick="endTimer('${key}')">終了</button>
+      </div>`;
+  }
   return `
     <div class="ch-footer-row">
       ${statHTML}
-      <button class="ch-record-btn" onclick="toggleRecordForm('${key}')">実施記録</button>
-    </div>
-    <div class="ch-record-form" id="chform-${key}">
-      <div class="ch-record-form-row">
-        <div>
-          <label class="ch-record-form-lbl">実施日</label>
-          <input type="date" class="ch-record-input" id="ch-date-${key}" value="${r.date || ''}">
-        </div>
-        <div>
-          <label class="ch-record-form-lbl">所要時間（分）</label>
-          <input type="text" inputmode="numeric" pattern="[0-9]*" class="ch-record-input" id="ch-time-${key}" placeholder="例: 30" value="${r.time || ''}">
-        </div>
-      </div>
-      <div class="ch-record-form-btns">
-        <button class="ch-record-cancel" onclick="toggleRecordForm('${key}')">キャンセル</button>
-        <button class="ch-record-save" onclick="saveRecord('${key}')">保存</button>
-      </div>
+      <button class="ch-record-btn" onclick="startTimer('${key}')">開始</button>
     </div>`;
 }
 
-function toggleRecordForm(key) {
-  const form = document.getElementById('chform-' + key);
-  if (!form) return;
-  const isOpen = form.classList.contains('open');
-  document.querySelectorAll('.ch-record-form.open').forEach(f => f.classList.remove('open'));
-  if (!isOpen) form.classList.add('open');
-}
-
-function saveRecord(key) {
-  const dateEl = document.getElementById('ch-date-' + key);
-  const timeEl = document.getElementById('ch-time-' + key);
-  if (!dateEl || !timeEl) return;
-  const dateVal = dateEl.value;
-  const timeVal = timeEl.value;
-  if (!chState[key]) chState[key] = {};
-  chState[key][curRound()] = { date: dateVal, time: timeVal };
+function startTimer(key) {
+  timerState[key] = Date.now();
   save();
   const foot = document.getElementById('chfoot-' + key);
-  if (foot) foot.innerHTML = buildChFooter(key, { date: dateVal, time: timeVal });
+  if (foot) foot.innerHTML = buildChFooter(key, (chState[key] || {})[curRound()] || {});
+}
+
+function endTimer(key) {
+  const start = timerState[key];
+  if (!start) return;
+  const elapsedMins = Math.max(1, Math.round((Date.now() - start) / 60000));
+  const dateVal = today();
+  if (!chState[key]) chState[key] = {};
+  chState[key][curRound()] = { date: dateVal, time: String(elapsedMins) };
+  delete timerState[key];
+  save();
+  const foot = document.getElementById('chfoot-' + key);
+  if (foot) foot.innerHTML = buildChFooter(key, chState[key][curRound()]);
 }
 
 function buildItemRow(item) {

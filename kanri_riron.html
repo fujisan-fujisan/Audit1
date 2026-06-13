@@ -965,6 +965,24 @@ body {
   color:var(--text)
 }
 
+.ch-timer-label {
+  font-size:11px;
+  color:var(--text-2);
+  font-style:italic;
+  margin-right:auto;
+}
+
+.ch-end-btn {
+  background:var(--o-color);
+  color:#fff;
+  border-color:var(--o-color);
+}
+
+.ch-end-btn:hover {
+  opacity:0.85;
+  color:#fff;
+}
+
 .ch-record-form {
   display:none;
   padding:10px 14px 14px;
@@ -1495,20 +1513,20 @@ const DATA=[
    {id:"t5-18",name:"問題5-18　実績データに基づく線形原価関数の正確性",imp:"B"},
   ]},
  {ch:"第6章",chName:"予算管理",items:[
-   {id:"t6-1",name:"問題6-1　会社全体の予算をキャッシュ・フローとして把握する意義",imp:"A"},
-   {id:"t6-2",name:"問題6-2　予算の役割",imp:"B"},
+   {id:"t6-1",name:"問題6-1　製造部門や販売部門を利益センターとして扱う意義",imp:"A"},
+   {id:"t6-2",name:"問題6-2　予算の機能",imp:"B"},
    {id:"t6-3",name:"問題6-3　予算編成の方法",imp:"A"},
-   {id:"t6-4",name:"問題6-4　参加型予算の問題",imp:"A"},
-   {id:"t6-5",name:"問題6-5　予算管理のプロセス",imp:"B"},
-   {id:"t6-6",name:"問題6-6　予算統制差異の分析と変動予算を利用する意義",imp:"B"},
-   {id:"t6-7",name:"問題6-7　標準原価計算方法の製造間接費差異の分析方法",imp:"B"},
+   {id:"t6-4",name:"問題6-4　総合予算の体系",imp:"A"},
+   {id:"t6-5",name:"問題6-5　予算統制のプロセス",imp:"B"},
+   {id:"t6-6",name:"問題6-6　予算実績差異の分析に変動予算を使用する意義",imp:"B"},
+   {id:"t6-7",name:"問題6-7　直接原価計算方式の販売数量差異の分析方法",imp:"B"},
    {id:"t6-8",name:"問題6-8　セールス・ミックス差異の分析方法の意義",imp:"C"},
-   {id:"t6-9",name:"問題6-9　市場規模差異と市場占有率差異の分析",imp:"B"},
+   {id:"t6-9",name:"問題6-9　市場占拠率差異と市場総需要量差異の分析",imp:"B"},
    {id:"t6-10",name:"問題6-10　ローリング方式の予算編成",imp:"B"},
-   {id:"t6-11",name:"問題6-11　予算スラックの構成",imp:"A"},
+   {id:"t6-11",name:"問題6-11　予算スラックの形成",imp:"A"},
    {id:"t6-12",name:"問題6-12　予算スラックを解消する方法",imp:"A"},
-   {id:"t6-13",name:"問題6-13　予算目標の設定基準",imp:"A"},
-   {id:"t6-14",name:"問題6-14　脱予算管理",imp:"B"},
+   {id:"t6-13",name:"問題6-13　予算目標の厳格度",imp:"A"},
+   {id:"t6-14",name:"問題6-14　脱予算経営",imp:"B"},
   ]},
  {ch:"第7章",chName:"資金管理とキャッシュ・フロー管理",items:[
    {id:"t7-1",name:"問題7-1　資金管理の目的",imp:"A"},
@@ -1525,10 +1543,10 @@ const DATA=[
  {ch:"第8章",chName:"差額原価収益分析",items:[
    {id:"t8-1",name:"問題8-1　差額原価と埋没原価",imp:"A"},
    {id:"t8-2",name:"問題8-2　機会原価と機会損失の意義",imp:"B"},
-   {id:"t8-3",name:"問題8-3　全部法と差額法",imp:"B"},
+   {id:"t8-3",name:"問題8-3　総額法と差額法",imp:"B"},
    {id:"t8-4",name:"問題8-4　差額原価収益分析と原価計算目的の関係",imp:"B"},
-   {id:"t8-5",name:"問題8-5　差額原価収益分析と固定費の取扱いの関係",imp:"B"},
-   {id:"t8-6",name:"問題8-6　差額原価収益分析と遊休設備利用の関係",imp:"B"},
+   {id:"t8-5",name:"問題8-5　差額原価収益分析と貨幣の時間価値の関係",imp:"B"},
+   {id:"t8-6",name:"問題8-6　差額原価収益分析と余剰生産能力の関係",imp:"B"},
    {id:"t8-7",name:"問題8-7　自製か外注かの意思決定に際しての留意点",imp:"A"},
    {id:"t8-8",name:"問題8-8　特別注文引受可否の意思決定に際しての留意点",imp:"B"},
    {id:"t8-9",name:"問題8-9　追加加工可否の意思決定に際しての留意点",imp:"B"},
@@ -1620,6 +1638,7 @@ const DATA=[
 const STORE_KEY='kanri-riron';
 let itemState={},chState={},appState={rounds:[{label:'第1回',scope:'all',deadline:null,startDate:null}],currentRound:0};
 let kwState={};
+let timerState={};
 let showingWeakness=false;
 
 function load(){
@@ -1632,6 +1651,7 @@ function load(){
     if(c)chState=JSON.parse(c);
     if(a)appState=JSON.parse(a);
     if(k)kwState=JSON.parse(k);
+    const tm=localStorage.getItem(STORE_KEY+'-timer');if(tm)timerState=JSON.parse(tm);
   }catch(e){}
 }
 function save(){
@@ -1640,6 +1660,7 @@ function save(){
     localStorage.setItem(STORE_KEY+'-ch',JSON.stringify(chState));
     localStorage.setItem(STORE_KEY+'-app',JSON.stringify(appState));
     localStorage.setItem(STORE_KEY+'-kw',JSON.stringify(kwState));
+    localStorage.setItem(STORE_KEY+'-timer',JSON.stringify(timerState));
   }catch(e){}
 }
 
@@ -1935,29 +1956,23 @@ function buildChFooter(key,r){
   let s='';
   if(r.date)s+=`<span class="ch-stat"><span class="ch-stat-lbl">実施日</span>${formatDate(r.date)}</span>`;
   if(r.time)s+=`<span class="ch-stat"><span class="ch-stat-lbl">所要時間</span>${r.time} 分</span>`;
-  return`<div class="ch-footer-row">${s}<button class="ch-record-btn" onclick="toggleRecordForm('${key}')">実施記録</button></div>
-    <div class="ch-record-form" id="chform-${key}">
-      <div class="ch-record-form-row">
-        <div><label class="ch-record-form-lbl">実施日</label><input type="date" class="ch-record-input" id="ch-date-${key}" value="${r.date||''}"></div>
-        <div><label class="ch-record-form-lbl">所要時間（分）</label><input type="text" inputmode="numeric" class="ch-record-input" id="ch-time-${key}" placeholder="例: 45" value="${r.time||''}"></div>
-      </div>
-      <div class="ch-record-form-btns">
-        <button class="ch-record-cancel" onclick="toggleRecordForm('${key}')">キャンセル</button>
-        <button class="ch-record-save" onclick="saveRecord('${key}')">保存</button>
-      </div>
-    </div>`;
+  if(timerState[key]){
+    return`<div class="ch-footer-row"><span class="ch-timer-label">計測中...</span><button class="ch-record-btn ch-end-btn" onclick="endTimer('${key}')">終了</button></div>`;
+  }
+  return`<div class="ch-footer-row">${s}<button class="ch-record-btn" onclick="startTimer('${key}')">開始</button></div>`;
 }
-function toggleRecordForm(key){
-  const f=document.getElementById('chform-'+key);if(!f)return;
-  const open=f.classList.contains('open');
-  document.querySelectorAll('.ch-record-form.open').forEach(x=>x.classList.remove('open'));
-  if(!open)f.classList.add('open');
+function startTimer(key){
+  timerState[key]=Date.now();save();
+  const ft=document.getElementById('chfoot-'+key);if(ft)ft.innerHTML=buildChFooter(key,(chState[key]||{})[curRound()]||{});
 }
-function saveRecord(key){
-  const d=document.getElementById('ch-date-'+key),t=document.getElementById('ch-time-'+key);if(!d||!t)return;
+function endTimer(key){
+  const start=timerState[key];if(!start)return;
+  const mins=Math.max(1,Math.round((Date.now()-start)/60000));
+  const dateVal=today();
   if(!chState[key])chState[key]={};
-  chState[key][curRound()]={date:d.value,time:t.value};save();
-  const ft=document.getElementById('chfoot-'+key);if(ft)ft.innerHTML=buildChFooter(key,{date:d.value,time:t.value});
+  chState[key][curRound()]={date:dateVal,time:String(mins)};
+  delete timerState[key];save();
+  const ft=document.getElementById('chfoot-'+key);if(ft)ft.innerHTML=buildChFooter(key,chState[key][curRound()]);
 }
 
 function buildItemRow(item){
