@@ -1347,16 +1347,22 @@
   .training-view { display: none; }
   .training-view.active { display: block; }
 
-  .tv-home-top { margin-bottom: 32px; }
+  #tv-home {
+    min-height: calc(100vh - 130px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .tv-home-top { margin-bottom: 0; flex-shrink: 0; align-self: flex-start; width: 100%; }
 
-  .tv-home-start { text-align: center; margin-bottom: 16px; }
+  .tv-home-start { text-align: center; margin-top: auto; margin-bottom: 24px; }
   .tv-start-btn { padding: 14px 48px !important; font-size: 15px !important; }
 
   .tv-home-sub {
     display: flex;
     justify-content: center;
     gap: 12px;
-    margin-bottom: 24px;
+    margin-bottom: auto;
   }
   .tv-sub-btn { padding: 10px 24px !important; }
 
@@ -1577,6 +1583,10 @@
     padding: 32px;
     color: var(--text-muted);
     font-size: 13px;
+    min-height: calc(100vh - 230px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   /* ===== iPad（11インチ以上） ===== */
