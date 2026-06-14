@@ -3358,10 +3358,22 @@ function showRegSuggest() {
   const val = input.value.trim();
   if (!val) { box.style.display = 'none'; return; }
 
+  // Escape regex special chars in val
+  const escaped = val.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // Priority: label starts with the typed number directly followed by 条 or の
+  // This ensures "6" matches "6条" and "6の2条" but NOT "60条"
+  const exactRe = new RegExp('^' + escaped + '(?:条|の)');
   const normalizedVal = val.replace(/の/g, '');
-  const suggestions = getAllArticleRefs().filter(r => {
-    return r.label.includes(val) || r.label.replace(/の/g, '').includes(normalizedVal);
-  }).slice(0, 10);
+
+  const exact = [], fuzzy = [];
+  for (const r of getAllArticleRefs()) {
+    if (exactRe.test(r.label)) {
+      exact.push(r);
+    } else if (r.label.includes(val) || r.label.replace(/の/g, '').includes(normalizedVal)) {
+      fuzzy.push(r);
+    }
+  }
+  const suggestions = [...exact, ...fuzzy].slice(0, 15);
   if (!suggestions.length) { box.style.display = 'none'; return; }
 
   box.innerHTML = suggestions.map(s =>
