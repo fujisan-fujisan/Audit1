@@ -3557,6 +3557,11 @@ function renderManageChapterList() {
   }
   const counts = {};
   for (const q of storage.questions) {
+    const match = q.answer ? q.answer.match(/^(\d+(?:の\d+)?)条/) : null;
+    if (match) {
+      const info = getChapterInfo(match[1]);
+      if (info) { const key = `${info.partIdx}-${info.chapterIdx}`; counts[key] = (counts[key] || 0) + 1; continue; }
+    }
     const key = (q.partIdx !== null && q.partIdx !== undefined) ? `${q.partIdx}-${q.chapterIdx}` : 'other';
     counts[key] = (counts[key] || 0) + 1;
   }
@@ -3599,9 +3604,13 @@ function renderManageQuestionList() {
   } else {
     const ch = STRUCTURE.parts[manageSelectedPartIdx].chapters[manageSelectedChapterIdx];
     title = ch.label;
-    filtered = storage.questions.map((q, i) => ({ q, i })).filter(({ q }) =>
-      q.partIdx === manageSelectedPartIdx && q.chapterIdx === manageSelectedChapterIdx
-    );
+    filtered = storage.questions.map((q, i) => ({ q, i })).filter(({ q }) => {
+      const m = q.answer ? q.answer.match(/^(\d+(?:の\d+)?)条/) : null;
+      if (!m) return false;
+      const info = getChapterInfo(m[1]);
+      if (!info) return false;
+      return info.partIdx === manageSelectedPartIdx && info.chapterIdx === manageSelectedChapterIdx;
+    });
   }
   document.getElementById('manageTitle').textContent = title;
   if (!filtered.length) {
