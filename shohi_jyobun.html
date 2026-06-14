@@ -3438,9 +3438,9 @@ function hideRegSuggestDelay() {
 
 function onRegQuestionKeydown(e) {
   if (e.key === 'Enter' && e.shiftKey) return; // Shift+Enter → 改行
-  if (e.key === 'Enter' || e.key === ' ') {
+  if (e.key === 'Enter') {
     const articleInput = document.getElementById('regArticleInput').value.trim();
-    if (!articleInput) return; // 条文番号未入力ならデフォルト動作
+    if (!articleInput) return;
     e.preventDefault();
     addQuestion();
   }
