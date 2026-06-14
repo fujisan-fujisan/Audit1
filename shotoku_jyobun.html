@@ -1843,7 +1843,7 @@
         <div class="reg-row">
           <span class="reg-label">要約文</span>
           <div style="flex:1">
-            <textarea class="reg-input" id="regQuestion" placeholder="要約を入力"></textarea>
+            <textarea class="reg-input" id="regQuestion" placeholder="要約を入力" onkeydown="onRegQuestionKeydown(event)"></textarea>
             <div id="claudeHintBox" style="display:none">
               <div class="claude-hint-label">💡 Claudeの要約（参考・叩き台）</div>
               <div class="claude-hint" id="claudeHintText"></div>
@@ -3434,6 +3434,16 @@ function hideRegSuggestDelay() {
   setTimeout(() => {
     document.getElementById('regSuggestBox').style.display = 'none';
   }, 200);
+}
+
+function onRegQuestionKeydown(e) {
+  if (e.key === 'Enter' && e.shiftKey) return; // Shift+Enter → 改行
+  if (e.key === 'Enter' || e.key === ' ') {
+    const articleInput = document.getElementById('regArticleInput').value.trim();
+    if (!articleInput) return; // 条文番号未入力ならデフォルト動作
+    e.preventDefault();
+    addQuestion();
+  }
 }
 
 function addQuestion() {
