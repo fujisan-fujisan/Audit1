@@ -1892,18 +1892,17 @@ function isGrayed(itemId) {
   return isSkippedThisRound(itemId) && !getItemR(itemId).u;
 }
 
-function setSkipNext(itemId, skip) {
+function setSkipNext(itemId) {
   const r = getItemR(itemId);
-  r.skipNext = skip;
+  r.skipNext = r.skipNext === true ? null : true;
   setItemR(itemId, r);
   save();
   const row = document.getElementById('irow-' + itemId);
   if (!row) return;
   const nrp = row.querySelector('.nrp');
   if (!nrp) return;
-  const [inclBtn, skipBtn] = nrp.querySelectorAll('.nrp-btn');
-  if (inclBtn) inclBtn.className = 'nrp-btn' + (skip === false ? ' nrp-include' : '');
-  if (skipBtn) skipBtn.className = 'nrp-btn' + (skip === true ? ' nrp-skip' : '');
+  const skipBtn = nrp.querySelector('.nrp-btn');
+  if (skipBtn) skipBtn.className = 'nrp-btn' + (r.skipNext === true ? ' nrp-skip' : '');
 }
 function applyFilter(){
   DATA.forEach(ch=>{
@@ -1995,8 +1994,7 @@ function buildItemRow(item){
     </div>
     <div class="nrp" style="${u?'':'display:none'}">
       <span class="nrp-label">次回</span>
-      <button class="nrp-btn${skipNext===false?' nrp-include':''}" onclick="setSkipNext('${item.id}',false)">含める</button>
-      <button class="nrp-btn${skipNext===true?' nrp-skip':''}" onclick="setSkipNext('${item.id}',true)">スキップ</button>
+      <button class="nrp-btn${skipNext===true?' nrp-skip':''}" onclick="setSkipNext('${item.id}')">スキップ</button>
     </div>`;
   return row;
 }
@@ -2021,8 +2019,7 @@ function refreshItem(id){
   const nrp=row.querySelector('.nrp');
   if(nrp){
     nrp.style.display=r.u?'':'none';
-    const[inclBtn,skipBtn]=nrp.querySelectorAll('.nrp-btn');
-    if(inclBtn)inclBtn.className='nrp-btn'+(r.skipNext===false?' nrp-include':'');
+    const skipBtn=nrp.querySelector('.nrp-btn');
     if(skipBtn)skipBtn.className='nrp-btn'+(r.skipNext===true?' nrp-skip':'');
   }
   const grayed=isGrayed(id);
