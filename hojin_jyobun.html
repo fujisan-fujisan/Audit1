@@ -3236,9 +3236,8 @@ function updateCard() {
   const artTextEl = document.getElementById('cardArticleText');
 
   if (isYomitori) {
-    const articleText = getArticleText(q.answer.trim());
     document.getElementById('cardArticleId').textContent = `問題 ${currentIdx + 1} / ${trainingQueue.length}`;
-    document.getElementById('cardQuestion').textContent = articleText || `（${q.answer} の条文テキストが見つかりません）`;
+    document.getElementById('cardQuestion').textContent = q.answer;
     document.getElementById('cardAnswer').textContent = q.question;
     document.getElementById('btnShowAnswer').textContent = '要約を確認する';
   } else {
