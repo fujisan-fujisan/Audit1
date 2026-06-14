@@ -3231,12 +3231,13 @@ function updateCard() {
   const artTextEl = document.getElementById('cardArticleText');
 
   if (isYomitori) {
-    const articleText = getArticleText(q.answer) || q.answer;
-    document.getElementById('cardQuestion').textContent = `【${q.answer}】
-${articleText}`;
+    const articleText = getArticleText(q.answer.trim());
+    document.getElementById('cardArticleId').textContent = `問題 ${currentIdx + 1} / ${trainingQueue.length}`;
+    document.getElementById('cardQuestion').textContent = articleText || `（${q.answer} の条文テキストが見つかりません）`;
     document.getElementById('cardAnswer').textContent = q.question;
     document.getElementById('btnShowAnswer').textContent = '要約を確認する';
   } else {
+    document.getElementById('cardArticleId').textContent = `問題 ${currentIdx + 1} / ${trainingQueue.length}`;
     document.getElementById('cardQuestion').textContent = q.question;
     document.getElementById('cardAnswer').textContent = q.answer;
     document.getElementById('btnShowAnswer').textContent = '答えを見る';
@@ -3247,7 +3248,6 @@ ${articleText}`;
   artTextEl.textContent = '';
   document.getElementById('btnShowAnswer').style.display = 'inline-block';
   document.getElementById('judgeButtons').classList.remove('show');
-  document.getElementById('cardArticleId').textContent = `問題 ${currentIdx + 1} / ${trainingQueue.length}`;
   _startTimer();
 }
 
