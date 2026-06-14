@@ -3429,7 +3429,7 @@ function selectRegArticle(label, key) {
     }
   }
 
-  document.getElementById('regQuestion').focus();
+  setTimeout(() => document.getElementById('regQuestion').focus(), 50);
 }
 
 function hideRegSuggestDelay() {
