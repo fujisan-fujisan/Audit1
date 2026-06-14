@@ -2899,10 +2899,15 @@ function getChapterInfo(articleKey) {
   const data = LAW_DATA[String(articleKey)];
   if (!data) return null;
   const pi = data.partIdx;
-  const ci = data.chapterIdx;
+  const globalCi = data.chapterIdx;
   const part = STRUCTURE.parts[pi];
-  const ch = part && part.chapters[ci];
-  return { partIdx: pi, chapterIdx: ci, partLabel: part ? part.label : '', chapterLabel: ch ? ch.label : '' };
+  if (!part) return null;
+  // chapterIdx in LAW_DATA is a global sequential index; convert to local (within-part) index
+  let offset = 0;
+  for (let i = 0; i < pi; i++) offset += STRUCTURE.parts[i].chapters.length;
+  const ci = globalCi - offset;
+  const ch = part.chapters[ci];
+  return { partIdx: pi, chapterIdx: ci, partLabel: part.label, chapterLabel: ch ? ch.label : '' };
 }
 
 // トレーニング絞り込み状態
