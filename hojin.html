@@ -547,18 +547,17 @@ function isGrayed(itemId) {
   return isSkippedThisRound(itemId) && !getItemR(itemId).u;
 }
 
-function setSkipNext(itemId, skip) {
+function setSkipNext(itemId) {
   const r = getItemR(itemId);
-  r.skipNext = skip;
+  r.skipNext = r.skipNext === true ? null : true;
   setItemR(itemId, r);
   save();
   const row = document.getElementById('irow-' + itemId);
   if (!row) return;
   const nrp = row.querySelector('.nrp');
   if (!nrp) return;
-  const [inclBtn, skipBtn] = nrp.querySelectorAll('.nrp-btn');
-  if (inclBtn) inclBtn.className = 'nrp-btn' + (skip === false ? ' nrp-include' : '');
-  if (skipBtn) skipBtn.className = 'nrp-btn' + (skip === true ? ' nrp-skip' : '');
+  const skipBtn = nrp.querySelector('.nrp-btn');
+  if (skipBtn) skipBtn.className = 'nrp-btn' + (r.skipNext === true ? ' nrp-skip' : '');
 }
 
 function render() {
@@ -689,8 +688,7 @@ function buildItemRow(item) {
       <button id="memo-btn-${item.id}" class="item-memo-btn${memoState[item.id] ? '' : ' no-memo'}" onclick="memoState['${item.id}'] ? openMemoView('${item.id}') : openMemoInput('${item.id}')">${memoState[item.id] ? 'メモ' : '＋メモ'}</button>
       <div class="nrp" style="${u ? 'margin-left:auto' : 'display:none'}">
         <span class="nrp-label">次回</span>
-        <button class="nrp-btn${skipNext === false ? ' nrp-include' : ''}" onclick="setSkipNext('${item.id}', false)">含める</button>
-        <button class="nrp-btn${skipNext === true ? ' nrp-skip' : ''}" onclick="setSkipNext('${item.id}', true)">スキップ</button>
+        <button class="nrp-btn${skipNext === true ? ' nrp-skip' : ''}" onclick="setSkipNext('${item.id}')">スキップ</button>
       </div>
     </div>`;
   return row;
@@ -849,8 +847,7 @@ function refreshItem(itemId) {
   const nrp = row.querySelector('.nrp');
   if (nrp) {
     nrp.style.cssText = r.u ? 'margin-left:auto' : 'display:none';
-    const [inclBtn, skipBtn] = nrp.querySelectorAll('.nrp-btn');
-    if (inclBtn) inclBtn.className = 'nrp-btn' + (r.skipNext === false ? ' nrp-include' : '');
+    const skipBtn = nrp.querySelector('.nrp-btn');
     if (skipBtn) skipBtn.className = 'nrp-btn' + (r.skipNext === true ? ' nrp-skip' : '');
   }
 
