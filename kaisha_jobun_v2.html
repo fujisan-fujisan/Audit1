@@ -2165,7 +2165,7 @@
       <div class="rl-form-section" id="rl-form">
         <div class="rl-field">
           <label class="rl-field-label">論点名<span class="rl-field-badge">必須</span></label>
-          <textarea class="rl-input" id="rl-name" rows="3" placeholder="例：株主は他の株主に対する瑕疵につき、自ら原告となって訴えを提起することができるか"></textarea>
+          <textarea class="rl-input" id="rl-name" rows="3"></textarea>
         </div>
         <div class="rl-field">
           <label class="rl-field-label">章<span class="rl-field-badge">必須</span></label>
@@ -2175,26 +2175,26 @@
         </div>
         <div class="rl-field">
           <label class="rl-field-label">① 問題提起<span class="rl-field-badge">任意</span></label>
-          <textarea class="rl-input" id="rl-ans1" rows="3" placeholder="問題提起を入力..."></textarea>
+          <textarea class="rl-input" id="rl-ans1" rows="3"></textarea>
         </div>
         <div class="rl-field">
           <label class="rl-field-label">② 規範定立<span class="rl-field-badge">任意</span></label>
-          <textarea class="rl-input" id="rl-ans2" rows="4" placeholder="規範定立を入力..."></textarea>
+          <textarea class="rl-input" id="rl-ans2" rows="4"></textarea>
         </div>
         <div class="rl-field">
           <label class="rl-field-label">③ 当てはめ<span class="rl-field-badge">任意</span></label>
-          <textarea class="rl-input" id="rl-ans3" rows="3" placeholder="当てはめを入力（なし可）..."></textarea>
+          <textarea class="rl-input" id="rl-ans3" rows="3"></textarea>
         </div>
         <div class="rl-field">
           <label class="rl-field-label">テキストページ<span class="rl-field-badge">任意</span></label>
-          <input class="rl-input short" id="rl-page" type="number" min="1" placeholder="例：123" style="max-width:140px">
+          <input class="rl-input short" id="rl-page" type="number" min="1" style="max-width:140px">
         </div>
         <div class="rl-field">
           <label class="rl-field-label">関連条文<span class="rl-field-badge">任意</span></label>
           <div class="rl-article-chips" id="rl-article-chips"></div>
           <div class="rl-input-row" style="margin-top:6px">
             <div class="rl-suggest-wrap">
-              <input class="rl-input short" id="rl-article-input" type="text" placeholder="条番号を入力（例：831）"
+              <input class="rl-input short" id="rl-article-input" type="text"
                 oninput="rlOnArticleInput()" onblur="rlHideSuggestDelay()" autocomplete="off">
               <div id="rl-article-suggest" class="related-suggest" style="display:none"></div>
             </div>
@@ -4526,7 +4526,7 @@ function rlRenderSession() {
     content.innerHTML = rontenCard + `
       <div class="rl-answer-card">
         <div class="rl-answer-card-title">自分の論証を入力（任意）</div>
-        <textarea class="rl-input" id="rl-user-input" rows="6" placeholder="論証を書いてみてください...">${escapeHtml(userAnswer)}</textarea>
+        <textarea class="rl-input" id="rl-user-input" rows="6">${escapeHtml(userAnswer)}</textarea>
       </div>
       <button class="btn btn-primary" style="width:100%;padding:14px;margin-top:4px" onclick="rlSubmitAnswer()">採点へ →</button>`;
   } else {
@@ -4781,7 +4781,7 @@ function rlRenderManage() {
             </span>`).join('') : '<span class="rl-no-kw">未登録</span>'}
           </div>
           <div class="rl-kw-add-row">
-            <input class="rl-kw-add-input" id="rl-kwinput-${p.id}" type="text" placeholder="語句・フレーズを追加..."
+            <input class="rl-kw-add-input" id="rl-kwinput-${p.id}" type="text"
               oncompositionstart="_isRlComposing=true" oncompositionend="_isRlComposing=false"
               onkeydown="if(event.key==='Enter'&&!event.isComposing&&!_isRlComposing){event.preventDefault();rlAddKw('${p.id}')}">
             <button class="btn btn-sm" onclick="rlAddKw('${p.id}')">追加</button>
