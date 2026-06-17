@@ -3563,8 +3563,9 @@ function getChapterLapInfo(storage, lapKey, filtered) {
 function chselClampCount() {
   const input = document.getElementById('chselCountInput');
   if (!input) return;
+  const val = parseInt(input.value);
+  if (isNaN(val)) return; // 入力中（空欄）は何もしない
   const max = parseInt(input.max) || 1;
-  const val = parseInt(input.value) || 0;
   if (val > max) input.value = max;
   if (val < 1) input.value = 1;
 }
