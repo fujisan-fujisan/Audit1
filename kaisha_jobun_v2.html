@@ -1794,6 +1794,27 @@
     white-space: pre-wrap;
   }
 
+  /* 採点画面：セクション別比較カード */
+  .rl-section-card {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    margin-bottom: 14px; overflow: hidden;
+  }
+  .rl-section-header {
+    font-size: 12px; font-weight: 700; color: var(--accent);
+    padding: 9px 14px; background: var(--surface);
+    border-bottom: 1px solid var(--border); letter-spacing: 0.04em;
+  }
+  .rl-section-block { padding: 12px 14px; }
+  .rl-section-block.model {
+    background: #f0f7ff; border-bottom: 1px solid #d0e6f8;
+  }
+  .rl-section-block.user { background: var(--surface2); }
+  .rl-section-sublabel {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 6px;
+  }
+  .rl-section-block.model .rl-section-sublabel { color: #1a4a7a; }
+  .rl-section-block.user .rl-section-sublabel { color: var(--text-muted); }
+
   /* キーワード評価 */
   .rl-eval-card {
     background: var(--surface); border: 1px solid var(--border);
@@ -4699,7 +4720,9 @@ function rlStartSession(chapterIdx) {
     queue: [...problems].sort(() => Math.random() - 0.5),
     idx: 0,
     phase: 'input',
-    userAnswer: '',
+    userAns1: '',
+    userAns2: '',
+    userAns3: '',
     kwScores: {},
     articleChecked: {},
     chapterIdx,
@@ -4715,7 +4738,7 @@ function rlEndSession() {
 
 function rlRenderSession() {
   if (!_rlSession) return;
-  const { queue, idx, phase, userAnswer, kwScores, articleChecked } = _rlSession;
+  const { queue, idx, phase, userAns1, userAns2, userAns3, kwScores, articleChecked } = _rlSession;
   if (idx >= queue.length) { rlFinishSession(); return; }
 
   const problem = queue[idx];
@@ -4741,34 +4764,42 @@ function rlRenderSession() {
     content.innerHTML = rontenCard + `
       <div class="rl-answer-card">
         <div class="rl-answer-card-title">自分の論証を入力（任意）</div>
-        <textarea class="rl-input" id="rl-user-input" rows="6">${escapeHtml(userAnswer)}</textarea>
+        <div class="rl-ans-part">
+          <div class="rl-ans-part-num">① 問題提起</div>
+          <textarea class="rl-input" id="rl-user-ans1" rows="3">${escapeHtml(userAns1)}</textarea>
+        </div>
+        <div class="rl-ans-part">
+          <div class="rl-ans-part-num">② 規範定立</div>
+          <textarea class="rl-input" id="rl-user-ans2" rows="4">${escapeHtml(userAns2)}</textarea>
+        </div>
+        <div class="rl-ans-part">
+          <div class="rl-ans-part-num">③ 当てはめ</div>
+          <textarea class="rl-input" id="rl-user-ans3" rows="3">${escapeHtml(userAns3)}</textarea>
+        </div>
       </div>
       <button class="btn btn-primary" style="width:100%;padding:14px;margin-top:4px" onclick="rlSubmitAnswer()">採点へ →</button>`;
   } else {
     const kws = problem.keywords || [];
     const articles = problem.articles || [];
 
-    const modelParts = [
-      { label: '① 問題提起', val: problem.ans1 },
-      { label: '② 規範定立', val: problem.ans2 },
-      { label: '③ 当てはめ', val: problem.ans3 },
-    ].filter(p => p.val);
+    const sectionParts = [
+      { label: '① 問題提起', model: problem.ans1, user: userAns1 },
+      { label: '② 規範定立', model: problem.ans2, user: userAns2 },
+      { label: '③ 当てはめ', model: problem.ans3, user: userAns3 },
+    ].filter(p => p.model);
 
-    const modelHtml = modelParts.length ? `
-      <div class="rl-answer-card rl-model-answer">
-        <div class="rl-answer-card-title">模範解答</div>
-        ${modelParts.map(p => `
-          <div class="rl-ans-part">
-            <div class="rl-ans-part-num">${p.label}</div>
-            <div class="rl-ans-part-text">${escapeHtml(p.val)}</div>
-          </div>`).join('')}
-      </div>` : '';
-
-    const userHtml = userAnswer ? `
-      <div class="rl-answer-card">
-        <div class="rl-answer-card-title">あなたの解答</div>
-        <div style="font-size:13px;line-height:1.8;white-space:pre-wrap">${escapeHtml(userAnswer)}</div>
-      </div>` : '';
+    const sectionHtml = sectionParts.map(p => `
+      <div class="rl-section-card">
+        <div class="rl-section-header">${p.label}</div>
+        <div class="rl-section-block model">
+          <div class="rl-section-sublabel">模範解答</div>
+          <div class="rl-ans-part-text">${escapeHtml(p.model)}</div>
+        </div>
+        <div class="rl-section-block user">
+          <div class="rl-section-sublabel">あなたの回答</div>
+          <div class="rl-ans-part-text">${p.user ? escapeHtml(p.user) : '<span style="color:var(--text-muted)">未入力</span>'}</div>
+        </div>
+      </div>`).join('');
 
     const kwHtml = kws.length === 0
       ? `<div class="rl-no-kw">キーワードが登録されていません。「問題管理」から追加できます。</div>`
@@ -4828,14 +4859,16 @@ function rlRenderSession() {
         </div>` : ''}
       </div>`;
 
-    content.innerHTML = rontenCard + userHtml + modelHtml + kwEvalCard + artEvalCard +
+    content.innerHTML = rontenCard + sectionHtml + kwEvalCard + artEvalCard +
       `<button class="rl-btn-next" onclick="rlNextProblem()">次の論点 →</button>`;
   }
   window.scrollTo(0, 0);
 }
 
 function rlSubmitAnswer() {
-  _rlSession.userAnswer = document.getElementById('rl-user-input')?.value || '';
+  _rlSession.userAns1 = document.getElementById('rl-user-ans1')?.value || '';
+  _rlSession.userAns2 = document.getElementById('rl-user-ans2')?.value || '';
+  _rlSession.userAns3 = document.getElementById('rl-user-ans3')?.value || '';
   _rlSession.phase = 'eval';
   _rlSession.kwScores = {};
   _rlSession.articleChecked = {};
@@ -4909,7 +4942,9 @@ function rlNextProblem() {
 
   _rlSession.idx++;
   _rlSession.phase = 'input';
-  _rlSession.userAnswer = '';
+  _rlSession.userAns1 = '';
+  _rlSession.userAns2 = '';
+  _rlSession.userAns3 = '';
   _rlSession.kwScores = {};
   _rlSession.articleChecked = {};
   rlRenderSession();
