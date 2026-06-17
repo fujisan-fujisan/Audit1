@@ -861,7 +861,10 @@
     background: var(--surface); outline: none;
   }
   .chsel-count-input:focus { border-color: var(--accent); }
-  .chsel-count-hint { font-size: 11px; color: var(--text-muted); flex: 1; }
+  .chsel-count-hint { font-size: 11px; color: var(--text-muted); }
+  .chsel-count-sep { width: 1px; height: 16px; background: var(--border); flex-shrink: 0; margin: 0 2px; }
+  .chsel-acc-label { font-size: 12px; color: var(--text-secondary); flex-shrink: 0; white-space: nowrap; }
+  .chsel-acc-input { width: 56px !important; }
   #chselStartBtn {
     flex: 1; padding: 12px; border: none; border-radius: 8px;
     background: var(--accent); color: white; font-size: 15px; font-weight: 700;
@@ -3545,8 +3548,26 @@ function getQuestionKey(q) {
 }
 
 function getChapterLapKey() {
-  if (_selectedChapters.size === 0) return 'all';
-  return [..._selectedChapters].sort().join(',');
+  const chKey = _selectedChapters.size === 0 ? 'all' : [..._selectedChapters].sort().join(',');
+  const acc = getAccuracyThreshold();
+  return acc !== null ? `${chKey}@acc${acc}` : chKey;
+}
+
+function getAccuracyThreshold() {
+  const input = document.getElementById('chselAccInput');
+  if (!input || input.value === '') return null;
+  const val = parseInt(input.value);
+  return isNaN(val) ? null : Math.max(0, Math.min(100, val));
+}
+
+function applyAccuracyFilter(questions) {
+  const threshold = getAccuracyThreshold();
+  if (threshold === null) return questions;
+  return questions.filter(q => {
+    const attempted = q.attempted || 0;
+    if (attempted === 0) return true; // 未解答は正答率0%として含める
+    return (q.correct || 0) / attempted * 100 <= threshold;
+  });
 }
 
 // 読み取り専用：現在の周回・残り問題数を返す（storage を変更しない）
@@ -3627,10 +3648,13 @@ function openChapterSelectModal() {
   // indeterminate は JS で設定
   document.querySelectorAll('[data-indeterminate="true"]').forEach(el => { el.indeterminate = true; });
 
-  // 保存済み問題数を入力欄に反映
+  // 保存済みの入力値を復元
   const savedCount = parseInt(localStorage.getItem('kaisha-v2-qcount')) || 20;
   const countInput = document.getElementById('chselCountInput');
   if (countInput) countInput.value = savedCount;
+  const savedAcc = localStorage.getItem('kaisha-v2-acc');
+  const accInput = document.getElementById('chselAccInput');
+  if (accInput) accInput.value = savedAcc !== null ? savedAcc : '';
 
   updateChselStart();
   const overlay = document.getElementById('chselOverlay');
@@ -3690,7 +3714,7 @@ function syncPartCheckboxes() {
 
 function updateChselStart() {
   const storage = getStorage();
-  const filtered = getFilteredQuestions(storage.questions);
+  const filtered = applyAccuracyFilter(getFilteredQuestions(storage.questions));
   const lapKey = getChapterLapKey();
   const info = getChapterLapInfo(storage, lapKey, filtered);
 
@@ -3746,10 +3770,13 @@ function confirmStartTraining() {
   const filtered = getFilteredQuestions(storage.questions);
   if (!filtered.length) { showToast('この範囲に登録された問題がありません'); return; }
 
+  const filteredAcc = applyAccuracyFilter(filtered);
+  if (!filteredAcc.length) { showToast('条件に合う問題がありません'); return; }
+
   const lapKey = getChapterLapKey();
   if (!storage.trainingLaps) storage.trainingLaps = {};
 
-  const allKeys = filtered.map(getQuestionKey);
+  const allKeys = filteredAcc.map(getQuestionKey);
   const allKeySet = new Set(allKeys);
   let state = storage.trainingLaps[lapKey];
   const validRemaining = (state?.remaining || []).filter(k => allKeySet.has(k));
@@ -3770,6 +3797,8 @@ function confirmStartTraining() {
   const requested = Math.max(1, parseInt(countInput?.value) || state.remaining.length);
   const count = Math.min(requested, state.remaining.length);
   localStorage.setItem('kaisha-v2-qcount', count);
+  const accInput = document.getElementById('chselAccInput');
+  if (accInput) localStorage.setItem('kaisha-v2-acc', accInput.value);
 
   // remaining の先頭から count 個を取り出す（シャッフル済み）
   const drawnKeys = state.remaining.splice(0, count);
@@ -3777,7 +3806,7 @@ function confirmStartTraining() {
 
   // drawn の順序を保ってキューを構築
   const keyToQ = {};
-  filtered.forEach(q => { keyToQ[getQuestionKey(q)] = q; });
+  filteredAcc.forEach(q => { keyToQ[getQuestionKey(q)] = q; });
   trainingQueue = drawnKeys
     .map(k => {
       const q = keyToQ[k];
@@ -5294,6 +5323,9 @@ function rlDeleteProblem(id) {
         <span class="chsel-count-label">問題数</span>
         <input type="number" id="chselCountInput" class="chsel-count-input" min="1" value="20" oninput="chselClampCount()">
         <span class="chsel-count-hint" id="chselCountHint"></span>
+        <span class="chsel-count-sep"></span>
+        <input type="number" id="chselAccInput" class="chsel-count-input chsel-acc-input" min="0" max="100" placeholder="–" oninput="updateChselStart()">
+        <span class="chsel-acc-label">% 以下のみ</span>
       </div>
       <button id="chselStartBtn" onclick="confirmStartTraining()">開始</button>
     </div>
