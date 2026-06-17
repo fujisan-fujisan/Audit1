@@ -1944,6 +1944,30 @@
   }
 
   .rl-no-kw { font-size: 11px; color: var(--text-muted); font-style: italic; }
+
+  /* 章選択 */
+  .rl-chapter-btn {
+    width: 100%; text-align: left; padding: 16px 18px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 10px;
+    cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+    font-family: 'Noto Sans JP', sans-serif; transition: all 0.15s;
+    box-shadow: var(--shadow-sm);
+  }
+  .rl-chapter-btn:hover { border-color: var(--accent); background: var(--accent-light); }
+  .rl-chapter-btn-all {
+    background: var(--accent); color: #fff; border-color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .rl-chapter-btn-all:hover { background: var(--accent-hover); }
+  .rl-chapter-btn-all .rl-ch-name { color: #fff; }
+  .rl-chapter-btn-all .rl-ch-count { color: rgba(255,255,255,0.8); }
+  .rl-ch-name { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+  .rl-ch-count { font-size: 12px; color: var(--text-muted); }
+  .rl-ch-count.zero { color: var(--border); }
+
+  /* 章タグ */
+  .rl-tag.chapter { background: #f0f4ff; color: #3a5bc7; border-color: #c0ccf0; }
 </style>
 </head>
 <body>
@@ -2114,13 +2138,22 @@
     <!-- ホーム -->
     <div id="rl-home" class="rl-view active">
       <div class="rl-home-actions">
-        <button class="rl-home-start" onclick="rlStartSession()">学習開始</button>
+        <button class="rl-home-start" onclick="rlGoChapterSelect()">学習開始</button>
         <div class="rl-home-sub">
           <button class="btn" onclick="rlSwitchView_register(null)">問題登録</button>
           <button class="btn" onclick="rlSwitchView('manage')">問題管理</button>
         </div>
       </div>
       <div id="rl-home-msg" class="rl-empty" style="display:none">論点が登録されていません。<br>「問題登録」から追加してください。</div>
+    </div>
+
+    <!-- 章選択 -->
+    <div id="rl-chapter-select" class="rl-view">
+      <div class="rl-back-bar">
+        <button class="btn btn-sm" onclick="rlSwitchView('home')">← 戻る</button>
+        <span class="rl-back-title">章を選択</span>
+      </div>
+      <div id="rl-chapter-list"></div>
     </div>
 
     <!-- 登録 -->
@@ -2133,6 +2166,12 @@
         <div class="rl-field">
           <label class="rl-field-label">論点名<span class="rl-field-badge">必須</span></label>
           <textarea class="rl-input" id="rl-name" rows="3" placeholder="例：株主は他の株主に対する瑕疵につき、自ら原告となって訴えを提起することができるか"></textarea>
+        </div>
+        <div class="rl-field">
+          <label class="rl-field-label">章<span class="rl-field-badge">必須</span></label>
+          <select class="rl-input short" id="rl-chapter" style="min-height:0;cursor:pointer">
+            <option value="">選択してください</option>
+          </select>
         </div>
         <div class="rl-field">
           <label class="rl-field-label">① 問題提起<span class="rl-field-badge">任意</span></label>
@@ -2191,7 +2230,7 @@
         <button class="btn btn-sm" onclick="rlSwitchView('home')">← 戻る</button>
         <span class="rl-back-title">問題管理</span>
       </div>
-      <div class="rl-manage-filter">
+      <div class="rl-manage-filter" id="rl-manage-filter-bar">
         <button class="rl-manage-filter-btn active" id="rl-filter-all" onclick="rlSetFilter('all')">すべて</button>
         <button class="rl-manage-filter-btn" id="rl-filter-hanrei" onclick="rlSetFilter('hanrei')">判例あり</button>
         <button class="rl-manage-filter-btn" id="rl-filter-no-kw" onclick="rlSetFilter('no-kw')">KW未登録</button>
@@ -4194,6 +4233,19 @@ function showArticleQPopup(numKey) {
 // ===== 論点学習 =====
 // ============================================================
 
+const RL_CHAPTERS = [
+  '第1章　機関',
+  '第2章　株式',
+  '第3章　設立',
+  '第4章　資金調達',
+  '第5章　株式会社の計算',
+  '第6章　持分会社',
+  '第7章　事業譲渡',
+  '第8章　組織再編等',
+  '第9章　定款変更',
+  '第10章　会社法総則',
+];
+
 function rlGetProblems() {
   const s = getStorage();
   if (!s.rlProblems) s.rlProblems = [];
@@ -4216,6 +4268,42 @@ function rlSwitchView(name) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (name === 'home') rlRenderHome();
   if (name === 'manage') rlRenderManage();
+  if (name === 'chapter-select') rlRenderChapterSelect();
+}
+
+function rlGoChapterSelect() {
+  const problems = rlGetProblems();
+  if (!problems.length) { showToast('論点が登録されていません'); return; }
+  rlSwitchView('chapter-select');
+}
+
+function rlRenderChapterSelect() {
+  const problems = rlGetProblems();
+  const countAll = problems.length;
+
+  // 章ごとの件数
+  const counts = {};
+  RL_CHAPTERS.forEach((ch, i) => { counts[i] = 0; });
+  problems.forEach(p => {
+    if (p.chapter !== undefined && p.chapter !== null && p.chapter !== '') {
+      const idx = parseInt(p.chapter);
+      if (!isNaN(idx)) counts[idx] = (counts[idx] || 0) + 1;
+    }
+  });
+
+  const list = document.getElementById('rl-chapter-list');
+  list.innerHTML =
+    `<button class="rl-chapter-btn rl-chapter-btn-all" onclick="rlStartSession(null)">
+      <span class="rl-ch-name">すべての章</span>
+      <span class="rl-ch-count">${countAll}問</span>
+    </button>` +
+    RL_CHAPTERS.map((ch, i) => {
+      const cnt = counts[i] || 0;
+      return `<button class="rl-chapter-btn" onclick="rlStartSession(${i})" ${cnt === 0 ? 'disabled style="opacity:0.4"' : ''}>
+        <span class="rl-ch-name">${ch}</span>
+        <span class="rl-ch-count${cnt === 0 ? ' zero' : ''}">${cnt}問</span>
+      </button>`;
+    }).join('');
 }
 
 function rlRenderHome() {
@@ -4240,11 +4328,17 @@ function rlSwitchView_register(editId) {
   document.getElementById('rl-article-input').value = '';
   document.getElementById('rl-article-suggest').style.display = 'none';
 
+  // 章セレクトを初期化
+  const sel = document.getElementById('rl-chapter');
+  sel.innerHTML = '<option value="">選択してください</option>' +
+    RL_CHAPTERS.map((ch, i) => `<option value="${i}">${ch}</option>`).join('');
+
   if (editId) {
     const p = rlGetProblems().find(p => p.id === editId);
     if (p) {
       document.getElementById('rl-register-title').textContent = '論点を編集';
       document.getElementById('rl-name').value = p.name || '';
+      sel.value = (p.chapter !== undefined && p.chapter !== '') ? String(p.chapter) : '';
       document.getElementById('rl-ans1').value = p.ans1 || '';
       document.getElementById('rl-ans2').value = p.ans2 || '';
       document.getElementById('rl-ans3').value = p.ans3 || '';
@@ -4335,6 +4429,8 @@ function rlCancelEdit() {
 function rlSaveRegister() {
   const name = document.getElementById('rl-name').value.trim();
   if (!name) { showToast('論点名を入力してください'); return; }
+  const chapterVal = document.getElementById('rl-chapter').value;
+  if (chapterVal === '') { showToast('章を選択してください'); return; }
 
   const problems = rlGetProblems();
   const now = new Date().toLocaleDateString('ja-JP');
@@ -4343,6 +4439,7 @@ function rlSaveRegister() {
     const idx = problems.findIndex(p => p.id === _rlEditId);
     if (idx >= 0) {
       problems[idx].name = name;
+      problems[idx].chapter = parseInt(chapterVal);
       problems[idx].ans1 = document.getElementById('rl-ans1').value.trim();
       problems[idx].ans2 = document.getElementById('rl-ans2').value.trim();
       problems[idx].ans3 = document.getElementById('rl-ans3').value.trim();
@@ -4355,6 +4452,7 @@ function rlSaveRegister() {
     problems.push({
       id: rlGenId(),
       name,
+      chapter: parseInt(chapterVal),
       ans1: document.getElementById('rl-ans1').value.trim(),
       ans2: document.getElementById('rl-ans2').value.trim(),
       ans3: document.getElementById('rl-ans3').value.trim(),
@@ -4376,9 +4474,12 @@ function rlSaveRegister() {
 
 let _rlSession = null;
 
-function rlStartSession() {
-  const problems = rlGetProblems();
-  if (!problems.length) { showToast('論点が登録されていません'); return; }
+function rlStartSession(chapterIdx) {
+  const all = rlGetProblems();
+  const problems = chapterIdx === null || chapterIdx === undefined
+    ? all
+    : all.filter(p => parseInt(p.chapter) === chapterIdx);
+  if (!problems.length) { showToast('この章に論点がありません'); return; }
   _rlSession = {
     queue: [...problems].sort(() => Math.random() - 0.5),
     idx: 0,
@@ -4386,6 +4487,7 @@ function rlStartSession() {
     userAnswer: '',
     kwScores: {},
     articleChecked: {},
+    chapterIdx,
   };
   rlSwitchView('session');
   rlRenderSession();
@@ -4393,7 +4495,7 @@ function rlStartSession() {
 
 function rlEndSession() {
   _rlSession = null;
-  rlSwitchView('home');
+  rlSwitchView('chapter-select');
 }
 
 function rlRenderSession() {
@@ -4404,7 +4506,10 @@ function rlRenderSession() {
   const problem = queue[idx];
   document.getElementById('rl-progress').textContent = `${idx + 1} / ${queue.length}`;
 
+  const chapterLabel = (problem.chapter !== undefined && problem.chapter !== '')
+    ? RL_CHAPTERS[parseInt(problem.chapter)] || '' : '';
   const badges = [
+    chapterLabel ? `<span class="rl-page-badge">${chapterLabel}</span>` : '',
     problem.hasHanrei ? `<span class="rl-hanrei-badge">判例あり</span>` : '',
     problem.page ? `<span class="rl-page-badge">p.${problem.page}</span>` : '',
   ].filter(Boolean).join('');
@@ -4572,7 +4677,7 @@ function rlNextProblem() {
 function rlFinishSession() {
   _rlSession = null;
   showToast('学習完了しました');
-  rlSwitchView('home');
+  rlSwitchView('chapter-select');
 }
 
 function rlCalcKwUnderstanding(scores, total) {
@@ -4607,7 +4712,8 @@ let _rlFilter = 'all';
 function rlSetFilter(f) {
   _rlFilter = f;
   document.querySelectorAll('.rl-manage-filter-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('rl-filter-' + f).classList.add('active');
+  const btn = document.getElementById('rl-filter-' + f);
+  if (btn) btn.classList.add('active');
   rlRenderManage();
 }
 
@@ -4616,6 +4722,19 @@ function rlRenderManage() {
   let problems = all;
   if (_rlFilter === 'hanrei') problems = all.filter(p => p.hasHanrei);
   if (_rlFilter === 'no-kw') problems = all.filter(p => !p.keywords || p.keywords.length === 0);
+  if (typeof _rlFilter === 'number') problems = all.filter(p => parseInt(p.chapter) === _rlFilter);
+
+  // 章フィルターボタンを動的生成
+  const bar = document.getElementById('rl-manage-filter-bar');
+  if (bar) {
+    bar.innerHTML = `<button class="rl-manage-filter-btn${_rlFilter==='all'?' active':''}" id="rl-filter-all" onclick="rlSetFilter('all')">すべて</button>` +
+      `<button class="rl-manage-filter-btn${_rlFilter==='hanrei'?' active':''}" id="rl-filter-hanrei" onclick="rlSetFilter('hanrei')">判例あり</button>` +
+      `<button class="rl-manage-filter-btn${_rlFilter==='no-kw'?' active':''}" id="rl-filter-no-kw" onclick="rlSetFilter('no-kw')">KW未登録</button>` +
+      RL_CHAPTERS.map((ch, i) => {
+        const cnt = all.filter(p => parseInt(p.chapter) === i).length;
+        return `<button class="rl-manage-filter-btn${_rlFilter===i?' active':''}" id="rl-filter-ch-${i}" onclick="rlSetFilter(${i})">${ch}${cnt ? ' ('+cnt+')' : ''}</button>`;
+      }).join('');
+  }
 
   const list = document.getElementById('rl-manage-list');
   if (!problems.length) {
@@ -4624,7 +4743,9 @@ function rlRenderManage() {
   }
 
   list.innerHTML = problems.map(p => {
+    const chLabel = (p.chapter !== undefined && p.chapter !== '') ? RL_CHAPTERS[parseInt(p.chapter)] || '' : '';
     const tags = [
+      chLabel ? `<span class="rl-tag chapter">${chLabel}</span>` : '',
       p.hasHanrei ? `<span class="rl-tag hanrei">判例</span>` : '',
       p.page ? `<span class="rl-tag">p.${p.page}</span>` : '',
       (p.keywords||[]).length ? `<span class="rl-tag kw">${p.keywords.length}KW</span>` : '',
