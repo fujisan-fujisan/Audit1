@@ -847,8 +847,21 @@
   .chsel-check { width: 16px; height: 16px; flex-shrink: 0; accent-color: var(--accent); cursor: pointer; }
   .chsel-footer {
     padding: 12px 16px; border-top: 1px solid var(--border-light);
-    display: flex; gap: 8px; flex-shrink: 0;
+    display: flex; flex-direction: column; gap: 10px; flex-shrink: 0;
   }
+  .chsel-lap-info {
+    font-size: 12px; font-weight: 600; color: var(--accent); text-align: center; min-height: 16px;
+  }
+  .chsel-count-row { display: flex; align-items: center; gap: 10px; }
+  .chsel-count-label { font-size: 13px; color: var(--text-secondary); flex-shrink: 0; }
+  .chsel-count-input {
+    width: 80px; padding: 6px 10px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); font-size: 14px; text-align: center;
+    font-family: 'Noto Sans JP', sans-serif; color: var(--text-primary);
+    background: var(--surface); outline: none;
+  }
+  .chsel-count-input:focus { border-color: var(--accent); }
+  .chsel-count-hint { font-size: 11px; color: var(--text-muted); flex: 1; }
   #chselStartBtn {
     flex: 1; padding: 12px; border: none; border-radius: 8px;
     background: var(--accent); color: white; font-size: 15px; font-weight: 700;
@@ -2385,6 +2398,7 @@ function getStorage() {
   if (!_storageCache.ronten) _storageCache.ronten = {};
   if (!_storageCache.hanrei) _storageCache.hanrei = {};
   if (!_storageCache.browseHistory) _storageCache.browseHistory = [];
+  if (!_storageCache.trainingLaps) _storageCache.trainingLaps = {};
   return _storageCache;
 }
 
@@ -3524,6 +3538,37 @@ function renderTraining() {
   renderTrainingHome();
 }
 
+// ===== 周回管理ヘルパー =====
+
+function getQuestionKey(q) {
+  return q.answer + '|||' + q.question;
+}
+
+function getChapterLapKey() {
+  if (_selectedChapters.size === 0) return 'all';
+  return [..._selectedChapters].sort().join(',');
+}
+
+// 読み取り専用：現在の周回・残り問題数を返す（storage を変更しない）
+function getChapterLapInfo(storage, lapKey, filtered) {
+  if (!filtered.length) return { lap: 1, remaining: 0 };
+  const state = (storage.trainingLaps || {})[lapKey];
+  if (!state) return { lap: 1, remaining: filtered.length };
+  const allKeySet = new Set(filtered.map(getQuestionKey));
+  const valid = (state.remaining || []).filter(k => allKeySet.has(k));
+  if (valid.length === 0) return { lap: (state.lap || 1) + 1, remaining: filtered.length };
+  return { lap: state.lap || 1, remaining: valid.length };
+}
+
+function chselClampCount() {
+  const input = document.getElementById('chselCountInput');
+  if (!input) return;
+  const max = parseInt(input.max) || 1;
+  const val = parseInt(input.value) || 0;
+  if (val > max) input.value = max;
+  if (val < 1) input.value = 1;
+}
+
 function startTraining() {
   openChapterSelectModal();
 }
@@ -3580,6 +3625,11 @@ function openChapterSelectModal() {
   document.getElementById('chselBody').innerHTML = html;
   // indeterminate は JS で設定
   document.querySelectorAll('[data-indeterminate="true"]').forEach(el => { el.indeterminate = true; });
+
+  // 保存済み問題数を入力欄に反映
+  const savedCount = parseInt(localStorage.getItem('kaisha-v2-qcount')) || 20;
+  const countInput = document.getElementById('chselCountInput');
+  if (countInput) countInput.value = savedCount;
 
   updateChselStart();
   const overlay = document.getElementById('chselOverlay');
@@ -3639,10 +3689,36 @@ function syncPartCheckboxes() {
 
 function updateChselStart() {
   const storage = getStorage();
-  const total = getFilteredQuestions(storage.questions).length;
+  const filtered = getFilteredQuestions(storage.questions);
+  const lapKey = getChapterLapKey();
+  const info = getChapterLapInfo(storage, lapKey, filtered);
+
   const btn = document.getElementById('chselStartBtn');
-  btn.textContent = `開始（${total}問）`;
-  btn.disabled = total === 0;
+  const lapInfoEl = document.getElementById('chselLapInfo');
+  const countInput = document.getElementById('chselCountInput');
+  const countHint = document.getElementById('chselCountHint');
+
+  if (lapInfoEl) {
+    lapInfoEl.textContent = filtered.length > 0
+      ? `第${info.lap}周　残り ${info.remaining} 問 / 全 ${filtered.length} 問`
+      : '';
+  }
+
+  if (countInput) {
+    const max = info.remaining;
+    countInput.max = max;
+    countInput.disabled = max === 0;
+    const cur = parseInt(countInput.value) || 0;
+    if (max > 0) {
+      if (cur <= 0 || cur > max) countInput.value = Math.min(cur > 0 ? cur : 20, max);
+    } else {
+      countInput.value = 0;
+    }
+    if (countHint) countHint.textContent = max > 0 ? `（最大 ${max} 問）` : '';
+  }
+
+  btn.textContent = '開始';
+  btn.disabled = filtered.length === 0;
 }
 
 function closeChapterSelectModal() {
@@ -3668,7 +3744,46 @@ function confirmStartTraining() {
   const storage = getStorage();
   const filtered = getFilteredQuestions(storage.questions);
   if (!filtered.length) { showToast('この範囲に登録された問題がありません'); return; }
-  trainingQueue = filtered.map(q => ({ ...q, originalIdx: storage.questions.indexOf(q) })).sort(() => Math.random() - 0.5);
+
+  const lapKey = getChapterLapKey();
+  if (!storage.trainingLaps) storage.trainingLaps = {};
+
+  const allKeys = filtered.map(getQuestionKey);
+  const allKeySet = new Set(allKeys);
+  let state = storage.trainingLaps[lapKey];
+  const validRemaining = (state?.remaining || []).filter(k => allKeySet.has(k));
+
+  if (!state || validRemaining.length === 0) {
+    // 新しい周を開始（初回 or 前の周が完了）
+    state = {
+      lap: state ? (state.lap || 1) + 1 : 1,
+      remaining: [...allKeys].sort(() => Math.random() - 0.5),
+    };
+    storage.trainingLaps[lapKey] = state;
+  } else {
+    state.remaining = validRemaining;
+  }
+
+  // 問題数を決定
+  const countInput = document.getElementById('chselCountInput');
+  const requested = Math.max(1, parseInt(countInput?.value) || state.remaining.length);
+  const count = Math.min(requested, state.remaining.length);
+  localStorage.setItem('kaisha-v2-qcount', count);
+
+  // remaining の先頭から count 個を取り出す（シャッフル済み）
+  const drawnKeys = state.remaining.splice(0, count);
+  saveStorage(storage);
+
+  // drawn の順序を保ってキューを構築
+  const keyToQ = {};
+  filtered.forEach(q => { keyToQ[getQuestionKey(q)] = q; });
+  trainingQueue = drawnKeys
+    .map(k => {
+      const q = keyToQ[k];
+      return q ? { ...q, originalIdx: storage.questions.indexOf(q) } : null;
+    })
+    .filter(Boolean);
+
   currentIdx = 0;
   sessionCorrect = 0;
   sessionTotal = 0;
@@ -5173,6 +5288,12 @@ function rlDeleteProblem(id) {
     </div>
     <div class="chsel-body" id="chselBody"></div>
     <div class="chsel-footer">
+      <div class="chsel-lap-info" id="chselLapInfo"></div>
+      <div class="chsel-count-row">
+        <span class="chsel-count-label">問題数</span>
+        <input type="number" id="chselCountInput" class="chsel-count-input" min="1" value="20" oninput="chselClampCount()">
+        <span class="chsel-count-hint" id="chselCountHint"></span>
+      </div>
       <button id="chselStartBtn" onclick="confirmStartTraining()">開始</button>
     </div>
   </div>
