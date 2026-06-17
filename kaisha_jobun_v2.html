@@ -91,7 +91,7 @@
   }
 
   .tab {
-    flex: 0 0 40%;
+    flex: 1;
     text-align: center;
     padding: 14px 20px;
     font-size: 13px;
@@ -1662,6 +1662,307 @@
     margin-left: auto;
     margin-right: 4px;
   }
+
+  /* ===== 論点学習 ===== */
+  .rl-view { display: none; }
+  .rl-view.active { display: block; }
+
+  .rl-home-top { margin-bottom: 24px; }
+  .rl-home-stats {
+    display: flex; gap: 12px; margin-bottom: 24px;
+  }
+  .rl-stat-card {
+    flex: 1; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 16px; text-align: center;
+  }
+  .rl-stat-num {
+    font-size: 28px; font-weight: 700; color: var(--accent);
+    font-family: 'Noto Serif JP', serif; line-height: 1.2;
+  }
+  .rl-stat-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+  .rl-home-actions { display: flex; flex-direction: column; gap: 10px; }
+  .rl-home-start {
+    width: 100%; padding: 16px; border: none; border-radius: var(--radius);
+    background: var(--accent); color: #fff; font-size: 15px; font-weight: 700;
+    font-family: 'Noto Sans JP', sans-serif; cursor: pointer; transition: background 0.15s;
+  }
+  .rl-home-start:hover { background: var(--accent-hover); }
+  .rl-home-sub { display: flex; gap: 10px; }
+  .rl-home-sub .btn { flex: 1; }
+
+  /* 戻るバー */
+  .rl-back-bar {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 20px; padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .rl-back-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+
+  /* 登録フォーム */
+  .rl-form-section { display: flex; flex-direction: column; gap: 16px; }
+  .rl-field { display: flex; flex-direction: column; gap: 6px; }
+  .rl-field-label {
+    font-size: 12px; font-weight: 700; color: var(--text-secondary);
+    letter-spacing: 0.04em;
+  }
+  .rl-field-badge {
+    display: inline-block; font-size: 10px; padding: 1px 6px;
+    background: var(--accent-light); color: var(--accent);
+    border-radius: 3px; margin-left: 6px; font-weight: 400;
+  }
+  .rl-input {
+    width: 100%; padding: 9px 12px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); font-size: 13.5px; line-height: 1.7;
+    font-family: 'Noto Sans JP', sans-serif; color: var(--text-primary);
+    background: var(--surface); resize: vertical; min-height: 44px; outline: none;
+    transition: border-color 0.2s;
+  }
+  .rl-input:focus { border-color: var(--accent); }
+  .rl-input.short { min-height: 0; resize: none; }
+  .rl-input-row { display: flex; gap: 8px; align-items: flex-start; }
+  .rl-input-row .rl-input { flex: 1; }
+
+  /* 関連条文チップ */
+  .rl-article-chips {
+    display: flex; flex-wrap: wrap; gap: 6px; min-height: 32px;
+    padding: 6px 8px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); background: var(--surface);
+  }
+  .rl-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--accent-light); color: var(--accent);
+    border-radius: 4px; padding: 3px 8px; font-size: 12px; font-weight: 500;
+  }
+  .rl-chip-del {
+    background: none; border: none; color: var(--accent); cursor: pointer;
+    font-size: 13px; padding: 0; line-height: 1; opacity: 0.7;
+  }
+  .rl-chip-del:hover { opacity: 1; }
+  .rl-suggest-wrap { position: relative; flex: 1; }
+
+  /* 判例トグル */
+  .rl-toggle-row { display: flex; align-items: center; gap: 12px; }
+  .rl-toggle {
+    position: relative; width: 42px; height: 24px;
+    appearance: none; border-radius: 12px;
+    background: var(--border); cursor: pointer;
+    transition: background 0.2s; outline: none; flex-shrink: 0;
+  }
+  .rl-toggle:checked { background: var(--accent); }
+  .rl-toggle::after {
+    content: ''; position: absolute; top: 3px; left: 3px;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #fff; transition: left 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .rl-toggle:checked::after { left: 21px; }
+  .rl-toggle-label { font-size: 13px; color: var(--text-primary); }
+
+  /* セッション */
+  .rl-session-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 18px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .rl-session-progress {
+    margin-left: auto; font-size: 12px; color: var(--text-muted);
+    font-family: monospace;
+  }
+  .rl-ronten-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px; margin-bottom: 16px;
+  }
+  .rl-ronten-label {
+    font-size: 10px; font-weight: 700; color: var(--text-muted);
+    letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .rl-hanrei-badge {
+    background: #fff3e0; color: #e06c00; border: 1px solid #f0c080;
+    font-size: 10px; padding: 1px 6px; border-radius: 3px; font-weight: 600;
+  }
+  .rl-page-badge {
+    background: var(--surface2); color: var(--text-muted);
+    font-size: 10px; padding: 1px 6px; border-radius: 3px;
+  }
+  .rl-ronten-name {
+    font-size: 15px; font-weight: 600; line-height: 1.65;
+    color: var(--text-primary); font-family: 'Noto Serif JP', serif;
+  }
+
+  .rl-answer-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px; margin-bottom: 14px;
+  }
+  .rl-answer-card-title {
+    font-size: 10px; font-weight: 700; color: var(--text-muted);
+    letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px;
+  }
+  .rl-model-answer { background: #f0f7ff; border-color: #b8d4f0; }
+  .rl-model-answer .rl-answer-card-title { color: #1a4a7a; }
+  .rl-ans-part { margin-bottom: 10px; }
+  .rl-ans-part:last-child { margin-bottom: 0; }
+  .rl-ans-part-num {
+    font-size: 10px; font-weight: 700; color: var(--accent);
+    margin-bottom: 3px; letter-spacing: 0.04em;
+  }
+  .rl-ans-part-text {
+    font-size: 13px; line-height: 1.8; color: var(--text-primary);
+    white-space: pre-wrap;
+  }
+
+  /* キーワード評価 */
+  .rl-eval-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px; margin-bottom: 14px;
+  }
+  .rl-eval-title {
+    font-size: 10px; font-weight: 700; color: var(--text-muted);
+    letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px;
+  }
+  .rl-kw-item { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--border-light); }
+  .rl-kw-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .rl-kw-word { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; line-height: 1.5; }
+  .rl-kw-btns { display: flex; gap: 4px; }
+  .rl-ksb {
+    flex: 1; padding: 7px 4px; border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border); background: var(--surface2);
+    font-size: 12px; font-weight: 700; cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif; transition: all 0.12s;
+    text-align: center; color: var(--text-muted);
+  }
+  .rl-ksb.sel-oo { background: #e8f5e9; border-color: #43a047; color: #2e7d32; }
+  .rl-ksb.sel-o  { background: #f1f8e9; border-color: #8bc34a; color: #558b2f; }
+  .rl-ksb.sel-n  { background: var(--surface2); border-color: var(--border); color: var(--text-muted); }
+  .rl-ksb.sel-x  { background: #fff8e1; border-color: #ffb300; color: #e65100; }
+  .rl-ksb.sel-xx { background: #ffebee; border-color: #ef5350; color: #c62828; }
+
+  /* 条文評価 */
+  .rl-article-eval-list { display: flex; flex-direction: column; gap: 8px; }
+  .rl-article-eval-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border); background: var(--surface2);
+    cursor: pointer; transition: all 0.15s; user-select: none;
+  }
+  .rl-article-eval-item.checked {
+    border-color: var(--accent); background: var(--accent-light);
+  }
+  .rl-article-eval-item .rl-ae-check {
+    width: 18px; height: 18px; border-radius: 4px;
+    border: 1.5px solid var(--border); background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; flex-shrink: 0; transition: all 0.15s;
+  }
+  .rl-article-eval-item.checked .rl-ae-check {
+    background: var(--accent); border-color: var(--accent); color: #fff;
+  }
+  .rl-ae-name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+  .rl-ae-caption { font-size: 11px; color: var(--text-muted); margin-left: 2px; }
+
+  /* 理解度バー */
+  .rl-understanding-bar {
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 14px; padding: 12px 14px;
+    background: var(--surface2); border-radius: var(--radius-sm);
+  }
+  .rl-u-label { font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
+  .rl-u-track { flex: 1; height: 6px; background: var(--border); border-radius: 999px; overflow: hidden; }
+  .rl-u-fill { height: 100%; border-radius: 999px; transition: width 0.4s ease; }
+  .rl-u-pct { font-size: 12px; font-weight: 700; min-width: 36px; text-align: right; flex-shrink: 0; }
+
+  .rl-btn-next {
+    width: 100%; padding: 14px; border: none; border-radius: var(--radius);
+    background: var(--text-primary); color: #fff; font-size: 14px; font-weight: 700;
+    font-family: 'Noto Sans JP', sans-serif; cursor: pointer; margin-top: 16px; transition: opacity 0.15s;
+  }
+  .rl-btn-next:hover { opacity: 0.85; }
+
+  /* 管理リスト */
+  .rl-manage-filter { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .rl-manage-filter-btn {
+    font-size: 12px; padding: 5px 12px; border-radius: 20px;
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--text-secondary); cursor: pointer; transition: all 0.15s;
+  }
+  .rl-manage-filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  .rl-problem-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 10px; overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  .rl-problem-header {
+    padding: 14px 16px; display: flex; align-items: flex-start;
+    gap: 10px; cursor: pointer; user-select: none; transition: background 0.15s;
+  }
+  .rl-problem-header:hover { background: var(--surface2); }
+  .rl-problem-name {
+    flex: 1; font-size: 13.5px; font-weight: 500; line-height: 1.6;
+    color: var(--text-primary);
+  }
+  .rl-problem-meta {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0;
+  }
+  .rl-problem-score {
+    font-size: 12px; font-weight: 700; font-family: monospace;
+    color: var(--text-muted);
+  }
+  .rl-problem-score.has-score { color: var(--accent); }
+  .rl-problem-tags { display: flex; gap: 4px; }
+  .rl-tag {
+    font-size: 10px; padding: 1px 5px; border-radius: 3px;
+    background: var(--surface2); color: var(--text-muted);
+    border: 1px solid var(--border-light);
+  }
+  .rl-tag.hanrei { background: #fff3e0; color: #e06c00; border-color: #f0c080; }
+  .rl-tag.kw { background: var(--accent-light); color: var(--accent); }
+
+  .rl-problem-body { display: none; padding: 14px 16px; border-top: 1px solid var(--border-light); }
+  .rl-problem-body.open { display: block; }
+
+  .rl-body-section { margin-bottom: 14px; }
+  .rl-body-section:last-child { margin-bottom: 0; }
+  .rl-body-section-title {
+    font-size: 10px; font-weight: 700; color: var(--text-muted);
+    letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px;
+  }
+  .rl-body-text {
+    font-size: 12.5px; line-height: 1.75; color: var(--text-primary);
+    white-space: pre-wrap; background: var(--surface2); padding: 8px 10px;
+    border-radius: var(--radius-sm);
+  }
+
+  .rl-kw-manage-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .rl-kw-manage-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 4px; padding: 3px 8px; font-size: 12px; color: var(--text-primary);
+  }
+  .rl-kw-manage-del {
+    background: none; border: none; cursor: pointer; font-size: 13px;
+    color: var(--text-muted); padding: 0; line-height: 1;
+  }
+  .rl-kw-manage-del:hover { color: var(--red); }
+  .rl-kw-add-row { display: flex; gap: 6px; margin-top: 6px; }
+  .rl-kw-add-input {
+    flex: 1; padding: 6px 10px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); font-size: 13px;
+    font-family: 'Noto Sans JP', sans-serif; outline: none;
+    background: var(--surface); color: var(--text-primary);
+  }
+  .rl-kw-add-input:focus { border-color: var(--accent); }
+
+  .rl-manage-actions { display: flex; gap: 8px; margin-top: 14px; }
+  .rl-manage-actions .btn { flex: 1; }
+
+  .rl-empty {
+    text-align: center; padding: 40px 20px;
+    color: var(--text-muted); font-size: 13px; line-height: 1.8;
+  }
+
+  .rl-no-kw { font-size: 11px; color: var(--text-muted); font-style: italic; }
 </style>
 </head>
 <body>
@@ -1708,6 +2009,7 @@
 <div class="tabs">
   <div class="tab active" onclick="switchTab('browse')">条文 検索・閲覧</div>
   <div class="tab" onclick="switchTab('training')">逆引きトレーニング</div>
+  <div class="tab" onclick="switchTab('ronten-learn')">論点学習</div>
 </div>
 
 <div class="main">
@@ -1825,6 +2127,109 @@
     </div>
   </div>
 
+  <!-- ===== 論点学習 ===== -->
+  <div id="panel-ronten-learn" class="panel">
+
+    <!-- ホーム -->
+    <div id="rl-home" class="rl-view active">
+      <div class="rl-home-stats">
+        <div class="rl-stat-card">
+          <div class="rl-stat-num" id="rl-stat-total">0</div>
+          <div class="rl-stat-label">登録論点</div>
+        </div>
+        <div class="rl-stat-card">
+          <div class="rl-stat-num" id="rl-stat-done">0</div>
+          <div class="rl-stat-label">学習済み</div>
+        </div>
+      </div>
+      <div class="rl-home-actions">
+        <button class="rl-home-start" onclick="rlStartSession()">学習開始</button>
+        <div class="rl-home-sub">
+          <button class="btn" onclick="rlSwitchView_register(null)">問題登録</button>
+          <button class="btn" onclick="rlSwitchView('manage')">問題管理</button>
+        </div>
+      </div>
+      <div id="rl-home-msg" class="rl-empty" style="display:none">論点が登録されていません。<br>「問題登録」から追加してください。</div>
+    </div>
+
+    <!-- 登録 -->
+    <div id="rl-register" class="rl-view">
+      <div class="rl-back-bar">
+        <button class="btn btn-sm" onclick="rlSwitchView('home')">← 戻る</button>
+        <span class="rl-back-title" id="rl-register-title">論点を登録</span>
+      </div>
+      <div class="rl-form-section" id="rl-form">
+        <div class="rl-field">
+          <label class="rl-field-label">論点名<span class="rl-field-badge">必須</span></label>
+          <textarea class="rl-input" id="rl-name" rows="3" placeholder="例：株主は他の株主に対する瑕疵につき、自ら原告となって訴えを提起することができるか"></textarea>
+        </div>
+        <div class="rl-field">
+          <label class="rl-field-label">① 問題提起<span class="rl-field-badge">任意</span></label>
+          <textarea class="rl-input" id="rl-ans1" rows="3" placeholder="問題提起を入力..."></textarea>
+        </div>
+        <div class="rl-field">
+          <label class="rl-field-label">② 規範定立<span class="rl-field-badge">任意</span></label>
+          <textarea class="rl-input" id="rl-ans2" rows="4" placeholder="規範定立を入力..."></textarea>
+        </div>
+        <div class="rl-field">
+          <label class="rl-field-label">③ 当てはめ<span class="rl-field-badge">任意</span></label>
+          <textarea class="rl-input" id="rl-ans3" rows="3" placeholder="当てはめを入力（なし可）..."></textarea>
+        </div>
+        <div class="rl-field">
+          <label class="rl-field-label">テキストページ<span class="rl-field-badge">任意</span></label>
+          <input class="rl-input short" id="rl-page" type="number" min="1" placeholder="例：123" style="max-width:140px">
+        </div>
+        <div class="rl-field">
+          <label class="rl-field-label">関連条文<span class="rl-field-badge">任意</span></label>
+          <div class="rl-article-chips" id="rl-article-chips"></div>
+          <div class="rl-input-row" style="margin-top:6px">
+            <div class="rl-suggest-wrap">
+              <input class="rl-input short" id="rl-article-input" type="text" placeholder="条番号を入力（例：831）"
+                oninput="rlOnArticleInput()" onblur="rlHideSuggestDelay()" autocomplete="off">
+              <div id="rl-article-suggest" class="related-suggest" style="display:none"></div>
+            </div>
+            <button class="btn btn-sm" onclick="rlAddArticleByInput()">追加</button>
+          </div>
+        </div>
+        <div class="rl-field">
+          <label class="rl-field-label">判例</label>
+          <div class="rl-toggle-row">
+            <input type="checkbox" class="rl-toggle" id="rl-hanrei">
+            <span class="rl-toggle-label">判例がある論証</span>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px">
+          <button class="btn btn-sm" onclick="rlCancelEdit()">キャンセル</button>
+          <button class="btn btn-primary btn-sm" onclick="rlSaveRegister()">登録する</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- セッション -->
+    <div id="rl-session" class="rl-view">
+      <div class="rl-session-header">
+        <button class="btn btn-sm" onclick="rlEndSession()">← 終了</button>
+        <div class="rl-session-progress" id="rl-progress"></div>
+      </div>
+      <div id="rl-session-content"></div>
+    </div>
+
+    <!-- 管理 -->
+    <div id="rl-manage" class="rl-view">
+      <div class="rl-back-bar">
+        <button class="btn btn-sm" onclick="rlSwitchView('home')">← 戻る</button>
+        <span class="rl-back-title">問題管理</span>
+      </div>
+      <div class="rl-manage-filter">
+        <button class="rl-manage-filter-btn active" id="rl-filter-all" onclick="rlSetFilter('all')">すべて</button>
+        <button class="rl-manage-filter-btn" id="rl-filter-hanrei" onclick="rlSetFilter('hanrei')">判例あり</button>
+        <button class="rl-manage-filter-btn" id="rl-filter-no-kw" onclick="rlSetFilter('no-kw')">KW未登録</button>
+      </div>
+      <div id="rl-manage-list"></div>
+    </div>
+
+  </div>
+
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1904,7 +2309,7 @@ let _lastTrainingView = null;
 let _articleListDirty = true;
 
 function switchTab(name) {
-  const tabs = ['browse','training'];
+  const tabs = ['browse','training','ronten-learn'];
   const alreadyActive = document.getElementById('panel-' + name).classList.contains('active');
   if (alreadyActive) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
   localStorage.setItem('kaisha-v2-tab', name);
@@ -1933,6 +2338,8 @@ function switchTab(name) {
   } else if (name === 'browse') {
     if (_articleListDirty || !document.getElementById('articleList').children.length) renderArticles();
     _updateRegisterBanner();
+  } else if (name === 'ronten-learn') {
+    rlRenderHome();
   }
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -3810,6 +4217,576 @@ function showArticleQPopup(numKey) {
   ).join('');
   document.getElementById('infoPopup').classList.add('open');
   document.getElementById('infoPopupOverlay').classList.add('open');
+}
+
+// ============================================================
+// ===== 論点学習 =====
+// ============================================================
+
+function rlGetProblems() {
+  const s = getStorage();
+  if (!s.rlProblems) s.rlProblems = [];
+  return s.rlProblems;
+}
+
+function rlSaveProblems(problems) {
+  const s = getStorage();
+  s.rlProblems = problems;
+  saveStorage(s);
+}
+
+function rlGenId() {
+  return 'rl_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+function rlSwitchView(name) {
+  document.querySelectorAll('.rl-view').forEach(v => v.classList.remove('active'));
+  document.getElementById('rl-' + name).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (name === 'home') rlRenderHome();
+  if (name === 'manage') rlRenderManage();
+}
+
+function rlRenderHome() {
+  const problems = rlGetProblems();
+  const done = problems.filter(p => p.history && p.history.length > 0).length;
+  document.getElementById('rl-stat-total').textContent = problems.length;
+  document.getElementById('rl-stat-done').textContent = done;
+  const msg = document.getElementById('rl-home-msg');
+  msg.style.display = problems.length === 0 ? 'block' : 'none';
+}
+
+let _rlEditId = null;
+let _rlArticles = [];
+let _isRlComposing = false;
+
+function rlSwitchView_register(editId) {
+  _rlEditId = editId || null;
+  _rlArticles = [];
+  document.getElementById('rl-name').value = '';
+  document.getElementById('rl-ans1').value = '';
+  document.getElementById('rl-ans2').value = '';
+  document.getElementById('rl-ans3').value = '';
+  document.getElementById('rl-page').value = '';
+  document.getElementById('rl-hanrei').checked = false;
+  document.getElementById('rl-article-input').value = '';
+  document.getElementById('rl-article-suggest').style.display = 'none';
+
+  if (editId) {
+    const p = rlGetProblems().find(p => p.id === editId);
+    if (p) {
+      document.getElementById('rl-register-title').textContent = '論点を編集';
+      document.getElementById('rl-name').value = p.name || '';
+      document.getElementById('rl-ans1').value = p.ans1 || '';
+      document.getElementById('rl-ans2').value = p.ans2 || '';
+      document.getElementById('rl-ans3').value = p.ans3 || '';
+      document.getElementById('rl-page').value = p.page || '';
+      document.getElementById('rl-hanrei').checked = !!p.hasHanrei;
+      _rlArticles = (p.articles || []).map(a => ({ numStr: a, caption: rlGetCaption(a) }));
+    }
+  } else {
+    document.getElementById('rl-register-title').textContent = '論点を登録';
+  }
+  rlRenderArticleChips();
+  rlSwitchView('register');
+}
+
+function rlGetCaption(numStr) {
+  const key = numStr.replace(/の/g, '_');
+  const art = LAW_DATA[key] || LAW_DATA[numStr];
+  return art ? (art.caption || '') : '';
+}
+
+function rlRenderArticleChips() {
+  const container = document.getElementById('rl-article-chips');
+  container.innerHTML = _rlArticles.map((a, i) =>
+    `<span class="rl-chip">第${a.numStr}条${a.caption ? '（' + a.caption + '）' : ''}
+      <button class="rl-chip-del" onclick="rlRemoveArticle(${i})">×</button>
+    </span>`
+  ).join('');
+}
+
+function rlOnArticleInput() {
+  const input = document.getElementById('rl-article-input');
+  const box = document.getElementById('rl-article-suggest');
+  const val = input.value.trim();
+  if (!val) { box.style.display = 'none'; return; }
+
+  const existing = _rlArticles.map(a => a.numStr);
+  const results = [];
+  for (const key of Object.keys(LAW_DATA)) {
+    const art = LAW_DATA[key];
+    const numStr = art.num || String(art.article);
+    if (existing.includes(numStr)) continue;
+    if (numStr.startsWith(val) || String(art.article).startsWith(val)) {
+      results.push({ numStr, caption: art.caption || '' });
+      if (results.length >= 8) break;
+    }
+  }
+
+  if (!results.length) { box.style.display = 'none'; return; }
+  box.innerHTML = results.map(r =>
+    `<div class="related-suggest-item" onmousedown="rlSelectArticle('${r.numStr}')">第${r.numStr}条${r.caption ? '　' + r.caption : ''}</div>`
+  ).join('');
+  box.style.display = 'block';
+  positionSuggest(input, box);
+}
+
+function rlHideSuggestDelay() {
+  setTimeout(() => {
+    const box = document.getElementById('rl-article-suggest');
+    if (box) box.style.display = 'none';
+  }, 200);
+}
+
+function rlSelectArticle(numStr) {
+  if (_rlArticles.some(a => a.numStr === numStr)) return;
+  _rlArticles.push({ numStr, caption: rlGetCaption(numStr) });
+  document.getElementById('rl-article-input').value = '';
+  document.getElementById('rl-article-suggest').style.display = 'none';
+  rlRenderArticleChips();
+}
+
+function rlAddArticleByInput() {
+  const val = document.getElementById('rl-article-input').value.trim();
+  if (!val) return;
+  rlSelectArticle(val);
+}
+
+function rlRemoveArticle(idx) {
+  _rlArticles.splice(idx, 1);
+  rlRenderArticleChips();
+}
+
+function rlCancelEdit() {
+  _rlEditId = null;
+  _rlArticles = [];
+  rlSwitchView('home');
+}
+
+function rlSaveRegister() {
+  const name = document.getElementById('rl-name').value.trim();
+  if (!name) { showToast('論点名を入力してください'); return; }
+
+  const problems = rlGetProblems();
+  const now = new Date().toLocaleDateString('ja-JP');
+
+  if (_rlEditId) {
+    const idx = problems.findIndex(p => p.id === _rlEditId);
+    if (idx >= 0) {
+      problems[idx].name = name;
+      problems[idx].ans1 = document.getElementById('rl-ans1').value.trim();
+      problems[idx].ans2 = document.getElementById('rl-ans2').value.trim();
+      problems[idx].ans3 = document.getElementById('rl-ans3').value.trim();
+      problems[idx].page = document.getElementById('rl-page').value.trim();
+      problems[idx].articles = _rlArticles.map(a => a.numStr);
+      problems[idx].hasHanrei = document.getElementById('rl-hanrei').checked;
+    }
+    showToast('更新しました');
+  } else {
+    problems.push({
+      id: rlGenId(),
+      name,
+      ans1: document.getElementById('rl-ans1').value.trim(),
+      ans2: document.getElementById('rl-ans2').value.trim(),
+      ans3: document.getElementById('rl-ans3').value.trim(),
+      page: document.getElementById('rl-page').value.trim(),
+      articles: _rlArticles.map(a => a.numStr),
+      hasHanrei: document.getElementById('rl-hanrei').checked,
+      keywords: [],
+      history: [],
+      createdAt: now,
+    });
+    showToast('登録しました');
+  }
+
+  rlSaveProblems(problems);
+  _rlEditId = null;
+  _rlArticles = [];
+  rlSwitchView('home');
+}
+
+let _rlSession = null;
+
+function rlStartSession() {
+  const problems = rlGetProblems();
+  if (!problems.length) { showToast('論点が登録されていません'); return; }
+  _rlSession = {
+    queue: [...problems].sort(() => Math.random() - 0.5),
+    idx: 0,
+    phase: 'input',
+    userAnswer: '',
+    kwScores: {},
+    articleChecked: {},
+  };
+  rlSwitchView('session');
+  rlRenderSession();
+}
+
+function rlEndSession() {
+  _rlSession = null;
+  rlSwitchView('home');
+}
+
+function rlRenderSession() {
+  if (!_rlSession) return;
+  const { queue, idx, phase, userAnswer, kwScores, articleChecked } = _rlSession;
+  if (idx >= queue.length) { rlFinishSession(); return; }
+
+  const problem = queue[idx];
+  document.getElementById('rl-progress').textContent = `${idx + 1} / ${queue.length}`;
+
+  const badges = [
+    problem.hasHanrei ? `<span class="rl-hanrei-badge">判例あり</span>` : '',
+    problem.page ? `<span class="rl-page-badge">p.${problem.page}</span>` : '',
+  ].filter(Boolean).join('');
+
+  const rontenCard = `
+    <div class="rl-ronten-card">
+      <div class="rl-ronten-label">論点 ${badges}</div>
+      <div class="rl-ronten-name">${escapeHtml(problem.name)}</div>
+    </div>`;
+
+  const content = document.getElementById('rl-session-content');
+
+  if (phase === 'input') {
+    content.innerHTML = rontenCard + `
+      <div class="rl-answer-card">
+        <div class="rl-answer-card-title">自分の論証を入力（任意）</div>
+        <textarea class="rl-input" id="rl-user-input" rows="6" placeholder="論証を書いてみてください...">${escapeHtml(userAnswer)}</textarea>
+      </div>
+      <button class="btn btn-primary" style="width:100%;padding:14px;margin-top:4px" onclick="rlSubmitAnswer()">採点へ →</button>`;
+  } else {
+    const kws = problem.keywords || [];
+    const articles = problem.articles || [];
+
+    const modelParts = [
+      { label: '① 問題提起', val: problem.ans1 },
+      { label: '② 規範定立', val: problem.ans2 },
+      { label: '③ 当てはめ', val: problem.ans3 },
+    ].filter(p => p.val);
+
+    const modelHtml = modelParts.length ? `
+      <div class="rl-answer-card rl-model-answer">
+        <div class="rl-answer-card-title">模範解答</div>
+        ${modelParts.map(p => `
+          <div class="rl-ans-part">
+            <div class="rl-ans-part-num">${p.label}</div>
+            <div class="rl-ans-part-text">${escapeHtml(p.val)}</div>
+          </div>`).join('')}
+      </div>` : '';
+
+    const userHtml = userAnswer ? `
+      <div class="rl-answer-card">
+        <div class="rl-answer-card-title">あなたの解答</div>
+        <div style="font-size:13px;line-height:1.8;white-space:pre-wrap">${escapeHtml(userAnswer)}</div>
+      </div>` : '';
+
+    const kwHtml = kws.length === 0
+      ? `<div class="rl-no-kw">キーワードが登録されていません。「問題管理」から追加できます。</div>`
+      : kws.map((kw, i) => {
+          const sel = kwScores[i] || null;
+          return `<div class="rl-kw-item">
+            <div class="rl-kw-word">${escapeHtml(kw)}</div>
+            <div class="rl-kw-btns">
+              <button class="rl-ksb${sel==='oo'?' sel-oo':''}" onclick="rlSetKwScore(${i},'oo')">○○</button>
+              <button class="rl-ksb${sel==='o'?' sel-o':''}" onclick="rlSetKwScore(${i},'o')">○</button>
+              <button class="rl-ksb${sel==='n'?' sel-n':''}" onclick="rlSetKwScore(${i},'n')">ー</button>
+              <button class="rl-ksb${sel==='x'?' sel-x':''}" onclick="rlSetKwScore(${i},'x')">×</button>
+              <button class="rl-ksb${sel==='xx'?' sel-xx':''}" onclick="rlSetKwScore(${i},'xx')">××</button>
+            </div>
+          </div>`;
+        }).join('');
+
+    const kwU = kws.length > 0 ? rlCalcKwUnderstanding(kwScores, kws.length) : null;
+    const kwUCol = rlUColor(kwU);
+    const kwEvalCard = `
+      <div class="rl-eval-card">
+        <div class="rl-eval-title">語句・フレーズ 自己評価</div>
+        ${kwHtml}
+        ${kws.length > 0 ? `<div class="rl-understanding-bar">
+          <div class="rl-u-label">理解度</div>
+          <div class="rl-u-track"><div class="rl-u-fill" id="rl-u-fill" style="width:${kwU||0}%;background:${kwUCol}"></div></div>
+          <div class="rl-u-pct" id="rl-u-pct" style="color:${kwUCol}">${kwU !== null ? kwU+'%' : '–'}</div>
+        </div>` : ''}
+      </div>`;
+
+    const artEvalHtml = articles.length === 0
+      ? `<div class="rl-no-kw">関連条文が登録されていません。</div>`
+      : `<div class="rl-article-eval-list">
+          ${articles.map((numStr, i) => {
+            const cap = rlGetCaption(numStr);
+            const checked = articleChecked[i] || false;
+            return `<div class="rl-article-eval-item${checked?' checked':''}" onclick="rlToggleArticle(${i})" id="rl-ae-${i}">
+              <div class="rl-ae-check">${checked ? '✓' : ''}</div>
+              <div>
+                <span class="rl-ae-name">第${numStr}条</span>
+                ${cap ? `<span class="rl-ae-caption">${escapeHtml(cap)}</span>` : ''}
+              </div>
+            </div>`;
+          }).join('')}
+        </div>`;
+
+    const artU = articles.length > 0 ? rlCalcArticleUnderstanding(articleChecked, articles.length) : null;
+    const artUCol = rlUColor(artU);
+    const artEvalCard = `
+      <div class="rl-eval-card">
+        <div class="rl-eval-title">条文 自己評価（挙げられた条文にチェック）</div>
+        ${artEvalHtml}
+        ${articles.length > 0 ? `<div class="rl-understanding-bar">
+          <div class="rl-u-label">条文充足率</div>
+          <div class="rl-u-track"><div class="rl-u-fill" id="rl-art-fill" style="width:${artU||0}%;background:${artUCol}"></div></div>
+          <div class="rl-u-pct" id="rl-art-pct" style="color:${artUCol}">${artU !== null ? artU+'%' : '–'}</div>
+        </div>` : ''}
+      </div>`;
+
+    content.innerHTML = rontenCard + userHtml + modelHtml + kwEvalCard + artEvalCard +
+      `<button class="rl-btn-next" onclick="rlNextProblem()">次の論点 →</button>`;
+  }
+  window.scrollTo(0, 0);
+}
+
+function rlSubmitAnswer() {
+  _rlSession.userAnswer = document.getElementById('rl-user-input')?.value || '';
+  _rlSession.phase = 'eval';
+  _rlSession.kwScores = {};
+  _rlSession.articleChecked = {};
+  rlRenderSession();
+}
+
+function rlSetKwScore(kwIdx, val) {
+  _rlSession.kwScores[kwIdx] = val;
+  const types = ['oo','o','n','x','xx'];
+  const items = document.querySelectorAll('.rl-kw-item');
+  if (items[kwIdx]) {
+    items[kwIdx].querySelectorAll('.rl-ksb').forEach((btn, j) => {
+      btn.className = 'rl-ksb' + (val === types[j] ? ' sel-' + types[j] : '');
+    });
+  }
+  const kws = _rlSession.queue[_rlSession.idx].keywords || [];
+  const u = rlCalcKwUnderstanding(_rlSession.kwScores, kws.length);
+  const fill = document.getElementById('rl-u-fill');
+  const pct = document.getElementById('rl-u-pct');
+  if (fill && pct && u !== null) {
+    const col = rlUColor(u);
+    fill.style.width = u + '%'; fill.style.background = col;
+    pct.textContent = u + '%'; pct.style.color = col;
+  }
+}
+
+function rlToggleArticle(idx) {
+  _rlSession.articleChecked[idx] = !_rlSession.articleChecked[idx];
+  const item = document.getElementById('rl-ae-' + idx);
+  if (item) {
+    item.classList.toggle('checked', _rlSession.articleChecked[idx]);
+    item.querySelector('.rl-ae-check').textContent = _rlSession.articleChecked[idx] ? '✓' : '';
+  }
+  const articles = _rlSession.queue[_rlSession.idx].articles || [];
+  const u = rlCalcArticleUnderstanding(_rlSession.articleChecked, articles.length);
+  const fill = document.getElementById('rl-art-fill');
+  const pct = document.getElementById('rl-art-pct');
+  if (fill && pct && u !== null) {
+    const col = rlUColor(u);
+    fill.style.width = u + '%'; fill.style.background = col;
+    pct.textContent = u + '%'; pct.style.color = col;
+  }
+}
+
+function rlNextProblem() {
+  const problem = _rlSession.queue[_rlSession.idx];
+  const kws = problem.keywords || [];
+  const articles = problem.articles || [];
+  const kwU = kws.length > 0 ? rlCalcKwUnderstanding(_rlSession.kwScores, kws.length) : null;
+  const artU = articles.length > 0 ? rlCalcArticleUnderstanding(_rlSession.articleChecked, articles.length) : null;
+  const date = new Date().toLocaleDateString('ja-JP');
+
+  const problems = rlGetProblems();
+  const pIdx = problems.findIndex(p => p.id === problem.id);
+  if (pIdx >= 0) {
+    problems[pIdx].history = problems[pIdx].history || [];
+    problems[pIdx].history.push({ date, kwU, artU });
+    if (problems[pIdx].history.length > 50) problems[pIdx].history = problems[pIdx].history.slice(-50);
+    rlSaveProblems(problems);
+  }
+
+  _rlSession.idx++;
+  _rlSession.phase = 'input';
+  _rlSession.userAnswer = '';
+  _rlSession.kwScores = {};
+  _rlSession.articleChecked = {};
+  rlRenderSession();
+}
+
+function rlFinishSession() {
+  _rlSession = null;
+  showToast('学習完了しました');
+  rlSwitchView('home');
+}
+
+function rlCalcKwUnderstanding(scores, total) {
+  if (total === 0) return null;
+  const map = { oo: 100, o: 75, n: 50, x: 25, xx: 0 };
+  let sum = 0, count = 0;
+  for (let i = 0; i < total; i++) {
+    const v = scores[i];
+    if (v) { sum += map[v] || 0; count++; }
+  }
+  if (count === 0) return null;
+  return Math.round(sum / total);
+}
+
+function rlCalcArticleUnderstanding(checked, total) {
+  if (total === 0) return null;
+  let count = 0;
+  for (let i = 0; i < total; i++) { if (checked[i]) count++; }
+  return Math.round(count / total * 100);
+}
+
+function rlUColor(u) {
+  if (u === null) return 'var(--text-muted)';
+  if (u >= 80) return '#27724a';
+  if (u >= 60) return '#5a9e3a';
+  if (u >= 40) return '#d4a017';
+  return '#c0392b';
+}
+
+let _rlFilter = 'all';
+
+function rlSetFilter(f) {
+  _rlFilter = f;
+  document.querySelectorAll('.rl-manage-filter-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('rl-filter-' + f).classList.add('active');
+  rlRenderManage();
+}
+
+function rlRenderManage() {
+  const all = rlGetProblems();
+  let problems = all;
+  if (_rlFilter === 'hanrei') problems = all.filter(p => p.hasHanrei);
+  if (_rlFilter === 'no-kw') problems = all.filter(p => !p.keywords || p.keywords.length === 0);
+
+  const list = document.getElementById('rl-manage-list');
+  if (!problems.length) {
+    list.innerHTML = `<div class="rl-empty">該当する論点がありません。</div>`;
+    return;
+  }
+
+  list.innerHTML = problems.map(p => {
+    const lastH = p.history && p.history.length ? p.history[p.history.length - 1] : null;
+    const scoreStr = lastH ? (lastH.artU !== null ? lastH.artU + '%' : '–') : '未';
+    const tags = [
+      p.hasHanrei ? `<span class="rl-tag hanrei">判例</span>` : '',
+      p.page ? `<span class="rl-tag">p.${p.page}</span>` : '',
+      (p.keywords||[]).length ? `<span class="rl-tag kw">${p.keywords.length}KW</span>` : '',
+    ].filter(Boolean).join('');
+
+    const kws = p.keywords || [];
+    const arts = p.articles || [];
+
+    return `<div class="rl-problem-card">
+      <div class="rl-problem-header" onclick="rlToggleProblem('${p.id}')">
+        <div class="rl-problem-name">${escapeHtml(p.name)}</div>
+        <div class="rl-problem-meta">
+          <span class="rl-problem-score${lastH?' has-score':''}">${scoreStr}</span>
+          <div class="rl-problem-tags">${tags}</div>
+        </div>
+      </div>
+      <div class="rl-problem-body" id="rlbody-${p.id}">
+        ${arts.length ? `<div class="rl-body-section">
+          <div class="rl-body-section-title">関連条文</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            ${arts.map(n => `<span class="rl-chip" style="cursor:default">第${n}条${rlGetCaption(n) ? '（' + rlGetCaption(n) + '）' : ''}</span>`).join('')}
+          </div>
+        </div>` : ''}
+        ${p.ans2 ? `<div class="rl-body-section">
+          <div class="rl-body-section-title">② 規範定立</div>
+          <div class="rl-body-text">${escapeHtml(p.ans2)}</div>
+        </div>` : ''}
+        <div class="rl-body-section">
+          <div class="rl-body-section-title">語句・フレーズ（キーワード）</div>
+          <div class="rl-kw-manage-list" id="rl-kwlist-${p.id}">
+            ${kws.length ? kws.map((kw, i) => `<span class="rl-kw-manage-chip">
+              ${escapeHtml(kw)}
+              <button class="rl-kw-manage-del" onclick="rlDeleteKw('${p.id}',${i})">×</button>
+            </span>`).join('') : '<span class="rl-no-kw">未登録</span>'}
+          </div>
+          <div class="rl-kw-add-row">
+            <input class="rl-kw-add-input" id="rl-kwinput-${p.id}" type="text" placeholder="語句・フレーズを追加..."
+              oncompositionstart="_isRlComposing=true" oncompositionend="_isRlComposing=false"
+              onkeydown="if(event.key==='Enter'&&!event.isComposing&&!_isRlComposing){event.preventDefault();rlAddKw('${p.id}')}">
+            <button class="btn btn-sm" onclick="rlAddKw('${p.id}')">追加</button>
+          </div>
+        </div>
+        <div class="rl-manage-actions">
+          <button class="btn btn-sm" onclick="rlSwitchView_register('${p.id}')">編集</button>
+          <button class="btn btn-sm btn-danger" onclick="rlDeleteProblem('${p.id}')">削除</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function rlToggleProblem(id) {
+  const body = document.getElementById('rlbody-' + id);
+  if (body) body.classList.toggle('open');
+}
+
+function rlAddKw(id) {
+  const input = document.getElementById('rl-kwinput-' + id);
+  if (!input) return;
+  const val = input.value.trim();
+  if (!val) return;
+  const problems = rlGetProblems();
+  const p = problems.find(p => p.id === id);
+  if (!p) return;
+  p.keywords = p.keywords || [];
+  p.keywords.push(val);
+  rlSaveProblems(problems);
+  input.value = '';
+  rlRefreshKwList(id, p.keywords);
+}
+
+function rlDeleteKw(id, idx) {
+  const problems = rlGetProblems();
+  const p = problems.find(p => p.id === id);
+  if (!p || !p.keywords) return;
+  p.keywords.splice(idx, 1);
+  rlSaveProblems(problems);
+  rlRefreshKwList(id, p.keywords);
+}
+
+function rlRefreshKwList(id, kws) {
+  const list = document.getElementById('rl-kwlist-' + id);
+  if (!list) return;
+  list.innerHTML = kws.length
+    ? kws.map((kw, i) => `<span class="rl-kw-manage-chip">
+        ${escapeHtml(kw)}
+        <button class="rl-kw-manage-del" onclick="rlDeleteKw('${id}',${i})">×</button>
+      </span>`).join('')
+    : '<span class="rl-no-kw">未登録</span>';
+  const tag = document.querySelector(`#rlbody-${id} .rl-tag.kw`);
+  const header = document.querySelector(`#rlbody-${id}`)?.previousElementSibling;
+  if (header) {
+    const tagsDiv = header.querySelector('.rl-problem-tags');
+    if (tagsDiv) {
+      const problems = rlGetProblems();
+      const p = problems.find(p => p.id === id);
+      if (p) {
+        tagsDiv.innerHTML = [
+          p.hasHanrei ? `<span class="rl-tag hanrei">判例</span>` : '',
+          p.page ? `<span class="rl-tag">p.${p.page}</span>` : '',
+          kws.length ? `<span class="rl-tag kw">${kws.length}KW</span>` : '',
+        ].filter(Boolean).join('');
+      }
+    }
+  }
+}
+
+function rlDeleteProblem(id) {
+  if (!confirm('この論点を削除しますか？')) return;
+  const problems = rlGetProblems().filter(p => p.id !== id);
+  rlSaveProblems(problems);
+  rlRenderManage();
 }
 </script>
 <!-- 編集ポップアップ -->
