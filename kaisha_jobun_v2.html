@@ -1941,6 +1941,98 @@
 
   .rl-no-kw { font-size: 11px; color: var(--text-muted); font-style: italic; }
 
+  /* 履歴セクション */
+  .rl-hist-section { margin-top: 28px; }
+  .rl-hist-section-title {
+    font-size: 11px; font-weight: 700; color: var(--text-muted);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 12px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .rl-hist-ch-header {
+    font-size: 12px; font-weight: 700; color: var(--text-secondary);
+    margin: 16px 0 6px; letter-spacing: 0.03em;
+  }
+  .rl-hist-ch-header:first-child { margin-top: 0; }
+
+  .rl-hist-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 8px; overflow: hidden;
+  }
+  .rl-hist-item-header {
+    padding: 11px 14px; display: flex; align-items: center; gap: 10px;
+    cursor: pointer; user-select: none; transition: background 0.15s;
+  }
+  .rl-hist-item-header:hover { background: var(--surface2); }
+  .rl-hist-item-name {
+    flex: 1; font-size: 13px; line-height: 1.55; color: var(--text-primary);
+  }
+  .rl-hist-item-latest {
+    flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 2px;
+  }
+  .rl-hist-score {
+    font-size: 13px; font-weight: 700; font-family: monospace;
+    color: var(--text-muted);
+  }
+  .rl-hist-score.s-good  { color: #27724a; }
+  .rl-hist-score.s-ok    { color: #5a9e3a; }
+  .rl-hist-score.s-mid   { color: #d4a017; }
+  .rl-hist-score.s-bad   { color: #c0392b; }
+  .rl-hist-count { font-size: 10px; color: var(--text-muted); font-family: monospace; }
+
+  .rl-hist-body { display: none; border-top: 1px solid var(--border-light); }
+  .rl-hist-body.open { display: block; }
+
+  /* 履歴テーブル */
+  .rl-hist-table-wrap { overflow-x: auto; padding: 12px 14px; }
+  .rl-hist-table {
+    border-collapse: collapse; width: 100%; font-size: 11px;
+    font-family: monospace;
+  }
+  .rl-hist-table th {
+    padding: 4px 8px; background: var(--surface2); color: var(--text-muted);
+    font-weight: 600; text-align: center; border: 1px solid var(--border-light);
+    white-space: nowrap;
+  }
+  .rl-hist-table th.col-kw { text-align: left; font-family: 'Noto Sans JP', sans-serif; font-size: 11px; }
+  .rl-hist-table td {
+    padding: 4px 8px; text-align: center; border: 1px solid var(--border-light);
+    white-space: nowrap;
+  }
+  .rl-hist-table td.col-kw {
+    text-align: left; font-family: 'Noto Sans JP', sans-serif;
+    font-size: 11px; color: var(--text-primary); max-width: 160px;
+    overflow: hidden; text-overflow: ellipsis;
+  }
+  .rl-hist-table tr:nth-child(even) td { background: var(--surface2); }
+
+  .rl-hist-art-row {
+    padding: 8px 14px; border-top: 1px solid var(--border-light);
+    font-size: 11px; color: var(--text-secondary);
+  }
+  .rl-hist-art-row-title {
+    font-weight: 700; color: var(--text-muted); margin-bottom: 4px;
+    font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .rl-hist-art-table {
+    border-collapse: collapse; font-size: 11px; font-family: monospace;
+    width: 100%;
+  }
+  .rl-hist-art-table th {
+    padding: 3px 6px; background: var(--surface2); color: var(--text-muted);
+    font-weight: 600; text-align: center; border: 1px solid var(--border-light);
+    white-space: nowrap;
+  }
+  .rl-hist-art-table th.col-art { text-align: left; font-family: 'Noto Sans JP', sans-serif; font-size: 11px; }
+  .rl-hist-art-table td {
+    padding: 3px 6px; text-align: center; border: 1px solid var(--border-light);
+  }
+  .rl-hist-art-table td.col-art {
+    text-align: left; font-family: 'Noto Sans JP', sans-serif; font-size: 11px;
+    color: var(--text-primary);
+  }
+  .rl-hist-art-table tr:nth-child(even) td { background: var(--surface2); }
+
   /* 章選択 */
   .rl-chapter-btn {
     width: 100%; text-align: left; padding: 16px 18px;
@@ -2141,6 +2233,7 @@
         </div>
       </div>
       <div id="rl-home-msg" class="rl-empty" style="display:none">論点が登録されていません。<br>「問題登録」から追加してください。</div>
+      <div id="rl-home-history"></div>
     </div>
 
     <!-- 章選択 -->
@@ -4306,6 +4399,131 @@ function rlRenderHome() {
   const problems = rlGetProblems();
   const msg = document.getElementById('rl-home-msg');
   msg.style.display = problems.length === 0 ? 'block' : 'none';
+  rlRenderHomeHistory(problems);
+}
+
+function rlRenderHomeHistory(problems) {
+  const container = document.getElementById('rl-home-history');
+  if (!problems.length) { container.innerHTML = ''; return; }
+
+  // 章ごとにグループ化
+  const byChapter = {};
+  problems.forEach(p => {
+    const ch = (p.chapter !== undefined && p.chapter !== '') ? parseInt(p.chapter) : -1;
+    if (!byChapter[ch]) byChapter[ch] = [];
+    byChapter[ch].push(p);
+  });
+
+  const KW_LABELS = { oo: '○○', o: '○', n: 'ー', x: '×', xx: '××' };
+
+  const chapKeys = Object.keys(byChapter).map(Number).sort((a, b) => a - b);
+
+  let html = '<div class="rl-hist-section"><div class="rl-hist-section-title">履歴</div>';
+
+  chapKeys.forEach(chIdx => {
+    const chName = chIdx >= 0 ? RL_CHAPTERS[chIdx] : '（章未設定）';
+    html += `<div class="rl-hist-ch-header">${chName}</div>`;
+
+    byChapter[chIdx].forEach(p => {
+      const hist = p.history || [];
+      const kws = p.keywords || [];
+      const arts = p.articles || [];
+
+      // 最新スコア
+      const latest = hist.length ? hist[hist.length - 1] : null;
+      const latestScore = latest ? rlHistScoreStr(latest) : '–';
+      const scoreClass = latest ? rlHistScoreClass(latest) : '';
+
+      html += `<div class="rl-hist-item">
+        <div class="rl-hist-item-header" onclick="rlToggleHistItem('${p.id}')">
+          <div class="rl-hist-item-name">${escapeHtml(p.name)}</div>
+          <div class="rl-hist-item-latest">
+            <span class="rl-hist-score ${scoreClass}">${latestScore}</span>
+            <span class="rl-hist-count">${hist.length}回</span>
+          </div>
+        </div>
+        <div class="rl-hist-body" id="rl-hist-body-${p.id}">`;
+
+      if (!hist.length) {
+        html += `<div style="padding:12px 14px;font-size:12px;color:var(--text-muted)">まだ学習記録がありません</div>`;
+      } else {
+        // ── キーワード評価テーブル ──
+        if (kws.length > 0) {
+          const cols = hist.map((h, i) => `<th>${hist.length > 1 ? i + 1 + '回' : h.date}</th>`).join('');
+          const rows = kws.map((kw, ki) => {
+            const cells = hist.map(h => {
+              const r = h.kwResults && h.kwResults[ki] != null ? KW_LABELS[h.kwResults[ki]] || '–' : '–';
+              return `<td>${r}</td>`;
+            }).join('');
+            return `<tr><td class="col-kw">${escapeHtml(kw)}</td>${cells}</tr>`;
+          }).join('');
+          html += `<div class="rl-hist-table-wrap">
+            <table class="rl-hist-table">
+              <thead><tr><th class="col-kw">語句</th>${cols}</tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>`;
+        }
+
+        // ── 条文評価テーブル ──
+        if (arts.length > 0) {
+          const cols = hist.map((h, i) => `<th>${hist.length > 1 ? i + 1 + '回' : h.date}</th>`).join('');
+          const rows = arts.map((numStr, ai) => {
+            const cap = rlGetCaption(numStr);
+            const cells = hist.map(h => {
+              const checked = h.artResults && h.artResults[ai];
+              return `<td>${checked ? '○' : '×'}</td>`;
+            }).join('');
+            return `<tr><td class="col-art">第${numStr}条${cap ? '（' + cap + '）' : ''}</td>${cells}</tr>`;
+          }).join('');
+          html += `<div class="rl-hist-art-row">
+            <div class="rl-hist-art-row-title">条文</div>
+            <table class="rl-hist-art-table">
+              <thead><tr><th class="col-art">条文</th>${cols}</tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>`;
+        }
+
+        // ── 日付行 ──
+        if (hist.length > 1) {
+          const dateCols = hist.map((h, i) => `<td style="font-size:10px;color:var(--text-muted)">${h.date}</td>`).join('');
+          html += `<div class="rl-hist-table-wrap" style="padding-top:0">
+            <table class="rl-hist-table">
+              <tbody><tr><td class="col-kw" style="color:var(--text-muted)">実施日</td>${dateCols}</tr></tbody>
+            </table>
+          </div>`;
+        }
+      }
+
+      html += `</div></div>`;
+    });
+  });
+
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function rlToggleHistItem(id) {
+  const body = document.getElementById('rl-hist-body-' + id);
+  if (body) body.classList.toggle('open');
+}
+
+function rlHistScoreStr(h) {
+  const parts = [];
+  if (h.kwU !== null && h.kwU !== undefined) parts.push('語' + h.kwU + '%');
+  if (h.artU !== null && h.artU !== undefined) parts.push('条' + h.artU + '%');
+  return parts.length ? parts.join(' ') : '–';
+}
+
+function rlHistScoreClass(h) {
+  const scores = [h.kwU, h.artU].filter(v => v !== null && v !== undefined);
+  if (!scores.length) return '';
+  const avg = scores.reduce((s, v) => s + v, 0) / scores.length;
+  if (avg >= 80) return 's-good';
+  if (avg >= 60) return 's-ok';
+  if (avg >= 40) return 's-mid';
+  return 's-bad';
 }
 
 let _rlEditId = null;
@@ -4662,6 +4880,32 @@ function rlToggleArticle(idx) {
 }
 
 function rlNextProblem() {
+  const problem = _rlSession.queue[_rlSession.idx];
+  const kws = problem.keywords || [];
+  const arts = problem.articles || [];
+  const kwU = kws.length > 0 ? rlCalcKwUnderstanding(_rlSession.kwScores, kws.length) : null;
+  const artU = arts.length > 0 ? rlCalcArticleUnderstanding(_rlSession.articleChecked, arts.length) : null;
+
+  // キーワードごとのスコアを配列化（順序保持）
+  const kwResults = kws.map((_, i) => _rlSession.kwScores[i] || null);
+  // 条文ごとのチェック状態を配列化
+  const artResults = arts.map((_, i) => !!_rlSession.articleChecked[i]);
+
+  const problems = rlGetProblems();
+  const pIdx = problems.findIndex(p => p.id === problem.id);
+  if (pIdx >= 0) {
+    if (!problems[pIdx].history) problems[pIdx].history = [];
+    problems[pIdx].history.push({
+      date: new Date().toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' }),
+      kwResults,
+      artResults,
+      kwU,
+      artU,
+    });
+    if (problems[pIdx].history.length > 10) problems[pIdx].history = problems[pIdx].history.slice(-10);
+    rlSaveProblems(problems);
+  }
+
   _rlSession.idx++;
   _rlSession.phase = 'input';
   _rlSession.userAnswer = '';
