@@ -1667,20 +1667,6 @@
   .rl-view { display: none; }
   .rl-view.active { display: block; }
 
-  .rl-home-top { margin-bottom: 24px; }
-  .rl-home-stats {
-    display: flex; gap: 12px; margin-bottom: 24px;
-  }
-  .rl-stat-card {
-    flex: 1; background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 14px 16px; text-align: center;
-  }
-  .rl-stat-num {
-    font-size: 28px; font-weight: 700; color: var(--accent);
-    font-family: 'Noto Serif JP', serif; line-height: 1.2;
-  }
-  .rl-stat-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
-
   .rl-home-actions { display: flex; flex-direction: column; gap: 10px; }
   .rl-home-start {
     width: 100%; padding: 16px; border: none; border-radius: var(--radius);
@@ -1905,11 +1891,6 @@
   .rl-problem-meta {
     display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0;
   }
-  .rl-problem-score {
-    font-size: 12px; font-weight: 700; font-family: monospace;
-    color: var(--text-muted);
-  }
-  .rl-problem-score.has-score { color: var(--accent); }
   .rl-problem-tags { display: flex; gap: 4px; }
   .rl-tag {
     font-size: 10px; padding: 1px 5px; border-radius: 3px;
@@ -2132,16 +2113,6 @@
 
     <!-- ホーム -->
     <div id="rl-home" class="rl-view active">
-      <div class="rl-home-stats">
-        <div class="rl-stat-card">
-          <div class="rl-stat-num" id="rl-stat-total">0</div>
-          <div class="rl-stat-label">登録論点</div>
-        </div>
-        <div class="rl-stat-card">
-          <div class="rl-stat-num" id="rl-stat-done">0</div>
-          <div class="rl-stat-label">学習済み</div>
-        </div>
-      </div>
       <div class="rl-home-actions">
         <button class="rl-home-start" onclick="rlStartSession()">学習開始</button>
         <div class="rl-home-sub">
@@ -4249,9 +4220,6 @@ function rlSwitchView(name) {
 
 function rlRenderHome() {
   const problems = rlGetProblems();
-  const done = problems.filter(p => p.history && p.history.length > 0).length;
-  document.getElementById('rl-stat-total').textContent = problems.length;
-  document.getElementById('rl-stat-done').textContent = done;
   const msg = document.getElementById('rl-home-msg');
   msg.style.display = problems.length === 0 ? 'block' : 'none';
 }
@@ -4593,22 +4561,6 @@ function rlToggleArticle(idx) {
 }
 
 function rlNextProblem() {
-  const problem = _rlSession.queue[_rlSession.idx];
-  const kws = problem.keywords || [];
-  const articles = problem.articles || [];
-  const kwU = kws.length > 0 ? rlCalcKwUnderstanding(_rlSession.kwScores, kws.length) : null;
-  const artU = articles.length > 0 ? rlCalcArticleUnderstanding(_rlSession.articleChecked, articles.length) : null;
-  const date = new Date().toLocaleDateString('ja-JP');
-
-  const problems = rlGetProblems();
-  const pIdx = problems.findIndex(p => p.id === problem.id);
-  if (pIdx >= 0) {
-    problems[pIdx].history = problems[pIdx].history || [];
-    problems[pIdx].history.push({ date, kwU, artU });
-    if (problems[pIdx].history.length > 50) problems[pIdx].history = problems[pIdx].history.slice(-50);
-    rlSaveProblems(problems);
-  }
-
   _rlSession.idx++;
   _rlSession.phase = 'input';
   _rlSession.userAnswer = '';
@@ -4672,8 +4624,6 @@ function rlRenderManage() {
   }
 
   list.innerHTML = problems.map(p => {
-    const lastH = p.history && p.history.length ? p.history[p.history.length - 1] : null;
-    const scoreStr = lastH ? (lastH.artU !== null ? lastH.artU + '%' : '–') : '未';
     const tags = [
       p.hasHanrei ? `<span class="rl-tag hanrei">判例</span>` : '',
       p.page ? `<span class="rl-tag">p.${p.page}</span>` : '',
@@ -4687,7 +4637,6 @@ function rlRenderManage() {
       <div class="rl-problem-header" onclick="rlToggleProblem('${p.id}')">
         <div class="rl-problem-name">${escapeHtml(p.name)}</div>
         <div class="rl-problem-meta">
-          <span class="rl-problem-score${lastH?' has-score':''}">${scoreStr}</span>
           <div class="rl-problem-tags">${tags}</div>
         </div>
       </div>
