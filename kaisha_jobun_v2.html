@@ -4725,7 +4725,7 @@ function rlSwitchView_register(editId) {
       document.getElementById('rl-ans3').value = p.ans3 || '';
       document.getElementById('rl-page').value = p.page || '';
       document.getElementById('rl-hanrei').checked = !!p.hasHanrei;
-      _rlArticles = (p.articles || []).map(a => ({ numStr: a, caption: rlGetCaption(a) }));
+      _rlArticles = (p.articles || []).map(a => ({ numStr: a.replace(/_(\d+)/g, 'の$1'), caption: rlGetCaption(a) }));
     }
   } else {
     document.getElementById('rl-register-title').textContent = '論点を登録';
@@ -4752,23 +4752,27 @@ function rlRenderArticleChips() {
 function rlOnArticleInput() {
   const input = document.getElementById('rl-article-input');
   const box = document.getElementById('rl-article-suggest');
-  const val = input.value.trim();
-  if (!val) { box.style.display = 'none'; return; }
+  const rawVal = input.value.trim();
+  if (!rawVal) { box.style.display = 'none'; return; }
+  const val = rawVal.replace(/_(\d+)/g, 'の$1');
 
-  const existing = _rlArticles.map(a => a.numStr);
+  const existing = new Set(_rlArticles.map(a => a.numStr.replace(/_(\d+)/g, 'の$1')));
   const results = [];
   for (const key of Object.keys(LAW_DATA)) {
     const art = LAW_DATA[key];
-    const numStr = art.num || String(art.article);
-    if (existing.includes(numStr)) continue;
+    const numStr = (art.num || String(art.article)).replace(/_(\d+)/g, 'の$1');
+    if (existing.has(numStr)) continue;
     if (numStr.startsWith(val) || String(art.article).startsWith(val)) {
       results.push({ numStr, caption: art.caption || '' });
-      if (results.length >= 8) break;
     }
   }
 
   if (!results.length) { box.style.display = 'none'; return; }
-  box.innerHTML = results.map(r =>
+  results.sort((a, b) => {
+    const k = s => { const p = s.split('の'); return parseInt(p[0]) * 1000 + (p.length > 1 ? parseInt(p[1]) : 0); };
+    return k(a.numStr) - k(b.numStr);
+  });
+  box.innerHTML = results.slice(0, 8).map(r =>
     `<div class="related-suggest-item" onmousedown="rlSelectArticle('${r.numStr}')">第${r.numStr}条${r.caption ? '　' + r.caption : ''}</div>`
   ).join('');
   box.style.display = 'block';
