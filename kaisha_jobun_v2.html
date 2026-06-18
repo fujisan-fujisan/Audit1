@@ -3958,11 +3958,11 @@ function showRegSuggest() {
     }))
   );
 
-  const suggestions = allRefs.filter(r => {
-    const normalizedLabel = r.label.replace(/の/g, '');
-    const normalizedVal = val.replace(/の/g, '');
-    return r.label.includes(val) || normalizedLabel.includes(normalizedVal);
-  }).slice(0, 8);
+  // "52条の2" → "52の2条" に正規化（ユーザーが条文番号を逆順で入力するケースを吸収）
+  const normVal = val.replace(/^(\d+)条(の\d+)/, '$1$2条');
+  const suggestions = allRefs.filter(r =>
+    r.label.startsWith(normVal) || r.label.startsWith(val)
+  ).slice(0, 8);
   if (!suggestions.length || !val) { box.style.display = 'none'; return; }
 
   box.innerHTML = suggestions.map(s =>
