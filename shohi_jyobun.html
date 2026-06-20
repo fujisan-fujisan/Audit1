@@ -3768,9 +3768,10 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-// スクロール時にサジェストを全部閉じる
+// スクロール時にサジェストを全部閉じる（サジェスト内のスクロールは除外）
 let _scrollRaf = false;
-window.addEventListener('scroll', () => {
+window.addEventListener('scroll', (e) => {
+  if (e.target && e.target.closest && e.target.closest('.related-suggest')) return;
   if (_scrollRaf) return;
   _scrollRaf = true;
   requestAnimationFrame(() => {
