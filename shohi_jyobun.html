@@ -855,8 +855,18 @@
   .chsel-check { width: 16px; height: 16px; flex-shrink: 0; accent-color: var(--accent); cursor: pointer; }
   .chsel-footer {
     padding: 12px 16px; border-top: 1px solid var(--border-light);
-    display: flex; gap: 8px; flex-shrink: 0;
+    display: flex; flex-direction: column; gap: 10px; flex-shrink: 0;
   }
+  .chsel-count-row { display: flex; align-items: center; gap: 10px; }
+  .chsel-count-label { font-size: 13px; color: var(--text-secondary); flex-shrink: 0; }
+  .chsel-count-input {
+    width: 80px; padding: 6px 10px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); font-size: 14px; text-align: center;
+    font-family: 'Noto Sans JP', sans-serif; color: var(--text-primary);
+    background: var(--surface); outline: none;
+  }
+  .chsel-count-input:focus { border-color: var(--accent); }
+  .chsel-count-hint { font-size: 11px; color: var(--text-muted); }
   #chselStartBtn {
     flex: 1; padding: 12px; border: none; border-radius: 8px;
     background: var(--accent); color: white; font-size: 15px; font-weight: 700;
@@ -3091,6 +3101,9 @@ function openChapterSelectModal() {
   // indeterminate は JS で設定
   document.querySelectorAll('[data-indeterminate="true"]').forEach(el => { el.indeterminate = true; });
 
+  const savedCount = parseInt(localStorage.getItem('shohi-qcount')) || 20;
+  const countInput = document.getElementById('chselCountInput');
+  if (countInput) countInput.value = savedCount;
   updateChselStart();
   const overlay = document.getElementById('chselOverlay');
   overlay.style.display = 'flex';
@@ -3147,11 +3160,34 @@ function syncPartCheckboxes() {
   });
 }
 
+function chselClampCount() {
+  const input = document.getElementById('chselCountInput');
+  if (!input) return;
+  const val = parseInt(input.value);
+  if (isNaN(val)) return;
+  const max = parseInt(input.max) || 1;
+  if (val > max) input.value = max;
+  if (val < 1) input.value = 1;
+}
+
 function updateChselStart() {
   const storage = getStorage();
   const total = getFilteredQuestions(storage.questions).length;
   const btn = document.getElementById('chselStartBtn');
-  btn.textContent = `開始（${total}問）`;
+  const countInput = document.getElementById('chselCountInput');
+  const countHint = document.getElementById('chselCountHint');
+  if (countInput) {
+    countInput.max = total;
+    countInput.disabled = total === 0;
+    const cur = parseInt(countInput.value) || 0;
+    if (total > 0) {
+      if (cur <= 0 || cur > total) countInput.value = Math.min(cur > 0 ? cur : 20, total);
+    } else {
+      countInput.value = 0;
+    }
+    if (countHint) countHint.textContent = total > 0 ? `（最大 ${total} 問）` : '';
+  }
+  btn.textContent = '開始';
   btn.disabled = total === 0;
 }
 
@@ -3178,10 +3214,15 @@ function confirmStartTraining() {
   const storage = getStorage();
   const filtered = getFilteredQuestions(storage.questions);
   if (!filtered.length) { showToast('この範囲に登録された問題がありません'); return; }
+  const countInput = document.getElementById('chselCountInput');
+  const requested = Math.max(1, parseInt(countInput?.value) || filtered.length);
+  const count = Math.min(requested, filtered.length);
+  localStorage.setItem('shohi-qcount', count);
+  const shuffled = filtered.map(q => ({ ...q, originalIdx: storage.questions.indexOf(q) })).sort(() => Math.random() - 0.5);
   if (trainingMode === 'yomitori') {
-    trainingQueue = filtered.map(q => ({ ...q, type: 'yomitori', originalIdx: storage.questions.indexOf(q) })).sort(() => Math.random() - 0.5);
+    trainingQueue = shuffled.slice(0, count).map(q => ({ ...q, type: 'yomitori' }));
   } else {
-    trainingQueue = filtered.map(q => ({ ...q, originalIdx: storage.questions.indexOf(q) })).sort(() => Math.random() - 0.5);
+    trainingQueue = shuffled.slice(0, count);
   }
   currentIdx = 0;
   sessionCorrect = 0;
@@ -3988,6 +4029,11 @@ function showArticleQPopup(numKey) {
     </div>
     <div class="chsel-body" id="chselBody"></div>
     <div class="chsel-footer">
+      <div class="chsel-count-row">
+        <span class="chsel-count-label">問題数</span>
+        <input type="number" id="chselCountInput" class="chsel-count-input" min="1" value="20" oninput="chselClampCount()">
+        <span class="chsel-count-hint" id="chselCountHint"></span>
+      </div>
       <button id="chselStartBtn" onclick="confirmStartTraining()">開始</button>
     </div>
   </div>
