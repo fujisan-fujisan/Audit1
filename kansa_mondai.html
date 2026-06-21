@@ -2840,6 +2840,24 @@ function initData(){
     sortDataByMaster(); saveData();
   }
 
+  // Migration: km_c7s3_021〜054 → 025〜058 (4問挿入による繰り下げ)
+  const c7s3=DATA.find(d=>d.ch==='第7章第3節');
+  if(c7s3){
+    const item021=c7s3.items.find(it=>it.id==='km_c7s3_021');
+    if(item021&&item021.name!=='内部統制の有効性の判断する時点'){
+      for(let i=54;i>=21;i--){
+        const oldId=`km_c7s3_${String(i).padStart(3,'0')}`;
+        const newId=`km_c7s3_${String(i+4).padStart(3,'0')}`;
+        const it=c7s3.items.find(x=>x.id===oldId);
+        if(it) it.id=newId;
+        if(kwData[oldId]){kwData[newId]=kwData[oldId];delete kwData[oldId];}
+        if(recData[oldId]){recData[newId]=recData[oldId];delete recData[oldId];}
+        if(ansData[oldId]){ansData[newId]=ansData[oldId];delete ansData[oldId];}
+      }
+      saveData();saveKw();saveRec();saveAns();
+    }
+  }
+
   let updated=false;
   INITIAL_DATA.forEach(initCh=>{
     let chEntry=DATA.find(d=>d.ch===initCh.ch);
