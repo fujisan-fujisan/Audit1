@@ -79,10 +79,34 @@ body {
   color: var(--text);
   line-height: 1;
 }
-.remaining-num.warn { color: var(--r2-color); }
-.remaining-num.expired { color: var(--r1-color); }
+.remaining-num.warn { color: #f97316; }
+.remaining-num.expired { color: #dc2626; }
 .remaining-days-label { font-size: 12px; color: var(--text-3); }
 .deadline-label { font-size: 11px; color: var(--text-3); margin-left: 2px; }
+
+/* ── Tab bar ── */
+.tab-bar {
+  display: flex;
+  border-top: 1px solid var(--border);
+}
+.tab-btn {
+  flex: 1;
+  padding: 9px 0;
+  border: none;
+  background: none;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  color: var(--text-3);
+  cursor: pointer;
+  letter-spacing: .06em;
+  border-bottom: 2px solid transparent;
+  transition: color .15s, border-color .15s;
+}
+.tab-btn.active {
+  color: var(--text);
+  border-bottom-color: var(--text);
+}
 
 /* ── Content ── */
 .content { padding: 14px 14px 0; max-width: 720px; margin: 0 auto; }
@@ -199,6 +223,200 @@ td.col-calc {
   color: var(--text);
 }
 
+/* ── Log View ── */
+.log-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0 12px;
+  gap: 8px;
+}
+.log-nav-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+.log-nav-btn:hover { background: var(--text); color: #fff; border-color: var(--text); }
+.log-date-center {
+  flex: 1;
+  text-align: center;
+}
+.log-date-main {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+}
+.log-date-sub {
+  font-size: 11px;
+  color: var(--text-3);
+  margin-top: 2px;
+}
+.today-link {
+  display: none;
+  margin-top: 4px;
+  padding: 2px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border-strong);
+  background: none;
+  font-size: 10px;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  font-weight: 700;
+  color: var(--text-3);
+  cursor: pointer;
+  letter-spacing: .04em;
+  transition: all .15s;
+}
+.today-link:hover { background: var(--text); color: #fff; border-color: var(--text); }
+.today-link.show { display: inline-block; }
+
+/* Log swipe area */
+.log-swipe-wrap {
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Empty state */
+.log-empty {
+  text-align: center;
+  padding: 48px 16px 32px;
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+/* Log entry cards */
+.log-entry-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+.log-entry-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.log-select {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+  font-size: 13px;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.log-select:focus { border-color: #4a7edc; box-shadow: 0 0 0 3px rgba(74,126,220,.12); }
+.log-hours-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.log-hours-input {
+  width: 56px;
+  text-align: center;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 6px 4px;
+  font-size: 13px;
+  font-family: 'DM Mono', 'Courier New', monospace;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  -moz-appearance: textfield;
+}
+.log-hours-input::-webkit-inner-spin-button,
+.log-hours-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.log-hours-input:focus { border-color: #4a7edc; box-shadow: 0 0 0 3px rgba(74,126,220,.12); }
+.log-hours-unit {
+  font-size: 11px;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.log-delete-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text-3);
+  font-size: 14px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .15s;
+  line-height: 1;
+}
+.log-delete-btn:hover { background: #fee2e2; border-color: #fca5a5; color: #dc2626; }
+.log-range-input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-size: 12px;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  color: var(--text);
+  background: #fafaf9;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.log-range-input:focus {
+  border-color: #4a7edc;
+  background: var(--surface);
+  box-shadow: 0 0 0 3px rgba(74,126,220,.12);
+}
+.log-range-input::placeholder { color: var(--text-3); }
+
+/* Log footer */
+.log-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 4px;
+  margin-top: 4px;
+}
+.log-total {
+  font-family: 'DM Mono', 'Courier New', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  min-height: 20px;
+}
+.log-add-btn {
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  font-size: 13px;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+  transition: all .15s;
+  letter-spacing: .04em;
+}
+.log-add-btn:hover { background: var(--text); color: #fff; border-color: var(--text); }
 </style>
 </head>
 <body>
@@ -219,9 +437,13 @@ td.col-calc {
       <span class="deadline-label" id="deadline-label"></span>
     </div>
   </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-cycles" onclick="switchTab('cycles')">周回管理</button>
+    <button class="tab-btn" id="tab-logs" onclick="switchTab('logs')">学習記録</button>
+  </div>
 </div>
 
-<div class="content">
+<div class="content" id="view-cycles">
 
   <!-- Desktop table -->
   <div class="table-wrap">
@@ -242,11 +464,30 @@ td.col-calc {
   <!-- Mobile cards -->
   <div class="cards-wrap" id="cards-wrap"></div>
 
+</div>
 
+<div class="content" id="view-logs" style="display:none">
+  <div class="log-nav">
+    <button class="log-nav-btn" onclick="navigateLog(-1)">‹</button>
+    <div class="log-date-center">
+      <div class="log-date-main" id="log-date-main">–</div>
+      <div class="log-date-sub" id="log-date-sub"></div>
+      <button class="today-link" id="today-link" onclick="goToToday()">今日に戻る</button>
+    </div>
+    <button class="log-nav-btn" onclick="navigateLog(1)">›</button>
+  </div>
+  <div class="log-swipe-wrap" id="log-swipe-wrap">
+    <div id="log-entries"></div>
+    <div class="log-footer">
+      <span class="log-total" id="log-total"></span>
+      <button class="log-add-btn" onclick="addLogEntry()">＋ 追加</button>
+    </div>
+  </div>
 </div>
 
 <script>
 const STORAGE_KEY = 'review-cycle-tool-v1';
+const LOGS_KEY    = 'review-cycle-logs-v1';
 
 const SUBJECTS = [
   { id: 'zaimu_keisan', name: '財務計算' },
@@ -263,6 +504,8 @@ const SUBJECTS = [
 ];
 
 let settings = {};
+let logs     = {};
+let currentLogDate = '';
 
 // ── Storage ──────────────────────────────────────
 function loadSettings() {
@@ -278,18 +521,38 @@ function saveSettings() {
   } catch(e) {}
 }
 
-// ── Date calculation ──────────────────────────────
+function loadLogs() {
+  try {
+    const s = localStorage.getItem(LOGS_KEY);
+    if (s) logs = JSON.parse(s);
+  } catch(e) {}
+}
+
+function saveLogs() {
+  try {
+    localStorage.setItem(LOGS_KEY, JSON.stringify(logs));
+  } catch(e) {}
+}
+
+// ── Date utilities ────────────────────────────────
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-'
+    + String(d.getMonth() + 1).padStart(2, '0') + '-'
+    + String(d.getDate()).padStart(2, '0');
+}
+
 function calcRemainingDays() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const deadline = new Date(today.getFullYear(), 7, 21); // 8月21日
+  const deadline = new Date(today.getFullYear(), 7, 21);
   return Math.floor((deadline - today) / (1000 * 60 * 60 * 24));
 }
 
 function getDeadlineLabel() {
   const today = new Date();
   const deadline = new Date(today.getFullYear(), 7, 21);
-  return `${deadline.getMonth() + 1}月${deadline.getDate()}日まで`;
+  return (deadline.getMonth() + 1) + '月' + deadline.getDate() + '日まで';
 }
 
 // ── Per-subject calculation ───────────────────────
@@ -366,24 +629,23 @@ function buildTable() {
   const tbody = document.getElementById('table-body');
   tbody.innerHTML = '';
 
-  SUBJECTS.forEach(({ id, name }) => {
+  SUBJECTS.forEach(function({ id, name }) {
     const s = settings[id] || {};
     const reviews = calcMaxReviews(s.hoursPerReview, s.hoursPerDay, remainingDays);
     const dpr     = calcDaysPerReview(s.hoursPerReview, s.hoursPerDay);
     const text    = getBadgeText(reviews, remainingDays);
 
     const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td class="col-name">${name}</td>
-      <td><input class="num-input" type="number" min="0" step="0.5" placeholder="–"
-            value="${s.hoursPerReview || ''}"
-            oninput="onInput('${id}','hoursPerReview',this.value)"></td>
-      <td><input class="num-input" type="number" min="0" step="0.5" placeholder="–"
-            value="${s.hoursPerDay || ''}"
-            oninput="onInput('${id}','hoursPerDay',this.value)"></td>
-      <td class="col-calc" id="calc-${id}">${dpr !== null ? dpr.toFixed(1) + '日' : '–'}</td>
-      <td><span class="badge" id="badge-${id}">${text}</span></td>
-    `;
+    tr.innerHTML =
+      '<td class="col-name">' + name + '</td>' +
+      '<td><input class="num-input" type="number" min="0" step="0.5" placeholder="–"' +
+        ' value="' + (s.hoursPerReview || '') + '"' +
+        ' oninput="onInput(\'' + id + '\',\'hoursPerReview\',this.value)"></td>' +
+      '<td><input class="num-input" type="number" min="0" step="0.5" placeholder="–"' +
+        ' value="' + (s.hoursPerDay || '') + '"' +
+        ' oninput="onInput(\'' + id + '\',\'hoursPerDay\',this.value)"></td>' +
+      '<td class="col-calc" id="calc-' + id + '">' + (dpr !== null ? dpr.toFixed(1) + '日' : '–') + '</td>' +
+      '<td><span class="badge" id="badge-' + id + '">' + text + '</span></td>';
     tbody.appendChild(tr);
   });
 }
@@ -393,7 +655,7 @@ function buildCards() {
   const wrap = document.getElementById('cards-wrap');
   wrap.innerHTML = '';
 
-  SUBJECTS.forEach(({ id, name }) => {
+  SUBJECTS.forEach(function({ id, name }) {
     const s = settings[id] || {};
     const reviews = calcMaxReviews(s.hoursPerReview, s.hoursPerDay, remainingDays);
     const dpr     = calcDaysPerReview(s.hoursPerReview, s.hoursPerDay);
@@ -401,27 +663,26 @@ function buildCards() {
 
     const card = document.createElement('div');
     card.className = 'card';
-    card.innerHTML = `
-      <div class="card-header">
-        <span class="card-name">${name}</span>
-        <span class="badge" id="m-badge-${id}">${text}</span>
-      </div>
-      <div class="card-inputs">
-        <div class="input-group">
-          <label>① 1周の時間（時間）</label>
-          <input class="num-input" type="number" min="0" step="0.5" placeholder="–"
-            value="${s.hoursPerReview || ''}"
-            oninput="onInput('${id}','hoursPerReview',this.value)">
-        </div>
-        <div class="input-group">
-          <label>② 1日の時間（時間/日）</label>
-          <input class="num-input" type="number" min="0" step="0.5" placeholder="–"
-            value="${s.hoursPerDay || ''}"
-            oninput="onInput('${id}','hoursPerDay',this.value)">
-        </div>
-      </div>
-      <div class="card-calc" id="m-calc-${id}">${dpr !== null ? '1周 = ' + dpr.toFixed(1) + '日' : ''}</div>
-    `;
+    card.innerHTML =
+      '<div class="card-header">' +
+        '<span class="card-name">' + name + '</span>' +
+        '<span class="badge" id="m-badge-' + id + '">' + text + '</span>' +
+      '</div>' +
+      '<div class="card-inputs">' +
+        '<div class="input-group">' +
+          '<label>① 1周の時間（時間）</label>' +
+          '<input class="num-input" type="number" min="0" step="0.5" placeholder="–"' +
+            ' value="' + (s.hoursPerReview || '') + '"' +
+            ' oninput="onInput(\'' + id + '\',\'hoursPerReview\',this.value)">' +
+        '</div>' +
+        '<div class="input-group">' +
+          '<label>② 1日の時間（時間/日）</label>' +
+          '<input class="num-input" type="number" min="0" step="0.5" placeholder="–"' +
+            ' value="' + (s.hoursPerDay || '') + '"' +
+            ' oninput="onInput(\'' + id + '\',\'hoursPerDay\',this.value)">' +
+        '</div>' +
+      '</div>' +
+      '<div class="card-calc" id="m-calc-' + id + '">' + (dpr !== null ? '1周 = ' + dpr.toFixed(1) + '日' : '') + '</div>';
     wrap.appendChild(card);
   });
 }
@@ -429,10 +690,11 @@ function buildCards() {
 // ── Backup / Restore ──────────────────────────────
 async function exportData() {
   const data = {
-    version: 1,
+    version: 2,
     label: '復習周期管理ツール',
     exportedAt: new Date().toISOString(),
     settings,
+    logs,
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const file = new File([blob], 'review_cycle_backup.json', { type: 'application/json' });
@@ -457,6 +719,7 @@ function importData(e) {
       if (!confirm('現在のデータを上書きして復元しますか？')) return;
       settings = data.settings;
       saveSettings();
+      if (data.logs) { logs = data.logs; saveLogs(); }
       location.reload();
     } catch(err) {
       alert('ファイルの読み込みに失敗しました。');
@@ -466,8 +729,150 @@ function importData(e) {
   e.target.value = '';
 }
 
+// ── Tab switching ─────────────────────────────────
+function switchTab(tab) {
+  const isCycles = tab === 'cycles';
+  document.getElementById('view-cycles').style.display = isCycles ? '' : 'none';
+  document.getElementById('view-logs').style.display   = isCycles ? 'none' : '';
+  document.getElementById('tab-cycles').classList.toggle('active', isCycles);
+  document.getElementById('tab-logs').classList.toggle('active', !isCycles);
+  if (!isCycles) renderLogView();
+}
+
+// ── Study Log ─────────────────────────────────────
+function goToToday() {
+  currentLogDate = todayStr();
+  renderLogView();
+}
+
+function navigateLog(dir) {
+  const d = new Date(currentLogDate + 'T00:00:00');
+  d.setDate(d.getDate() + dir);
+  currentLogDate = d.getFullYear() + '-'
+    + String(d.getMonth() + 1).padStart(2, '0') + '-'
+    + String(d.getDate()).padStart(2, '0');
+  renderLogView();
+}
+
+function addLogEntry() {
+  if (!logs[currentLogDate]) logs[currentLogDate] = [];
+  logs[currentLogDate].push({ id: Date.now(), subjectId: '', hours: '', range: '' });
+  saveLogs();
+  renderLogView();
+}
+
+function deleteLogEntry(id) {
+  if (!logs[currentLogDate]) return;
+  logs[currentLogDate] = logs[currentLogDate].filter(function(e) {
+    return String(e.id) !== String(id);
+  });
+  saveLogs();
+  renderLogView();
+}
+
+function updateLogEntry(id, field, value) {
+  const entries = logs[currentLogDate];
+  if (!entries) return;
+  const entry = entries.find(function(e) { return String(e.id) === String(id); });
+  if (!entry) return;
+  entry[field] = value;
+  saveLogs();
+  if (field === 'hours') updateLogTotals();
+}
+
+function updateLogTotals() {
+  const entries = logs[currentLogDate] || [];
+  const total = entries.reduce(function(sum, e) { return sum + (parseFloat(e.hours) || 0); }, 0);
+  const el = document.getElementById('log-total');
+  if (el) el.textContent = total > 0 ? '合計 ' + total.toFixed(1) + '時間' : '';
+}
+
+function renderLogView() {
+  const today = todayStr();
+  const isToday = currentLogDate === today;
+
+  const d = new Date(currentLogDate + 'T00:00:00');
+  const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+  const diff = Math.round(
+    (new Date(currentLogDate + 'T00:00:00') - new Date(today + 'T00:00:00')) / 86400000
+  );
+
+  document.getElementById('log-date-main').textContent =
+    (d.getMonth() + 1) + '月' + d.getDate() + '日（' + weekdays[d.getDay()] + '）';
+  document.getElementById('log-date-sub').textContent =
+    isToday   ? '今日' :
+    diff === -1 ? '昨日' :
+    diff === 1  ? '明日' :
+    diff < 0    ? Math.abs(diff) + '日前' :
+                  diff + '日後';
+  document.getElementById('today-link').classList.toggle('show', !isToday);
+
+  const entries = logs[currentLogDate] || [];
+  const container = document.getElementById('log-entries');
+  container.innerHTML = '';
+
+  if (entries.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'log-empty';
+    empty.textContent = 'まだ記録がありません';
+    container.appendChild(empty);
+  } else {
+    entries.forEach(function(entry) {
+      const opts = SUBJECTS.map(function(s) {
+        return '<option value="' + s.id + '"'
+          + (String(entry.subjectId) === String(s.id) ? ' selected' : '')
+          + '>' + s.name + '</option>';
+      }).join('');
+
+      const safeRange = (entry.range || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+      const eid = entry.id;
+
+      const card = document.createElement('div');
+      card.className = 'log-entry-card';
+      card.innerHTML =
+        '<div class="log-entry-top">' +
+          '<select class="log-select" onchange="updateLogEntry(' + eid + ',\'subjectId\',this.value)">' +
+            '<option value="">科目を選択</option>' + opts +
+          '</select>' +
+          '<div class="log-hours-wrap">' +
+            '<input class="log-hours-input" type="number" min="0" max="24" step="0.5" placeholder="0"' +
+              ' value="' + (entry.hours || '') + '"' +
+              ' oninput="updateLogEntry(' + eid + ',\'hours\',this.value)">' +
+            '<span class="log-hours-unit">時間</span>' +
+          '</div>' +
+          '<button class="log-delete-btn" onclick="deleteLogEntry(' + eid + ')" title="削除">×</button>' +
+        '</div>' +
+        '<input class="log-range-input" type="text" placeholder="勉強した範囲・内容"' +
+          ' value="' + safeRange + '"' +
+          ' oninput="updateLogEntry(' + eid + ',\'range\',this.value)">';
+      container.appendChild(card);
+    });
+  }
+
+  updateLogTotals();
+}
+
+// ── Swipe detection ───────────────────────────────
+(function() {
+  var startX = 0, startY = 0;
+  var wrap = document.getElementById('log-swipe-wrap');
+  wrap.addEventListener('touchstart', function(e) {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+  wrap.addEventListener('touchend', function(e) {
+    var dx = e.changedTouches[0].clientX - startX;
+    var dy = e.changedTouches[0].clientY - startY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+      navigateLog(dx < 0 ? -1 : 1);
+    }
+  }, { passive: true });
+})();
+
 // ── Init ─────────────────────────────────────────
 loadSettings();
+loadLogs();
+currentLogDate = todayStr();
 updateHeader();
 buildTable();
 buildCards();
