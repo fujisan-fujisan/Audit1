@@ -288,14 +288,6 @@ td.col-calc {
   -webkit-user-select: none;
 }
 
-/* Empty state */
-.log-empty {
-  text-align: center;
-  padding: 48px 16px 32px;
-  color: var(--text-3);
-  font-size: 13px;
-}
-
 /* Log entry cards */
 .log-entry-card {
   background: var(--surface);
@@ -310,20 +302,12 @@ td.col-calc {
   gap: 8px;
   margin-bottom: 8px;
 }
-.log-select {
+.log-subject-name {
   flex: 1;
-  min-width: 0;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  padding: 6px 8px;
-  font-size: 13px;
-  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
   color: var(--text);
-  background: var(--surface);
-  outline: none;
-  transition: border-color .15s, box-shadow .15s;
 }
-.log-select:focus { border-color: #4a7edc; box-shadow: 0 0 0 3px rgba(74,126,220,.12); }
 .log-hours-wrap {
   display: flex;
   align-items: center;
@@ -352,23 +336,6 @@ td.col-calc {
   color: var(--text-3);
   white-space: nowrap;
 }
-.log-delete-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1px solid var(--border);
-  background: none;
-  color: var(--text-3);
-  font-size: 14px;
-  cursor: pointer;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all .15s;
-  line-height: 1;
-}
-.log-delete-btn:hover { background: #fee2e2; border-color: #fca5a5; color: #dc2626; }
 .log-range-input {
   width: 100%;
   border: 1px solid var(--border);
@@ -390,11 +357,7 @@ td.col-calc {
 
 /* Log footer */
 .log-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 4px;
-  margin-top: 4px;
+  padding: 8px 0 4px;
 }
 .log-total {
   font-family: 'DM Mono', 'Courier New', monospace;
@@ -403,20 +366,6 @@ td.col-calc {
   color: var(--text);
   min-height: 20px;
 }
-.log-add-btn {
-  padding: 8px 18px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-strong);
-  background: var(--surface);
-  font-size: 13px;
-  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
-  font-weight: 700;
-  color: var(--text);
-  cursor: pointer;
-  transition: all .15s;
-  letter-spacing: .04em;
-}
-.log-add-btn:hover { background: var(--text); color: #fff; border-color: var(--text); }
 </style>
 </head>
 <body>
@@ -480,7 +429,6 @@ td.col-calc {
     <div id="log-entries"></div>
     <div class="log-footer">
       <span class="log-total" id="log-total"></span>
-      <button class="log-add-btn" onclick="addLogEntry()">＋ 追加</button>
     </div>
   </div>
 </div>
@@ -754,35 +702,19 @@ function navigateLog(dir) {
   renderLogView();
 }
 
-function addLogEntry() {
-  if (!logs[currentLogDate]) logs[currentLogDate] = [];
-  logs[currentLogDate].push({ id: Date.now(), subjectId: '', hours: '', range: '' });
-  saveLogs();
-  renderLogView();
-}
-
-function deleteLogEntry(id) {
-  if (!logs[currentLogDate]) return;
-  logs[currentLogDate] = logs[currentLogDate].filter(function(e) {
-    return String(e.id) !== String(id);
-  });
-  saveLogs();
-  renderLogView();
-}
-
-function updateLogEntry(id, field, value) {
-  const entries = logs[currentLogDate];
-  if (!entries) return;
-  const entry = entries.find(function(e) { return String(e.id) === String(id); });
-  if (!entry) return;
-  entry[field] = value;
+function updateLogEntry(subjectId, field, value) {
+  if (!logs[currentLogDate]) logs[currentLogDate] = {};
+  if (!logs[currentLogDate][subjectId]) logs[currentLogDate][subjectId] = {};
+  logs[currentLogDate][subjectId][field] = value;
   saveLogs();
   if (field === 'hours') updateLogTotals();
 }
 
 function updateLogTotals() {
-  const entries = logs[currentLogDate] || [];
-  const total = entries.reduce(function(sum, e) { return sum + (parseFloat(e.hours) || 0); }, 0);
+  const day = logs[currentLogDate] || {};
+  const total = SUBJECTS.reduce(function(sum, s) {
+    return sum + (parseFloat((day[s.id] || {}).hours) || 0);
+  }, 0);
   const el = document.getElementById('log-total');
   if (el) el.textContent = total > 0 ? '合計 ' + total.toFixed(1) + '時間' : '';
 }
@@ -800,54 +732,38 @@ function renderLogView() {
   document.getElementById('log-date-main').textContent =
     (d.getMonth() + 1) + '月' + d.getDate() + '日（' + weekdays[d.getDay()] + '）';
   document.getElementById('log-date-sub').textContent =
-    isToday   ? '今日' :
+    isToday     ? '今日' :
     diff === -1 ? '昨日' :
     diff === 1  ? '明日' :
     diff < 0    ? Math.abs(diff) + '日前' :
                   diff + '日後';
   document.getElementById('today-link').classList.toggle('show', !isToday);
 
-  const entries = logs[currentLogDate] || [];
+  const day = logs[currentLogDate] || {};
   const container = document.getElementById('log-entries');
   container.innerHTML = '';
 
-  if (entries.length === 0) {
-    const empty = document.createElement('div');
-    empty.className = 'log-empty';
-    empty.textContent = 'まだ記録がありません';
-    container.appendChild(empty);
-  } else {
-    entries.forEach(function(entry) {
-      const opts = SUBJECTS.map(function(s) {
-        return '<option value="' + s.id + '"'
-          + (String(entry.subjectId) === String(s.id) ? ' selected' : '')
-          + '>' + s.name + '</option>';
-      }).join('');
+  SUBJECTS.forEach(function(s) {
+    const entry = day[s.id] || {};
+    const safeRange = (entry.range || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 
-      const safeRange = (entry.range || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-      const eid = entry.id;
-
-      const card = document.createElement('div');
-      card.className = 'log-entry-card';
-      card.innerHTML =
-        '<div class="log-entry-top">' +
-          '<select class="log-select" onchange="updateLogEntry(' + eid + ',\'subjectId\',this.value)">' +
-            '<option value="">科目を選択</option>' + opts +
-          '</select>' +
-          '<div class="log-hours-wrap">' +
-            '<input class="log-hours-input" type="number" min="0" max="24" step="0.5" placeholder="0"' +
-              ' value="' + (entry.hours || '') + '"' +
-              ' oninput="updateLogEntry(' + eid + ',\'hours\',this.value)">' +
-            '<span class="log-hours-unit">時間</span>' +
-          '</div>' +
-          '<button class="log-delete-btn" onclick="deleteLogEntry(' + eid + ')" title="削除">×</button>' +
+    const card = document.createElement('div');
+    card.className = 'log-entry-card';
+    card.innerHTML =
+      '<div class="log-entry-top">' +
+        '<span class="log-subject-name">' + s.name + '</span>' +
+        '<div class="log-hours-wrap">' +
+          '<input class="log-hours-input" type="number" min="0" max="24" step="0.5" placeholder="–"' +
+            ' value="' + (entry.hours || '') + '"' +
+            ' oninput="updateLogEntry(\'' + s.id + '\',\'hours\',this.value)">' +
+          '<span class="log-hours-unit">時間</span>' +
         '</div>' +
-        '<input class="log-range-input" type="text" placeholder="勉強した範囲・内容"' +
-          ' value="' + safeRange + '"' +
-          ' oninput="updateLogEntry(' + eid + ',\'range\',this.value)">';
-      container.appendChild(card);
-    });
-  }
+      '</div>' +
+      '<input class="log-range-input" type="text" placeholder="勉強した範囲・内容"' +
+        ' value="' + safeRange + '"' +
+        ' oninput="updateLogEntry(\'' + s.id + '\',\'range\',this.value)">';
+    container.appendChild(card);
+  });
 
   updateLogTotals();
 }
