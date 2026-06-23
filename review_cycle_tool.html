@@ -230,6 +230,13 @@ td.col-calc {
   justify-content: space-between;
   padding: 8px 0 12px;
   gap: 8px;
+  border-radius: var(--radius);
+  transition: background .2s, padding .2s;
+}
+.log-nav.is-today {
+  background: #eef2ff;
+  padding: 10px 10px 14px;
+  margin-bottom: 2px;
 }
 .log-nav-btn {
   width: 36px;
@@ -262,6 +269,16 @@ td.col-calc {
   font-size: 11px;
   color: var(--text-3);
   margin-top: 2px;
+}
+.log-date-sub.today-badge {
+  display: inline-block;
+  background: #4f46e5;
+  color: #ffffff;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
 }
 .today-link {
   display: none;
@@ -420,7 +437,7 @@ td.col-calc {
 </div>
 
 <div class="content" id="view-logs" style="display:none">
-  <div class="log-nav">
+  <div class="log-nav" id="log-nav">
     <button class="log-nav-btn" onclick="navigateLog(-1)">‹</button>
     <div class="log-date-center">
       <div class="log-date-main" id="log-date-main">–</div>
@@ -741,12 +758,15 @@ function renderLogView() {
 
   document.getElementById('log-date-main').textContent =
     (d.getMonth() + 1) + '月' + d.getDate() + '日（' + weekdays[d.getDay()] + '）';
-  document.getElementById('log-date-sub').textContent =
+  var subEl = document.getElementById('log-date-sub');
+  subEl.classList.toggle('today-badge', isToday);
+  subEl.textContent =
     isToday     ? '今日' :
     diff === -1 ? '昨日' :
     diff === 1  ? '明日' :
     diff < 0    ? Math.abs(diff) + '日前' :
                   diff + '日後';
+  document.getElementById('log-nav').classList.toggle('is-today', isToday);
   document.getElementById('today-link').classList.toggle('show', !isToday);
 
   const day = logs[currentLogDate] || {};
