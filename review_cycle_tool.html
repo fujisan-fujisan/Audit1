@@ -421,8 +421,8 @@ td.col-calc {
       <thead>
         <tr>
           <th class="col-name">科目</th>
-          <th>① 1周の時間<br><span style="font-weight:400;text-transform:none;letter-spacing:0">(時間)</span></th>
-          <th>② 1日の時間<br><span style="font-weight:400;text-transform:none;letter-spacing:0">(時間/日)</span></th>
+          <th>① 1周の時間<br><span style="font-weight:400;text-transform:none;letter-spacing:0">(分)</span></th>
+          <th>② 1日の時間<br><span style="font-weight:400;text-transform:none;letter-spacing:0">(分/日)</span></th>
           <th>1周の日数</th>
           <th>最大周回数</th>
         </tr>
@@ -609,10 +609,10 @@ function buildTable() {
     const tr = document.createElement('tr');
     tr.innerHTML =
       '<td class="col-name">' + name + '</td>' +
-      '<td><input class="num-input" type="number" min="0" step="0.5" placeholder="–"' +
+      '<td><input class="num-input" type="number" min="0" step="5" placeholder="–"' +
         ' value="' + (s.hoursPerReview || '') + '"' +
         ' oninput="onInput(\'' + id + '\',\'hoursPerReview\',this.value)"></td>' +
-      '<td><input class="num-input" type="number" min="0" step="0.5" placeholder="–"' +
+      '<td><input class="num-input" type="number" min="0" step="5" placeholder="–"' +
         ' value="' + (s.hoursPerDay || '') + '"' +
         ' oninput="onInput(\'' + id + '\',\'hoursPerDay\',this.value)"></td>' +
       '<td class="col-calc" id="calc-' + id + '">' + (dpr !== null ? dpr.toFixed(1) + '日' : '–') + '</td>' +
@@ -641,14 +641,14 @@ function buildCards() {
       '</div>' +
       '<div class="card-inputs">' +
         '<div class="input-group">' +
-          '<label>① 1周の時間（時間）</label>' +
-          '<input class="num-input" type="number" min="0" step="0.5" placeholder="–"' +
+          '<label>① 1周の時間（分）</label>' +
+          '<input class="num-input" type="number" min="0" step="5" placeholder="–"' +
             ' value="' + (s.hoursPerReview || '') + '"' +
             ' oninput="onInput(\'' + id + '\',\'hoursPerReview\',this.value)">' +
         '</div>' +
         '<div class="input-group">' +
-          '<label>② 1日の時間（時間/日）</label>' +
-          '<input class="num-input" type="number" min="0" step="0.5" placeholder="–"' +
+          '<label>② 1日の時間（分/日）</label>' +
+          '<input class="num-input" type="number" min="0" step="5" placeholder="–"' +
             ' value="' + (s.hoursPerDay || '') + '"' +
             ' oninput="onInput(\'' + id + '\',\'hoursPerDay\',this.value)">' +
         '</div>' +
@@ -743,7 +743,7 @@ function updateLogTotals() {
     return sum + (parseFloat((day[s.id] || {}).hours) || 0);
   }, 0);
   const el = document.getElementById('log-total');
-  if (el) el.textContent = total > 0 ? '合計 ' + total.toFixed(1) + '時間' : '';
+  if (el) el.textContent = total > 0 ? '合計 ' + total + '分' : '';
 }
 
 function renderLogView() {
@@ -783,10 +783,10 @@ function renderLogView() {
       '<div class="log-entry-top">' +
         '<span class="log-subject-name">' + s.name + '</span>' +
         '<div class="log-hours-wrap">' +
-          '<input class="log-hours-input" type="number" min="0" max="24" step="0.5" placeholder="–"' +
+          '<input class="log-hours-input" type="number" min="0" max="1440" step="5" placeholder="–"' +
             ' value="' + (entry.hours || '') + '"' +
             ' oninput="updateLogEntry(\'' + s.id + '\',\'hours\',this.value)">' +
-          '<span class="log-hours-unit">時間</span>' +
+          '<span class="log-hours-unit">分</span>' +
         '</div>' +
       '</div>' +
       '<input class="log-range-input" type="text" placeholder="勉強した範囲・内容"' +
