@@ -574,7 +574,8 @@ const CHAPTER_MASTER = [
   { ch: "第6章第9節", chName: "関連当事者の監査" },
   { ch: "第7章第1節", chName: "財務情報等に係る保証業務の概念的枠組み" },
   { ch: "第7章第2節", chName: "期中レビュー" },
-  { ch: "第7章第3節", chName: "財務報告に係る内部統制の報告と監査" },
+  { ch: "第7章第3節", chName: "経営者による評価・報告＋総論" },
+  { ch: "第7章第3節*", chName: "監査人による内部統制監査" },
   { ch: "第7章第4節", chName: "中間監査" },
   { ch: "第8章第1節", chName: "特別目的の財務諸表の監査と準拠性の意見表明" },
   { ch: "第8章第2節", chName: "個別の財務表または財務諸表項目等に対する監査" },
@@ -2029,7 +2030,7 @@ const INITIAL_DATA = [
     {id:"km_c7s2_024",type:"ronsh",name:"継続企業の前提が成立していない－前提としていない期中f/sを作成"},
     {id:"km_c7s2_025",type:"ronsh",name:"継続企業の前提に関する評価や，対応策が提示されない場合"}
   ]},
-  { ch:"第7章第3節", chName:"財務報告に係る内部統制の報告と監査", importance:"A", items:[
+  { ch:"第7章第3節", chName:"経営者による評価・報告＋総論", importance:"A", items:[
     {id:"km_c7s3_001",type:"ronsh",name:"内部統制報告制度(経営者の責任)"},
     {id:"km_c7s3_002",type:"ronsh",name:"内部統制監査報告制度(監査人の責任)"},
     {id:"km_c7s3_003",type:"ronsh",name:"我が国に内部統制報告・監査制度が導入された経緯"},
@@ -2053,7 +2054,9 @@ const INITIAL_DATA = [
     {id:"km_c7s3_021",type:"ronsh",name:"内部統制の有効性の判断する時点"},
     {id:"km_c7s3_022",type:"ronsh",name:"開示すべき重要な不備の是正措置の時期と内部統制の有効性の判断の関係"},
     {id:"km_c7s3_023",type:"ronsh",name:"内部統制報告書(経営者)の評価結果（4パターン）"},
-    {id:"km_c7s3_024",type:"ronsh",name:"内部統制報告書(経営者)の付記事項（4個）"},
+    {id:"km_c7s3_024",type:"ronsh",name:"内部統制報告書(経営者)の付記事項（4個）"}
+  ]},
+  { ch:"第7章第3節*", chName:"監査人による内部統制監査", importance:"A", items:[
     {id:"km_c7s3_025",type:"ronsh",name:"内部統制監査の目的の内容（積極的形式の意見の表明）"},
     {id:"km_c7s3_026",type:"ronsh",name:"内部統制監査はアサーション・ベースの保証業務"},
     {id:"km_c7s3_027",type:"ronsh",name:"内部統制監査の保証水準"},
@@ -2856,6 +2859,21 @@ function initData(){
       }
       saveData();saveKw();saveRec();saveAns();
     }
+  }
+
+  // Migration: 第7章第3節の025〜058を第7章第3節*へ移動
+  const c7s3main=DATA.find(d=>d.ch==='第7章第3節');
+  if(c7s3main&&c7s3main.items.some(it=>parseInt(it.id.split('_').pop(),10)>=25)){
+    let c7s3sub=DATA.find(d=>d.ch==='第7章第3節*');
+    if(!c7s3sub){
+      c7s3sub={ch:'第7章第3節*',chName:'監査人による内部統制監査',importance:'A',items:[]};
+      DATA.push(c7s3sub);
+    }
+    const subIds=new Set(c7s3sub.items.map(it=>it.id));
+    const toMove=c7s3main.items.filter(it=>parseInt(it.id.split('_').pop(),10)>=25);
+    toMove.forEach(it=>{ if(!subIds.has(it.id)) c7s3sub.items.push(it); });
+    c7s3main.items=c7s3main.items.filter(it=>parseInt(it.id.split('_').pop(),10)<25);
+    sortDataByMaster(); saveData();
   }
 
   let updated=false;
