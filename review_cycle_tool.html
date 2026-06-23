@@ -283,9 +283,13 @@ td.col-calc {
 
 /* Log swipe area */
 .log-swipe-wrap {
+  overflow: hidden;
   touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
+}
+#log-slide-inner {
+  will-change: transform;
 }
 
 /* Log entry cards */
@@ -426,9 +430,11 @@ td.col-calc {
     <button class="log-nav-btn" onclick="navigateLog(1)">›</button>
   </div>
   <div class="log-swipe-wrap" id="log-swipe-wrap">
-    <div id="log-entries"></div>
-    <div class="log-footer">
-      <span class="log-total" id="log-total"></span>
+    <div id="log-slide-inner">
+      <div id="log-entries"></div>
+      <div class="log-footer">
+        <span class="log-total" id="log-total"></span>
+      </div>
     </div>
   </div>
 </div>
@@ -693,12 +699,16 @@ function goToToday() {
   renderLogView();
 }
 
-function navigateLog(dir) {
-  const d = new Date(currentLogDate + 'T00:00:00');
+function offsetDate(dateStr, dir) {
+  var d = new Date(dateStr + 'T00:00:00');
   d.setDate(d.getDate() + dir);
-  currentLogDate = d.getFullYear() + '-'
+  return d.getFullYear() + '-'
     + String(d.getMonth() + 1).padStart(2, '0') + '-'
     + String(d.getDate()).padStart(2, '0');
+}
+
+function navigateLog(dir) {
+  currentLogDate = offsetDate(currentLogDate, dir);
   renderLogView();
 }
 
@@ -768,19 +778,63 @@ function renderLogView() {
   updateLogTotals();
 }
 
-// ── Swipe detection ───────────────────────────────
+// ── Swipe detection (continuous drag) ────────────
 (function() {
-  var startX = 0, startY = 0;
-  var wrap = document.getElementById('log-swipe-wrap');
+  var startX = 0, startY = 0, dragX = 0;
+  var dragging = false, animating = false;
+  var wrap  = document.getElementById('log-swipe-wrap');
+  var inner = document.getElementById('log-slide-inner');
+
   wrap.addEventListener('touchstart', function(e) {
+    if (animating) return;
     startX = e.touches[0].clientX;
     startY = e.touches[0].clientY;
+    dragX = 0;
+    dragging = false;
+    inner.style.transition = 'none';
   }, { passive: true });
-  wrap.addEventListener('touchend', function(e) {
-    var dx = e.changedTouches[0].clientX - startX;
-    var dy = e.changedTouches[0].clientY - startY;
-    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
-      navigateLog(dx < 0 ? 1 : -1);
+
+  wrap.addEventListener('touchmove', function(e) {
+    if (animating) return;
+    var dx = e.touches[0].clientX - startX;
+    var dy = e.touches[0].clientY - startY;
+    if (!dragging) {
+      if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+      if (Math.abs(dy) > Math.abs(dx)) return;
+      dragging = true;
+    }
+    e.preventDefault();
+    dragX = dx;
+    inner.style.transform = 'translateX(' + dx + 'px)';
+  }, { passive: false });
+
+  wrap.addEventListener('touchend', function() {
+    if (!dragging) return;
+    dragging = false;
+    var threshold = Math.min(80, window.innerWidth * 0.28);
+    if (Math.abs(dragX) > threshold) {
+      var dir = dragX > 0 ? -1 : 1;
+      var slideOut = (dragX > 0 ? 1 : -1) * window.innerWidth;
+      animating = true;
+      inner.style.transition = 'transform 0.18s ease-out';
+      inner.style.transform = 'translateX(' + slideOut + 'px)';
+      setTimeout(function() {
+        currentLogDate = offsetDate(currentLogDate, dir);
+        renderLogView();
+        var slideIn = (dragX > 0 ? -1 : 1) * window.innerWidth;
+        inner.style.transition = 'none';
+        inner.style.transform = 'translateX(' + slideIn + 'px)';
+        requestAnimationFrame(function() {
+          requestAnimationFrame(function() {
+            inner.style.transition = 'transform 0.22s ease-out';
+            inner.style.transform = 'translateX(0)';
+            setTimeout(function() { animating = false; }, 220);
+          });
+        });
+      }, 180);
+    } else {
+      inner.style.transition = 'transform 0.2s ease-out';
+      inner.style.transform = 'translateX(0)';
     }
   }, { passive: true });
 })();
