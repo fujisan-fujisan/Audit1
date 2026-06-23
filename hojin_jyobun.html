@@ -3527,6 +3527,7 @@ function addQuestion() {
   document.getElementById('regArticlePreview').style.display = 'none';
   document.getElementById('regExistingQs').style.display = 'none';
   showToast('問題を登録しました');
+  document.getElementById('regArticleInput').focus();
 }
 
 function buildQSection(articleNum, pNum, storage) {
