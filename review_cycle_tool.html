@@ -495,7 +495,18 @@ function saveSettings() {
 function loadLogs() {
   try {
     const s = localStorage.getItem(LOGS_KEY);
-    if (s) logs = JSON.parse(s);
+    if (!s) return;
+    const parsed = JSON.parse(s);
+    Object.keys(parsed).forEach(function(date) {
+      if (Array.isArray(parsed[date])) {
+        const migrated = {};
+        parsed[date].forEach(function(entry) {
+          if (entry.subjectId) migrated[entry.subjectId] = { hours: entry.hours || '', range: entry.range || '' };
+        });
+        parsed[date] = migrated;
+      }
+    });
+    logs = parsed;
   } catch(e) {}
 }
 
@@ -779,19 +790,18 @@ function renderLogView() {
 
     const card = document.createElement('div');
     card.className = 'log-entry-card';
+    card.dataset.sid = s.id;
     card.innerHTML =
       '<div class="log-entry-top">' +
         '<span class="log-subject-name">' + s.name + '</span>' +
         '<div class="log-hours-wrap">' +
           '<input class="log-hours-input" type="number" min="0" max="1440" step="5" placeholder="–"' +
-            ' value="' + (entry.hours || '') + '"' +
-            ' oninput="updateLogEntry(\'' + s.id + '\',\'hours\',this.value)">' +
+            ' data-field="hours" value="' + (entry.hours || '') + '">' +
           '<span class="log-hours-unit">分</span>' +
         '</div>' +
       '</div>' +
       '<input class="log-range-input" type="text" placeholder="勉強した範囲・内容"' +
-        ' value="' + safeRange + '"' +
-        ' oninput="updateLogEntry(\'' + s.id + '\',\'range\',this.value)">';
+        ' data-field="range" value="' + safeRange + '">';
     container.appendChild(card);
   });
 
@@ -857,6 +867,20 @@ function renderLogView() {
       inner.style.transform = 'translateX(0)';
     }
   }, { passive: true });
+})();
+
+// ── Log entry event delegation ────────────────────
+(function() {
+  function handleLogInput(e) {
+    var input = e.target;
+    if (input.tagName !== 'INPUT') return;
+    var card = input.closest('[data-sid]');
+    if (!card) return;
+    updateLogEntry(card.dataset.sid, input.dataset.field, input.value);
+  }
+  var logView = document.getElementById('view-logs');
+  logView.addEventListener('input',  handleLogInput);
+  logView.addEventListener('change', handleLogInput);
 })();
 
 // ── Init ─────────────────────────────────────────
