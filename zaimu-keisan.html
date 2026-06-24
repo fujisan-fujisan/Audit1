@@ -353,13 +353,13 @@ body {
 .empty-state { text-align: center; padding: 48px 16px; color: var(--text-3); font-size: 13px; }
 
 /* TIMER BAR */
-.timer-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--text); color: #fff; padding: 12px 16px; display: flex; align-items: center; gap: 12px; z-index: 200; box-shadow: 0 -2px 12px rgba(0,0,0,0.2); }
+.timer-bar { background: var(--text); color: #fff; padding: 10px 16px; align-items: center; gap: 12px; border-top: 1px solid rgba(255,255,255,0.12); }
 .timer-bar-left { flex: 1; min-width: 0; }
 .timer-bar-problem { font-size: 11px; color: rgba(255,255,255,0.65); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
-.timer-bar-elapsed { font-size: 22px; font-weight: 700; font-family: 'DM Mono', monospace; line-height: 1; }
-.timer-bar-btn { flex-shrink: 0; padding: 9px 18px; border-radius: var(--radius-sm); border: none; background: #fff; color: var(--text); font-weight: 700; font-size: 14px; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; }
+.timer-bar-elapsed { font-size: 20px; font-weight: 700; font-family: 'DM Mono', monospace; line-height: 1; }
+.timer-bar-btn { flex-shrink: 0; padding: 7px 16px; border-radius: var(--radius-sm); border: none; background: #fff; color: var(--text); font-weight: 700; font-size: 13px; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; }
 .timer-bar-btn:active { opacity: .85; }
-.timer-bar-cancel { flex-shrink: 0; background: transparent; border: none; color: rgba(255,255,255,0.45); font-size: 22px; cursor: pointer; padding: 4px; line-height: 1; }
+.timer-bar-cancel { flex-shrink: 0; background: transparent; border: none; color: rgba(255,255,255,0.45); font-size: 20px; cursor: pointer; padding: 4px; line-height: 1; }
 </style>
 </head>
 <body>
@@ -378,6 +378,15 @@ body {
     <button class="tab active" onclick="setTab('problems',this)">問題</button>
     <button class="tab" onclick="setTab('ronten',this)">論点</button>
     <button class="tab" onclick="setTab('urgent',this)">要復習</button>
+  </div>
+  <!-- TIMER BAR -->
+  <div id="timer-bar" class="timer-bar" style="display:none">
+    <div class="timer-bar-left">
+      <div class="timer-bar-problem" id="timer-bar-title"></div>
+      <div class="timer-bar-elapsed" id="timer-bar-elapsed">00:00</div>
+    </div>
+    <button class="timer-bar-btn" onclick="goToEval()">評価へ</button>
+    <button class="timer-bar-cancel" onclick="cancelTimer()">×</button>
   </div>
 </div>
 
@@ -477,16 +486,6 @@ body {
       <div class="prob-detail-delete" id="pd-delete"></div>
     </div>
   </div>
-</div>
-
-<!-- TIMER BAR -->
-<div id="timer-bar" class="timer-bar" style="display:none">
-  <div class="timer-bar-left">
-    <div class="timer-bar-problem" id="timer-bar-title"></div>
-    <div class="timer-bar-elapsed" id="timer-bar-elapsed">00:00</div>
-  </div>
-  <button class="timer-bar-btn" onclick="goToEval()">評価へ</button>
-  <button class="timer-bar-cancel" onclick="cancelTimer()">×</button>
 </div>
 
 <!-- NEW PROBLEM MODAL -->
