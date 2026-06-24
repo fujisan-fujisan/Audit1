@@ -351,6 +351,15 @@ body {
 .ch-group.open .ch-score-badge { opacity: 0.7; }
 
 .empty-state { text-align: center; padding: 48px 16px; color: var(--text-3); font-size: 13px; }
+
+/* TIMER BAR */
+.timer-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--text); color: #fff; padding: 12px 16px; display: flex; align-items: center; gap: 12px; z-index: 200; box-shadow: 0 -2px 12px rgba(0,0,0,0.2); }
+.timer-bar-left { flex: 1; min-width: 0; }
+.timer-bar-problem { font-size: 11px; color: rgba(255,255,255,0.65); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+.timer-bar-elapsed { font-size: 22px; font-weight: 700; font-family: 'DM Mono', monospace; line-height: 1; }
+.timer-bar-btn { flex-shrink: 0; padding: 9px 18px; border-radius: var(--radius-sm); border: none; background: #fff; color: var(--text); font-weight: 700; font-size: 14px; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; }
+.timer-bar-btn:active { opacity: .85; }
+.timer-bar-cancel { flex-shrink: 0; background: transparent; border: none; color: rgba(255,255,255,0.45); font-size: 22px; cursor: pointer; padding: 4px; line-height: 1; }
 </style>
 </head>
 <body>
@@ -467,12 +476,22 @@ body {
     <div class="prob-detail-body">
       <div class="prob-detail-hist" id="pd-hist"></div>
       <div class="prob-detail-actions">
-        <button class="btn-record" id="pd-record-btn">記録する</button>
+        <button class="btn-record" id="pd-record-btn">開始する</button>
       </div>
       <div class="prob-detail-sub" id="pd-sub"></div>
       <div class="prob-detail-delete" id="pd-delete"></div>
     </div>
   </div>
+</div>
+
+<!-- TIMER BAR -->
+<div id="timer-bar" class="timer-bar" style="display:none">
+  <div class="timer-bar-left">
+    <div class="timer-bar-problem" id="timer-bar-title"></div>
+    <div class="timer-bar-elapsed" id="timer-bar-elapsed">00:00</div>
+  </div>
+  <button class="timer-bar-btn" onclick="goToEval()">評価へ</button>
+  <button class="timer-bar-cancel" onclick="cancelTimer()">×</button>
 </div>
 
 <!-- NEW PROBLEM MODAL -->
@@ -1188,10 +1207,16 @@ function openProbDetail(probId) {
       }).join('');
   document.getElementById('pd-hist').innerHTML = histHtml;
 
-  document.getElementById('pd-record-btn').onclick = () => {
-    closeProbDetailDirect();
-    openModal(probId);
-  };
+  const pdBtn = document.getElementById('pd-record-btn');
+  if (timerProbId === probId) {
+    pdBtn.textContent = '計測中...';
+    pdBtn.style.opacity = '0.5';
+    pdBtn.onclick = null;
+  } else {
+    pdBtn.textContent = '開始する';
+    pdBtn.style.opacity = '';
+    pdBtn.onclick = () => startProbTimer(probId);
+  }
 
   document.getElementById('pd-sub').innerHTML = `
     <button class="btn-sub" onclick="closeProbDetailDirect();openEditModal('${probId}')">論点を編集する</button>
@@ -1241,6 +1266,11 @@ let modalProbId = null;
 let modalEval = null;
 let modalRontenEvals = {};
 
+// ── TIMER ──
+let timerProbId = null;
+let timerStart = null;
+let timerInterval = null;
+
 function openModal(probId) {
   modalProbId = probId;
   modalEval = null;
@@ -1265,6 +1295,48 @@ function openModal(probId) {
 function closeModal() {
   document.getElementById('record-modal').classList.remove('open');
   _unlockScroll();
+}
+
+function startProbTimer(probId) {
+  if (timerInterval) clearInterval(timerInterval);
+  timerProbId = probId;
+  timerStart = Date.now();
+  const prob = getProbById(probId);
+  document.getElementById('timer-bar-title').textContent = prob ? prob.title : probId;
+  document.getElementById('timer-bar').style.display = 'flex';
+  updateTimerDisplay();
+  timerInterval = setInterval(updateTimerDisplay, 1000);
+  closeProbDetailDirect();
+}
+
+function updateTimerDisplay() {
+  if (!timerStart) return;
+  const secs = Math.floor((Date.now() - timerStart) / 1000);
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  document.getElementById('timer-bar-elapsed').textContent =
+    String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+
+function stopTimer() {
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = null;
+  timerProbId = null;
+  timerStart = null;
+  document.getElementById('timer-bar').style.display = 'none';
+}
+
+function cancelTimer() {
+  stopTimer();
+}
+
+function goToEval() {
+  if (!timerProbId) return;
+  const elapsed = Math.round((Date.now() - timerStart) / 60000);
+  const probId = timerProbId;
+  stopTimer();
+  openModal(probId);
+  document.getElementById('modal-time').value = elapsed > 0 ? elapsed : 1;
 }
 
 function selectModalEval(val) {
