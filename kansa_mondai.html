@@ -1218,9 +1218,10 @@ function refreshManageKws(id){
 
 function deleteItem(id){
   if(!confirm('この問題を削除しますか？記録も削除されます。')) return;
+  let deletedCh=null;
   for(const ch of DATA){
     const idx=ch.items.findIndex(it=>it.id===id);
-    if(idx>=0){ ch.items.splice(idx,1); break; }
+    if(idx>=0){ deletedCh=ch.ch; ch.items.splice(idx,1); break; }
   }
   saveData();
   delete ansData[id]; saveAns();
@@ -1231,7 +1232,9 @@ function deleteItem(id){
     document.getElementById('manage-tabs').innerHTML='';
     document.getElementById('manage-content').innerHTML='<div class="manage-empty">問題が登録されていません</div>';
   } else {
-    renderManage(0);
+    let tabIdx=chs.findIndex(ch=>ch.ch===deletedCh);
+    if(tabIdx<0) tabIdx=Math.min(chs.length-1, Math.max(0, tabIdx));
+    renderManage(Math.max(0,tabIdx));
   }
 }
 
