@@ -3212,9 +3212,17 @@ function getChapterLapKey() {
   return _selectedChapters.size === 0 ? 'all' : [..._selectedChapters].sort().join(',');
 }
 
-function getChapterLapInfo(storage, lapKey, filtered) {
+function getLaps() {
+  try { return JSON.parse(localStorage.getItem('hojin-training-laps') || '{}'); } catch { return {}; }
+}
+
+function saveLaps(laps) {
+  localStorage.setItem('hojin-training-laps', JSON.stringify(laps));
+}
+
+function getChapterLapInfo(laps, lapKey, filtered) {
   if (!filtered.length) return { lap: 1, remaining: 0 };
-  const state = (storage.trainingLaps || {})[lapKey];
+  const state = (laps || {})[lapKey];
   if (!state) return { lap: 1, remaining: filtered.length };
   const allKeySet = new Set(filtered.map(getQuestionKey));
   const valid = (state.remaining || []).filter(k => allKeySet.has(k));
@@ -3226,7 +3234,7 @@ function updateChselStart() {
   const storage = getStorage();
   const filtered = getFilteredQuestions(storage.questions);
   const lapKey = getChapterLapKey();
-  const info = getChapterLapInfo(storage, lapKey, filtered);
+  const info = getChapterLapInfo(getLaps(), lapKey, filtered);
   const btn = document.getElementById('chselStartBtn');
   const lapInfoEl = document.getElementById('chselLapInfo');
   const countInput = document.getElementById('chselCountInput');
@@ -3277,17 +3285,17 @@ function confirmStartTraining() {
   if (!filtered.length) { showToast('この範囲に登録された問題がありません'); return; }
 
   const lapKey = getChapterLapKey();
-  if (!storage.trainingLaps) storage.trainingLaps = {};
+  const laps = getLaps();
   const allKeys = filtered.map(getQuestionKey);
   const allKeySet = new Set(allKeys);
-  let state = storage.trainingLaps[lapKey];
+  let state = laps[lapKey];
   const validRemaining = (state?.remaining || []).filter(k => allKeySet.has(k));
   if (!state || validRemaining.length === 0) {
     state = {
       lap: state ? (state.lap || 1) + 1 : 1,
       remaining: [...allKeys].sort(() => Math.random() - 0.5),
     };
-    storage.trainingLaps[lapKey] = state;
+    laps[lapKey] = state;
   } else {
     state.remaining = validRemaining;
   }
@@ -3298,7 +3306,7 @@ function confirmStartTraining() {
   localStorage.setItem('hojin-qcount', count);
 
   const drawnKeys = state.remaining.splice(0, count);
-  saveStorage(storage);
+  saveLaps(laps);
 
   const keyToQ = {};
   filtered.forEach(q => { keyToQ[getQuestionKey(q)] = q; });
