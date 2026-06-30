@@ -2085,25 +2085,30 @@ function updateSessionScore() {
 let _scrollLockCount = 0;
 let _savedScrollY = 0;
 
+function _preventBodyScroll(e) {
+  if (e.target.closest('.drawer-body, .chsel-body')) return;
+  e.preventDefault();
+}
+
 function lockBodyScroll() {
-  if (_scrollLockCount === 0) {
+  _scrollLockCount++;
+  if (_scrollLockCount === 1) {
     _savedScrollY = window.scrollY;
-    lockBodyScroll();
     document.body.style.position = 'fixed';
     document.body.style.top = `-${_savedScrollY}px`;
     document.body.style.width = '100%';
+    document.addEventListener('touchmove', _preventBodyScroll, { passive: false });
   }
-  _scrollLockCount++;
 }
 
 function unlockBodyScroll() {
   _scrollLockCount = Math.max(0, _scrollLockCount - 1);
   if (_scrollLockCount === 0) {
-    unlockBodyScroll();
     document.body.style.position = '';
     document.body.style.top = '';
     document.body.style.width = '';
     window.scrollTo(0, _savedScrollY);
+    document.removeEventListener('touchmove', _preventBodyScroll);
   }
 }
 
