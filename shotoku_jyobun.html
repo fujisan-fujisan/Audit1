@@ -868,6 +868,9 @@
   }
   .chsel-count-input:focus { border-color: var(--accent); }
   .chsel-count-hint { font-size: 11px; color: var(--text-muted); }
+  .chsel-lap-info {
+    font-size: 12px; font-weight: 600; color: var(--accent); text-align: center; min-height: 16px;
+  }
   #chselStartBtn {
     flex: 1; padding: 12px; border: none; border-radius: 8px;
     background: var(--accent); color: white; font-size: 15px; font-weight: 700;
@@ -1159,6 +1162,7 @@
     color: var(--text-primary);
     margin-bottom: 24px;
     max-width: 640px;
+    white-space: pre-wrap;
   }
 
   .training-article-id {
@@ -3197,25 +3201,52 @@ function chselClampCount() {
   if (val < 1) input.value = 1;
 }
 
+function getQuestionKey(q) {
+  return q.answer + '|||' + q.question;
+}
+
+function getChapterLapKey() {
+  return _selectedChapters.size === 0 ? 'all' : [..._selectedChapters].sort().join(',');
+}
+
+function getChapterLapInfo(storage, lapKey, filtered) {
+  if (!filtered.length) return { lap: 1, remaining: 0 };
+  const state = (storage.trainingLaps || {})[lapKey];
+  if (!state) return { lap: 1, remaining: filtered.length };
+  const allKeySet = new Set(filtered.map(getQuestionKey));
+  const valid = (state.remaining || []).filter(k => allKeySet.has(k));
+  if (valid.length === 0) return { lap: (state.lap || 1) + 1, remaining: filtered.length };
+  return { lap: state.lap || 1, remaining: valid.length };
+}
+
 function updateChselStart() {
   const storage = getStorage();
-  const total = getFilteredQuestions(storage.questions).length;
+  const filtered = getFilteredQuestions(storage.questions);
+  const lapKey = getChapterLapKey();
+  const info = getChapterLapInfo(storage, lapKey, filtered);
   const btn = document.getElementById('chselStartBtn');
+  const lapInfoEl = document.getElementById('chselLapInfo');
   const countInput = document.getElementById('chselCountInput');
   const countHint = document.getElementById('chselCountHint');
+  if (lapInfoEl) {
+    lapInfoEl.textContent = filtered.length > 0
+      ? `第${info.lap}周　残り ${info.remaining} 問 / 全 ${filtered.length} 問`
+      : '';
+  }
   if (countInput) {
-    countInput.max = total;
-    countInput.disabled = total === 0;
+    const max = info.remaining;
+    countInput.max = max;
+    countInput.disabled = max === 0;
     const cur = parseInt(countInput.value) || 0;
-    if (total > 0) {
-      if (cur <= 0 || cur > total) countInput.value = Math.min(cur > 0 ? cur : 20, total);
+    if (max > 0) {
+      if (cur <= 0 || cur > max) countInput.value = Math.min(cur > 0 ? cur : 20, max);
     } else {
       countInput.value = 0;
     }
-    if (countHint) countHint.textContent = total > 0 ? `（最大 ${total} 問）` : '';
+    if (countHint) countHint.textContent = max > 0 ? `（最大 ${max} 問）` : '';
   }
   btn.textContent = '開始';
-  btn.disabled = total === 0;
+  btn.disabled = filtered.length === 0;
 }
 
 function closeChapterSelectModal() {
@@ -3241,15 +3272,41 @@ function confirmStartTraining() {
   const storage = getStorage();
   const filtered = getFilteredQuestions(storage.questions);
   if (!filtered.length) { showToast('この範囲に登録された問題がありません'); return; }
-  const countInput = document.getElementById('chselCountInput');
-  const requested = Math.max(1, parseInt(countInput?.value) || filtered.length);
-  const count = Math.min(requested, filtered.length);
-  localStorage.setItem('shotoku-qcount', count);
-  const shuffled = filtered.map(q => ({ ...q, originalIdx: storage.questions.indexOf(q) })).sort(() => Math.random() - 0.5);
-  if (trainingMode === 'yomitori') {
-    trainingQueue = shuffled.slice(0, count).map(q => ({ ...q, type: 'yomitori' }));
+
+  const lapKey = getChapterLapKey();
+  if (!storage.trainingLaps) storage.trainingLaps = {};
+  const allKeys = filtered.map(getQuestionKey);
+  const allKeySet = new Set(allKeys);
+  let state = storage.trainingLaps[lapKey];
+  const validRemaining = (state?.remaining || []).filter(k => allKeySet.has(k));
+  if (!state || validRemaining.length === 0) {
+    state = {
+      lap: state ? (state.lap || 1) + 1 : 1,
+      remaining: [...allKeys].sort(() => Math.random() - 0.5),
+    };
+    storage.trainingLaps[lapKey] = state;
   } else {
-    trainingQueue = shuffled.slice(0, count);
+    state.remaining = validRemaining;
+  }
+
+  const countInput = document.getElementById('chselCountInput');
+  const requested = Math.max(1, parseInt(countInput?.value) || state.remaining.length);
+  const count = Math.min(requested, state.remaining.length);
+  localStorage.setItem('shotoku-qcount', count);
+
+  const drawnKeys = state.remaining.splice(0, count);
+  saveStorage(storage);
+
+  const keyToQ = {};
+  filtered.forEach(q => { keyToQ[getQuestionKey(q)] = q; });
+  const drawnQs = drawnKeys
+    .map(k => { const q = keyToQ[k]; return q ? { ...q, originalIdx: storage.questions.indexOf(q) } : null; })
+    .filter(Boolean);
+
+  if (trainingMode === 'yomitori') {
+    trainingQueue = drawnQs.map(q => ({ ...q, type: 'yomitori' }));
+  } else {
+    trainingQueue = drawnQs;
   }
   currentIdx = 0;
   sessionCorrect = 0;
@@ -4057,6 +4114,7 @@ function showArticleQPopup(numKey) {
     </div>
     <div class="chsel-body" id="chselBody"></div>
     <div class="chsel-footer">
+      <div class="chsel-lap-info" id="chselLapInfo"></div>
       <div class="chsel-count-row">
         <span class="chsel-count-label">問題数</span>
         <input type="number" id="chselCountInput" class="chsel-count-input" min="1" value="20" oninput="chselClampCount()">
