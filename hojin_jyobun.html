@@ -512,6 +512,7 @@
     flex: 1;
     overflow-y: auto;
     padding: 8px 0;
+    overscroll-behavior: contain;
   }
 
   .nav-part-header {
@@ -2076,6 +2077,32 @@ function updateSessionScore() {
   document.getElementById('sessionScore').textContent = `${sessionTotal}問中${sessionCorrect}問正解`;
 }
 
+// ===== スクロールロック =====
+let _scrollLockCount = 0;
+let _savedScrollY = 0;
+
+function lockBodyScroll() {
+  if (_scrollLockCount === 0) {
+    _savedScrollY = window.scrollY;
+    lockBodyScroll();
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${_savedScrollY}px`;
+    document.body.style.width = '100%';
+  }
+  _scrollLockCount++;
+}
+
+function unlockBodyScroll() {
+  _scrollLockCount = Math.max(0, _scrollLockCount - 1);
+  if (_scrollLockCount === 0) {
+    unlockBodyScroll();
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    window.scrollTo(0, _savedScrollY);
+  }
+}
+
 // ===== サイドドロワー =====
 let browseMode = 'view';
 let currentPartIdx = null;
@@ -2088,14 +2115,14 @@ function openDrawer() {
   el.offsetHeight;
   el.classList.add('open');
   document.getElementById('drawerOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  lockBodyScroll();
 }
 
 function closeDrawer() {
   const el = document.getElementById('drawer');
   el.classList.remove('open');
   document.getElementById('drawerOverlay').classList.remove('open');
-  document.body.style.overflow = '';
+  unlockBodyScroll();
   setTimeout(() => { el.style.display = 'none'; }, 280);
 }
 
@@ -2431,14 +2458,14 @@ function openEditPopup(articleNum, pNum) {
   area.value = currentText;
   document.getElementById('editPopup').classList.add('open');
   document.getElementById('editPopupOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  lockBodyScroll();
   area.focus();
 }
 
 function closeEditPopup() {
   document.getElementById('editPopup').classList.remove('open');
   document.getElementById('editPopupOverlay').classList.remove('open');
-  document.body.style.overflow = '';
+  unlockBodyScroll();
   _editPopupArticle = null;
   _editPopupPNum = null;
 }
@@ -2928,14 +2955,14 @@ function openTrainingDrawer() {
   el.offsetHeight;
   el.classList.add('open');
   document.getElementById('trainingDrawerOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  lockBodyScroll();
 }
 
 function closeTrainingDrawer() {
   const el = document.getElementById('trainingDrawer');
   el.classList.remove('open');
   document.getElementById('trainingDrawerOverlay').classList.remove('open');
-  document.body.style.overflow = '';
+  unlockBodyScroll();
   setTimeout(() => { el.style.display = 'none'; }, 280);
 }
 
