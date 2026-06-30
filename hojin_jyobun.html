@@ -2083,15 +2083,14 @@ function updateSessionScore() {
 let _scrollLockCount = 0;
 let _savedScrollY = 0;
 
-function _preventBodyScroll(e) {
-  if (e.target.closest('.drawer-body, .chsel-body')) return;
-  e.preventDefault();
-}
+function _preventBodyScroll(e) { e.preventDefault(); }
+function _allowScrollInEl(e) { e.stopPropagation(); }
 
 function lockBodyScroll() {
   _scrollLockCount++;
   if (_scrollLockCount === 1) {
     _savedScrollY = window.scrollY;
+    document.documentElement.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
     document.body.style.top = `-${_savedScrollY}px`;
     document.body.style.width = '100%';
@@ -2102,6 +2101,7 @@ function lockBodyScroll() {
 function unlockBodyScroll() {
   _scrollLockCount = Math.max(0, _scrollLockCount - 1);
   if (_scrollLockCount === 0) {
+    document.documentElement.style.overflow = '';
     document.body.style.position = '';
     document.body.style.top = '';
     document.body.style.width = '';
@@ -2122,6 +2122,7 @@ function openDrawer() {
   el.offsetHeight;
   el.classList.add('open');
   document.getElementById('drawerOverlay').classList.add('open');
+  document.getElementById('drawerBody').addEventListener('touchmove', _allowScrollInEl, { passive: true });
   lockBodyScroll();
 }
 
@@ -2129,6 +2130,7 @@ function closeDrawer() {
   const el = document.getElementById('drawer');
   el.classList.remove('open');
   document.getElementById('drawerOverlay').classList.remove('open');
+  document.getElementById('drawerBody').removeEventListener('touchmove', _allowScrollInEl);
   unlockBodyScroll();
   setTimeout(() => { el.style.display = 'none'; }, 280);
 }
@@ -2962,6 +2964,7 @@ function openTrainingDrawer() {
   el.offsetHeight;
   el.classList.add('open');
   document.getElementById('trainingDrawerOverlay').classList.add('open');
+  document.getElementById('trainingDrawerBody').addEventListener('touchmove', _allowScrollInEl, { passive: true });
   lockBodyScroll();
 }
 
@@ -2969,6 +2972,7 @@ function closeTrainingDrawer() {
   const el = document.getElementById('trainingDrawer');
   el.classList.remove('open');
   document.getElementById('trainingDrawerOverlay').classList.remove('open');
+  document.getElementById('trainingDrawerBody').removeEventListener('touchmove', _allowScrollInEl);
   unlockBodyScroll();
   setTimeout(() => { el.style.display = 'none'; }, 280);
 }
