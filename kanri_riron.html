@@ -1351,6 +1351,7 @@ body {
   <div class="view-tabs" id="view-tabs">
     <button class="vtab active" onclick="showPage('all',this)">全問題</button>
     <button class="vtab" onclick="showPage('history',this)">履歴一覧</button>
+    <button class="vtab" onclick="showPage('training',this)">苦手トレーニング</button>
   </div>
 </div>
 <div id="main-view">
@@ -1360,6 +1361,7 @@ body {
   </div>
 </div>
 <div id="weakness-view" class="content" style="display:none;"></div>
+<div id="training-view" class="content" style="display:none;"></div>
 <div id="kw-manage-view" class="content" style="display:none;padding-bottom:100px;"></div>
 
 <div class="overlay" id="scope-overlay">
@@ -1640,6 +1642,8 @@ let itemState={},chState={},appState={rounds:[{label:'第1回',scope:'all',deadl
 let kwState={};
 let timerState={};
 let showingWeakness=false;
+let showingTraining=false;
+let trainingThreshold=50;
 
 function load(){
   try{
@@ -2114,12 +2118,15 @@ function showPage(page, btn) {
   document.getElementById('kw-manage-btn').classList.remove('active');
   showingKwManage = false;
   showingWeakness = page === 'history';
-  document.getElementById('main-view').style.display = showingWeakness ? 'none' : 'block';
+  showingTraining = page === 'training';
+  document.getElementById('main-view').style.display = (showingWeakness || showingTraining) ? 'none' : 'block';
   document.getElementById('weakness-view').style.display = showingWeakness ? 'block' : 'none';
+  document.getElementById('training-view').style.display = showingTraining ? 'block' : 'none';
   document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   window.scrollTo(0, 0);
   if (showingWeakness) renderHistoryPage();
+  if (showingTraining) renderTrainingPage();
 }
 
 function toggleKwManagePage() {
@@ -2128,14 +2135,16 @@ function toggleKwManagePage() {
   if (showingKwManage) {
     document.getElementById('main-view').style.display = 'none';
     document.getElementById('weakness-view').style.display = 'none';
+    document.getElementById('training-view').style.display = 'none';
     document.getElementById('kw-manage-view').style.display = 'block';
     document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
     window.scrollTo(0, 0);
     renderKwManagePage();
   } else {
     document.getElementById('kw-manage-view').style.display = 'none';
-    document.getElementById('main-view').style.display = showingWeakness ? 'none' : 'block';
+    document.getElementById('main-view').style.display = (showingWeakness || showingTraining) ? 'none' : 'block';
     document.getElementById('weakness-view').style.display = showingWeakness ? 'block' : 'none';
+    document.getElementById('training-view').style.display = showingTraining ? 'block' : 'none';
     window.scrollTo(0, 0);
   }
 }
@@ -2376,6 +2385,85 @@ function selectHistCh(idx){
   const roundHeaders=Array.from({length:totalRounds},(_,i)=>(appState.rounds[i]||{}).label||`第${i+1}回`);
   const visibleChs=DATA.filter(ch=>ch.items.filter(itemInScope).length>0);
   contentEl.innerHTML=buildHistChContent(visibleChs[idx],roundHeaders);
+}
+
+// ── 苦手トレーニング（フィルターのみ・周回の記録には一切書き込まない） ──
+function computeItemScore(item){
+  const kws=getKeywords(item.id);
+  if(kws.length>0){
+    const allResults=kws.flatMap(kw=>kw.results);
+    if(allResults.length>0){
+      const okCount=allResults.filter(r=>r.result==='o').length;
+      return Math.round(okCount/allResults.length*100);
+    }
+    return null;
+  }
+  const stateForItem=itemState[item.id]||{};
+  const roundIdxs=Object.keys(stateForItem).map(Number).filter(i=>stateForItem[i]&&stateForItem[i].u);
+  if(roundIdxs.length===0)return null;
+  const lastU=stateForItem[Math.max(...roundIdxs)].u;
+  const uMap={oo:100,o:80,n:50,x:25,xx:0};
+  return lastU in uMap?uMap[lastU]:null;
+}
+
+function renderTrainingPage(){
+  const view=document.getElementById('training-view');
+  const filterHtml=`
+    <div class="ch-card" style="padding:12px 14px;margin-bottom:10px;">
+      <div style="font-size:11px;font-weight:700;color:var(--text-2);margin-bottom:2px;">理解率フィルター</div>
+      <div style="font-size:10px;color:var(--text-3);margin-bottom:10px;">ここでの学習・自己チェックは周回の評価や記録には保存されません</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <input type="range" id="training-th-slider" min="0" max="100" step="10" value="${trainingThreshold}" oninput="onTrainingThresholdChange(this.value)" style="flex:1;">
+        <span style="font-family:'DM Mono',monospace;font-weight:700;font-size:13px;min-width:78px;text-align:right;" id="training-th-label">${trainingThreshold}% 以下</span>
+      </div>
+    </div>`;
+  const items=scopedItems()
+    .map(item=>({item,score:computeItemScore(item)}))
+    .filter(x=>x.score!==null&&x.score<=trainingThreshold)
+    .sort((a,b)=>a.score-b.score);
+  let listHtml;
+  if(items.length===0){
+    listHtml=`<div style="text-align:center;color:var(--text-3);font-size:12px;padding:40px 0;">条件に一致する問題はありません（理解率が未記録の項目は対象外です）</div>`;
+  }else{
+    listHtml=`<div style="font-size:10px;color:var(--text-3);margin-bottom:8px;">${items.length} 問</div>`
+      +items.map(({item,score})=>buildTrainingCard(item,score)).join('');
+  }
+  view.innerHTML=filterHtml+listHtml;
+}
+
+function onTrainingThresholdChange(v){
+  trainingThreshold=parseInt(v,10);
+  const lbl=document.getElementById('training-th-label');
+  if(lbl)lbl.textContent=trainingThreshold+'% 以下';
+  renderTrainingPage();
+}
+
+function buildTrainingCard(item,score){
+  const ch=DATA.find(c=>c.items.some(i=>i.id===item.id));
+  const scoreColor=score>=80?'#0a5c35':score>=60?'var(--o-color)':score>=40?'#d4a017':'var(--x-color)';
+  const kws=getKeywords(item.id);
+  const kwHtml=kws.length
+    ?kws.map(k=>`<span style="font-size:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:3px 7px;color:var(--text-2);">${escHtml(k.word)}</span>`).join('')
+    :`<span style="font-size:10px;color:var(--text-3);">キーワードなし</span>`;
+  return `<div class="ch-card">
+    <div class="ch-header" onclick="this.closest('.ch-card').classList.toggle('open')">
+      <span class="ch-chevron">▶</span>
+      <div class="ch-info">
+        <div class="ch-name">${item.q?`<button class="q-btn" style="margin-right:6px;margin-left:0" onclick="event.stopPropagation();showQ('${item.id}')">問題文</button>`:''}${escHtml(item.name)}</div>
+        <div class="ch-sub">${ch?ch.ch:''}・重要度${item.imp}</div>
+      </div>
+      <span class="ch-badge" style="color:${scoreColor};border-color:${scoreColor};">${score}%</span>
+    </div>
+    <div class="items-wrap">
+      <div style="padding:10px 14px;display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;flex-wrap:wrap;gap:4px;">${kwHtml}</div>
+        <div style="display:flex;gap:6px;">
+          <button class="ub" style="flex:1;" onclick="event.stopPropagation();this.classList.toggle('sel-o');this.parentElement.querySelector('.ub:last-child').classList.remove('sel-x')">わかった ○</button>
+          <button class="ub" style="flex:1;" onclick="event.stopPropagation();this.classList.toggle('sel-x');this.parentElement.querySelector('.ub:first-child').classList.remove('sel-o')">まだ ×</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
 }
 
 let pendingScope=null,pendingScopeIsFirst=false;
