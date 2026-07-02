@@ -350,6 +350,41 @@ body {
   display:block
 }
 
+.tr-ch-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  margin-bottom:8px;
+  overflow:hidden
+}
+
+.tr-ch-header {
+  padding:12px 14px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  user-select:none
+}
+
+.tr-ch-header:active {
+  background:var(--bg)
+}
+
+.tr-ch-card.open .ch-chevron {
+  transform:rotate(90deg)
+}
+
+.tr-items-wrap {
+  display:none;
+  border-top:1px solid var(--border);
+  padding:8px 14px
+}
+
+.tr-ch-card.open .tr-items-wrap {
+  display:block
+}
+
 .item-row {
   padding:10px 14px;
   border-bottom:1px solid var(--border);
@@ -2423,20 +2458,42 @@ function renderTrainingPage(){
     const chItems=ch.items
       .filter(itemInScope)
       .map(item=>({item,score:computeItemScore(item)}))
-      .filter(x=>x.score!==null&&x.score<=trainingThreshold)
-      .sort((a,b)=>a.score-b.score);
+      .filter(x=>x.score!==null&&x.score<=trainingThreshold);
     return {ch,chItems};
   }).filter(x=>x.chItems.length>0);
   let listHtml;
   if(chGroups.length===0){
     listHtml=`<div style="text-align:center;color:var(--text-3);font-size:12px;padding:40px 0;">条件に一致する問題はありません（理解率が未記録の項目は対象外です）</div>`;
   }else{
-    listHtml=chGroups.map(({ch,chItems})=>`
-      <div style="font-size:10px;font-weight:700;color:var(--text-2);padding:10px 0 8px;letter-spacing:.06em;">${ch.ch}　${ch.chName}　<span style="color:var(--text-3);font-weight:500;">${chItems.length}問</span></div>
-      ${chItems.map(({item,score})=>buildTrainingCard(item,score)).join('')}
-    `).join('');
+    listHtml=chGroups.map(({ch,chItems})=>buildTrainingChCard(ch,chItems)).join('');
   }
   view.innerHTML=filterHtml+listHtml;
+}
+
+function buildTrainingChCard(ch,chItems){
+  return `<div class="tr-ch-card">
+    <div class="tr-ch-header" onclick="toggleTrainingCh(this)">
+      <span class="ch-chevron">▶</span>
+      <div class="ch-info">
+        <div class="ch-name">${ch.ch}　${ch.chName}</div>
+      </div>
+      <span class="ch-badge">${chItems.length}問</span>
+    </div>
+    <div class="tr-items-wrap">
+      ${chItems.map(({item,score})=>buildTrainingCard(item,score)).join('')}
+    </div>
+  </div>`;
+}
+
+function toggleTrainingCh(headerEl){
+  const chCard=headerEl.closest('.tr-ch-card');
+  const isOpen=chCard.classList.toggle('open');
+  if(!isOpen){
+    chCard.querySelectorAll('.ch-card.open').forEach(c=>{
+      c.classList.remove('open');
+      c.querySelectorAll('.ub').forEach(b=>b.classList.remove('sel-oo','sel-o','sel-n','sel-x','sel-xx'));
+    });
+  }
 }
 
 function onTrainingThresholdChange(v){
