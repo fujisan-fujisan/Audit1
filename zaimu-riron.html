@@ -363,6 +363,27 @@ body {
   display: block;
 }
 
+.tr-eval-btn {
+  width: 100%;
+  padding: 16px 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--bg);
+  color: var(--text-2);
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Noto Sans JP', sans-serif;
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.tr-eval-btn:active {
+  background: var(--text);
+  border-color: var(--text);
+  color: #fff;
+  transform: scale(.98);
+}
+
 .item-row {
   padding: 10px 14px;
   border-bottom: 1px solid var(--border);
@@ -3123,19 +3144,16 @@ function adjustTrainingThreshold(delta) {
 }
 
 function buildTrainingItemRow(item, score) {
-  const scoreColor = score >= 80 ? '#0a5c35' : score >= 60 ? 'var(--o-color)' : score >= 40 ? '#d4a017' : 'var(--x-color)';
   const kws = getKeywords(item.id);
   const evalBtn = kws.length
-    ? `<button class="q-btn" onclick="event.stopPropagation();openTrainingKwEval('${item.id}')">評価</button>`
-    : `<span style="font-size:10px;color:var(--text-3);">キーワード未登録</span>`;
+    ? `<button class="tr-eval-btn" onclick="event.stopPropagation();openTrainingKwEval('${item.id}')">評価</button>`
+    : `<div style="font-size:11px;color:var(--text-3);text-align:center;padding:10px 0;">キーワード未登録</div>`;
 
-  return `<div class="item-row">
+  return `<div class="item-row" style="padding:18px 14px;gap:12px;">
     <div class="item-top">
       <span class="item-name">${item.q ? `<button class="q-btn" style="margin-right:6px;margin-left:0" onclick="event.stopPropagation();showQ('${item.id}')">問題文</button>` : ''}${escHtml(item.name)}</span>
-      <span class="imp-badge imp-${item.imp}">${item.imp}</span>
-      <span class="ch-badge" style="color:${scoreColor};border-color:${scoreColor};">${score}%</span>
     </div>
-    <div style="display:flex;justify-content:flex-end;">${evalBtn}</div>
+    ${evalBtn}
   </div>`;
 }
 
