@@ -2030,7 +2030,8 @@ function endTimer(key){
   const mins=Math.max(1,Math.round((Date.now()-start)/60000));
   const dateVal=today();
   if(!chState[key])chState[key]={};
-  chState[key][curRound()]={date:dateVal,time:String(mins)};
+  const prevMins=parseInt((chState[key][curRound()]||{}).time)||0;
+  chState[key][curRound()]={date:dateVal,time:String(prevMins+mins)};
   delete timerState[key];save();
   const ft=document.getElementById('chfoot-'+key);if(ft)ft.innerHTML=buildChFooter(key,chState[key][curRound()]);
 }
