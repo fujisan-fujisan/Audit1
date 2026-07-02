@@ -377,8 +377,7 @@ body {
 
 .tr-items-wrap {
   display:none;
-  border-top:1px solid var(--border);
-  padding:8px 14px
+  border-top:1px solid var(--border)
 }
 
 .tr-ch-card.open .tr-items-wrap {
@@ -1915,6 +1914,7 @@ function closeKwEvalPopup(){
   _unlockScroll();
   document.getElementById('kw-eval-overlay').classList.remove('open');
   kwEvalItemId=null;
+  trainingKwEvalItemId=null;
 }
 
 document.getElementById('kw-eval-overlay').addEventListener('click',e=>{
@@ -2446,7 +2446,7 @@ function renderTrainingPage(){
   const filterHtml=`
     <div class="ch-card" style="padding:12px 14px;margin-bottom:10px;">
       <div style="font-size:11px;font-weight:700;color:var(--text-2);margin-bottom:2px;">理解率フィルター</div>
-      <div style="font-size:10px;color:var(--text-3);margin-bottom:10px;">ここでの評価は周回の記録には保存されません（項目を閉じるとリセットされます）</div>
+      <div style="font-size:10px;color:var(--text-3);margin-bottom:10px;">「評価」ボタンで開くキーワード評価は周回の記録には保存されません</div>
       <div style="display:flex;align-items:center;gap:8px;">
         <button class="ub" style="min-width:32px;" onclick="adjustTrainingThreshold(-10)">−</button>
         <input type="range" id="training-th-slider" min="0" max="100" step="10" value="${trainingThreshold}" oninput="onTrainingThresholdChange(this.value)" style="flex:1;">
@@ -2480,20 +2480,13 @@ function buildTrainingChCard(ch,chItems){
       <span class="ch-badge">${chItems.length}問</span>
     </div>
     <div class="tr-items-wrap">
-      ${chItems.map(({item,score})=>buildTrainingCard(item,score)).join('')}
+      ${chItems.map(({item,score})=>buildTrainingItemRow(item,score)).join('')}
     </div>
   </div>`;
 }
 
 function toggleTrainingCh(headerEl){
-  const chCard=headerEl.closest('.tr-ch-card');
-  const isOpen=chCard.classList.toggle('open');
-  if(!isOpen){
-    chCard.querySelectorAll('.ch-card.open').forEach(c=>{
-      c.classList.remove('open');
-      c.querySelectorAll('.ub').forEach(b=>b.classList.remove('sel-oo','sel-o','sel-n','sel-x','sel-xx'));
-    });
-  }
+  headerEl.closest('.tr-ch-card').classList.toggle('open');
 }
 
 function onTrainingThresholdChange(v){
@@ -2506,49 +2499,64 @@ function adjustTrainingThreshold(delta){
   renderTrainingPage();
 }
 
-function buildTrainingCard(item,score){
+function buildTrainingItemRow(item,score){
   const scoreColor=score>=80?'#0a5c35':score>=60?'var(--o-color)':score>=40?'#d4a017':'var(--x-color)';
   const kws=getKeywords(item.id);
-  const kwHtml=kws.length
-    ?kws.map(k=>`<span style="font-size:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:3px 7px;color:var(--text-2);">${escHtml(k.word)}</span>`).join('')
-    :`<span style="font-size:10px;color:var(--text-3);">キーワードなし</span>`;
-  return `<div class="ch-card">
-    <div class="ch-header" onclick="toggleTrainingCard(this)">
-      <span class="ch-chevron">▶</span>
-      <div class="ch-info">
-        <div class="ch-name">${item.q?`<button class="q-btn" style="margin-right:6px;margin-left:0" onclick="event.stopPropagation();showQ('${item.id}')">問題文</button>`:''}${escHtml(item.name)}</div>
-        <div class="ch-sub">重要度${item.imp}</div>
-      </div>
+  const evalBtn=kws.length
+    ?`<button class="q-btn" onclick="event.stopPropagation();openTrainingKwEval('${item.id}')">評価</button>`
+    :`<span style="font-size:10px;color:var(--text-3);">キーワード未登録</span>`;
+  return `<div class="item-row">
+    <div class="item-top">
+      <span class="item-name">${item.q?`<button class="q-btn" style="margin-right:6px;margin-left:0" onclick="event.stopPropagation();showQ('${item.id}')">問題文</button>`:''}${escHtml(item.name)}</span>
+      <span class="imp-badge imp-${item.imp}">${item.imp}</span>
       <span class="ch-badge" style="color:${scoreColor};border-color:${scoreColor};">${score}%</span>
     </div>
-    <div class="items-wrap">
-      <div style="padding:10px 14px;display:flex;flex-direction:column;gap:8px;">
-        <div style="display:flex;flex-wrap:wrap;gap:4px;">${kwHtml}</div>
-        <div class="u-btns">
-          <button class="ub" onclick="event.stopPropagation();toggleTrainingEval(this,'oo')">○○</button>
-          <button class="ub" onclick="event.stopPropagation();toggleTrainingEval(this,'o')">○</button>
-          <button class="ub" onclick="event.stopPropagation();toggleTrainingEval(this,'n')">ー</button>
-          <button class="ub" onclick="event.stopPropagation();toggleTrainingEval(this,'x')">×</button>
-          <button class="ub" onclick="event.stopPropagation();toggleTrainingEval(this,'xx')">××</button>
-        </div>
-      </div>
-    </div>
+    <div style="display:flex;justify-content:flex-end;">${evalBtn}</div>
   </div>`;
 }
 
-function toggleTrainingCard(headerEl){
-  const card=headerEl.closest('.ch-card');
-  card.classList.toggle('open');
-  if(!card.classList.contains('open')){
-    card.querySelectorAll('.ub').forEach(b=>b.classList.remove('sel-oo','sel-o','sel-n','sel-x','sel-xx'));
-  }
+/* ── 苦手タブ専用キーワード評価ポップアップ（周回の記録には保存しない） ── */
+let trainingKwEvalItemId=null;
+
+function openTrainingKwEval(id){
+  const kws=getKeywords(id);
+  if(!kws.length)return;
+  trainingKwEvalItemId=id;
+  const item=DATA.flatMap(c=>c.items).find(i=>i.id===id);
+  document.getElementById('kw-eval-subtitle').textContent=(item?item.name:'')+'（この評価は記録されません）';
+  renderTrainingKwEvalList();
+  _lockScroll();
+  document.getElementById('kw-eval-overlay').classList.add('open');
 }
 
-function toggleTrainingEval(btn,type){
-  const group=btn.closest('.u-btns');
-  const wasSel=btn.classList.contains('sel-'+type);
-  group.querySelectorAll('.ub').forEach(b=>b.classList.remove('sel-oo','sel-o','sel-n','sel-x','sel-xx'));
-  if(!wasSel)btn.classList.add('sel-'+type);
+function renderTrainingKwEvalList(){
+  const kws=getKeywords(trainingKwEvalItemId);
+  const list=document.getElementById('kw-eval-list');
+  list.innerHTML='';
+  kws.forEach((kw,idx)=>{
+    const row=document.createElement('div');
+    row.className='kw-eval-row';
+    row.id='tr-kw-eval-row-'+idx;
+    row.innerHTML=`<span class="kw-eval-word">${escHtml(kw.word)}</span>
+      <div class="kw-eval-btns2">
+        <button class="kw-ebtn" onclick="evalTrainingKwPopup(${idx},'o')">○</button>
+        <button class="kw-ebtn" onclick="evalTrainingKwPopup(${idx},'x')">&#x2715;</button>
+      </div>`;
+    list.appendChild(row);
+  });
+}
+
+function evalTrainingKwPopup(idx,result){
+  const row=document.getElementById('tr-kw-eval-row-'+idx);
+  if(!row)return;
+  const cls=result==='o'?'ep':'ef';
+  const already=row.classList.contains(cls);
+  row.classList.remove('ep','ef');
+  row.querySelectorAll('.kw-ebtn').forEach(b=>b.classList.remove('ep','ef'));
+  if(!already){
+    row.classList.add(cls);
+    row.querySelectorAll('.kw-ebtn')[result==='o'?0:1].classList.add(cls);
+  }
 }
 
 let pendingScope=null,pendingScopeIsFirst=false;
