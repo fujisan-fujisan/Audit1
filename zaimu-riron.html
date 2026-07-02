@@ -3151,8 +3151,8 @@ function buildTrainingItemRow(item, score) {
     : `<span style="font-size:10px;color:var(--text-3);flex-shrink:0;">キーワード未登録</span>`;
 
   return `<div class="item-row">
-    <div class="item-top">
-      <span class="item-name">${item.q ? `<button class="q-btn" style="margin-right:6px;margin-left:0" onclick="event.stopPropagation();showQ('${item.id}')">問題文</button>` : ''}${escHtml(item.name)}</span>
+    <div class="item-top" style="align-items:center;">
+      <span class="item-name" style="font-size:15px;line-height:1.4;">${item.q ? `<button class="q-btn" style="margin-right:8px;margin-left:0;font-size:12px;padding:7px 12px;" onclick="event.stopPropagation();showQ('${item.id}')">問題文</button>` : ''}${escHtml(item.name)}</span>
       ${evalBtn}
     </div>
   </div>`;
