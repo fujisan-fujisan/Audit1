@@ -651,7 +651,8 @@ function endTimer(key) {
   const elapsedMins = Math.max(1, Math.round((Date.now() - start) / 60000));
   const dateVal = today();
   if (!chState[key]) chState[key] = {};
-  chState[key][curRound()] = { date: dateVal, time: String(elapsedMins) };
+  const prevMins = parseInt((chState[key][curRound()] || {}).time) || 0;
+  chState[key][curRound()] = { date: dateVal, time: String(prevMins + elapsedMins) };
   delete timerState[key];
   save();
   const foot = document.getElementById('chfoot-' + key);
