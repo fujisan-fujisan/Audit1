@@ -364,13 +364,14 @@ body {
 }
 
 .tr-eval-btn {
-  width: 100%;
-  padding: 16px 0;
+  width: 57px;
+  height: 38px;
+  flex-shrink: 0;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-strong);
   background: var(--bg);
   color: var(--text-2);
-  font-size: 15px;
+  font-size: 12px;
   font-weight: 700;
   font-family: 'Noto Sans JP', sans-serif;
   cursor: pointer;
@@ -381,7 +382,7 @@ body {
   background: var(--text);
   border-color: var(--text);
   color: #fff;
-  transform: scale(.98);
+  transform: scale(.95);
 }
 
 .item-row {
@@ -3147,13 +3148,13 @@ function buildTrainingItemRow(item, score) {
   const kws = getKeywords(item.id);
   const evalBtn = kws.length
     ? `<button class="tr-eval-btn" onclick="event.stopPropagation();openTrainingKwEval('${item.id}')">評価</button>`
-    : `<div style="font-size:11px;color:var(--text-3);text-align:center;padding:10px 0;">キーワード未登録</div>`;
+    : `<span style="font-size:10px;color:var(--text-3);flex-shrink:0;">キーワード未登録</span>`;
 
-  return `<div class="item-row" style="padding:18px 14px;gap:12px;">
+  return `<div class="item-row">
     <div class="item-top">
       <span class="item-name">${item.q ? `<button class="q-btn" style="margin-right:6px;margin-left:0" onclick="event.stopPropagation();showQ('${item.id}')">問題文</button>` : ''}${escHtml(item.name)}</span>
+      ${evalBtn}
     </div>
-    ${evalBtn}
   </div>`;
 }
 
