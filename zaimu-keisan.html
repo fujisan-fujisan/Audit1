@@ -1156,6 +1156,21 @@ let state = { problems: ALL_PROBLEMS.map(p=>p.id), ronten: {}, history: {} };
 
 function load() {
   try { const s = localStorage.getItem(STORE_KEY); if(s) state = JSON.parse(s); } catch(e){}
+  syncNewProblems();
+}
+function syncNewProblems() {
+  if (!state.problems) state.problems = [];
+  const existing = new Set(state.problems);
+  ALL_PROBLEMS.forEach((prob, idx) => {
+    if (existing.has(prob.id)) return;
+    let insertAt = state.problems.length;
+    for (let i = idx - 1; i >= 0; i--) {
+      const pos = state.problems.indexOf(ALL_PROBLEMS[i].id);
+      if (pos !== -1) { insertAt = pos + 1; break; }
+    }
+    state.problems.splice(insertAt, 0, prob.id);
+    existing.add(prob.id);
+  });
 }
 function save() {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch(e){}
