@@ -409,8 +409,8 @@ body {
 
 .item-name {
   flex: 1;
-  font-size: 12px;
-  line-height: 1.5;
+  font-size: 14px;
+  line-height: 1.4;
   color: var(--text);
 }
 
@@ -1586,7 +1586,7 @@ body {
 }
 
 /* ── 問題文モーダル ── */
-.q-btn{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;border:1px solid var(--border-strong,#d0d0cb);background:transparent;color:var(--text-2,#666);font-size:10px;font-family:'Noto Sans JP',sans-serif;font-weight:700;cursor:pointer;transition:all .12s;white-space:nowrap;flex-shrink:0;margin-left:6px;vertical-align:middle}
+.q-btn{display:inline-flex;align-items:center;padding:3px 9px;border-radius:4px;border:1px solid var(--border-strong,#d0d0cb);background:transparent;color:var(--text-2,#666);font-size:12px;font-family:'Noto Sans JP',sans-serif;font-weight:700;cursor:pointer;transition:all .12s;white-space:nowrap;flex-shrink:0;margin-left:6px;vertical-align:middle}
 .q-btn:active{transform:scale(.93)}
 .q-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:flex-end;justify-content:center}
 .q-overlay.open{display:flex}
@@ -2507,7 +2507,7 @@ function buildItemRow(item) {
   row.id = 'irow-' + item.id;
   row.innerHTML = `
     <div class="item-top">
-      <span class="item-name"><span style="color:var(--text-3);font-family:'DM Mono',monospace;font-size:12px;margin-right:5px;">${item.id.replace('z','')}</span>${item.q?`<button class="q-btn" style="margin-right:6px;margin-left:0" onclick="event.stopPropagation();showQ('${item.id}')">問題文</button>`:''}${escHtml(item.name)}</span>
+      <span class="item-name"><span style="color:var(--text-3);font-family:'DM Mono',monospace;font-size:13px;margin-right:5px;">${item.id.replace('z','')}</span>${item.q?`<button class="q-btn" style="margin-right:6px;margin-left:0" onclick="event.stopPropagation();showQ('${item.id}')">問題文</button>`:''}${escHtml(item.name)}</span>
       <span class="imp-badge imp-${item.imp}">${item.imp}</span>
       ${grayed ? '<span class="skip-chip">SKIP</span>' : ''}
       <div class="u-btns">
