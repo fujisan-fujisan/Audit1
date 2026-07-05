@@ -1028,6 +1028,20 @@ body {
   margin-right:auto;
 }
 
+.ch-time-edit-btn {
+  font-size:12px;
+  color:var(--text-3);
+  background:none;
+  border:none;
+  cursor:pointer;
+  padding:2px 6px;
+  margin-right:auto;
+}
+
+.ch-time-edit-btn:hover {
+  color:var(--text);
+}
+
 .ch-end-btn {
   background:var(--o-color);
   color:#fff;
@@ -1433,6 +1447,17 @@ body {
     <div style="margin-bottom:8px"><label class="form-lbl">開始日</label><input type="date" class="ch-record-input" id="scope-startdate" style="width:100%" oninput="checkScopeConfirmBtn()"></div>
     <div style="margin-bottom:8px"><label class="form-lbl">期限（任意）</label><input type="date" class="ch-record-input" id="scope-deadline" style="width:100%"></div>
     <button class="ch-record-save" id="scope-confirm-btn" style="width:100%;opacity:.4;pointer-events:none">この設定で始める</button>
+  </div>
+</div>
+<div class="overlay" id="time-overlay">
+  <div class="scope-modal">
+    <div class="modal-handle"></div>
+    <h2 style="font-size:14px;font-weight:700;margin-bottom:12px">所要時間を修正</h2>
+    <input type="number" min="0" class="ch-record-input" id="time-input" style="width:100%;margin-bottom:12px" placeholder="分">
+    <div style="display:flex;gap:8px">
+      <button class="ch-record-cancel" onclick="closeTimeModal()" style="flex:1">キャンセル</button>
+      <button class="ch-record-save" onclick="saveTimeEdit()" style="flex:2">保存</button>
+    </div>
   </div>
 </div>
 <div class="overlay" id="deadline-overlay">
@@ -2017,9 +2042,9 @@ function buildChFooter(key,r){
   if(r.date)s+=`<span class="ch-stat"><span class="ch-stat-lbl">実施日</span>${formatDate(r.date)}</span>`;
   if(r.time)s+=`<span class="ch-stat"><span class="ch-stat-lbl">所要時間</span>${r.time} 分</span>`;
   if(timerState[key]){
-    return`<div class="ch-footer-row"><span class="ch-timer-label">計測中...</span><button class="ch-record-btn ch-end-btn" onclick="endTimer('${key}')">終了</button></div>`;
+    return`<div class="ch-footer-row"><span class="ch-timer-label">計測中...</span><button class="ch-record-btn" onclick="cancelTimer('${key}')">取消</button><button class="ch-record-btn ch-end-btn" onclick="endTimer('${key}')">終了</button></div>`;
   }
-  return`<div class="ch-footer-row">${s}<button class="ch-record-btn" onclick="startTimer('${key}')">開始</button></div>`;
+  return`<div class="ch-footer-row">${s}<button class="ch-time-edit-btn" onclick="openTimeModal('${key}')" title="所要時間を修正">✎ 修正</button><button class="ch-record-btn" onclick="startTimer('${key}')">開始</button></div>`;
 }
 function startTimer(key){
   timerState[key]=Date.now();save();
@@ -2034,7 +2059,45 @@ function endTimer(key){
   chState[key][curRound()]={date:dateVal,time:String(prevMins+mins)};
   delete timerState[key];save();
   const ft=document.getElementById('chfoot-'+key);if(ft)ft.innerHTML=buildChFooter(key,chState[key][curRound()]);
+  renderRoundTabs();
 }
+function cancelTimer(key){
+  delete timerState[key];save();
+  const ft=document.getElementById('chfoot-'+key);if(ft)ft.innerHTML=buildChFooter(key,(chState[key]||{})[curRound()]||{});
+}
+let timeEditKey=null;
+function openTimeModal(key){
+  timeEditKey=key;
+  const cur=(chState[key]||{})[curRound()]||{};
+  document.getElementById('time-input').value=cur.time||'';
+  _lockScroll();
+  document.getElementById('time-overlay').classList.add('open');
+}
+function closeTimeModal(){
+  _unlockScroll();
+  document.getElementById('time-overlay').classList.remove('open');
+  timeEditKey=null;
+}
+function saveTimeEdit(){
+  const key=timeEditKey;if(!key)return;
+  const val=parseInt(document.getElementById('time-input').value);
+  const mins=(!isNaN(val)&&val>0)?val:0;
+  if(!chState[key])chState[key]={};
+  const existing=chState[key][curRound()]||{};
+  if(mins>0){
+    chState[key][curRound()]={date:existing.date||today(),time:String(mins)};
+  }else{
+    delete existing.time;
+    if(existing.date)chState[key][curRound()]=existing;else delete chState[key][curRound()];
+  }
+  save();
+  closeTimeModal();
+  const ft=document.getElementById('chfoot-'+key);if(ft)ft.innerHTML=buildChFooter(key,chState[key][curRound()]||{});
+  renderRoundTabs();
+}
+document.getElementById('time-overlay').addEventListener('click',e=>{
+  if(e.target===document.getElementById('time-overlay'))closeTimeModal();
+});
 
 function buildItemRow(item){
   const r=getItemR(item.id),u=r.u||null;
