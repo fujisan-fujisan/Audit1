@@ -380,6 +380,7 @@ details.comment-toggle .comment-body {
       </details>
 
       <button class="btn-primary" id="confirm-score-btn" onclick="confirmScore()" style="margin-top:14px">採点を確定する</button>
+      <button class="btn-primary hidden" id="dontknow-next-btn" onclick="proceedAfterDontKnow()" style="margin-top:14px">0点で確定する</button>
     </div>
 
     <button class="btn-danger-text" onclick="abortSession()">中止する</button>
@@ -751,13 +752,19 @@ function submitAnswer(dontKnow) {
   document.getElementById('reveal-card').classList.remove('hidden');
 
   const confirmBtn = document.getElementById('confirm-score-btn');
+  const nextBtn = document.getElementById('dontknow-next-btn');
   if (dontKnow) {
-    // わからない → チェック不要・自動0点
+    // わからない → 強制0点。ただし模範解答は読めるよう、次へ進むまで自動では進めない
     confirmBtn.classList.add('hidden');
-    recordResult(0);
+    nextBtn.classList.remove('hidden');
   } else {
     confirmBtn.classList.remove('hidden');
+    nextBtn.classList.add('hidden');
   }
+}
+
+function proceedAfterDontKnow() {
+  recordResult(0);
 }
 
 function escapeHtml(s) {
