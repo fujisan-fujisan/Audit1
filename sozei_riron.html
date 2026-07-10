@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>租税理論問題 出題</title>
+<meta name="theme-color" content="#0a0a0a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f9f9f8;
+  --surface: #ffffff;
+  --border: #e8e8e5;
+  --border-strong: #d0d0cb;
+  --text: #111111;
+  --text-2: #666666;
+  --text-3: #aaaaaa;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --accent: #4a7edc;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 60px;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 16px;
+}
+.header-row { display: flex; justify-content: space-between; align-items: center; }
+.app-title { font-size: 11px; font-weight: 700; letter-spacing: .12em; color: var(--text-3); text-transform: uppercase; }
+.header-actions { display: flex; gap: 6px; }
+.btn-icon {
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 11px;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.btn-icon:hover { background: var(--text); border-color: var(--text); color: #fff; }
+.screen-title { font-size: 18px; font-weight: 700; margin-top: 4px; }
+
+.content { padding: 16px 14px 0; max-width: 640px; margin: 0 auto; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+label.field-label {
+  display: block;
+  font-size: 11px;
+  color: var(--text-3);
+  font-weight: 700;
+  letter-spacing: .06em;
+  margin-bottom: 6px;
+}
+
+.subject-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
+.subject-btn {
+  padding: 12px 4px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  cursor: pointer;
+  transition: all .15s;
+}
+.subject-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
+.subject-btn .sub-count { display: block; font-size: 10px; font-weight: 400; margin-top: 2px; color: inherit; opacity: .7; }
+
+.num-input {
+  width: 100%;
+  text-align: center;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 12px 8px;
+  font-size: 20px;
+  font-family: 'DM Mono', 'Courier New', monospace;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.num-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,126,220,.12); }
+
+.btn-primary {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius);
+  border: none;
+  background: var(--text);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.btn-primary:hover { opacity: .85; }
+.btn-primary:disabled { opacity: .4; cursor: default; }
+
+.btn-secondary {
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all .15s;
+}
+.btn-secondary:hover { background: #fafaf9; }
+
+.btn-danger-text {
+  width: 100%;
+  text-align: center;
+  padding: 10px;
+  color: #b91c1c;
+  font-size: 12px;
+  font-weight: 700;
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.warn-box {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 12px;
+  margin-bottom: 14px;
+}
+
+.progress-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.progress-label { font-size: 12px; color: var(--text-3); font-weight: 700; letter-spacing: .04em; }
+.progress-num { font-family: 'DM Mono', 'Courier New', monospace; font-size: 14px; color: var(--text-2); }
+
+.q-header { font-size: 13px; font-weight: 700; color: var(--text-2); margin-bottom: 2px; }
+.q-page { font-size: 11px; color: var(--text-3); margin-bottom: 12px; }
+.q-type-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: #eef2ff;
+  color: #4338ca;
+  margin-bottom: 10px;
+}
+.q-text {
+  white-space: pre-wrap;
+  font-size: 15px;
+  line-height: 1.85;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+textarea.answer-input {
+  width: 100%;
+  min-height: 120px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  font-size: 14px;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  resize: vertical;
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+textarea.answer-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,126,220,.12); }
+
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-3);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin: 16px 0 6px;
+}
+.section-label:first-child { margin-top: 0; }
+.answer-block {
+  background: #f5f8ff;
+  border: 1px solid #dde6fb;
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  white-space: pre-wrap;
+  font-size: 14px;
+  line-height: 1.8;
+  margin-bottom: 4px;
+}
+.provisions-list { list-style: none; }
+.provisions-list li {
+  font-size: 13px;
+  color: var(--text-2);
+  padding: 4px 0 4px 14px;
+  position: relative;
+}
+.provisions-list li::before { content: "・"; position: absolute; left: 0; }
+
+.scoring-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+.scoring-table td { padding: 7px 4px; font-size: 13px; border-bottom: 1px solid var(--border); }
+.scoring-table td.pt { text-align: right; font-family: 'DM Mono', 'Courier New', monospace; white-space: nowrap; color: var(--text-2); }
+.scoring-table tr:last-child td { border-bottom: none; }
+.total-row { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0 0; font-weight: 700; }
+.total-row .val { font-family: 'DM Mono', 'Courier New', monospace; font-size: 18px; }
+
+details.comment-toggle { margin-top: 10px; }
+details.comment-toggle summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-3);
+  font-weight: 700;
+}
+details.comment-toggle .comment-body {
+  white-space: pre-wrap;
+  font-size: 13px;
+  color: var(--text-2);
+  margin-top: 8px;
+  line-height: 1.75;
+}
+
+.score-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+.score-row .num-input { font-size: 22px; padding: 10px; }
+.score-of { font-size: 14px; color: var(--text-3); white-space: nowrap; }
+
+.result-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+.result-table th, .result-table td { padding: 8px 6px; font-size: 12px; text-align: center; border-bottom: 1px solid var(--border); }
+.result-table th { color: var(--text-3); font-weight: 700; font-size: 10px; letter-spacing: .05em; }
+.result-table td.no-col { text-align: left; font-weight: 700; }
+.tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; }
+.tag.correct { background: #dcfce7; color: #15803d; }
+.tag.partial { background: #fef9c3; color: #a16207; }
+.tag.wrong { background: #fee2e2; color: #b91c1c; }
+
+.summary-row { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 0; font-size: 14px; }
+.summary-row.total { font-weight: 700; font-size: 16px; border-top: 1px solid var(--border); margin-top: 4px; padding-top: 12px; }
+.summary-row .val { font-family: 'DM Mono', 'Courier New', monospace; }
+
+.save-note { font-size: 11px; color: var(--text-3); margin-top: 10px; text-align: center; }
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-row">
+    <div class="app-title">租税理論問題出題ツール</div>
+    <div class="header-actions">
+      <button class="btn-icon" onclick="exportRecords()">バックアップ</button>
+      <button class="btn-icon" onclick="document.getElementById('import-input').click()">復元</button>
+      <input type="file" id="import-input" accept=".json" style="display:none" onchange="importRecords(event)">
+    </div>
+  </div>
+  <div class="screen-title" id="screen-title">出題設定</div>
+</div>
+
+<div class="content">
+
+  <!-- ── Screen 1: Setup ── -->
+  <div id="screen-setup">
+    <div class="card">
+      <label class="field-label">科目</label>
+      <div class="subject-grid" id="subject-grid"></div>
+
+      <label class="field-label">出題数</label>
+      <input class="num-input" type="number" id="count-input" min="1" value="10" oninput="onCountInput()">
+      <div id="count-warn" class="warn-box hidden"></div>
+    </div>
+    <button class="btn-primary" id="start-btn" onclick="startSession()">出題を開始する</button>
+  </div>
+
+  <!-- ── Screen 2: Quiz ── -->
+  <div id="screen-quiz" class="hidden">
+    <div class="progress-row">
+      <span class="progress-label" id="progress-label"></span>
+      <span class="progress-num" id="progress-num"></span>
+    </div>
+
+    <div class="card">
+      <div class="q-header" id="q-header"></div>
+      <div class="q-page" id="q-page"></div>
+      <span class="q-type-badge" id="q-type"></span>
+      <div class="q-text" id="q-text"></div>
+    </div>
+
+    <div class="card" id="answer-card">
+      <label class="field-label">ご回答</label>
+      <textarea class="answer-input" id="answer-text" placeholder="回答を入力してください"></textarea>
+      <button class="btn-primary" onclick="submitAnswer(false)">回答する</button>
+      <button class="btn-secondary" onclick="submitAnswer(true)">わかりません</button>
+    </div>
+
+    <div class="card hidden" id="reveal-card">
+      <div class="section-label">模範解答</div>
+      <div class="answer-block" id="reveal-answer"></div>
+
+      <div id="reveal-provisions-wrap">
+        <div class="section-label">関連規定</div>
+        <ul class="provisions-list" id="reveal-provisions"></ul>
+      </div>
+
+      <div class="section-label">予想配点</div>
+      <table class="scoring-table" id="reveal-scoring"></table>
+      <div class="total-row"><span>満点</span><span class="val" id="reveal-total"></span></div>
+
+      <details class="comment-toggle" id="reveal-comment-wrap">
+        <summary>解説コメントを表示</summary>
+        <div class="comment-body" id="reveal-comment"></div>
+      </details>
+    </div>
+
+    <div class="card hidden" id="score-card">
+      <label class="field-label">獲得点数を入力してください</label>
+      <div class="score-row">
+        <input class="num-input" type="number" id="score-input" min="0" step="1">
+        <span class="score-of" id="score-of"></span>
+      </div>
+      <button class="btn-primary" onclick="confirmScore()">採点を確定する</button>
+    </div>
+
+    <button class="btn-danger-text" onclick="abortSession()">中止する</button>
+  </div>
+
+  <!-- ── Screen 3: Result ── -->
+  <div id="screen-result" class="hidden">
+    <div class="card">
+      <table class="result-table">
+        <thead>
+          <tr><th>No.</th><th>重要度</th><th>得点</th><th>満点</th><th>得点率</th></tr>
+        </thead>
+        <tbody id="result-body"></tbody>
+      </table>
+      <div class="summary-row total">
+        <span>合計</span>
+        <span class="val" id="result-total"></span>
+      </div>
+      <div class="summary-row">
+        <span>全体得点率</span>
+        <span class="val" id="result-rate"></span>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="backToSetup()">出題設定に戻る</button>
+    <div class="save-note" id="save-note"></div>
+  </div>
+
+</div>
+
+<script src="sozei_riron_data.js"></script>
+<script>
+// ─────────────────────────────────────────────────────────────
+// 定数・設定
+// ─────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'sozei-riron-seiseki-v1';
+const BACKUP_KEY  = 'sozei-riron-seiseki-v1-bak';
+
+const SUBJECT_LABEL = { '法人': '法人税', '所得': '所得税', '消費': '消費税' };
+const SUBJECT_KEYS = ['法人', '所得', '消費'];
+
+// データ品質対応（開発指示書 1-3節）:
+// 所得税 No.94 / No.99 は元Markdown見出しに "(Ｄ)" とあるが、抽出結果では
+// importance が A/B/C いずれにも一致せず null になっている（парースミスではなく原本の仕様）。
+// 既定では、これらは A/B/C比率の計算対象からは除外しつつ、重み計算上は
+// 「Cと同じ係数」で出題プールに混ぜる（低優先度の別枠として扱う）。
+// 将来「原本の誤植だった」と判明した場合は、以下のフラグを true にすると
+// 表示上の重要度ラベルも "C" に統一される（重み計算は元々Cと同じ係数なので変化なし）。
+const IMPORTANCE_OVERRIDE_ENABLED = false;
+
+// カテゴリ内優先順位づけの重みテーブル（開発指示書 3-2節）
+const BASE_IMPORTANCE = {
+  A: { wrong: 10, partial: 7, correct: 3, unattempted: 8 },
+  B: { wrong: 6,  partial: 4, correct: 2, unattempted: 5 },
+  C: { wrong: 3,  partial: 2, correct: 1, unattempted: 2 }, // D相当もこの係数を流用
+};
+
+// ─────────────────────────────────────────────────────────────
+// 状態
+// ─────────────────────────────────────────────────────────────
+let seiseki = null;       // 成績表（localStorageと同期）
+let selectedSubjects = ['法人'];
+let session = null;       // { pool: [...], index, results: [...] , subjectsUsed:Set }
+
+// ─────────────────────────────────────────────────────────────
+// 成績表 読み書き
+// ─────────────────────────────────────────────────────────────
+function defaultSeiseki() {
+  return {
+    meta: {
+      description: '租税理論問題出題ツール 成績表',
+      last_updated: '',
+      sessions: { 法人: 0, 所得: 0, 消費: 0 },
+    },
+    records: { 法人: {}, 所得: {}, 消費: {} },
+  };
+}
+
+function loadSeiseki() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      seiseki = JSON.parse(raw);
+      SUBJECT_KEYS.forEach(function (s) {
+        if (!seiseki.records[s]) seiseki.records[s] = {};
+        if (!seiseki.meta.sessions[s]) seiseki.meta.sessions[s] = 0;
+      });
+      return;
+    }
+  } catch (e) {}
+  seiseki = defaultSeiseki();
+}
+
+// 保存前に直近の状態を1世代分だけバックアップに退避してから上書きする（.bak相当）
+function saveSeiseki() {
+  try {
+    const prev = localStorage.getItem(STORAGE_KEY);
+    if (prev) localStorage.setItem(BACKUP_KEY, prev);
+  } catch (e) {}
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(seiseki));
+  } catch (e) {}
+}
+
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+// ─────────────────────────────────────────────────────────────
+// 出題選定ロジック（開発指示書 3章）
+// ─────────────────────────────────────────────────────────────
+function weightBucket(q) {
+  if (q.importance === 'A' || q.importance === 'B' || q.importance === 'C') return q.importance;
+  return 'C'; // importance が null（＝所得税No.94/99等）はCと同係数の別枠として扱う
+}
+
+function displayImportance(q) {
+  if (q.importance === 'A' || q.importance === 'B' || q.importance === 'C') return q.importance;
+  return IMPORTANCE_OVERRIDE_ENABLED ? 'C' : 'D';
+}
+
+function recordKey(q) { return 'No.' + q.no; }
+
+function getRecord(q) {
+  return (seiseki.records[q.subject] || {})[recordKey(q)];
+}
+
+function getState(record) {
+  if (!record || !record.attempts) return 'unattempted';
+  if (record.last_score_rate === 0) return 'wrong';
+  if (record.last_score_rate < 0.8) return 'partial';
+  return 'correct';
+}
+
+function getPhase(subject) {
+  const total = SOZEI_DATA[subject].length;
+  const registered = Object.keys(seiseki.records[subject] || {}).length;
+  return registered < total ? 1 : 2;
+}
+
+function phaseFactor(q, record) {
+  const phase = getPhase(q.subject);
+  if (phase === 1) {
+    return getState(record) === 'unattempted' ? 1.5 : 1;
+  }
+  const isReview = record && ((record.partial || 0) >= 1 || (record.wrong || 0) >= 1);
+  return isReview ? 1.3 : 1;
+}
+
+function mistakeFactor(record) {
+  const wrong = record ? (record.wrong || 0) : 0;
+  return 1 + wrong * 0.5;
+}
+
+function weightOf(q) {
+  const record = getRecord(q);
+  const base = BASE_IMPORTANCE[weightBucket(q)][getState(record)];
+  return base * phaseFactor(q, record) * mistakeFactor(record);
+}
+
+function shuffleInPlace(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// 重み降順・同点内ランダムで指定数だけ選ぶ
+function pickByWeight(candidates, count) {
+  const withWeight = candidates.map(function (q) { return { q: q, w: weightOf(q) }; });
+  const groups = new Map();
+  withWeight.forEach(function (item) {
+    if (!groups.has(item.w)) groups.set(item.w, []);
+    groups.get(item.w).push(item.q);
+  });
+  const weightsDesc = Array.from(groups.keys()).sort(function (a, b) { return b - a; });
+  const picked = [];
+  for (const w of weightsDesc) {
+    if (picked.length >= count) break;
+    const group = shuffleInPlace(groups.get(w).slice());
+    for (const q of group) {
+      if (picked.length >= count) break;
+      picked.push(q);
+    }
+  }
+  return picked;
+}
+
+function buildPool(subjects) {
+  let pool = [];
+  subjects.forEach(function (s) { pool = pool.concat(SOZEI_DATA[s]); });
+  return pool;
+}
+
+// 重要度A/B/C配分（開発指示書3-1節）。在庫不足はA→B→Cの順に繰り越す。
+function selectQuestions(subjects, requestedCount) {
+  const pool = buildPool(subjects);
+  const n = Math.min(requestedCount, pool.length);
+
+  const buckets = { A: [], B: [], C: [] };
+  pool.forEach(function (q) { buckets[weightBucket(q)].push(q); });
+
+  let nA = Math.round(n * 0.6);
+  let nB = Math.round(n * 0.3);
+  let nC = n - nA - nB;
+
+  const wanted = { A: nA, B: nB, C: nC };
+  let carry = 0;
+  const finalCounts = {};
+  ['A', 'B', 'C'].forEach(function (b) {
+    const want = wanted[b] + carry;
+    const avail = buckets[b].length;
+    if (want > avail) {
+      finalCounts[b] = avail;
+      carry = want - avail;
+    } else {
+      finalCounts[b] = want;
+      carry = 0;
+    }
+  });
+
+  const selected = [];
+  ['A', 'B', 'C'].forEach(function (b) {
+    selected.push.apply(selected, pickByWeight(buckets[b], finalCounts[b]));
+  });
+
+  return shuffleInPlace(selected);
+}
+
+// ─────────────────────────────────────────────────────────────
+// 画面: 出題設定
+// ─────────────────────────────────────────────────────────────
+function renderSubjectGrid() {
+  const grid = document.getElementById('subject-grid');
+  const options = SUBJECT_KEYS.concat(['全科目']);
+  grid.innerHTML = '';
+  options.forEach(function (key) {
+    const isAll = key === '全科目';
+    const count = isAll
+      ? SUBJECT_KEYS.reduce(function (sum, s) { return sum + SOZEI_DATA[s].length; }, 0)
+      : SOZEI_DATA[key].length;
+    const label = isAll ? '全科目' : SUBJECT_LABEL[key];
+    const active = isAll ? selectedSubjects.length === 3 : (selectedSubjects.length === 1 && selectedSubjects[0] === key);
+    const btn = document.createElement('button');
+    btn.className = 'subject-btn' + (active ? ' active' : '');
+    btn.innerHTML = label + '<span class="sub-count">' + count + '問</span>';
+    btn.onclick = function () {
+      selectedSubjects = isAll ? SUBJECT_KEYS.slice() : [key];
+      renderSubjectGrid();
+      onCountInput();
+    };
+    grid.appendChild(btn);
+  });
+}
+
+function onCountInput() {
+  const countEl = document.getElementById('count-input');
+  const warnEl = document.getElementById('count-warn');
+  const startBtn = document.getElementById('start-btn');
+  let n = parseInt(countEl.value, 10);
+  const max = buildPool(selectedSubjects).length;
+  if (!n || n < 1) {
+    startBtn.disabled = true;
+    warnEl.classList.add('hidden');
+    return;
+  }
+  if (n > max) {
+    warnEl.textContent = '選択した科目の問題数は最大 ' + max + ' 問です。' + max + '問で出題します。';
+    warnEl.classList.remove('hidden');
+  } else {
+    warnEl.classList.add('hidden');
+  }
+  startBtn.disabled = false;
+}
+
+function backToSetup() {
+  document.getElementById('screen-result').classList.add('hidden');
+  document.getElementById('screen-quiz').classList.add('hidden');
+  document.getElementById('screen-setup').classList.remove('hidden');
+  document.getElementById('screen-title').textContent = '出題設定';
+  renderSubjectGrid();
+  onCountInput();
+}
+
+// ─────────────────────────────────────────────────────────────
+// セッション開始・進行
+// ─────────────────────────────────────────────────────────────
+function startSession() {
+  const requested = parseInt(document.getElementById('count-input').value, 10) || 0;
+  if (requested < 1) return;
+  const questions = selectQuestions(selectedSubjects, requested);
+  if (questions.length === 0) {
+    alert('出題できる問題がありません。');
+    return;
+  }
+  session = {
+    questions: questions,
+    index: 0,
+    results: [],
+    currentAnswer: null,
+    dontKnow: false,
+  };
+  document.getElementById('screen-setup').classList.add('hidden');
+  document.getElementById('screen-result').classList.add('hidden');
+  document.getElementById('screen-quiz').classList.remove('hidden');
+  document.getElementById('screen-title').textContent = '出題中';
+  renderQuestion();
+}
+
+function currentQuestion() {
+  return session.questions[session.index];
+}
+
+function renderQuestion() {
+  const q = currentQuestion();
+  document.getElementById('progress-label').textContent = SUBJECT_LABEL[q.subject] + '理論問題';
+  document.getElementById('progress-num').textContent = (session.index + 1) + ' / ' + session.questions.length;
+
+  document.getElementById('q-header').textContent =
+    '【第' + (session.index + 1) + '問】' + SUBJECT_LABEL[q.subject] + '理論問題_問題編のNo.' + q.no;
+  document.getElementById('q-page').textContent = q.page ? '【該当ページ：' + q.page + '】' : '';
+  document.getElementById('q-type').textContent = q.type || '';
+  document.getElementById('q-text').textContent = q.question_text || '';
+
+  document.getElementById('answer-text').value = '';
+  document.getElementById('answer-card').classList.remove('hidden');
+  document.getElementById('reveal-card').classList.add('hidden');
+  document.getElementById('score-card').classList.add('hidden');
+}
+
+function submitAnswer(dontKnow) {
+  const q = currentQuestion();
+  session.currentAnswer = dontKnow ? 'わかりません' : document.getElementById('answer-text').value;
+  session.dontKnow = dontKnow;
+
+  document.getElementById('answer-card').classList.add('hidden');
+
+  // 模範解答・関連規定・予想配点・満点の開示（採点はしない）
+  document.getElementById('reveal-answer').textContent = q.model_answer || '（模範解答データなし）';
+
+  const provWrap = document.getElementById('reveal-provisions-wrap');
+  const provList = document.getElementById('reveal-provisions');
+  provList.innerHTML = '';
+  if (q.related_provisions && q.related_provisions.length) {
+    provWrap.classList.remove('hidden');
+    q.related_provisions.forEach(function (p) {
+      const li = document.createElement('li');
+      li.textContent = p;
+      provList.appendChild(li);
+    });
+  } else {
+    provWrap.classList.add('hidden');
+  }
+
+  const scoringTable = document.getElementById('reveal-scoring');
+  scoringTable.innerHTML = '';
+  (q.scoring_points || []).forEach(function (sp) {
+    const tr = document.createElement('tr');
+    const label = sp.label ? sp.label + (sp.content ? '：' : '') : '';
+    const text = label + (sp.content || '');
+    tr.innerHTML = '<td>' + escapeHtml(text || '（内容なし）') + '</td><td class="pt">' + (sp.points != null ? sp.points + '点' : '－') + '</td>';
+    scoringTable.appendChild(tr);
+  });
+  document.getElementById('reveal-total').textContent = q.total_points + '点';
+
+  const commentWrap = document.getElementById('reveal-comment-wrap');
+  if (q.comment) {
+    commentWrap.classList.remove('hidden');
+    commentWrap.open = false;
+    document.getElementById('reveal-comment').textContent = q.comment;
+  } else {
+    commentWrap.classList.add('hidden');
+  }
+
+  document.getElementById('reveal-card').classList.remove('hidden');
+
+  if (dontKnow) {
+    // わからない → 自動0点、得点入力はスキップ
+    recordResult(0);
+  } else {
+    document.getElementById('score-of').textContent = '/ ' + q.total_points + '点';
+    const scoreInput = document.getElementById('score-input');
+    scoreInput.value = '';
+    scoreInput.max = q.total_points;
+    document.getElementById('score-card').classList.remove('hidden');
+  }
+}
+
+function escapeHtml(s) {
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+function confirmScore() {
+  const q = currentQuestion();
+  const raw = document.getElementById('score-input').value;
+  let score = parseFloat(raw);
+  if (isNaN(score) || raw === '') { alert('獲得点数を入力してください。'); return; }
+  if (score < 0) score = 0;
+  if (score > q.total_points) score = q.total_points;
+  recordResult(score);
+}
+
+function recordResult(score) {
+  const q = currentQuestion();
+  const total = q.total_points || 0;
+  let rate;
+  if (total === 0) {
+    alert('この問題は満点が0点のためデータ不備です。得点率を0として扱います。');
+    rate = 0;
+  } else {
+    rate = score / total;
+  }
+  let classification;
+  if (rate === 0) classification = 'wrong';
+  else if (rate >= 0.8) classification = 'correct';
+  else classification = 'partial';
+
+  session.results.push({
+    q: q,
+    answer: session.currentAnswer,
+    score: score,
+    total: total,
+    rate: rate,
+    classification: classification,
+  });
+
+  document.getElementById('score-card').classList.add('hidden');
+
+  if (session.index + 1 < session.questions.length) {
+    session.index += 1;
+    renderQuestion();
+  } else {
+    finishSession(false);
+  }
+}
+
+function abortSession() {
+  if (!confirm('出題を中止しますか？（未確定の問題は成績表に反映されません）')) return;
+  finishSession(true);
+}
+
+// ─────────────────────────────────────────────────────────────
+// セッション終了・成績表更新
+// ─────────────────────────────────────────────────────────────
+function finishSession(aborted) {
+  const results = session.results; // 自己採点が確定した問題のみ
+
+  const subjectsTouched = new Set();
+  results.forEach(function (r) {
+    const q = r.q;
+    subjectsTouched.add(q.subject);
+    const key = recordKey(q);
+    const subjRecords = seiseki.records[q.subject];
+    if (!subjRecords[key]) {
+      subjRecords[key] = { importance: q.importance, attempts: 0, correct: 0, partial: 0, wrong: 0, last_score_rate: 0 };
+    }
+    const rec = subjRecords[key];
+    rec.attempts += 1;
+    rec[r.classification] += 1;
+    rec.last_score_rate = r.rate;
+    rec.importance = q.importance;
+  });
+
+  subjectsTouched.forEach(function (s) {
+    seiseki.meta.sessions[s] = (seiseki.meta.sessions[s] || 0) + 1;
+  });
+  if (subjectsTouched.size > 0) {
+    seiseki.meta.last_updated = todayStr();
+    saveSeiseki();
+  }
+
+  renderResult(results, aborted, subjectsTouched.size > 0);
+}
+
+function renderResult(results, aborted, saved) {
+  document.getElementById('screen-quiz').classList.add('hidden');
+  document.getElementById('screen-result').classList.remove('hidden');
+  document.getElementById('screen-title').textContent = aborted ? '中止しました' : '出題終了';
+
+  const body = document.getElementById('result-body');
+  body.innerHTML = '';
+  let sumScore = 0, sumTotal = 0;
+  results.forEach(function (r) {
+    sumScore += r.score;
+    sumTotal += r.total;
+    const tr = document.createElement('tr');
+    const rateText = (r.rate * 100).toFixed(0) + '%';
+    tr.innerHTML =
+      '<td class="no-col">No.' + r.q.no + '</td>' +
+      '<td>' + displayImportance(r.q) + '</td>' +
+      '<td>' + r.score + '</td>' +
+      '<td>' + r.total + '</td>' +
+      '<td><span class="tag ' + r.classification + '">' + rateText + '</span></td>';
+    body.appendChild(tr);
+  });
+
+  document.getElementById('result-total').textContent = sumScore + ' / ' + sumTotal;
+  document.getElementById('result-rate').textContent = sumTotal > 0 ? (sumScore / sumTotal * 100).toFixed(1) + '%' : '－';
+
+  const note = document.getElementById('save-note');
+  if (results.length === 0) {
+    note.textContent = '確定した問題がなかったため、成績表は更新されませんでした。';
+  } else if (saved) {
+    note.textContent = '成績表をこの端末のブラウザに保存しました（バックアップ推奨: 右上の「バックアップ」ボタン）。';
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// バックアップ / 復元
+// ─────────────────────────────────────────────────────────────
+async function exportRecords() {
+  const blob = new Blob([JSON.stringify(seiseki, null, 2)], { type: 'application/json' });
+  const file = new File([blob], '租税法_成績表.json', { type: 'application/json' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file] }); return; } catch (e) {}
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '租税法_成績表.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importRecords(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function (ev) {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.records || !data.meta) throw new Error('invalid format');
+      seiseki = data;
+      SUBJECT_KEYS.forEach(function (s) {
+        if (!seiseki.records[s]) seiseki.records[s] = {};
+        if (!seiseki.meta.sessions[s]) seiseki.meta.sessions[s] = 0;
+      });
+      saveSeiseki();
+      alert('成績表を復元しました。');
+      renderSubjectGrid();
+      onCountInput();
+    } catch (err) {
+      alert('ファイルの読み込みに失敗しました。');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ─────────────────────────────────────────────────────────────
+// 初期化
+// ─────────────────────────────────────────────────────────────
+loadSeiseki();
+renderSubjectGrid();
+onCountInput();
+</script>
+</body>
+</html>
