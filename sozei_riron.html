@@ -239,30 +239,41 @@ textarea.answer-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border);
-}
-.score-item:last-child { border-bottom: none; }
-.score-toggle {
-  flex-shrink: 0;
-  width: 40px;
-  height: 34px;
+  padding: 10px 8px;
+  margin-bottom: 6px;
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.score-item:last-child { margin-bottom: 0; }
+.score-item:hover { background: #fafaf9; }
+.score-item.checked { background: #f0fdf4; border-color: #86efac; }
+.score-mark {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   border: 1px solid var(--border-strong);
   background: var(--surface);
   color: var(--text-3);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   font-family: 'DM Mono', 'Courier New', monospace;
-  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all .15s;
 }
-.score-toggle.checked { background: #15803d; border-color: #15803d; color: #fff; }
+.score-item.checked .score-mark { background: #15803d; border-color: #15803d; color: #fff; }
 .score-item-body { flex: 1; min-width: 0; }
 .score-item-label { font-size: 10px; color: var(--text-3); font-weight: 700; letter-spacing: .02em; margin-bottom: 2px; }
 .score-item-text { font-size: 13px; line-height: 1.6; color: var(--text); }
 .score-item-pt { flex-shrink: 0; font-family: 'DM Mono', 'Courier New', monospace; font-size: 13px; color: var(--text-2); white-space: nowrap; }
-.score-item.no-pt { opacity: .55; }
+.score-item.no-pt { cursor: default; opacity: .55; }
+.score-item.no-pt:hover { background: none; }
 .score-item.no-pt .score-item-pt { visibility: hidden; }
 .total-row { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 0 0; font-weight: 700; }
 .total-row .val { font-family: 'DM Mono', 'Courier New', monospace; font-size: 20px; }
@@ -765,19 +776,11 @@ function renderScoringChecklist(q, disabled) {
     const row = document.createElement('div');
     const hasPoints = sp.points != null;
     row.className = 'score-item' + (hasPoints ? '' : ' no-pt');
-
-    let toggleHtml = '';
-    if (hasPoints) {
-      toggleHtml =
-        '<button type="button" class="score-toggle" id="toggle-' + idx + '"' +
-        (disabled ? ' disabled' : ' onclick="toggleScoreItem(' + idx + ')"') +
-        '>×</button>';
-    } else {
-      toggleHtml = '<div style="width:40px"></div>';
-    }
+    row.id = 'score-item-' + idx;
+    if (hasPoints && !disabled) row.onclick = function () { toggleScoreItem(idx); };
 
     row.innerHTML =
-      toggleHtml +
+      '<div class="score-mark" id="mark-' + idx + '">×</div>' +
       '<div class="score-item-body">' +
         (sp.label ? '<div class="score-item-label">' + escapeHtml(sp.label) + '</div>' : '') +
         '<div class="score-item-text">' + escapeHtml(sp.content || '（内容なし）') + '</div>' +
@@ -790,11 +793,12 @@ function renderScoringChecklist(q, disabled) {
   updateLiveScore(q);
 }
 
+// 採点項目（行全体）をタップすると正解扱い（○）にトグルする
 function toggleScoreItem(idx) {
   session.checked[idx] = !session.checked[idx];
-  const btn = document.getElementById('toggle-' + idx);
-  btn.classList.toggle('checked', !!session.checked[idx]);
-  btn.textContent = session.checked[idx] ? '○' : '×';
+  const checked = !!session.checked[idx];
+  document.getElementById('score-item-' + idx).classList.toggle('checked', checked);
+  document.getElementById('mark-' + idx).textContent = checked ? '○' : '×';
   updateLiveScore(currentQuestion());
 }
 
