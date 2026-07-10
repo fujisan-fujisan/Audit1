@@ -1,5 +1,8 @@
 // 租税理論問題データ（法人・所得・消費 計124問）
-// parse_source_files.py により元Markdownから機械抽出。編集不要・参照専用。
+// parse_source_files.py により元Markdownから機械抽出。
+// scoring_points は「結論」「当てはめ」のうち、内容と条文(複数可)を combineした2点以上の項目を
+// 内容パートと条文パート(引用ごと)に分割済み（○×チェックボックスで個別採点するため）。
+// 分割ロジック: 端数は内容パートに配分。1問あたりの合計点は分割前後で変化しない。
 const SOZEI_DATA = {
  "法人": [
   {
@@ -56,8 +59,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "Ｋは法人税の納税義務を負う 法人税法４条１項",
-     "points": 2
+     "content": "Ｋは法人税の納税義務を負う",
+     "points": 1
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法４条１項",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -83,8 +91,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "法人税が課される 法人税法５条",
-     "points": 3
+     "content": "法人税が課される",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法５条",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -112,13 +125,23 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論①",
-     "content": "別の者とみなして課税される 法人税法４条の２第１項",
-     "points": 2
+     "content": "別の者とみなして課税される",
+     "points": 1
+    },
+    {
+     "label": "結論①（条文）",
+     "content": "法人税法４条の２第１項",
+     "points": 1
     },
     {
      "label": "結論②",
-     "content": "Ｂ社に帰属する 法人税法４条の２第２項",
-     "points": 2
+     "content": "Ｂ社に帰属する",
+     "points": 1
+    },
+    {
+     "label": "結論②（条文）",
+     "content": "法人税法４条の２第２項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -183,8 +206,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "法人税を課されない 法人税法６条",
-     "points": 5
+     "content": "法人税を課されない",
+     "points": 3
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法６条",
+     "points": 2
     }
    ],
    "total_points": 5
@@ -211,13 +239,23 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論①",
-     "content": "法人税を課されない 法人税法６条",
-     "points": 3
+     "content": "法人税を課されない",
+     "points": 2
+    },
+    {
+     "label": "結論①（条文）",
+     "content": "法人税法６条",
+     "points": 1
     },
     {
      "label": "結論②",
-     "content": "法人税額から控除することはできない 法人税法68条２項",
-     "points": 2
+     "content": "法人税額から控除することはできない",
+     "points": 1
+    },
+    {
+     "label": "結論②（条文）",
+     "content": "法人税法68条２項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -239,13 +277,23 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "結論①",
-     "content": "債務免除益として益金の額に算入 法人税法22条２項",
-     "points": 3
+     "content": "債務免除益として益金の額に算入",
+     "points": 2
+    },
+    {
+     "label": "結論①（条文）",
+     "content": "法人税法22条２項",
+     "points": 1
     },
     {
      "label": "結論②",
-     "content": "貸倒損失として損金の額に算入 法人税法22条３項３号",
-     "points": 2
+     "content": "貸倒損失として損金の額に算入",
+     "points": 1
+    },
+    {
+     "label": "結論②（条文）",
+     "content": "法人税法22条３項３号",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -267,13 +315,23 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "結論①",
-     "content": "800 万円を廃棄損として損金の額に算入 法人税法22条３項３号",
-     "points": 2
+     "content": "800 万円を廃棄損として損金の額に算入",
+     "points": 1
+    },
+    {
+     "label": "結論①（条文）",
+     "content": "法人税法22条３項３号",
+     "points": 1
     },
     {
      "label": "結論②",
-     "content": "受け取った損害賠償金 800 万円を益金の額に算入 法人税法22条２項",
-     "points": 3
+     "content": "受け取った損害賠償金 800 万円を益金の額に算入",
+     "points": 2
+    },
+    {
+     "label": "結論②（条文）",
+     "content": "法人税法22条２項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -311,8 +369,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "④ これらに係る還付加算金は，益金の額に算入される 法人税法22条２項",
-     "points": 2
+     "content": "④ これらに係る還付加算金は，益金の額に算入される",
+     "points": 1
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法22条２項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -334,13 +397,28 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "結論①",
-     "content": "益金の額に算入される 法人税法22条２条",
-     "points": 3
+     "content": "益金の額に算入される",
+     "points": 1
+    },
+    {
+     "label": "結論①（条文①）",
+     "content": "法人税法22条",
+     "points": 1
+    },
+    {
+     "label": "結論①（条文②）",
+     "content": "２条",
+     "points": 1
     },
     {
      "label": "結論②",
-     "content": "譲渡収入 600 万円 法人税法22条の２第４項",
-     "points": 2
+     "content": "譲渡収入 600 万円",
+     "points": 1
+    },
+    {
+     "label": "結論②（条文）",
+     "content": "法人税法22条の２第４項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -363,13 +441,23 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "結論①",
-     "content": "譲渡収入を益金の額に算入 法人税法22条２条",
-     "points": 2
+     "content": "譲渡収入を益金の額に算入",
+     "points": 1
+    },
+    {
+     "label": "結論①（条文）",
+     "content": "法人税法22条／２条",
+     "points": 1
     },
     {
      "label": "結論②",
-     "content": "譲渡原価を損金の額に算入 法人税法22条３項１号",
-     "points": 2
+     "content": "譲渡原価を損金の額に算入",
+     "points": 1
+    },
+    {
+     "label": "結論②（条文）",
+     "content": "法人税法22条３項１号",
+     "points": 1
     },
     {
      "label": "結論③",
@@ -401,8 +489,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論①",
-     "content": "益金の額に算入 法人税法22条２項",
-     "points": 2
+     "content": "益金の額に算入",
+     "points": 1
+    },
+    {
+     "label": "結論①（条文）",
+     "content": "法人税法22条２項",
+     "points": 1
     },
     {
      "label": "結論②",
@@ -461,8 +554,13 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "結論",
-     "content": "益金の額に算入される 法人税法22条２項",
-     "points": 5
+     "content": "益金の額に算入される",
+     "points": 3
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法22条２項",
+     "points": 2
     }
    ],
    "total_points": 5
@@ -560,8 +658,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "100 分の 20 に相当する金額の 10 万円が益金不算入 法人税法23条１項",
-     "points": 2
+     "content": "100 分の 20 に相当する金額の 10 万円が益金不算入",
+     "points": 1
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法23条１項",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -593,8 +696,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "控除負債利子を控除した金額が益金不算入 法人税法23条１項",
-     "points": 2
+     "content": "控除負債利子を控除した金額が益金不算入",
+     "points": 1
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法23条１項",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -616,13 +724,23 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "当てはめ",
-     "content": "損金の額に算入されている 法人税法23条の２第２項１号",
-     "points": 2
+     "content": "損金の額に算入されている",
+     "points": 1
+    },
+    {
+     "label": "当てはめ（条文）",
+     "content": "法人税法23条の２第２項１号",
+     "points": 1
     },
     {
      "label": "結論",
-     "content": "全額が益金の額に算入される 法人税法22条２項",
-     "points": 3
+     "content": "全額が益金の額に算入される",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法22条２項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -681,8 +799,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "配当等の額とみなす 法人税法24条１項４号",
-     "points": 3
+     "content": "配当等の額とみなす",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法24条１項４号",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -743,8 +866,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論①",
-     "content": "損金の額に算入しない 法人税法33条１項",
-     "points": 2
+     "content": "損金の額に算入しない",
+     "points": 1
+    },
+    {
+     "label": "結論①（条文）",
+     "content": "法人税法33条１項",
+     "points": 1
     },
     {
      "label": "結論②",
@@ -770,8 +898,13 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "結論",
-     "content": "損金の額に算入される 法人税法33条２項",
-     "points": 5
+     "content": "損金の額に算入される",
+     "points": 3
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法33条２項",
+     "points": 2
     }
    ],
    "total_points": 5
@@ -840,13 +973,23 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "結論①",
-     "content": "相当とされる１億円は損金算入 法人税法34条１項１号，34条２項，22条３項２号",
-     "points": 3
+     "content": "相当とされる１億円は損金算入",
+     "points": 2
+    },
+    {
+     "label": "結論①（条文）",
+     "content": "法人税法34条１項１号／34条２項／22条３項２号",
+     "points": 1
     },
     {
      "label": "結論②",
-     "content": "不相当に高額な 2,000 万円は損金不算入 法人税法34条２項",
-     "points": 2
+     "content": "不相当に高額な 2,000 万円は損金不算入",
+     "points": 1
+    },
+    {
+     "label": "結論②（条文）",
+     "content": "法人税法34条２項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -868,13 +1011,23 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "当てはめ",
-     "content": "時価と対価の差額である 1,500 万円は経済的利益である 法人税法34条４項",
-     "points": 2
+     "content": "時価と対価の差額である 1,500 万円は経済的利益である",
+     "points": 1
+    },
+    {
+     "label": "当てはめ（条文）",
+     "content": "法人税法34条４項",
+     "points": 1
     },
     {
      "label": "結論",
-     "content": "定期同額給与等に該当しないため，損金の額に算入されない 法人税法34条１項",
-     "points": 3
+     "content": "定期同額給与等に該当しないため，損金の額に算入されない",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法34条１項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -902,13 +1055,23 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論①",
-     "content": "不相当に高額な金額は損金不算入 法人税法34条２項",
-     "points": 2
+     "content": "不相当に高額な金額は損金不算入",
+     "points": 1
+    },
+    {
+     "label": "結論①（条文）",
+     "content": "法人税法34条２項",
+     "points": 1
     },
     {
      "label": "結論②",
-     "content": "それ以外の金額は損金算入 法人税法22条３項２号 法人税法34条２項",
-     "points": 2
+     "content": "それ以外の金額は損金算入",
+     "points": 1
+    },
+    {
+     "label": "結論②（条文）",
+     "content": "法人税法22条３項２号／法人税法34条２項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -941,8 +1104,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "損金の額に算入される 法人税法22条３項２号",
-     "points": 2
+     "content": "損金の額に算入される",
+     "points": 1
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法22条３項２号",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -963,13 +1131,23 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "当てはめ",
-     "content": "事実を仮装して経理することにより支給された給与 法人税法34条３項",
-     "points": 2
+     "content": "事実を仮装して経理することにより支給された給与",
+     "points": 1
+    },
+    {
+     "label": "当てはめ（条文）",
+     "content": "法人税法34条３項",
+     "points": 1
     },
     {
      "label": "結論",
-     "content": "全額が損金不算入 法人税法34条３項",
-     "points": 3
+     "content": "全額が損金不算入",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法34条３項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -995,8 +1173,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "損金の額に算入されない 法人税法34条３項",
-     "points": 3
+     "content": "損金の額に算入されない",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法34条３項",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -1023,8 +1206,18 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "全額が損金算入 法人税法22条３項２号 法人税法37条３項１号",
-     "points": 4
+     "content": "全額が損金算入",
+     "points": 2
+    },
+    {
+     "label": "結論（条文①）",
+     "content": "法人税法22条３項２号",
+     "points": 1
+    },
+    {
+     "label": "結論（条文②）",
+     "content": "法人税法37条３項１号",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -1046,13 +1239,23 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "当てはめ",
-     "content": "現金 2,000 万円の贈与は寄附金に該当 法人税法37条７項",
-     "points": 2
+     "content": "現金 2,000 万円の贈与は寄附金に該当",
+     "points": 1
+    },
+    {
+     "label": "当てはめ（条文）",
+     "content": "法人税法37条７項",
+     "points": 1
     },
     {
      "label": "結論",
-     "content": "全額が損金不算入 法人税法37条２項",
-     "points": 3
+     "content": "全額が損金不算入",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法37条２項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -1078,8 +1281,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "書類の添付があれば，記載金額を限度として損金算入できる 法人税法37条９項",
-     "points": 3
+     "content": "書類の添付があれば，記載金額を限度として損金算入できる",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法37条９項",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -1110,8 +1318,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "配当に係る外国源泉税等の全額が損金の額に算入されない 法人税法39条の２",
-     "points": 2
+     "content": "配当に係る外国源泉税等の全額が損金の額に算入されない",
+     "points": 1
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法39条の２",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -1160,13 +1373,23 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "結論①",
-     "content": "交付を受けた国庫補助金等は益金算入 法人税法22条２項",
-     "points": 2
+     "content": "交付を受けた国庫補助金等は益金算入",
+     "points": 1
+    },
+    {
+     "label": "結論①（条文）",
+     "content": "法人税法22条２項",
+     "points": 1
     },
     {
      "label": "結論②",
-     "content": "損金経理した国庫補助金相当額の 2,000 万円を帳簿価額から減額し，同額を損金算入 法人税法42条１項",
-     "points": 3
+     "content": "損金経理した国庫補助金相当額の 2,000 万円を帳簿価額から減額し，同額を損金算入",
+     "points": 2
+    },
+    {
+     "label": "結論②（条文）",
+     "content": "法人税法42条１項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -1188,13 +1411,23 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "結論①",
-     "content": "交付を受けた国庫補助金等は益金算入 法人税法22条２項",
-     "points": 2
+     "content": "交付を受けた国庫補助金等は益金算入",
+     "points": 1
+    },
+    {
+     "label": "結論①（条文）",
+     "content": "法人税法22条２項",
+     "points": 1
     },
     {
      "label": "結論②",
-     "content": "圧縮限度額に達するまでの金額を取得価額から減額し，損金の額に算入 法人税法45条１項１号",
-     "points": 3
+     "content": "圧縮限度額に達するまでの金額を取得価額から減額し，損金の額に算入",
+     "points": 2
+    },
+    {
+     "label": "結論②（条文）",
+     "content": "法人税法45条１項１号",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -1222,13 +1455,23 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論②",
-     "content": "損害賠償金の 1,500 万円を益金算入 法人税法22条２項",
-     "points": 2
+     "content": "損害賠償金の 1,500 万円を益金算入",
+     "points": 1
+    },
+    {
+     "label": "結論②（条文）",
+     "content": "法人税法22条２項",
+     "points": 1
     },
     {
      "label": "結論③",
-     "content": "差額 500 万円を損金算入 法人税法47条１項",
-     "points": 2
+     "content": "差額 500 万円を損金算入",
+     "points": 1
+    },
+    {
+     "label": "結論③（条文）",
+     "content": "法人税法47条１項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -1254,8 +1497,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "損金の額に算入することはできない 法人税法50条１項",
-     "points": 3
+     "content": "損金の額に算入することはできない",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法50条１項",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -1277,13 +1525,23 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "当てはめ",
-     "content": "資本金１億円超の内国法人 法人税法52条１項１号イ",
-     "points": 2
+     "content": "資本金１億円超の内国法人",
+     "points": 1
+    },
+    {
+     "label": "当てはめ（条文）",
+     "content": "法人税法52条１項１号イ",
+     "points": 1
     },
     {
      "label": "結論",
-     "content": "全額損金不算入 法人税法22条３項２号",
-     "points": 3
+     "content": "全額損金不算入",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法22条３項２号",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -1316,8 +1574,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "全額損金不算入 法人税法22条３項２号",
-     "points": 2
+     "content": "全額損金不算入",
+     "points": 1
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法22条３項２号",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -1343,8 +1606,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "損金の額には算入されない 法人税法34条１項２号イ",
-     "points": 3
+     "content": "損金の額には算入されない",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法34条１項２号イ",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -1366,13 +1634,23 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "当てはめ",
-     "content": "給与等課税額が生ずることが確定した日に役務の提供を受けたものとして取り扱う 法人税法54条１項",
-     "points": 2
+     "content": "給与等課税額が生ずることが確定した日に役務の提供を受けたものとして取り扱う",
+     "points": 1
+    },
+    {
+     "label": "当てはめ（条文）",
+     "content": "法人税法54条１項",
+     "points": 1
     },
     {
      "label": "結論",
-     "content": "損金の額に算入される 法人税法22条３項２号",
-     "points": 3
+     "content": "損金の額に算入される",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法22条３項２号",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -1395,8 +1673,13 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "当てはめ",
-     "content": "① 給与等課税事由が生じるため 法人税法54条の２第１項",
-     "points": 2
+     "content": "① 給与等課税事由が生じるため",
+     "points": 1
+    },
+    {
+     "label": "当てはめ（条文）",
+     "content": "法人税法54条の２第１項",
+     "points": 1
     },
     {
      "label": "当てはめ",
@@ -1405,8 +1688,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "損金の額に算入する 法人税法22条３項２号",
-     "points": 2
+     "content": "損金の額に算入する",
+     "points": 1
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法22条３項２号",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -1466,8 +1754,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論②",
-     "content": "手数料 200 万円は，損金の額に算入されない 法人税法55条１項",
-     "points": 2
+     "content": "手数料 200 万円は，損金の額に算入されない",
+     "points": 1
+    },
+    {
+     "label": "結論②（条文）",
+     "content": "法人税法55条１項",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -1488,8 +1781,13 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "結論",
-     "content": "課徴金は損金の額に算入されない 法人税法55条５項３号",
-     "points": 5
+     "content": "課徴金は損金の額に算入されない",
+     "points": 3
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法55条５項３号",
+     "points": 2
     }
    ],
    "total_points": 5
@@ -1510,8 +1808,13 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "結論",
-     "content": "賄賂である 2,000 万円の支出は損金の額に算入されない 法人税法55条６項",
-     "points": 5
+     "content": "賄賂である 2,000 万円の支出は損金の額に算入されない",
+     "points": 3
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法55条６項",
+     "points": 2
     }
    ],
    "total_points": 5
@@ -1538,8 +1841,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "当てはめ",
-     "content": "資本金の額が１億円以下の普通法人である 法人税法57条11項１号イ",
-     "points": 2
+     "content": "資本金の額が１億円以下の普通法人である",
+     "points": 1
+    },
+    {
+     "label": "当てはめ（条文）",
+     "content": "法人税法57条11項１号イ",
+     "points": 1
     },
     {
      "label": "結論",
@@ -1571,8 +1879,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "当てはめ",
-     "content": "特定支配日の５年以内に事業を再開しているため，事業再開後に生じた未処理欠損金額 300 万円のみ 法人税法57条の２第１項１号",
-     "points": 2
+     "content": "特定支配日の５年以内に事業を再開しているため，事業再開後に生じた未処理欠損金額 300 万円のみ",
+     "points": 1
+    },
+    {
+     "label": "当てはめ（条文）",
+     "content": "法人税法57条の２第１項１号",
+     "points": 1
     },
     {
      "label": "結論",
@@ -1603,8 +1916,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "取引を行った時における外貨為替の売買相場により換算した金額 法人税法61条の８第１項",
-     "points": 3
+     "content": "取引を行った時における外貨為替の売買相場により換算した金額",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法61条の８第１項",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -1671,8 +1989,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "令和４年３月 31 日の属する事業年度(令和３事業年度)の法人税額の計算上，甲土地の譲渡に関する所得が生じる 法人税法61条の11第３項",
-     "points": 3
+     "content": "令和４年３月 31 日の属する事業年度(令和３事業年度)の法人税額の計算上，甲土地の譲渡に関する所得が生じる",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法61条の11第３項",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -1698,8 +2021,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "繰延べた譲渡益相当額 4,000 万円が益金算入 法人税法61条の11第２項",
-     "points": 4
+     "content": "繰延べた譲渡益相当額 4,000 万円が益金算入",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法61条の11第２項",
+     "points": 2
     }
    ],
    "total_points": 5
@@ -1720,8 +2048,13 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "結論",
-     "content": "譲渡利益相当額 3,000 万円が益金算入 法人税法61条の11第２項",
-     "points": 5
+     "content": "譲渡利益相当額 3,000 万円が益金算入",
+     "points": 3
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法61条の11第２項",
+     "points": 2
     }
    ],
    "total_points": 5
@@ -1782,13 +2115,23 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "当てはめ",
-     "content": "適格合併に該当する 法人税法２条12号の８イ",
-     "points": 2
+     "content": "適格合併に該当する",
+     "points": 1
+    },
+    {
+     "label": "当てはめ（条文）",
+     "content": "法人税法２条12号の８イ",
+     "points": 1
     },
     {
      "label": "結論",
-     "content": "全ての資産等を帳簿価額でＡ社に引き継いだものとして取り扱う 法人税法62条の２第１項",
-     "points": 3
+     "content": "全ての資産等を帳簿価額でＡ社に引き継いだものとして取り扱う",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法62条の２第１項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -1810,13 +2153,23 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "当てはめ",
-     "content": "適格現物出資に該当する 法人税法２条12号の14ロ",
-     "points": 2
+     "content": "適格現物出資に該当する",
+     "points": 1
+    },
+    {
+     "label": "当てはめ（条文）",
+     "content": "法人税法２条12号の14ロ",
+     "points": 1
     },
     {
      "label": "結論",
-     "content": "適格現物出資の直前の帳簿価額により譲渡したもの 法人税法62条の４第１項",
-     "points": 3
+     "content": "適格現物出資の直前の帳簿価額により譲渡したもの",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法62条の４第１項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -1838,13 +2191,23 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "当てはめ",
-     "content": "適格現物分配に該当する 法人税法２条12号の15",
-     "points": 2
+     "content": "適格現物分配に該当する",
+     "points": 1
+    },
+    {
+     "label": "当てはめ（条文）",
+     "content": "法人税法２条12号の15",
+     "points": 1
     },
     {
      "label": "結論",
-     "content": "甲土地を帳簿価額である 1,000 万円で譲渡 法人税法62条の５第３項",
-     "points": 3
+     "content": "甲土地を帳簿価額である 1,000 万円で譲渡",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法62条の５第３項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -1866,13 +2229,23 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "当てはめ",
-     "content": "適格現物分配に該当する 法人税法２条12号の15",
-     "points": 2
+     "content": "適格現物分配に該当する",
+     "points": 1
+    },
+    {
+     "label": "当てはめ（条文）",
+     "content": "法人税法２条12号の15",
+     "points": 1
     },
     {
      "label": "結論",
-     "content": "Ｃ社株式を配当直前の帳簿価額でＡ社に 譲渡した 法人税法62条の５第３項",
-     "points": 3
+     "content": "Ｃ社株式を配当直前の帳簿価額でＡ社に 譲渡した",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法62条の５第３項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -1930,8 +2303,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "経理処理にかかわらず，工事進行基準の方法により計算した金額を，益金の額及び損金の額に算入 法人税法63条１項",
-     "points": 2
+     "content": "経理処理にかかわらず，工事進行基準の方法により計算した金額を，益金の額及び損金の額に算入",
+     "points": 1
+    },
+    {
+     "label": "結論（条文）",
+     "content": "法人税法63条１項",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -2059,8 +2437,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論②",
-     "content": "Ｐは控除対象扶養親族となる 所得税法２条１項34号 所得税法２条１項34号の２",
-     "points": 2
+     "content": "Ｐは控除対象扶養親族となる",
+     "points": 1
+    },
+    {
+     "label": "結論②（条文）",
+     "content": "所得税法２条１項34号／所得税法２条１項34号の２",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -2140,8 +2523,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "保険金は，非課税 所得税法９条１項18号",
-     "points": 3
+     "content": "保険金は，非課税",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "所得税法９条１項18号",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -2220,8 +2608,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "課税標準としては退職所得金額に含まれる 所得税法22条３項",
-     "points": 2
+     "content": "課税標準としては退職所得金額に含まれる",
+     "points": 1
+    },
+    {
+     "label": "結論（条文）",
+     "content": "所得税法22条３項",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -2280,8 +2673,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "収入金額に算入される 所得税法36条１項",
-     "points": 2
+     "content": "収入金額に算入される",
+     "points": 1
+    },
+    {
+     "label": "結論（条文）",
+     "content": "所得税法36条１項",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -2313,8 +2711,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "収入金額は，取得した株式の時価 900 万円から権利行使価額 300 万円を控除した 600 万円 所得税法36条１項 所得税法36条２項",
-     "points": 2
+     "content": "収入金額は，取得した株式の時価 900 万円から権利行使価額 300 万円を控除した 600 万円",
+     "points": 1
+    },
+    {
+     "label": "結論（条文）",
+     "content": "所得税法36条１項／所得税法36条２項",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -2340,8 +2743,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "退職所得として取り扱うべき 所得税法30条１項",
-     "points": 3
+     "content": "退職所得として取り扱うべき",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "所得税法30条１項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -2401,8 +2809,18 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "手付金１億円は平成 24 年分の総収入金額に算入する 所得税法33条３項 所得税法36条１項",
-     "points": 4
+     "content": "手付金１億円は平成 24 年分の総収入金額に算入する",
+     "points": 2
+    },
+    {
+     "label": "結論（条文①）",
+     "content": "所得税法33条３項",
+     "points": 1
+    },
+    {
+     "label": "結論（条文②）",
+     "content": "所得税法36条１項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -2428,8 +2846,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "総収入金額に算入される 所得税法39条",
-     "points": 3
+     "content": "総収入金額に算入される",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "所得税法39条",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -2455,8 +2878,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "給与所得として取り扱われその収入金額は100 万円である 所得税法41条の２",
-     "points": 4
+     "content": "給与所得として取り扱われその収入金額は100 万円である",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "所得税法41条の２",
+     "points": 2
     }
    ],
    "total_points": 5
@@ -2488,8 +2916,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "債務免除により受ける経済的利益の価額 500万円は総収入金額に算入しない 所得税法44条の２第１項",
-     "points": 4
+     "content": "債務免除により受ける経済的利益の価額 500万円は総収入金額に算入しない",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "所得税法44条の２第１項",
+     "points": 2
     }
    ],
    "total_points": 5
@@ -2515,8 +2948,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "事業所得の計算上，必要経費に算入する 所得税法51条１項",
-     "points": 3
+     "content": "事業所得の計算上，必要経費に算入する",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "所得税法51条１項",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -2542,13 +2980,23 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論①",
-     "content": "ＰからＲへと支払われた賃金は，Ｐの事業所得の計算上，必要経費に算入されない 所得税法56条",
-     "points": 2
+     "content": "ＰからＲへと支払われた賃金は，Ｐの事業所得の計算上，必要経費に算入されない",
+     "points": 1
+    },
+    {
+     "label": "結論①（条文）",
+     "content": "所得税法56条",
+     "points": 1
     },
     {
      "label": "結論②",
-     "content": "賃金の支払いは，Ｒの給与所得の計算上，ないものとみなす 所得税法56条",
-     "points": 2
+     "content": "賃金の支払いは，Ｒの給与所得の計算上，ないものとみなす",
+     "points": 1
+    },
+    {
+     "label": "結論②（条文）",
+     "content": "所得税法56条",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -2658,8 +3106,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論③",
-     "content": "取得費は 3,000 万円 所得税法60条１項１号",
-     "points": 2
+     "content": "取得費は 3,000 万円",
+     "points": 1
+    },
+    {
+     "label": "結論③（条文）",
+     "content": "所得税法60条１項１号",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -2724,8 +3177,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "限定承認をした場合，時価で譲渡したもの 所得税法59条１項１号",
-     "points": 3
+     "content": "限定承認をした場合，時価で譲渡したもの",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "所得税法59条１項１号",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -2764,8 +3222,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "④ 2,500 万円が譲渡所得の金額 所得税法33条３項２号",
-     "points": 2
+     "content": "④ 2,500 万円が譲渡所得の金額",
+     "points": 1
+    },
+    {
+     "label": "結論（条文）",
+     "content": "所得税法33条３項２号",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -2786,8 +3249,13 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "結論",
-     "content": "国外転出の時における価額である３億円で譲渡があったものとみなされる 所得税法60条の２第１項１号",
-     "points": 5
+     "content": "国外転出の時における価額である３億円で譲渡があったものとみなされる",
+     "points": 3
+    },
+    {
+     "label": "結論（条文）",
+     "content": "所得税法60条の２第１項１号",
+     "points": 2
     }
    ],
    "total_points": 5
@@ -2809,13 +3277,23 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "当てはめ",
-     "content": "Ｙ国転出時の時価である２億円で譲渡をしたものとみなして譲渡所得を計算している所得税法60条の４第１項 所得税法60条の４第３項",
-     "points": 2
+     "content": "Ｙ国転出時の時価である２億円で譲渡をしたものとみなして譲渡所得を計算している",
+     "points": 1
+    },
+    {
+     "label": "当てはめ（条文）",
+     "content": "所得税法60条の４第１項／所得税法60条の４第３項",
+     "points": 1
     },
     {
      "label": "結論",
-     "content": "上場株式の取得費は２億円 所得税法60条の４第１項",
-     "points": 3
+     "content": "上場株式の取得費は２億円",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "所得税法60条の４第１項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -2836,13 +3314,23 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "当てはめ",
-     "content": "甲は生活に通常必要でない資産に該当 所得税法62条１項",
-     "points": 2
+     "content": "甲は生活に通常必要でない資産に該当",
+     "points": 1
+    },
+    {
+     "label": "当てはめ（条文）",
+     "content": "所得税法62条１項",
+     "points": 1
     },
     {
      "label": "結論",
-     "content": "甲の盗難によって生じた損失は，譲渡所得の金額から控除される 所得税法62条１項",
-     "points": 3
+     "content": "甲の盗難によって生じた損失は，譲渡所得の金額から控除される",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "所得税法62条１項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -2934,8 +3422,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "Ｐは平成 28 年中に支払った 80 万円のうち70 万円を，Ｐのその年分の総所得金額から控除することができる 所得税法73条１項",
-     "points": 3
+     "content": "Ｐは平成 28 年中に支払った 80 万円のうち70 万円を，Ｐのその年分の総所得金額から控除することができる",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "所得税法73条１項",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -2963,8 +3456,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論①",
-     "content": "一定額は益金の額に算入されない 法人税法23条１項 法人税法23条１項１号",
-     "points": 2
+     "content": "一定額は益金の額に算入されない",
+     "points": 1
+    },
+    {
+     "label": "結論①（条文）",
+     "content": "法人税法23条１項／法人税法23条１項１号",
+     "points": 1
     },
     {
      "label": "結論②",
@@ -2991,13 +3489,23 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "結論①",
-     "content": "賞与について所得税を徴収し，その徴収の日の属する月の翌月 10 日までに，これを国に納付 所得税法183条１項",
-     "points": 3
+     "content": "賞与について所得税を徴収し，その徴収の日の属する月の翌月 10 日までに，これを国に納付",
+     "points": 2
+    },
+    {
+     "label": "結論①（条文）",
+     "content": "所得税法183条１項",
+     "points": 1
     },
     {
      "label": "結論②",
-     "content": "支払の確定した日から１年を経過した日においてその支払があったものとみなして 所得税法183条２項",
-     "points": 2
+     "content": "支払の確定した日から１年を経過した日においてその支払があったものとみなして",
+     "points": 1
+    },
+    {
+     "label": "結論②（条文）",
+     "content": "所得税法183条２項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -3058,8 +3566,18 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "所得税を徴収し，令和４年５月 31 日までに国に納付しなければならない所得税法212条１項 所得税法212条２項",
-     "points": 4
+     "content": "所得税を徴収し，令和４年５月 31 日までに国に納付しなければならない",
+     "points": 2
+    },
+    {
+     "label": "結論（条文①）",
+     "content": "所得税法212条１項",
+     "points": 1
+    },
+    {
+     "label": "結論（条文②）",
+     "content": "所得税法212条２項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -3086,8 +3604,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "国内源泉所得に対して所得税を徴収し，その徴収の日の属する月の翌月 10 日までに，これを国に納付する義務が課せられる 所得税法212条１項",
-     "points": 4
+     "content": "国内源泉所得に対して所得税を徴収し，その徴収の日の属する月の翌月 10 日までに，これを国に納付する義務が課せられる",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "所得税法212条１項",
+     "points": 2
     }
    ],
    "total_points": 5
@@ -3172,13 +3695,23 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "当てはめ",
-     "content": "課税仕入れに該当しない 消費税法２条１項12号",
-     "points": 2
+     "content": "課税仕入れに該当しない",
+     "points": 1
+    },
+    {
+     "label": "当てはめ（条文）",
+     "content": "消費税法２条１項12号",
+     "points": 1
     },
     {
      "label": "結論",
-     "content": "仕入れに係る消費税額の控除を適用することはできない 消費税法30条１項",
-     "points": 3
+     "content": "仕入れに係る消費税額の控除を適用することはできない",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "消費税法30条１項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -3239,13 +3772,23 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "当てはめ",
-     "content": "対価性がなく，資産の譲渡等には該当しない 消費税法２条１項８号",
-     "points": 2
+     "content": "対価性がなく，資産の譲渡等には該当しない",
+     "points": 1
+    },
+    {
+     "label": "当てはめ（条文）",
+     "content": "消費税法２条１項８号",
+     "points": 1
     },
     {
      "label": "結論",
-     "content": "消費税法上は何ら考慮されない 消費税法４条１項",
-     "points": 3
+     "content": "消費税法上は何ら考慮されない",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "消費税法４条１項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -3267,13 +3810,23 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "当てはめ",
-     "content": "対価性がなく，資産の譲渡等には該当しない 消費税法２条１項８号",
-     "points": 2
+     "content": "対価性がなく，資産の譲渡等には該当しない",
+     "points": 1
+    },
+    {
+     "label": "当てはめ（条文）",
+     "content": "消費税法２条１項８号",
+     "points": 1
     },
     {
      "label": "結論",
-     "content": "課税資産の譲渡等の対価として取り扱わない 消費税法２条１項９号",
-     "points": 3
+     "content": "課税資産の譲渡等の対価として取り扱わない",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "消費税法２条１項９号",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -3350,8 +3903,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "Ａ社に消費税が課される 消費税法４条１項",
-     "points": 2
+     "content": "Ａ社に消費税が課される",
+     "points": 1
+    },
+    {
+     "label": "結論（条文）",
+     "content": "消費税法４条１項",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -3383,8 +3941,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "消費税が課される 消費税法４条１項",
-     "points": 2
+     "content": "消費税が課される",
+     "points": 1
+    },
+    {
+     "label": "結論（条文）",
+     "content": "消費税法４条１項",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -3449,8 +4012,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "消費税の納税義務は免除されない 消費税法５条１項",
-     "points": 2
+     "content": "消費税の納税義務は免除されない",
+     "points": 1
+    },
+    {
+     "label": "結論（条文）",
+     "content": "消費税法５条１項",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -3517,8 +4085,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論②",
-     "content": "輸出免税取引に該当し，日本の消費税は免除される 消費税法７条１項",
-     "points": 2
+     "content": "輸出免税取引に該当し，日本の消費税は免除される",
+     "points": 1
+    },
+    {
+     "label": "結論②（条文）",
+     "content": "消費税法７条１項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -3544,8 +4117,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "課税標準は，課税資産の譲渡等の対価の額である 7,000 万円 消費税法28条１項",
-     "points": 3
+     "content": "課税標準は，課税資産の譲渡等の対価の額である 7,000 万円",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "消費税法28条１項",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -3600,13 +4178,23 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "当てはめ",
-     "content": "対価の額 500 万円が譲渡時の時価 2,000 万円の 50％未満であるため，法人の自社の役員に対する著しく低い金額での譲渡に該当 消費税法28条１項",
-     "points": 2
+     "content": "対価の額 500 万円が譲渡時の時価 2,000 万円の 50％未満であるため，法人の自社の役員に対する著しく低い金額での譲渡に該当",
+     "points": 1
+    },
+    {
+     "label": "当てはめ（条文）",
+     "content": "消費税法28条１項",
+     "points": 1
     },
     {
      "label": "結論",
-     "content": "譲渡時の時価の 2,000 万円をその対価の額とみなし，消費税の課税標準を計算する。 消費税法28条１項",
-     "points": 3
+     "content": "譲渡時の時価の 2,000 万円をその対価の額とみなし，消費税の課税標準を計算する。",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
+     "content": "消費税法28条１項",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -3636,13 +4224,23 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論①",
-     "content": "１億円を課税標準に含めて，課税標準額に対する消費税額を計算 消費税法28条２項",
-     "points": 2
+     "content": "１億円を課税標準に含めて，課税標準額に対する消費税額を計算",
+     "points": 1
+    },
+    {
+     "label": "結論①（条文）",
+     "content": "消費税法28条２項",
+     "points": 1
     },
     {
      "label": "結論②",
-     "content": "当該支払額は仕入税額控除の対象 消費税法30条１項２号",
-     "points": 2
+     "content": "当該支払額は仕入税額控除の対象",
+     "points": 1
+    },
+    {
+     "label": "結論②（条文）",
+     "content": "消費税法30条１項２号",
+     "points": 1
     }
    ],
    "total_points": 5
@@ -3706,8 +4304,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
-     "content": "Ｃ社が消費税の納税義務を負う 消費税法５条１項",
-     "points": 2
+     "content": "Ｃ社が消費税の納税義務を負う",
+     "points": 1
+    },
+    {
+     "label": "結論（条文）",
+     "content": "消費税法５条１項",
+     "points": 1
     }
    ],
    "total_points": 4
@@ -3728,8 +4331,13 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "結論①",
-     "content": "課税標準額に対する消費税額から控除 消費税法38条１項",
-     "points": 3
+     "content": "課税標準額に対する消費税額から控除",
+     "points": 2
+    },
+    {
+     "label": "結論①（条文）",
+     "content": "消費税法38条１項",
+     "points": 1
     },
     {
      "label": "結論②",
@@ -3782,8 +4390,13 @@ const SOZEI_DATA = {
    "scoring_points": [
     {
      "label": "結論",
-     "content": "課税標準額に対する消費税額から，売掛金 550万円に係る消費税額 39 万円を控除する 消費税法39条１項",
-     "points": 5
+     "content": "課税標準額に対する消費税額から，売掛金 550万円に係る消費税額 39 万円を控除する",
+     "points": 3
+    },
+    {
+     "label": "結論（条文）",
+     "content": "消費税法39条１項",
+     "points": 2
     }
    ],
    "total_points": 5

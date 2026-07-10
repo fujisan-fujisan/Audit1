@@ -234,12 +234,49 @@ textarea.answer-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px
 }
 .provisions-list li::before { content: "・"; position: absolute; left: 0; }
 
-.scoring-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
-.scoring-table td { padding: 7px 4px; font-size: 13px; border-bottom: 1px solid var(--border); }
-.scoring-table td.pt { text-align: right; font-family: 'DM Mono', 'Courier New', monospace; white-space: nowrap; color: var(--text-2); }
-.scoring-table tr:last-child td { border-bottom: none; }
-.total-row { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0 0; font-weight: 700; }
-.total-row .val { font-family: 'DM Mono', 'Courier New', monospace; font-size: 18px; }
+.score-items { margin-bottom: 4px; }
+.score-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 8px;
+  margin-bottom: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.score-item:last-child { margin-bottom: 0; }
+.score-item:hover { background: #fafaf9; }
+.score-item.checked { background: #f0fdf4; border-color: #86efac; }
+.score-mark {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text-3);
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'DM Mono', 'Courier New', monospace;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .15s;
+}
+.score-item.checked .score-mark { background: #15803d; border-color: #15803d; color: #fff; }
+.score-item-body { flex: 1; min-width: 0; }
+.score-item-label { font-size: 10px; color: var(--text-3); font-weight: 700; letter-spacing: .02em; margin-bottom: 2px; }
+.score-item-text { font-size: 13px; line-height: 1.6; color: var(--text); }
+.score-item-pt { flex-shrink: 0; font-family: 'DM Mono', 'Courier New', monospace; font-size: 13px; color: var(--text-2); white-space: nowrap; }
+.score-item.no-pt { cursor: default; opacity: .55; }
+.score-item.no-pt:hover { background: none; }
+.score-item.no-pt .score-item-pt { visibility: hidden; }
+.total-row { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 0 0; font-weight: 700; }
+.total-row .val { font-family: 'DM Mono', 'Courier New', monospace; font-size: 20px; }
 
 details.comment-toggle { margin-top: 10px; }
 details.comment-toggle summary {
@@ -255,10 +292,6 @@ details.comment-toggle .comment-body {
   margin-top: 8px;
   line-height: 1.75;
 }
-
-.score-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
-.score-row .num-input { font-size: 22px; padding: 10px; }
-.score-of { font-size: 14px; color: var(--text-3); white-space: nowrap; }
 
 .result-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
 .result-table th, .result-table td { padding: 8px 6px; font-size: 12px; text-align: center; border-bottom: 1px solid var(--border); }
@@ -337,23 +370,16 @@ details.comment-toggle .comment-body {
         <ul class="provisions-list" id="reveal-provisions"></ul>
       </div>
 
-      <div class="section-label">予想配点</div>
-      <table class="scoring-table" id="reveal-scoring"></table>
-      <div class="total-row"><span>満点</span><span class="val" id="reveal-total"></span></div>
+      <div class="section-label">予想配点（できている項目に○を押してください）</div>
+      <div class="score-items" id="reveal-scoring"></div>
+      <div class="total-row"><span>獲得点数</span><span class="val" id="reveal-total"><span id="live-score">0</span> / <span id="live-total"></span>点</span></div>
 
       <details class="comment-toggle" id="reveal-comment-wrap">
         <summary>解説コメントを表示</summary>
         <div class="comment-body" id="reveal-comment"></div>
       </details>
-    </div>
 
-    <div class="card hidden" id="score-card">
-      <label class="field-label">獲得点数を入力してください</label>
-      <div class="score-row">
-        <input class="num-input" type="number" id="score-input" min="0" step="1">
-        <span class="score-of" id="score-of"></span>
-      </div>
-      <button class="btn-primary" onclick="confirmScore()">採点を確定する</button>
+      <button class="btn-primary" id="confirm-score-btn" onclick="confirmScore()" style="margin-top:14px">採点を確定する</button>
     </div>
 
     <button class="btn-danger-text" onclick="abortSession()">中止する</button>
@@ -656,6 +682,7 @@ function startSession() {
     results: [],
     currentAnswer: null,
     dontKnow: false,
+    checked: {},
   };
   document.getElementById('screen-setup').classList.add('hidden');
   document.getElementById('screen-result').classList.add('hidden');
@@ -682,17 +709,18 @@ function renderQuestion() {
   document.getElementById('answer-text').value = '';
   document.getElementById('answer-card').classList.remove('hidden');
   document.getElementById('reveal-card').classList.add('hidden');
-  document.getElementById('score-card').classList.add('hidden');
+  session.checked = {};
 }
 
 function submitAnswer(dontKnow) {
   const q = currentQuestion();
   session.currentAnswer = dontKnow ? 'わかりません' : document.getElementById('answer-text').value;
   session.dontKnow = dontKnow;
+  session.checked = {};
 
   document.getElementById('answer-card').classList.add('hidden');
 
-  // 模範解答・関連規定・予想配点・満点の開示（採点はしない）
+  // 模範解答・関連規定・予想配点の開示（採点は○×チェックの積み上げで行い、正誤判定はしない）
   document.getElementById('reveal-answer').textContent = q.model_answer || '（模範解答データなし）';
 
   const provWrap = document.getElementById('reveal-provisions-wrap');
@@ -709,16 +737,7 @@ function submitAnswer(dontKnow) {
     provWrap.classList.add('hidden');
   }
 
-  const scoringTable = document.getElementById('reveal-scoring');
-  scoringTable.innerHTML = '';
-  (q.scoring_points || []).forEach(function (sp) {
-    const tr = document.createElement('tr');
-    const label = sp.label ? sp.label + (sp.content ? '：' : '') : '';
-    const text = label + (sp.content || '');
-    tr.innerHTML = '<td>' + escapeHtml(text || '（内容なし）') + '</td><td class="pt">' + (sp.points != null ? sp.points + '点' : '－') + '</td>';
-    scoringTable.appendChild(tr);
-  });
-  document.getElementById('reveal-total').textContent = q.total_points + '点';
+  renderScoringChecklist(q, dontKnow);
 
   const commentWrap = document.getElementById('reveal-comment-wrap');
   if (q.comment) {
@@ -731,15 +750,13 @@ function submitAnswer(dontKnow) {
 
   document.getElementById('reveal-card').classList.remove('hidden');
 
+  const confirmBtn = document.getElementById('confirm-score-btn');
   if (dontKnow) {
-    // わからない → 自動0点、得点入力はスキップ
+    // わからない → チェック不要・自動0点
+    confirmBtn.classList.add('hidden');
     recordResult(0);
   } else {
-    document.getElementById('score-of').textContent = '/ ' + q.total_points + '点';
-    const scoreInput = document.getElementById('score-input');
-    scoreInput.value = '';
-    scoreInput.max = q.total_points;
-    document.getElementById('score-card').classList.remove('hidden');
+    confirmBtn.classList.remove('hidden');
   }
 }
 
@@ -749,14 +766,57 @@ function escapeHtml(s) {
   return div.innerHTML;
 }
 
+// scoring_points を○×チェックボックス形式で描画し、チェック状態から得点を自動集計する
+function renderScoringChecklist(q, disabled) {
+  const wrap = document.getElementById('reveal-scoring');
+  wrap.innerHTML = '';
+  const items = q.scoring_points || [];
+
+  items.forEach(function (sp, idx) {
+    const row = document.createElement('div');
+    const hasPoints = sp.points != null;
+    row.className = 'score-item' + (hasPoints ? '' : ' no-pt');
+    row.id = 'score-item-' + idx;
+    if (hasPoints && !disabled) row.onclick = function () { toggleScoreItem(idx); };
+
+    row.innerHTML =
+      '<div class="score-mark" id="mark-' + idx + '">×</div>' +
+      '<div class="score-item-body">' +
+        (sp.label ? '<div class="score-item-label">' + escapeHtml(sp.label) + '</div>' : '') +
+        '<div class="score-item-text">' + escapeHtml(sp.content || '（内容なし）') + '</div>' +
+      '</div>' +
+      '<div class="score-item-pt">' + (hasPoints ? sp.points + '点' : '－') + '</div>';
+    wrap.appendChild(row);
+  });
+
+  document.getElementById('live-total').textContent = q.total_points;
+  updateLiveScore(q);
+}
+
+// 採点項目（行全体）をタップすると正解扱い（○）にトグルする
+function toggleScoreItem(idx) {
+  session.checked[idx] = !session.checked[idx];
+  const checked = !!session.checked[idx];
+  document.getElementById('score-item-' + idx).classList.toggle('checked', checked);
+  document.getElementById('mark-' + idx).textContent = checked ? '○' : '×';
+  updateLiveScore(currentQuestion());
+}
+
+function computeCheckedScore(q) {
+  let sum = 0;
+  (q.scoring_points || []).forEach(function (sp, idx) {
+    if (sp.points != null && session.checked[idx]) sum += sp.points;
+  });
+  return sum;
+}
+
+function updateLiveScore(q) {
+  document.getElementById('live-score').textContent = computeCheckedScore(q);
+}
+
 function confirmScore() {
   const q = currentQuestion();
-  const raw = document.getElementById('score-input').value;
-  let score = parseFloat(raw);
-  if (isNaN(score) || raw === '') { alert('獲得点数を入力してください。'); return; }
-  if (score < 0) score = 0;
-  if (score > q.total_points) score = q.total_points;
-  recordResult(score);
+  recordResult(computeCheckedScore(q));
 }
 
 function recordResult(score) {
@@ -782,8 +842,6 @@ function recordResult(score) {
     rate: rate,
     classification: classification,
   });
-
-  document.getElementById('score-card').classList.add('hidden');
 
   if (session.index + 1 < session.questions.length) {
     session.index += 1;
