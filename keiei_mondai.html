@@ -46,18 +46,13 @@ body {
 
 .content { padding: 14px; max-width: 720px; margin: 0 auto; }
 
-/* OVERALL PROGRESS BAR (dashboard mini, shown on list/practice tabs) */
+/* OVERALL PROGRESS BAR (dashboard mini, shown on list/stats tabs) */
 .overview-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px; }
 .overview-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
 .overview-num { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 700; }
 .overview-label { font-size: 11px; color: var(--text-3); }
 .progress-track { height: 8px; border-radius: 99px; background: var(--bg); overflow: hidden; border: 1px solid var(--border); }
 .progress-fill { height: 100%; background: var(--o-color); border-radius: 99px; transition: width .3s; }
-
-/* FILTER CHIPS */
-.chip-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
-.filter-chip { padding: 6px 12px; border-radius: 99px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-2); font-size: 11px; font-weight: 500; cursor: pointer; white-space: nowrap; }
-.filter-chip.active { background: var(--text); border-color: var(--text); color: #fff; }
 
 /* CHAPTER GROUP */
 .ch-group { margin-bottom: 10px; }
@@ -86,30 +81,22 @@ body {
 .prob-body { display: none; border-top: 1px solid var(--border); padding: 4px 10px 8px; }
 .prob-card.open .prob-body { display: block; }
 
-/* ITEM ROW */
-.item-row { padding: 10px 4px; border-bottom: 1px dashed var(--border); }
+/* ITEM ROW — 問題名／重要度／必要回数／評価ボタンを1行に並べ、高さ方向は中央揃え */
+.item-row { padding: 8px 4px; border-bottom: 1px dashed var(--border); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .item-row:last-child { border-bottom: none; }
-.item-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
 .item-label { font-size: 12px; font-weight: 700; color: var(--text); }
-.imp-chip { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; font-family: 'Noto Sans JP', sans-serif; }
+.imp-chip { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; font-family: 'Noto Sans JP', sans-serif; flex-shrink: 0; }
 .grade-A { background: #fdf0ee; color: #c0392b; }
 .grade-B { background: #fdf4e3; color: #7c5c00; }
 .grade-Cplus { background: #eaf1fb; color: #1a5fb4; }
 .grade-C { background: #eef7ee; color: #2e7d32; }
 .grade-unknown { background: var(--bg); color: var(--text-3); border: 1px solid var(--border); }
-.flag-chip { font-size: 9px; padding: 2px 6px; border-radius: 99px; border: 1px solid var(--border-strong); color: var(--text-2); background: var(--bg); }
+.flag-chip { font-size: 9px; padding: 2px 6px; border-radius: 99px; border: 1px solid var(--border-strong); color: var(--text-2); background: var(--bg); flex-shrink: 0; }
 .flag-chip.f-keyword { border-color: #1a5fb4; color: #1a5fb4; background: #eef4fc; }
-.flag-chip.f-noexample { border-color: var(--border-strong); color: var(--text-2); }
-.flag-chip.f-star { border-color: #c8900a; color: #7c5c00; background: #fffbe6; }
-.flag-chip.f-review { border-color: var(--x-color); color: var(--x-color); background: var(--x-bg); }
 
-.item-bottom { display: flex; align-items: center; gap: 10px; }
-.rotation-dots { display: flex; gap: 3px; align-items: center; }
-.rdot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--border-strong); background: var(--surface); flex-shrink: 0; }
-.rdot.filled { background: var(--o-color); border-color: var(--o-color); }
-.rotation-text { font-size: 11px; color: var(--text-2); font-family: 'DM Mono', monospace; white-space: nowrap; }
-.rotation-optional { font-size: 11px; color: var(--text-3); }
-.item-btns { display: flex; gap: 4px; margin-left: auto; }
+.rotation-text { font-size: 11px; color: var(--text-2); font-family: 'DM Mono', monospace; white-space: nowrap; margin-left: auto; }
+.rotation-optional { font-size: 11px; color: var(--text-3); white-space: nowrap; margin-left: auto; }
+.item-btns { display: flex; gap: 4px; flex-shrink: 0; }
 .rec-btn { width: 30px; height: 30px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--bg); font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s; }
 .rec-btn.o:hover, .rec-btn.o:active { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
 .rec-btn.x:hover, .rec-btn.x:active { background: var(--x-bg); border-color: var(--x-color); color: var(--x-color); }
@@ -117,26 +104,6 @@ body {
 .rec-btn.undo:hover { background: var(--bg); color: var(--text); }
 .rec-btn:disabled { opacity: .3; pointer-events: none; }
 .item-row.mastered { background: var(--o-bg); border-radius: var(--radius-sm); }
-
-/* PRACTICE MODE */
-.practice-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 18px; text-align: center; }
-.practice-empty { text-align: center; padding: 48px 16px; color: var(--text-3); font-size: 13px; }
-.practice-chapter { font-size: 11px; color: var(--text-3); margin-bottom: 4px; }
-.practice-num { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-3); margin-bottom: 2px; }
-.practice-title { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
-.practice-item-label { font-size: 13px; font-weight: 700; color: var(--text-2); margin-bottom: 10px; }
-.practice-chips { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
-.practice-progress { margin-bottom: 20px; }
-.practice-progress-num { font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 700; }
-.practice-progress-label { font-size: 11px; color: var(--text-3); margin-top: 2px; }
-.practice-btns { display: flex; gap: 10px; margin-bottom: 10px; }
-.practice-btn { flex: 1; padding: 16px; border-radius: var(--radius); border: none; font-size: 20px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; }
-.practice-btn.o { background: var(--o-bg); color: var(--o-color); border: 1.5px solid var(--o-color); }
-.practice-btn.x { background: var(--x-bg); color: var(--x-color); border: 1.5px solid var(--x-color); }
-.practice-btn:active { transform: scale(.97); }
-.practice-skip { width: 100%; padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: transparent; color: var(--text-2); font-size: 12px; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; }
-.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--text); color: #fff; padding: 10px 18px; border-radius: 99px; font-size: 12px; font-weight: 700; z-index: 400; opacity: 0; transition: opacity .2s, bottom .2s; pointer-events: none; }
-.toast.show { opacity: 1; bottom: 32px; }
 
 /* STATS */
 .stat-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px; }
@@ -163,17 +130,13 @@ body {
     </div>
   </div>
   <div class="tabs">
-    <button class="tab active" onclick="setTab('practice', this)">演習</button>
-    <button class="tab" onclick="setTab('list', this)">一覧</button>
+    <button class="tab active" onclick="setTab('list', this)">一覧</button>
     <button class="tab" onclick="setTab('stats', this)">統計</button>
   </div>
 </div>
 
-<div id="tab-practice" class="content"></div>
-<div id="tab-list" class="content" style="display:none"></div>
+<div id="tab-list" class="content"></div>
 <div id="tab-stats" class="content" style="display:none"></div>
-
-<div class="toast" id="toast"></div>
 
 <script src="keiei_mondai_data.js"></script>
 <script>
@@ -220,18 +183,9 @@ function isMastered(item) {
   if (isOptional(item)) return getP(item.id).correct > 0;
   return getP(item.id).correct >= item.rotationLeft;
 }
-function chapterName(chId) {
-  const ch = KEIEI_CHAPTERS.find(function (c) { return c.id === chId; });
-  return ch ? ch.name : chId;
-}
-
-const GRADE_ORDER = ['C+', 'A', 'B', 'C']; // check C+ before C
+// scan left-to-right, treat 'C+' as a single token
 function extractGrade(impText) {
   if (!impText) return null;
-  if (impText.indexOf('C+') !== -1 && impText.indexOf('C+') <= (impText.search(/[ABC]/) === -1 ? Infinity : impText.search(/[ABC]/))) {
-    // fallthrough handled below by ordered scan
-  }
-  // scan left-to-right, treat 'C+' as a single token
   for (let i = 0; i < impText.length; i++) {
     if (impText[i] === 'C' && impText[i + 1] === '+') return 'C+';
     if (impText[i] === 'A') return 'A';
@@ -247,19 +201,8 @@ function gradeClass(grade) {
   if (grade === 'C') return 'grade-C';
   return 'grade-unknown';
 }
-function gradeRank(grade) {
-  if (grade === 'A') return 4;
-  if (grade === 'B') return 3;
-  if (grade === 'C+') return 2;
-  if (grade === 'C') return 1;
-  return 1;
-}
 function classifyFlag(flag) {
-  if (flag.indexOf('キーワード') !== -1) return 'f-keyword';
-  if (flag.indexOf('設例なし') !== -1) return 'f-noexample';
-  if (flag.indexOf('要確認') !== -1) return 'f-review';
-  if (flag.indexOf('★') !== -1) return 'f-star';
-  return '';
+  return flag.indexOf('キーワード') !== -1 ? 'f-keyword' : '';
 }
 function escapeHtml(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -283,135 +226,28 @@ function undoLast(itemId) {
   saveProgress();
 }
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(t._timer);
-  t._timer = setTimeout(function () { t.classList.remove('show'); }, 1600);
-}
-
 // ============================================================================
 // Tabs
 // ============================================================================
-let curTab = 'practice';
+let curTab = 'list';
 function setTab(tab, btnEl) {
   curTab = tab;
   document.querySelectorAll('.tab').forEach(function (b) { b.classList.remove('active'); });
   if (btnEl) btnEl.classList.add('active');
-  ['practice', 'list', 'stats'].forEach(function (t) {
+  ['list', 'stats'].forEach(function (t) {
     document.getElementById('tab-' + t).style.display = (t === tab) ? '' : 'none';
   });
   render();
 }
 
 function render() {
-  if (curTab === 'practice') renderPractice();
-  else if (curTab === 'list') renderList();
+  if (curTab === 'list') renderList();
   else if (curTab === 'stats') renderStats();
-}
-
-// ============================================================================
-// PRACTICE TAB
-// ============================================================================
-let curPracticeItemId = null;
-
-function pickNextPracticeItem() {
-  const candidates = allItemsFlat().filter(function (x) {
-    return !isOptional(x.item) && !isMastered(x.item);
-  });
-  if (candidates.length === 0) return null;
-  // weighted random by importance grade rank (A studied more often)
-  const weighted = [];
-  candidates.forEach(function (c) {
-    const grade = extractGrade(c.item.imp);
-    const w = gradeRank(grade);
-    for (let i = 0; i < w; i++) weighted.push(c);
-  });
-  return weighted[Math.floor(Math.random() * weighted.length)];
-}
-
-function renderPractice() {
-  const container = document.getElementById('tab-practice');
-  if (!curPracticeItemId || isMastered(getItemById(curPracticeItemId) || {}) ) {
-    const next = pickNextPracticeItem();
-    curPracticeItemId = next ? next.item.id : null;
-  }
-  if (!curPracticeItemId) {
-    container.innerHTML = '<div class="practice-empty">🎉 すべての問題が目標回転数に到達しました！<br>「一覧」タブで進捗を確認できます。</div>';
-    return;
-  }
-  const found = allItemsFlat().find(function (x) { return x.item.id === curPracticeItemId; });
-  if (!found) { curPracticeItemId = null; renderPractice(); return; }
-  const prob = found.prob, item = found.item;
-  const p = getP(item.id);
-  const grade = extractGrade(item.imp);
-  const flagsHtml = (item.flags || []).map(function (f) {
-    return '<span class="flag-chip ' + classifyFlag(f) + '">' + escapeHtml(f) + '</span>';
-  }).join('');
-
-  let dotsHtml = '';
-  for (let i = 0; i < item.rotationLeft; i++) {
-    dotsHtml += '<span class="rdot' + (i < p.correct ? ' filled' : '') + '" style="width:14px;height:14px;"></span>';
-  }
-
-  container.innerHTML =
-    '<div class="practice-card">' +
-      '<div class="practice-chapter">' + escapeHtml(chapterName(prob.ch)) + '</div>' +
-      '<div class="practice-num">問題' + escapeHtml(prob.num) + '　難易度' + escapeHtml(prob.difficulty) + '</div>' +
-      '<div class="practice-title">' + escapeHtml(prob.title) + '</div>' +
-      '<div class="practice-item-label">' + escapeHtml(item.label) + '　<span class="imp-chip ' + gradeClass(grade) + '">' + escapeHtml(item.imp) + '</span></div>' +
-      '<div class="practice-chips">' + flagsHtml + '</div>' +
-      '<div class="practice-progress">' +
-        '<div class="rotation-dots" style="justify-content:center;margin-bottom:6px;">' + dotsHtml + '</div>' +
-        '<div class="practice-progress-num">' + p.correct + ' / ' + item.rotationLeft + '</div>' +
-        '<div class="practice-progress-label">目標回転数（正解できた回数）</div>' +
-      '</div>' +
-      '<div class="practice-btns">' +
-        '<button class="practice-btn o" onclick="practiceRecord(\'o\')">○ 正解</button>' +
-        '<button class="practice-btn x" onclick="practiceRecord(\'x\')">× 不正解</button>' +
-      '</div>' +
-      '<button class="practice-skip" onclick="practiceSkip()">この問題をスキップして次へ</button>' +
-    '</div>';
-}
-
-function getItemById(id) {
-  const found = allItemsFlat().find(function (x) { return x.item.id === id; });
-  return found ? found.item : null;
-}
-
-function practiceRecord(result) {
-  if (!curPracticeItemId) return;
-  const item = getItemById(curPracticeItemId);
-  recordResult(curPracticeItemId, result);
-  const p = getP(curPracticeItemId);
-  if (result === 'o' && item.rotationLeft != null && p.correct >= item.rotationLeft) {
-    showToast('🎉 クリア！ 目標の' + item.rotationLeft + '回正解に到達しました');
-  } else {
-    showToast(result === 'o' ? '記録しました（正解）' : '記録しました（不正解）');
-  }
-  curPracticeItemId = null;
-  renderPractice();
-}
-function practiceSkip() {
-  curPracticeItemId = null;
-  renderPractice();
 }
 
 // ============================================================================
 // LIST TAB
 // ============================================================================
-let listFilter = 'all';
-
-function matchesFilter(item) {
-  if (listFilter === 'all') return true;
-  if (listFilter === 'todo') return !isOptional(item) && !isMastered(item);
-  if (listFilter === 'done') return isMastered(item);
-  if (listFilter === 'gradeA') return extractGrade(item.imp) === 'A';
-  if (listFilter === 'keyword') return (item.flags || []).some(function (f) { return f.indexOf('キーワード') !== -1; });
-  return true;
-}
-
 function renderList() {
   const container = document.getElementById('tab-list');
   const flat = allItemsFlat();
@@ -425,17 +261,12 @@ function renderList() {
     '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
   '</div>';
 
-  html += '<div class="chip-row">' +
-    filterChip('all', '全て') + filterChip('todo', '未クリア') + filterChip('done', 'クリア済み') +
-    filterChip('gradeA', '重要度Aのみ') + filterChip('keyword', 'キーワードのみ') +
-  '</div>';
-
   KEIEI_CHAPTERS.forEach(function (ch) {
     const probs = KEIEI_ALL_PROBLEMS.filter(function (p) { return p.ch === ch.id; });
     const chItemsAll = [];
     probs.forEach(function (p) { p.items.forEach(function (it) { chItemsAll.push(it); }); });
     const chMastered = chItemsAll.filter(isMastered).length;
-    const isOpen = openChapters[ch.id] !== false; // default open
+    const isOpen = openChapters[ch.id] === true; // default closed
 
     html += '<div class="ch-group' + (isOpen ? ' open' : '') + '" data-ch="' + ch.id + '">' +
       '<div class="ch-group-header" onclick="toggleChapter(\'' + ch.id + '\')">' +
@@ -446,8 +277,6 @@ function renderList() {
       '<div class="ch-group-body">';
 
     probs.forEach(function (prob) {
-      const visibleItems = prob.items.filter(matchesFilter);
-      if (visibleItems.length === 0) return;
       const probMastered = prob.items.every(isMastered);
       const probOpen = openProblems[prob.num] === true;
       html += '<div class="prob-card' + (probOpen ? ' open' : '') + '" data-prob="' + prob.num + '">' +
@@ -459,7 +288,7 @@ function renderList() {
           '<span class="prob-chevron">▶</span>' +
         '</div>' +
         '<div class="prob-body">' +
-          visibleItems.map(function (item) { return renderItemRow(item); }).join('') +
+          prob.items.map(function (item) { return renderItemRow(item); }).join('') +
         '</div>' +
       '</div>';
     });
@@ -470,15 +299,10 @@ function renderList() {
   container.innerHTML = html;
 }
 
-function filterChip(key, label) {
-  return '<button class="filter-chip' + (listFilter === key ? ' active' : '') + '" onclick="setListFilter(\'' + key + '\')">' + label + '</button>';
-}
-function setListFilter(key) { listFilter = key; renderList(); }
-
 let openChapters = {};
 let openProblems = {};
 function toggleChapter(id) {
-  openChapters[id] = !(openChapters[id] !== false);
+  openChapters[id] = !openChapters[id];
   renderList();
 }
 function toggleProblem(num) {
@@ -490,34 +314,24 @@ function renderItemRow(item) {
   const p = getP(item.id);
   const grade = extractGrade(item.imp);
   const mastered = isMastered(item);
-  const flagsHtml = (item.flags || []).map(function (f) {
-    return '<span class="flag-chip ' + classifyFlag(f) + '">' + escapeHtml(f) + '</span>';
-  }).join('');
+  const flagsHtml = (item.flags || [])
+    .filter(function (f) { return f.indexOf('設例なし') === -1 && f.indexOf('★') === -1; })
+    .map(function (f) { return '<span class="flag-chip ' + classifyFlag(f) + '">' + escapeHtml(f) + '</span>'; })
+    .join('');
 
-  let rotationHtml;
-  if (isOptional(item)) {
-    rotationHtml = '<span class="rotation-optional">回転不要／任意' + (p.correct > 0 ? '（実施済み）' : '') + '</span>';
-  } else {
-    let dots = '';
-    for (let i = 0; i < item.rotationLeft; i++) {
-      dots += '<span class="rdot' + (i < p.correct ? ' filled' : '') + '"></span>';
-    }
-    rotationHtml = '<div class="rotation-dots">' + dots + '</div><span class="rotation-text">' + p.correct + '/' + item.rotationLeft + '回</span>';
-  }
+  const rotationHtml = isOptional(item)
+    ? '<span class="rotation-optional">回転不要／任意' + (p.correct > 0 ? '（実施済み）' : '') + '</span>'
+    : '<span class="rotation-text">' + p.correct + '/' + item.rotationLeft + '回</span>';
 
   return '<div class="item-row' + (mastered ? ' mastered' : '') + '">' +
-    '<div class="item-top">' +
-      '<span class="item-label">' + escapeHtml(item.label) + '</span>' +
-      '<span class="imp-chip ' + gradeClass(grade) + '">' + escapeHtml(item.imp) + '</span>' +
-      flagsHtml +
-    '</div>' +
-    '<div class="item-bottom">' +
-      rotationHtml +
-      '<div class="item-btns">' +
-        '<button class="rec-btn o" onclick="listRecord(\'' + item.id + '\',\'o\')" title="正解">○</button>' +
-        '<button class="rec-btn x" onclick="listRecord(\'' + item.id + '\',\'x\')" title="不正解">×</button>' +
-        '<button class="rec-btn undo" onclick="listUndo(\'' + item.id + '\')" title="取り消し">↺</button>' +
-      '</div>' +
+    '<span class="item-label">' + escapeHtml(item.label) + '</span>' +
+    '<span class="imp-chip ' + gradeClass(grade) + '">' + escapeHtml(item.imp) + '</span>' +
+    flagsHtml +
+    rotationHtml +
+    '<div class="item-btns">' +
+      '<button class="rec-btn o" onclick="listRecord(\'' + item.id + '\',\'o\')" title="正解">○</button>' +
+      '<button class="rec-btn x" onclick="listRecord(\'' + item.id + '\',\'x\')" title="不正解">×</button>' +
+      '<button class="rec-btn undo" onclick="listUndo(\'' + item.id + '\')" title="取り消し">↺</button>' +
     '</div>' +
   '</div>';
 }
