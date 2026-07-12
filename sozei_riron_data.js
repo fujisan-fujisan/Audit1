@@ -1347,7 +1347,7 @@ const SOZEI_DATA = {
    "related_provisions": [
     "法人税法 41 条１項（法人税額から控除する外国税額の損金不算入）"
    ],
-   "model_answer": "〇 法人税法 41 条１項",
+   "model_answer": "× 外国税額控除の限度額を超過した 200 万円ではなく，Ｄ国に納付した 600 万円の全額につき，損金の額に算入されない。（法人税法 41 条１項）",
    "comment": null,
    "scoring_points": [
     {
@@ -1357,8 +1357,13 @@ const SOZEI_DATA = {
     },
     {
      "label": "結論",
+     "content": "Ｄ国に納付した 600 万円の全額につき，損金の額に算入されない",
+     "points": 2
+    },
+    {
+     "label": "結論（条文）",
      "content": "法人税法41条１項",
-     "points": 3
+     "points": 1
     }
    ],
    "total_points": 4
