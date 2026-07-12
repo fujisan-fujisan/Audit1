@@ -60,6 +60,22 @@ body {
 .btn-icon:hover { background: var(--text); border-color: var(--text); color: #fff; }
 .screen-title { font-size: 18px; font-weight: 700; margin-top: 4px; }
 
+.tab-bar { display: flex; gap: 4px; margin-top: 12px; border-bottom: 1px solid var(--border); }
+.tab-btn {
+  flex: 1;
+  padding: 10px 0;
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  color: var(--text-3);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color .15s, border-color .15s;
+}
+.tab-btn.active { color: var(--text); border-bottom-color: var(--text); }
+
 .content { padding: 16px 14px 0; max-width: 640px; margin: 0 auto; }
 
 .card {
@@ -327,6 +343,11 @@ details.comment-toggle .comment-body {
 
 .save-note { font-size: 11px; color: var(--text-3); margin-top: 10px; text-align: center; }
 
+.seiseki-table { width: 100%; border-collapse: collapse; }
+.seiseki-table th, .seiseki-table td { padding: 8px 6px; font-size: 12px; text-align: center; border-bottom: 1px solid var(--border); }
+.seiseki-table th { color: var(--text-3); font-weight: 700; font-size: 10px; letter-spacing: .05em; }
+.seiseki-table td.no-col { text-align: left; font-weight: 700; white-space: nowrap; }
+
 .hidden { display: none !important; }
 </style>
 </head>
@@ -342,9 +363,13 @@ details.comment-toggle .comment-body {
     </div>
   </div>
   <div class="screen-title" id="screen-title">出題設定</div>
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-quiz" onclick="switchTab('quiz')">出題</button>
+    <button class="tab-btn" id="tab-seiseki" onclick="switchTab('seiseki')">成績</button>
+  </div>
 </div>
 
-<div class="content">
+<div class="content" id="view-quiz">
 
   <!-- ── Screen 1: Setup ── -->
   <div id="screen-setup">
@@ -438,6 +463,23 @@ details.comment-toggle .comment-body {
     <div class="save-note" id="save-note"></div>
   </div>
 
+</div>
+
+<!-- ── 成績タブ ── -->
+<div class="content hidden" id="view-seiseki">
+  <div class="card">
+    <label class="field-label">科目</label>
+    <div class="subject-grid" id="seiseki-subject-grid"></div>
+  </div>
+  <div class="card">
+    <table class="seiseki-table">
+      <thead>
+        <tr><th class="no-col">No.</th><th>重要度</th><th>演習回数</th><th>平均得点率</th></tr>
+      </thead>
+      <tbody id="seiseki-body"></tbody>
+    </table>
+    <div class="save-note" id="seiseki-empty-note"></div>
+  </div>
 </div>
 
 <script src="sozei_riron_data.js"></script>
@@ -943,12 +985,17 @@ function finishSession(aborted) {
     const key = recordKey(q);
     const subjRecords = seiseki.records[q.subject];
     if (!subjRecords[key]) {
-      subjRecords[key] = { importance: q.importance, attempts: 0, correct: 0, partial: 0, wrong: 0, last_score_rate: 0 };
+      subjRecords[key] = { importance: q.importance, attempts: 0, correct: 0, partial: 0, wrong: 0, last_score_rate: 0, rate_sum: 0 };
     }
     const rec = subjRecords[key];
+    if (rec.rate_sum == null) {
+      // 平均得点率トラッキング追加前に記録されたレコードは、直近の得点率を遡及的に補完する
+      rec.rate_sum = (rec.last_score_rate || 0) * rec.attempts;
+    }
     rec.attempts += 1;
     rec[r.classification] += 1;
     rec.last_score_rate = r.rate;
+    rec.rate_sum += r.rate;
     rec.importance = q.importance;
   });
 
@@ -1029,12 +1076,96 @@ function importRecords(e) {
       alert('成績表を復元しました。');
       renderSubjectGrid();
       onCountInput();
+      if (!document.getElementById('view-seiseki').classList.contains('hidden')) renderSeisekiList();
     } catch (err) {
       alert('ファイルの読み込みに失敗しました。');
     }
   };
   reader.readAsText(file);
   e.target.value = '';
+}
+
+// ─────────────────────────────────────────────────────────────
+// 成績タブ（問題ごとの平均得点率一覧）
+// ─────────────────────────────────────────────────────────────
+let seisekiSubject = '法人';
+
+function switchTab(tab) {
+  document.getElementById('tab-quiz').classList.toggle('active', tab === 'quiz');
+  document.getElementById('tab-seiseki').classList.toggle('active', tab === 'seiseki');
+  document.getElementById('view-quiz').classList.toggle('hidden', tab !== 'quiz');
+  document.getElementById('view-seiseki').classList.toggle('hidden', tab !== 'seiseki');
+  if (tab === 'seiseki') {
+    document.getElementById('screen-title').textContent = '成績（問題ごとの平均得点率）';
+    renderSeisekiSubjectGrid();
+    renderSeisekiList();
+  } else {
+    document.getElementById('screen-title').textContent = document.getElementById('screen-setup').classList.contains('hidden')
+      ? (document.getElementById('screen-quiz').classList.contains('hidden') ? '出題終了' : '出題中')
+      : '出題設定';
+  }
+}
+
+function renderSeisekiSubjectGrid() {
+  const grid = document.getElementById('seiseki-subject-grid');
+  grid.innerHTML = '';
+  SUBJECT_KEYS.concat(['全科目']).forEach(function (key) {
+    const isAll = key === '全科目';
+    const active = seisekiSubject === key;
+    const btn = document.createElement('button');
+    btn.className = 'subject-btn' + (active ? ' active' : '');
+    btn.textContent = isAll ? '全科目' : SUBJECT_LABEL[key];
+    btn.onclick = function () {
+      seisekiSubject = key;
+      renderSeisekiSubjectGrid();
+      renderSeisekiList();
+    };
+    grid.appendChild(btn);
+  });
+}
+
+// レコードの平均得点率。rate_sum未設定の古いレコードは last_score_rate で代用する
+function avgRate(rec) {
+  if (!rec.attempts) return 0;
+  const sum = rec.rate_sum != null ? rec.rate_sum : (rec.last_score_rate || 0) * rec.attempts;
+  return sum / rec.attempts;
+}
+
+function recDisplayImportance(rec) {
+  if (rec.importance === 'A' || rec.importance === 'B' || rec.importance === 'C') return rec.importance;
+  return IMPORTANCE_OVERRIDE_ENABLED ? 'C' : 'D';
+}
+
+function renderSeisekiList() {
+  const tbody = document.getElementById('seiseki-body');
+  tbody.innerHTML = '';
+  const subjects = seisekiSubject === '全科目' ? SUBJECT_KEYS : [seisekiSubject];
+
+  const rows = [];
+  subjects.forEach(function (subj) {
+    const recs = seiseki.records[subj] || {};
+    Object.keys(recs).forEach(function (key) {
+      const rec = recs[key];
+      if (!rec.attempts) return;
+      rows.push({ subj: subj, no: parseInt(key.replace('No.', ''), 10), key: key, rec: rec });
+    });
+  });
+  rows.sort(function (a, b) { return a.no - b.no; });
+
+  document.getElementById('seiseki-empty-note').textContent = rows.length === 0 ? 'まだ演習履歴がありません。' : '';
+
+  rows.forEach(function (r) {
+    const rate = avgRate(r.rec);
+    const cls = rate === 0 ? 'wrong' : (rate >= 0.8 ? 'correct' : 'partial');
+    const label = seisekiSubject === '全科目' ? SUBJECT_LABEL[r.subj] + ' ' + r.key : r.key;
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="no-col">' + escapeHtml(label) + '</td>' +
+      '<td>' + recDisplayImportance(r.rec) + '</td>' +
+      '<td>' + r.rec.attempts + '</td>' +
+      '<td><span class="tag ' + cls + '">' + (rate * 100).toFixed(0) + '%</span></td>';
+    tbody.appendChild(tr);
+  });
 }
 
 // ─────────────────────────────────────────────────────────────
