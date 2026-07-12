@@ -78,6 +78,7 @@ label.field-label {
   letter-spacing: .06em;
   margin-bottom: 6px;
 }
+label.field-label.sub { margin-top: 14px; }
 
 .subject-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
 .subject-btn {
@@ -205,6 +206,24 @@ textarea.answer-input {
   line-height: 1.6;
 }
 textarea.answer-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,126,220,.12); }
+textarea.answer-input-citation { min-height: 60px; }
+
+.maru-batsu-row { display: flex; gap: 10px; margin-bottom: 10px; }
+.mb-btn {
+  flex: 1;
+  padding: 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 24px;
+  font-weight: 700;
+  font-family: 'DM Mono', 'Courier New', monospace;
+  cursor: pointer;
+  transition: all .15s;
+}
+.mb-btn:hover { background: #fafaf9; }
+.mb-btn.selected { background: var(--text); color: #fff; border-color: var(--text); }
 
 .section-label {
   font-size: 11px;
@@ -355,7 +374,18 @@ details.comment-toggle .comment-body {
 
     <div class="card" id="answer-card">
       <label class="field-label">ご回答</label>
-      <textarea class="answer-input" id="answer-text" placeholder="回答を入力してください"></textarea>
+
+      <div class="maru-batsu-row" id="maru-batsu-row">
+        <button type="button" class="mb-btn" id="mb-maru" onclick="selectMaruBatsu('〇')">〇</button>
+        <button type="button" class="mb-btn" id="mb-batsu" onclick="selectMaruBatsu('×')">×</button>
+      </div>
+
+      <label class="field-label sub">記述欄</label>
+      <textarea class="answer-input" id="answer-text-narrative" placeholder="結論・理由を記述してください"></textarea>
+
+      <label class="field-label sub">条文欄</label>
+      <textarea class="answer-input answer-input-citation" id="answer-text-citation" placeholder="根拠条文を記述してください"></textarea>
+
       <button class="btn-primary" onclick="submitAnswer(false)">回答する</button>
       <button class="btn-secondary" onclick="submitAnswer(true)">わかりません</button>
     </div>
@@ -707,15 +737,31 @@ function renderQuestion() {
   document.getElementById('q-type').textContent = q.type || '';
   document.getElementById('q-text').textContent = q.question_text || '';
 
-  document.getElementById('answer-text').value = '';
+  document.getElementById('answer-text-narrative').value = '';
+  document.getElementById('answer-text-citation').value = '';
+  session.maruBatsu = null;
+  document.getElementById('mb-maru').classList.remove('selected');
+  document.getElementById('mb-batsu').classList.remove('selected');
+  document.getElementById('maru-batsu-row').classList.toggle('hidden', q.type !== '正誤問題');
+
   document.getElementById('answer-card').classList.remove('hidden');
   document.getElementById('reveal-card').classList.add('hidden');
   session.checked = {};
 }
 
+function selectMaruBatsu(v) {
+  session.maruBatsu = v;
+  document.getElementById('mb-maru').classList.toggle('selected', v === '〇');
+  document.getElementById('mb-batsu').classList.toggle('selected', v === '×');
+}
+
 function submitAnswer(dontKnow) {
   const q = currentQuestion();
-  session.currentAnswer = dontKnow ? 'わかりません' : document.getElementById('answer-text').value;
+  session.currentAnswer = dontKnow ? { dontKnow: true } : {
+    maruBatsu: q.type === '正誤問題' ? session.maruBatsu : null,
+    narrative: document.getElementById('answer-text-narrative').value,
+    citation: document.getElementById('answer-text-citation').value,
+  };
   session.dontKnow = dontKnow;
   session.checked = {};
 
