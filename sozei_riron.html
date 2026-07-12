@@ -652,7 +652,9 @@ function buildPool(subjects) {
   return pool;
 }
 
-// 重要度A/B/C配分（開発指示書3-1節）。在庫不足はA→B→Cの順に繰り越す。
+// 重要度A/B/C配分: 固定比率ではなく、選択科目内の実際のA/B/C構成比に
+// できるだけ近づくように配分する（端数は四捨五入し、Cで帳尻を合わせる）。
+// 在庫不足（丸め誤差でnA+nBがnを超える場合など）はA→B→Cの順に繰り越す。
 function selectQuestions(subjects, requestedCount) {
   const pool = buildPool(subjects);
   const n = Math.min(requestedCount, pool.length);
@@ -660,8 +662,9 @@ function selectQuestions(subjects, requestedCount) {
   const buckets = { A: [], B: [], C: [] };
   pool.forEach(function (q) { buckets[weightBucket(q)].push(q); });
 
-  let nA = Math.round(n * 0.6);
-  let nB = Math.round(n * 0.3);
+  const total = pool.length || 1;
+  let nA = Math.min(n, Math.round(n * buckets.A.length / total));
+  let nB = Math.min(n - nA, Math.round(n * buckets.B.length / total));
   let nC = n - nA - nB;
 
   const wanted = { A: nA, B: nB, C: nC };
