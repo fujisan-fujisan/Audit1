@@ -819,11 +819,20 @@ function escapeHtml(s) {
   return div.innerHTML;
 }
 
+// 正誤問題の模範解答冒頭の〇／×を、正解記号として取り出す
+function getCorrectMaruBatsu(q) {
+  if (q.type !== '正誤問題' || !q.model_answer) return null;
+  const first = q.model_answer.trim().charAt(0);
+  return (first === '〇' || first === '×') ? first : null;
+}
+
 // scoring_points を○×チェックボックス形式で描画し、チェック状態から得点を自動集計する
 function renderScoringChecklist(q, disabled) {
   const wrap = document.getElementById('reveal-scoring');
   wrap.innerHTML = '';
   const items = q.scoring_points || [];
+  const correctMB = getCorrectMaruBatsu(q);
+  const userMB = (!disabled && session.currentAnswer) ? session.currentAnswer.maruBatsu : null;
 
   items.forEach(function (sp, idx) {
     const row = document.createElement('div');
@@ -832,11 +841,23 @@ function renderScoringChecklist(q, disabled) {
     row.id = 'score-item-' + idx;
     if (hasPoints && !disabled) row.onclick = function () { toggleScoreItem(idx); };
 
+    // 〇×欄は模範解答の正解記号を表示し、自分の回答と一致していれば自動でチェック済みにする
+    let displayContent = sp.content;
+    let autoChecked = false;
+    if (sp.label === '〇×欄' && correctMB) {
+      displayContent = '正解：' + correctMB;
+      if (userMB && userMB === correctMB) {
+        autoChecked = true;
+        session.checked[idx] = true;
+        row.classList.add('checked');
+      }
+    }
+
     row.innerHTML =
-      '<div class="score-mark" id="mark-' + idx + '">×</div>' +
+      '<div class="score-mark" id="mark-' + idx + '">' + (autoChecked ? '○' : '×') + '</div>' +
       '<div class="score-item-body">' +
         (sp.label ? '<div class="score-item-label">' + escapeHtml(sp.label) + '</div>' : '') +
-        '<div class="score-item-text">' + escapeHtml(sp.content || '（内容なし）') + '</div>' +
+        '<div class="score-item-text">' + escapeHtml(displayContent || '（内容なし）') + '</div>' +
       '</div>' +
       '<div class="score-item-pt">' + (hasPoints ? sp.points + '点' : '－') + '</div>';
     wrap.appendChild(row);
