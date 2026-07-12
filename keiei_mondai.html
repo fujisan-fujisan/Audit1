@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>経営学 個別問題集 復習管理</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#ffffff">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f9f9f8;
+  --surface: #ffffff;
+  --border: #e8e8e5;
+  --border-strong: #d0d0cb;
+  --text: #111111;
+  --text-2: #666666;
+  --text-3: #aaaaaa;
+  --o-color: #1a7a4a;
+  --o-bg: #edf7f2;
+  --x-color: #c0392b;
+  --x-bg: #fdf0ee;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  background: var(--bg); color: var(--text);
+  min-height: 100vh; padding-bottom: 40px;
+  font-size: 14px; line-height: 1.5;
+}
+
+/* HEADER */
+.header { position: sticky; top: 0; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--border); }
+.header-top { padding: 12px 16px 10px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.app-title { font-size: 11px; font-weight: 700; letter-spacing: .10em; color: var(--text-3); text-transform: uppercase; white-space: nowrap; }
+.header-actions { display: flex; gap: 6px; }
+.btn-sm { padding: 5px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: transparent; color: var(--text-2); font-size: 11px; font-family: 'Noto Sans JP', sans-serif; font-weight: 500; cursor: pointer; transition: all .15s; white-space: nowrap; }
+.btn-sm:hover, .btn-sm.active { background: var(--text); border-color: var(--text); color: #fff; }
+
+.tabs { display: flex; border-top: 1px solid var(--border); }
+.tab { flex: 1; padding: 10px 8px; font-size: 12px; font-weight: 700; font-family: 'Noto Sans JP', sans-serif; background: transparent; border: none; cursor: pointer; color: var(--text-3); border-bottom: 2px solid transparent; transition: all .15s; }
+.tab.active { color: var(--text); border-bottom-color: var(--text); }
+
+.content { padding: 14px; max-width: 720px; margin: 0 auto; }
+
+/* OVERALL PROGRESS BAR (dashboard mini, shown on list/practice tabs) */
+.overview-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px; }
+.overview-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+.overview-num { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 700; }
+.overview-label { font-size: 11px; color: var(--text-3); }
+.progress-track { height: 8px; border-radius: 99px; background: var(--bg); overflow: hidden; border: 1px solid var(--border); }
+.progress-fill { height: 100%; background: var(--o-color); border-radius: 99px; transition: width .3s; }
+
+/* FILTER CHIPS */
+.chip-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.filter-chip { padding: 6px 12px; border-radius: 99px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-2); font-size: 11px; font-weight: 500; cursor: pointer; white-space: nowrap; }
+.filter-chip.active { background: var(--text); border-color: var(--text); color: #fff; }
+
+/* CHAPTER GROUP */
+.ch-group { margin-bottom: 10px; }
+.ch-group-header { display: flex; align-items: center; gap: 8px; padding: 12px 14px; cursor: pointer; user-select: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+.ch-group.open .ch-group-header { border-radius: var(--radius) var(--radius) 0 0; background: var(--text); }
+.ch-group.open .ch-group-title { color: #fff; }
+.ch-group.open .ch-group-count { color: rgba(255,255,255,0.6); }
+.ch-group.open .ch-group-chevron { color: rgba(255,255,255,0.7); transform: rotate(90deg); }
+.ch-group-title { font-size: 13px; font-weight: 700; color: var(--text); flex: 1; }
+.ch-group-count { font-size: 11px; color: var(--text-3); font-family: 'DM Mono', monospace; }
+.ch-group-chevron { color: var(--text-3); transition: transform .15s; font-size: 11px; }
+.ch-group-body { display: none; margin-left: 0; border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--radius) var(--radius); overflow: hidden; padding: 8px; background: var(--bg); }
+.ch-group.open .ch-group-body { display: block; }
+
+/* PROBLEM CARD */
+.prob-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 8px; overflow: hidden; }
+.prob-card:last-child { margin-bottom: 0; }
+.prob-header { padding: 10px 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
+.prob-header:active { background: var(--bg); }
+.prob-num { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-3); flex-shrink: 0; }
+.prob-title { font-size: 13px; font-weight: 700; flex: 1; min-width: 0; }
+.diff-badge { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; background: var(--text); color: #fff; flex-shrink: 0; font-family: 'DM Mono', monospace; }
+.prob-mastered-badge { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; background: var(--o-bg); color: var(--o-color); flex-shrink: 0; }
+.prob-chevron { color: var(--text-3); font-size: 11px; transition: transform .15s; flex-shrink: 0; }
+.prob-card.open .prob-chevron { transform: rotate(90deg); }
+.prob-body { display: none; border-top: 1px solid var(--border); padding: 4px 10px 8px; }
+.prob-card.open .prob-body { display: block; }
+
+/* ITEM ROW */
+.item-row { padding: 10px 4px; border-bottom: 1px dashed var(--border); }
+.item-row:last-child { border-bottom: none; }
+.item-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+.item-label { font-size: 12px; font-weight: 700; color: var(--text); }
+.imp-chip { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; font-family: 'Noto Sans JP', sans-serif; }
+.grade-A { background: #fdf0ee; color: #c0392b; }
+.grade-B { background: #fdf4e3; color: #7c5c00; }
+.grade-Cplus { background: #eaf1fb; color: #1a5fb4; }
+.grade-C { background: #eef7ee; color: #2e7d32; }
+.grade-unknown { background: var(--bg); color: var(--text-3); border: 1px solid var(--border); }
+.flag-chip { font-size: 9px; padding: 2px 6px; border-radius: 99px; border: 1px solid var(--border-strong); color: var(--text-2); background: var(--bg); }
+.flag-chip.f-keyword { border-color: #1a5fb4; color: #1a5fb4; background: #eef4fc; }
+.flag-chip.f-noexample { border-color: var(--border-strong); color: var(--text-2); }
+.flag-chip.f-star { border-color: #c8900a; color: #7c5c00; background: #fffbe6; }
+.flag-chip.f-review { border-color: var(--x-color); color: var(--x-color); background: var(--x-bg); }
+
+.item-bottom { display: flex; align-items: center; gap: 10px; }
+.rotation-dots { display: flex; gap: 3px; align-items: center; }
+.rdot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--border-strong); background: var(--surface); flex-shrink: 0; }
+.rdot.filled { background: var(--o-color); border-color: var(--o-color); }
+.rotation-text { font-size: 11px; color: var(--text-2); font-family: 'DM Mono', monospace; white-space: nowrap; }
+.rotation-optional { font-size: 11px; color: var(--text-3); }
+.item-btns { display: flex; gap: 4px; margin-left: auto; }
+.rec-btn { width: 30px; height: 30px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--bg); font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s; }
+.rec-btn.o:hover, .rec-btn.o:active { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
+.rec-btn.x:hover, .rec-btn.x:active { background: var(--x-bg); border-color: var(--x-color); color: var(--x-color); }
+.rec-btn.undo { font-size: 11px; color: var(--text-3); }
+.rec-btn.undo:hover { background: var(--bg); color: var(--text); }
+.rec-btn:disabled { opacity: .3; pointer-events: none; }
+.item-row.mastered { background: var(--o-bg); border-radius: var(--radius-sm); }
+
+/* PRACTICE MODE */
+.practice-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 18px; text-align: center; }
+.practice-empty { text-align: center; padding: 48px 16px; color: var(--text-3); font-size: 13px; }
+.practice-chapter { font-size: 11px; color: var(--text-3); margin-bottom: 4px; }
+.practice-num { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-3); margin-bottom: 2px; }
+.practice-title { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
+.practice-item-label { font-size: 13px; font-weight: 700; color: var(--text-2); margin-bottom: 10px; }
+.practice-chips { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+.practice-progress { margin-bottom: 20px; }
+.practice-progress-num { font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 700; }
+.practice-progress-label { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.practice-btns { display: flex; gap: 10px; margin-bottom: 10px; }
+.practice-btn { flex: 1; padding: 16px; border-radius: var(--radius); border: none; font-size: 20px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; }
+.practice-btn.o { background: var(--o-bg); color: var(--o-color); border: 1.5px solid var(--o-color); }
+.practice-btn.x { background: var(--x-bg); color: var(--x-color); border: 1.5px solid var(--x-color); }
+.practice-btn:active { transform: scale(.97); }
+.practice-skip { width: 100%; padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: transparent; color: var(--text-2); font-size: 12px; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; }
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--text); color: #fff; padding: 10px 18px; border-radius: 99px; font-size: 12px; font-weight: 700; z-index: 400; opacity: 0; transition: opacity .2s, bottom .2s; pointer-events: none; }
+.toast.show { opacity: 1; bottom: 32px; }
+
+/* STATS */
+.stat-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px; }
+.stat-section-title { font-size: 11px; font-weight: 700; color: var(--text-3); letter-spacing: .06em; margin-bottom: 10px; text-transform: uppercase; }
+.stat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.stat-row:last-child { margin-bottom: 0; }
+.stat-row-label { font-size: 12px; width: 56px; flex-shrink: 0; font-weight: 700; }
+.stat-row-track { flex: 1; height: 10px; border-radius: 99px; background: var(--bg); overflow: hidden; border: 1px solid var(--border); }
+.stat-row-fill { height: 100%; border-radius: 99px; }
+.stat-row-num { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text-2); width: 64px; text-align: right; flex-shrink: 0; }
+
+.empty-state { text-align: center; padding: 48px 16px; color: var(--text-3); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="app-title">経営学 個別問題集</div>
+    <div class="header-actions">
+      <button class="btn-sm" onclick="exportData()">バックアップ</button>
+      <button class="btn-sm" onclick="document.getElementById('import-input').click()">復元</button>
+      <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)">
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="setTab('practice', this)">演習</button>
+    <button class="tab" onclick="setTab('list', this)">一覧</button>
+    <button class="tab" onclick="setTab('stats', this)">統計</button>
+  </div>
+</div>
+
+<div id="tab-practice" class="content"></div>
+<div id="tab-list" class="content" style="display:none"></div>
+<div id="tab-stats" class="content" style="display:none"></div>
+
+<div class="toast" id="toast"></div>
+
+<script src="keiei_mondai_data.js"></script>
+<script>
+// ============================================================================
+// State & storage
+// ============================================================================
+const PROGRESS_KEY = 'keiei-mondai-progress-v1';
+let progress = {};
+
+function loadProgress() {
+  try {
+    const s = localStorage.getItem(PROGRESS_KEY);
+    if (s) progress = JSON.parse(s);
+  } catch (e) { progress = {}; }
+}
+function saveProgress() {
+  try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); } catch (e) {}
+}
+const EMPTY_P = { correct: 0, wrong: 0, log: [] };
+function getP(itemId) {
+  // read-only accessor: does NOT create a storage entry just for viewing
+  return progress[itemId] || EMPTY_P;
+}
+function ensureP(itemId) {
+  if (!progress[itemId]) progress[itemId] = { correct: 0, wrong: 0, log: [] };
+  return progress[itemId];
+}
+
+// ============================================================================
+// Data helpers
+// ============================================================================
+function allItemsFlat() {
+  const out = [];
+  KEIEI_ALL_PROBLEMS.forEach(function (prob) {
+    prob.items.forEach(function (item) {
+      out.push({ prob: prob, item: item });
+    });
+  });
+  return out;
+}
+
+function isOptional(item) { return item.rotationLeft === null || item.rotationLeft === undefined; }
+function isMastered(item) {
+  if (isOptional(item)) return getP(item.id).correct > 0;
+  return getP(item.id).correct >= item.rotationLeft;
+}
+function chapterName(chId) {
+  const ch = KEIEI_CHAPTERS.find(function (c) { return c.id === chId; });
+  return ch ? ch.name : chId;
+}
+
+const GRADE_ORDER = ['C+', 'A', 'B', 'C']; // check C+ before C
+function extractGrade(impText) {
+  if (!impText) return null;
+  if (impText.indexOf('C+') !== -1 && impText.indexOf('C+') <= (impText.search(/[ABC]/) === -1 ? Infinity : impText.search(/[ABC]/))) {
+    // fallthrough handled below by ordered scan
+  }
+  // scan left-to-right, treat 'C+' as a single token
+  for (let i = 0; i < impText.length; i++) {
+    if (impText[i] === 'C' && impText[i + 1] === '+') return 'C+';
+    if (impText[i] === 'A') return 'A';
+    if (impText[i] === 'B') return 'B';
+    if (impText[i] === 'C') return 'C';
+  }
+  return null;
+}
+function gradeClass(grade) {
+  if (grade === 'A') return 'grade-A';
+  if (grade === 'B') return 'grade-B';
+  if (grade === 'C+') return 'grade-Cplus';
+  if (grade === 'C') return 'grade-C';
+  return 'grade-unknown';
+}
+function gradeRank(grade) {
+  if (grade === 'A') return 4;
+  if (grade === 'B') return 3;
+  if (grade === 'C+') return 2;
+  if (grade === 'C') return 1;
+  return 1;
+}
+function classifyFlag(flag) {
+  if (flag.indexOf('キーワード') !== -1) return 'f-keyword';
+  if (flag.indexOf('設例なし') !== -1) return 'f-noexample';
+  if (flag.indexOf('要確認') !== -1) return 'f-review';
+  if (flag.indexOf('★') !== -1) return 'f-star';
+  return '';
+}
+function escapeHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// ============================================================================
+// Recording
+// ============================================================================
+function recordResult(itemId, result) {
+  const p = ensureP(itemId);
+  if (result === 'o') p.correct++; else p.wrong++;
+  p.log.push({ ts: Date.now(), result: result });
+  saveProgress();
+}
+function undoLast(itemId) {
+  const p = ensureP(itemId);
+  const last = p.log.pop();
+  if (!last) return;
+  if (last.result === 'o') p.correct = Math.max(0, p.correct - 1);
+  else p.wrong = Math.max(0, p.wrong - 1);
+  saveProgress();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(function () { t.classList.remove('show'); }, 1600);
+}
+
+// ============================================================================
+// Tabs
+// ============================================================================
+let curTab = 'practice';
+function setTab(tab, btnEl) {
+  curTab = tab;
+  document.querySelectorAll('.tab').forEach(function (b) { b.classList.remove('active'); });
+  if (btnEl) btnEl.classList.add('active');
+  ['practice', 'list', 'stats'].forEach(function (t) {
+    document.getElementById('tab-' + t).style.display = (t === tab) ? '' : 'none';
+  });
+  render();
+}
+
+function render() {
+  if (curTab === 'practice') renderPractice();
+  else if (curTab === 'list') renderList();
+  else if (curTab === 'stats') renderStats();
+}
+
+// ============================================================================
+// PRACTICE TAB
+// ============================================================================
+let curPracticeItemId = null;
+
+function pickNextPracticeItem() {
+  const candidates = allItemsFlat().filter(function (x) {
+    return !isOptional(x.item) && !isMastered(x.item);
+  });
+  if (candidates.length === 0) return null;
+  // weighted random by importance grade rank (A studied more often)
+  const weighted = [];
+  candidates.forEach(function (c) {
+    const grade = extractGrade(c.item.imp);
+    const w = gradeRank(grade);
+    for (let i = 0; i < w; i++) weighted.push(c);
+  });
+  return weighted[Math.floor(Math.random() * weighted.length)];
+}
+
+function renderPractice() {
+  const container = document.getElementById('tab-practice');
+  if (!curPracticeItemId || isMastered(getItemById(curPracticeItemId) || {}) ) {
+    const next = pickNextPracticeItem();
+    curPracticeItemId = next ? next.item.id : null;
+  }
+  if (!curPracticeItemId) {
+    container.innerHTML = '<div class="practice-empty">🎉 すべての問題が目標回転数に到達しました！<br>「一覧」タブで進捗を確認できます。</div>';
+    return;
+  }
+  const found = allItemsFlat().find(function (x) { return x.item.id === curPracticeItemId; });
+  if (!found) { curPracticeItemId = null; renderPractice(); return; }
+  const prob = found.prob, item = found.item;
+  const p = getP(item.id);
+  const grade = extractGrade(item.imp);
+  const flagsHtml = (item.flags || []).map(function (f) {
+    return '<span class="flag-chip ' + classifyFlag(f) + '">' + escapeHtml(f) + '</span>';
+  }).join('');
+
+  let dotsHtml = '';
+  for (let i = 0; i < item.rotationLeft; i++) {
+    dotsHtml += '<span class="rdot' + (i < p.correct ? ' filled' : '') + '" style="width:14px;height:14px;"></span>';
+  }
+
+  container.innerHTML =
+    '<div class="practice-card">' +
+      '<div class="practice-chapter">' + escapeHtml(chapterName(prob.ch)) + '</div>' +
+      '<div class="practice-num">問題' + escapeHtml(prob.num) + '　難易度' + escapeHtml(prob.difficulty) + '</div>' +
+      '<div class="practice-title">' + escapeHtml(prob.title) + '</div>' +
+      '<div class="practice-item-label">' + escapeHtml(item.label) + '　<span class="imp-chip ' + gradeClass(grade) + '">' + escapeHtml(item.imp) + '</span></div>' +
+      '<div class="practice-chips">' + flagsHtml + '</div>' +
+      '<div class="practice-progress">' +
+        '<div class="rotation-dots" style="justify-content:center;margin-bottom:6px;">' + dotsHtml + '</div>' +
+        '<div class="practice-progress-num">' + p.correct + ' / ' + item.rotationLeft + '</div>' +
+        '<div class="practice-progress-label">目標回転数（正解できた回数）</div>' +
+      '</div>' +
+      '<div class="practice-btns">' +
+        '<button class="practice-btn o" onclick="practiceRecord(\'o\')">○ 正解</button>' +
+        '<button class="practice-btn x" onclick="practiceRecord(\'x\')">× 不正解</button>' +
+      '</div>' +
+      '<button class="practice-skip" onclick="practiceSkip()">この問題をスキップして次へ</button>' +
+    '</div>';
+}
+
+function getItemById(id) {
+  const found = allItemsFlat().find(function (x) { return x.item.id === id; });
+  return found ? found.item : null;
+}
+
+function practiceRecord(result) {
+  if (!curPracticeItemId) return;
+  const item = getItemById(curPracticeItemId);
+  recordResult(curPracticeItemId, result);
+  const p = getP(curPracticeItemId);
+  if (result === 'o' && item.rotationLeft != null && p.correct >= item.rotationLeft) {
+    showToast('🎉 クリア！ 目標の' + item.rotationLeft + '回正解に到達しました');
+  } else {
+    showToast(result === 'o' ? '記録しました（正解）' : '記録しました（不正解）');
+  }
+  curPracticeItemId = null;
+  renderPractice();
+}
+function practiceSkip() {
+  curPracticeItemId = null;
+  renderPractice();
+}
+
+// ============================================================================
+// LIST TAB
+// ============================================================================
+let listFilter = 'all';
+
+function matchesFilter(item) {
+  if (listFilter === 'all') return true;
+  if (listFilter === 'todo') return !isOptional(item) && !isMastered(item);
+  if (listFilter === 'done') return isMastered(item);
+  if (listFilter === 'gradeA') return extractGrade(item.imp) === 'A';
+  if (listFilter === 'keyword') return (item.flags || []).some(function (f) { return f.indexOf('キーワード') !== -1; });
+  return true;
+}
+
+function renderList() {
+  const container = document.getElementById('tab-list');
+  const flat = allItemsFlat();
+  const total = flat.length;
+  const mastered = flat.filter(function (x) { return isMastered(x.item); }).length;
+  const pct = total ? Math.round(mastered / total * 100) : 0;
+
+  let html = '';
+  html += '<div class="overview-card">' +
+    '<div class="overview-row"><span class="overview-num">' + mastered + ' / ' + total + '</span><span class="overview-label">' + pct + '% 完了</span></div>' +
+    '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
+  '</div>';
+
+  html += '<div class="chip-row">' +
+    filterChip('all', '全て') + filterChip('todo', '未クリア') + filterChip('done', 'クリア済み') +
+    filterChip('gradeA', '重要度Aのみ') + filterChip('keyword', 'キーワードのみ') +
+  '</div>';
+
+  KEIEI_CHAPTERS.forEach(function (ch) {
+    const probs = KEIEI_ALL_PROBLEMS.filter(function (p) { return p.ch === ch.id; });
+    const chItemsAll = [];
+    probs.forEach(function (p) { p.items.forEach(function (it) { chItemsAll.push(it); }); });
+    const chMastered = chItemsAll.filter(isMastered).length;
+    const isOpen = openChapters[ch.id] !== false; // default open
+
+    html += '<div class="ch-group' + (isOpen ? ' open' : '') + '" data-ch="' + ch.id + '">' +
+      '<div class="ch-group-header" onclick="toggleChapter(\'' + ch.id + '\')">' +
+        '<span class="ch-group-chevron">▶</span>' +
+        '<span class="ch-group-title">' + escapeHtml(ch.name) + '</span>' +
+        '<span class="ch-group-count">' + chMastered + '/' + chItemsAll.length + '</span>' +
+      '</div>' +
+      '<div class="ch-group-body">';
+
+    probs.forEach(function (prob) {
+      const visibleItems = prob.items.filter(matchesFilter);
+      if (visibleItems.length === 0) return;
+      const probMastered = prob.items.every(isMastered);
+      const probOpen = openProblems[prob.num] === true;
+      html += '<div class="prob-card' + (probOpen ? ' open' : '') + '" data-prob="' + prob.num + '">' +
+        '<div class="prob-header" onclick="toggleProblem(\'' + prob.num + '\')">' +
+          '<span class="prob-num">' + escapeHtml(prob.num) + '</span>' +
+          '<span class="prob-title">' + escapeHtml(prob.title) + '</span>' +
+          (probMastered ? '<span class="prob-mastered-badge">クリア</span>' : '') +
+          '<span class="diff-badge">' + escapeHtml(prob.difficulty) + '</span>' +
+          '<span class="prob-chevron">▶</span>' +
+        '</div>' +
+        '<div class="prob-body">' +
+          visibleItems.map(function (item) { return renderItemRow(item); }).join('') +
+        '</div>' +
+      '</div>';
+    });
+
+    html += '</div></div>';
+  });
+
+  container.innerHTML = html;
+}
+
+function filterChip(key, label) {
+  return '<button class="filter-chip' + (listFilter === key ? ' active' : '') + '" onclick="setListFilter(\'' + key + '\')">' + label + '</button>';
+}
+function setListFilter(key) { listFilter = key; renderList(); }
+
+let openChapters = {};
+let openProblems = {};
+function toggleChapter(id) {
+  openChapters[id] = !(openChapters[id] !== false);
+  renderList();
+}
+function toggleProblem(num) {
+  openProblems[num] = !openProblems[num];
+  renderList();
+}
+
+function renderItemRow(item) {
+  const p = getP(item.id);
+  const grade = extractGrade(item.imp);
+  const mastered = isMastered(item);
+  const flagsHtml = (item.flags || []).map(function (f) {
+    return '<span class="flag-chip ' + classifyFlag(f) + '">' + escapeHtml(f) + '</span>';
+  }).join('');
+
+  let rotationHtml;
+  if (isOptional(item)) {
+    rotationHtml = '<span class="rotation-optional">回転不要／任意' + (p.correct > 0 ? '（実施済み）' : '') + '</span>';
+  } else {
+    let dots = '';
+    for (let i = 0; i < item.rotationLeft; i++) {
+      dots += '<span class="rdot' + (i < p.correct ? ' filled' : '') + '"></span>';
+    }
+    rotationHtml = '<div class="rotation-dots">' + dots + '</div><span class="rotation-text">' + p.correct + '/' + item.rotationLeft + '回</span>';
+  }
+
+  return '<div class="item-row' + (mastered ? ' mastered' : '') + '">' +
+    '<div class="item-top">' +
+      '<span class="item-label">' + escapeHtml(item.label) + '</span>' +
+      '<span class="imp-chip ' + gradeClass(grade) + '">' + escapeHtml(item.imp) + '</span>' +
+      flagsHtml +
+    '</div>' +
+    '<div class="item-bottom">' +
+      rotationHtml +
+      '<div class="item-btns">' +
+        '<button class="rec-btn o" onclick="listRecord(\'' + item.id + '\',\'o\')" title="正解">○</button>' +
+        '<button class="rec-btn x" onclick="listRecord(\'' + item.id + '\',\'x\')" title="不正解">×</button>' +
+        '<button class="rec-btn undo" onclick="listUndo(\'' + item.id + '\')" title="取り消し">↺</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function listRecord(itemId, result) {
+  recordResult(itemId, result);
+  renderList();
+}
+function listUndo(itemId) {
+  undoLast(itemId);
+  renderList();
+}
+
+// ============================================================================
+// STATS TAB
+// ============================================================================
+function renderStats() {
+  const container = document.getElementById('tab-stats');
+  const flat = allItemsFlat();
+  const total = flat.length;
+  const mastered = flat.filter(function (x) { return isMastered(x.item); }).length;
+  const pct = total ? Math.round(mastered / total * 100) : 0;
+
+  let html = '<div class="overview-card">' +
+    '<div class="overview-row"><span class="overview-num">' + mastered + ' / ' + total + '</span><span class="overview-label">' + pct + '% 完了</span></div>' +
+    '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
+  '</div>';
+
+  // by grade
+  const grades = ['A', 'B', 'C+', 'C'];
+  const gradeColors = { 'A': '#c0392b', 'B': '#c8900a', 'C+': '#1a5fb4', 'C': '#2e7d32' };
+  html += '<div class="stat-section"><div class="stat-section-title">重要度別の進捗</div>';
+  grades.forEach(function (g) {
+    const items = flat.filter(function (x) { return extractGrade(x.item.imp) === g; });
+    if (items.length === 0) return;
+    const m = items.filter(function (x) { return isMastered(x.item); }).length;
+    const p = Math.round(m / items.length * 100);
+    html += '<div class="stat-row">' +
+      '<span class="stat-row-label" style="color:' + gradeColors[g] + '">' + g + '</span>' +
+      '<div class="stat-row-track"><div class="stat-row-fill" style="width:' + p + '%;background:' + gradeColors[g] + '"></div></div>' +
+      '<span class="stat-row-num">' + m + ' / ' + items.length + '</span>' +
+    '</div>';
+  });
+  html += '</div>';
+
+  // by chapter
+  html += '<div class="stat-section"><div class="stat-section-title">章別の進捗</div>';
+  KEIEI_CHAPTERS.forEach(function (ch) {
+    const probs = KEIEI_ALL_PROBLEMS.filter(function (p) { return p.ch === ch.id; });
+    const items = [];
+    probs.forEach(function (p) { p.items.forEach(function (it) { items.push(it); }); });
+    if (items.length === 0) return;
+    const m = items.filter(isMastered).length;
+    const p = Math.round(m / items.length * 100);
+    html += '<div class="stat-row">' +
+      '<span class="stat-row-label" style="font-size:11px;width:120px;">' + escapeHtml(ch.name.slice(0, 14)) + '</span>' +
+      '<div class="stat-row-track"><div class="stat-row-fill" style="width:' + p + '%;background:var(--o-color)"></div></div>' +
+      '<span class="stat-row-num">' + m + ' / ' + items.length + '</span>' +
+    '</div>';
+  });
+  html += '</div>';
+
+  // remaining reps
+  const remaining = flat.reduce(function (sum, x) {
+    if (isOptional(x.item)) return sum;
+    return sum + Math.max(0, x.item.rotationLeft - getP(x.item.id).correct);
+  }, 0);
+  html += '<div class="stat-section"><div class="stat-section-title">残り演習回数の目安</div>' +
+    '<div class="overview-num" style="font-size:20px;">あと ' + remaining + ' 回</div>' +
+    '<div class="overview-label" style="margin-top:4px;">全問題が目標回転数に到達するまでに必要な正解回数の合計</div>' +
+  '</div>';
+
+  container.innerHTML = html;
+}
+
+// ============================================================================
+// Backup / Restore
+// ============================================================================
+function exportData() {
+  const data = { version: 1, label: '経営学個別問題集復習管理', exportedAt: new Date().toISOString(), progress: progress };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'keiei_mondai_backup.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function (ev) {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.progress) throw new Error('invalid');
+      if (!confirm('現在の進捗を上書きして復元しますか？')) return;
+      progress = data.progress;
+      saveProgress();
+      location.reload();
+    } catch (err) {
+      alert('ファイルの読み込みに失敗しました。');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ============================================================================
+// Init
+// ============================================================================
+loadProgress();
+render();
+</script>
+</body>
+</html>
