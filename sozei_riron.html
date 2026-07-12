@@ -472,6 +472,10 @@ details.comment-toggle .comment-body {
     <div class="subject-grid" id="seiseki-subject-grid"></div>
   </div>
   <div class="card">
+    <label class="field-label">重要度別 得点率</label>
+    <div id="seiseki-summary"></div>
+  </div>
+  <div class="card">
     <table class="seiseki-table">
       <thead>
         <tr><th class="no-col">No.</th><th>重要度</th><th>演習回数</th><th>平均得点率</th></tr>
@@ -1136,6 +1140,38 @@ function recDisplayImportance(rec) {
   return IMPORTANCE_OVERRIDE_ENABLED ? 'C' : 'D';
 }
 
+// 重要度（A/B/C/D）ごとに、演習済み問題の平均得点率を集計して表示する
+function renderSeisekiSummary(rows) {
+  const order = ['A', 'B', 'C', 'D'];
+  const buckets = {};
+  order.forEach(function (k) { buckets[k] = { attempted: 0, total: 0, rateSum: 0 }; });
+
+  rows.forEach(function (r) {
+    const b = buckets[r.importance];
+    if (!b) return;
+    b.total += 1;
+    if (r.attempted) {
+      b.attempted += 1;
+      b.rateSum += avgRate(r.rec);
+    }
+  });
+
+  const wrap = document.getElementById('seiseki-summary');
+  wrap.innerHTML = '';
+  order.forEach(function (k) {
+    const b = buckets[k];
+    if (b.total === 0) return; // 該当科目にその重要度の問題がなければ表示しない
+    const rate = b.attempted > 0 ? b.rateSum / b.attempted : null;
+    const row = document.createElement('div');
+    row.className = 'summary-row';
+    row.innerHTML =
+      '<span>重要度 ' + k + '</span>' +
+      '<span class="val">' + (rate == null ? '－' : (rate * 100).toFixed(0) + '%') +
+      ' <span style="color:var(--text-3);font-weight:400;font-size:11px">(' + b.attempted + '/' + b.total + '問)</span></span>';
+    wrap.appendChild(row);
+  });
+}
+
 function renderSeisekiList() {
   const tbody = document.getElementById('seiseki-body');
   tbody.innerHTML = '';
@@ -1146,17 +1182,24 @@ function renderSeisekiList() {
     const recs = seiseki.records[subj] || {};
     SOZEI_DATA[subj].forEach(function (q) {
       const key = recordKey(q);
-      rows.push({ subj: subj, no: q.no, key: key, q: q, rec: recs[key] || null });
+      const rec = recs[key] || null;
+      const attempted = !!(rec && rec.attempts);
+      rows.push({
+        subj: subj, no: q.no, key: key, q: q, rec: rec,
+        attempted: attempted,
+        importance: attempted ? recDisplayImportance(rec) : displayImportance(q),
+      });
     });
   });
   rows.sort(function (a, b) { return a.no - b.no; });
 
+  renderSeisekiSummary(rows);
   document.getElementById('seiseki-empty-note').textContent = '';
 
   rows.forEach(function (r) {
-    const attempted = !!(r.rec && r.rec.attempts);
+    const attempted = r.attempted;
     const label = seisekiSubject === '全科目' ? SUBJECT_LABEL[r.subj] + ' ' + r.key : r.key;
-    const importance = attempted ? recDisplayImportance(r.rec) : displayImportance(r.q);
+    const importance = r.importance;
     let rateCell;
     if (attempted) {
       const rate = avgRate(r.rec);
