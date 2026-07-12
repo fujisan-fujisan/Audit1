@@ -1144,26 +1144,33 @@ function renderSeisekiList() {
   const rows = [];
   subjects.forEach(function (subj) {
     const recs = seiseki.records[subj] || {};
-    Object.keys(recs).forEach(function (key) {
-      const rec = recs[key];
-      if (!rec.attempts) return;
-      rows.push({ subj: subj, no: parseInt(key.replace('No.', ''), 10), key: key, rec: rec });
+    SOZEI_DATA[subj].forEach(function (q) {
+      const key = recordKey(q);
+      rows.push({ subj: subj, no: q.no, key: key, q: q, rec: recs[key] || null });
     });
   });
   rows.sort(function (a, b) { return a.no - b.no; });
 
-  document.getElementById('seiseki-empty-note').textContent = rows.length === 0 ? 'まだ演習履歴がありません。' : '';
+  document.getElementById('seiseki-empty-note').textContent = '';
 
   rows.forEach(function (r) {
-    const rate = avgRate(r.rec);
-    const cls = rate === 0 ? 'wrong' : (rate >= 0.8 ? 'correct' : 'partial');
+    const attempted = !!(r.rec && r.rec.attempts);
     const label = seisekiSubject === '全科目' ? SUBJECT_LABEL[r.subj] + ' ' + r.key : r.key;
+    const importance = attempted ? recDisplayImportance(r.rec) : displayImportance(r.q);
+    let rateCell;
+    if (attempted) {
+      const rate = avgRate(r.rec);
+      const cls = rate === 0 ? 'wrong' : (rate >= 0.8 ? 'correct' : 'partial');
+      rateCell = '<span class="tag ' + cls + '">' + (rate * 100).toFixed(0) + '%</span>';
+    } else {
+      rateCell = '<span style="color:var(--text-3)">未演習</span>';
+    }
     const tr = document.createElement('tr');
     tr.innerHTML =
       '<td class="no-col">' + escapeHtml(label) + '</td>' +
-      '<td>' + recDisplayImportance(r.rec) + '</td>' +
-      '<td>' + r.rec.attempts + '</td>' +
-      '<td><span class="tag ' + cls + '">' + (rate * 100).toFixed(0) + '%</span></td>';
+      '<td>' + importance + '</td>' +
+      '<td>' + (attempted ? r.rec.attempts : 0) + '</td>' +
+      '<td>' + rateCell + '</td>';
     tbody.appendChild(tr);
   });
 }
