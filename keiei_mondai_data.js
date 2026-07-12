@@ -1,6 +1,6 @@
 // ============================================================================
 // 経営学 個別問題集 復習管理 — 問題データ
-// 出典: CPA会計士講座 経営学 個別問題集（ファイナンス①）2026年合格目標
+// 出典: CPA会計士講座 経営学 個別問題集（ファイナンス①・②）2026年合格目標
 //
 // 各問題(item)の rotationLeft は「回転数」欄の左側の数値（時間に余裕がある人向け）
 // を採用回数の目標としている。rotationRight は参考として保持するのみ（右側の数値、
@@ -9,11 +9,15 @@
 
 const KEIEI_BOOKS = [
   { id: "finance1", name: "ファイナンス①", order: 1 },
+  { id: "finance2", name: "ファイナンス②", order: 2 },
 ];
 
-// 章（今のところファイナンス①は第1章のみ。今後の科目追加はこの配列に章を足していく）
+// 章（今後の科目追加はこの配列に章を足していく）
 const KEIEI_CHAPTERS = [
   { id: "f1-ch1", book: "finance1", name: "1. コーポレート・ファイナンス，財務分析，資金調達，運転資本管理", order: 1 },
+  { id: "f2-ch2", book: "finance2", name: "2. インベストメント", order: 2 },
+  { id: "f2-ch3", book: "finance2", name: "3. デリバティブ", order: 3 },
+  { id: "f2-ch4", book: "finance2", name: "4. ファイナンスに関するその他の論点", order: 4 },
 ];
 
 function mkItems(problemId, arr) {
@@ -459,10 +463,507 @@ const KEIEI_PROBLEMS_FINANCE1 = [
 ];
 
 // ============================================================================
+// ファイナンス② — 2. インベストメント / 3. デリバティブ / 4. ファイナンスに関するその他の論点
+// ============================================================================
+
+const KEIEI_PROBLEMS_FINANCE2 = [
+  {
+    num: "2-1", ch: "f2-ch2", title: "インベストメントの基礎知識", difficulty: "A",
+    items: mkItems("finance2__2-1", [
+      { label: "空欄穴埋め", imp: "A-A", rotationLeft: 2, rotationRight: 2, flags: ["キーワード"] },
+    ]),
+  },
+  {
+    num: "2-2", ch: "f2-ch2", title: "期待収益率及び標準偏差の算定（個別証券）", difficulty: "A",
+    items: mkItems("finance2__2-2", [
+      { label: "問1", imp: "A-A", rotationLeft: 2, rotationRight: 1, flags: [] },
+      { label: "問2", imp: "B-B", rotationLeft: 2, rotationRight: 1, flags: ["設例なし"] },
+      { label: "問3", imp: "A-A", rotationLeft: 2, rotationRight: 2, flags: ["設例なし", "★"] },
+    ]),
+  },
+  {
+    num: "2-3", ch: "f2-ch2", title: "ポートフォリオ理論", difficulty: "A",
+    items: mkItems("finance2__2-3", [
+      { label: "空欄穴埋め", imp: "A-A", rotationLeft: 2, rotationRight: 2, flags: ["キーワード"] },
+    ]),
+  },
+  {
+    num: "2-4", ch: "f2-ch2", title: "ポートフォリオの期待収益率と標準偏差の算定", difficulty: "B",
+    items: mkItems("finance2__2-4", [
+      { label: "単一問題", imp: "A-A", rotationLeft: 3, rotationRight: 2, flags: [] },
+    ]),
+  },
+  {
+    num: "2-5", ch: "f2-ch2", title: "相関係数と共分散の算定", difficulty: "B",
+    items: mkItems("finance2__2-5", [
+      { label: "問1", imp: "A-A", rotationLeft: 1, rotationRight: 1, flags: [] },
+      { label: "問2", imp: "A-A", rotationLeft: 3, rotationRight: 2, flags: [] },
+      { label: "問3", imp: "C+-C+", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
+    ]),
+  },
+  {
+    num: "2-6", ch: "f2-ch2", title: "最適ポートフォリオの決定", difficulty: "A",
+    items: mkItems("finance2__2-6", [
+      { label: "空欄穴埋め", imp: "A-A", rotationLeft: 2, rotationRight: 2, flags: ["キーワード", "★"] },
+    ]),
+  },
+  {
+    num: "2-7", ch: "f2-ch2", title: "有効フロンティア", difficulty: "B",
+    items: mkItems("finance2__2-7", [
+      { label: "問1", imp: "A-A", rotationLeft: 3, rotationRight: 2, flags: ["①②③⑩キーワード", "他設例なし", "★"] },
+      { label: "問2", imp: "A-A", rotationLeft: 2, rotationRight: 1, flags: ["設例なし"] },
+    ]),
+  },
+  {
+    num: "2-8", ch: "f2-ch2", title: "最適ポートフォリオの決定", difficulty: "A",
+    items: mkItems("finance2__2-8", [
+      { label: "問1（図示）", imp: "A-A", rotationLeft: 2, rotationRight: 1, flags: ["設例なし"] },
+      { label: "問2（図示）", imp: "A-A", rotationLeft: 2, rotationRight: 1, flags: ["設例なし"] },
+      { label: "問3（図示）", imp: "A-A", rotationLeft: 2, rotationRight: 1, flags: ["設例なし"] },
+    ]),
+  },
+  {
+    num: "2-9", ch: "f2-ch2", title: "分離定理，借入ポートフォリオ", difficulty: "B",
+    items: mkItems("finance2__2-9", [
+      { label: "問1", imp: "A-A", rotationLeft: 2, rotationRight: 2, flags: ["⑤キーワード"] },
+      { label: "問2", imp: "B-B", rotationLeft: 2, rotationRight: 1, flags: ["設例なし", "★"] },
+      { label: "問3", imp: "A-A", rotationLeft: 3, rotationRight: 2, flags: ["設例なし", "★"] },
+      { label: "問4", imp: "B-B", rotationLeft: 2, rotationRight: 1, flags: ["設例なし", "★"] },
+      { label: "問5", imp: "C+-C+", rotationLeft: 1, rotationRight: 1, flags: ["設例なし"] },
+    ]),
+  },
+  {
+    num: "2-10", ch: "f2-ch2", title: "市場均衡", difficulty: "A",
+    items: mkItems("finance2__2-10", [
+      { label: "空欄穴埋め", imp: "A-A", rotationLeft: 2, rotationRight: 2, flags: ["キーワード", "★"] },
+    ]),
+  },
+  {
+    num: "2-11", ch: "f2-ch2", title: "資本市場線とリスク", difficulty: "B",
+    items: mkItems("finance2__2-11", [
+      { label: "問題1-問1", imp: "B-B", rotationLeft: 2, rotationRight: 1, flags: [] },
+      { label: "問題1-問2", imp: "B-B", rotationLeft: 1, rotationRight: 1, flags: ["設例なし", "★"] },
+      { label: "問題2", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["設例なし", "★"] },
+      { label: "問題3", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["設例なし", "★"] },
+    ]),
+  },
+  {
+    num: "2-12", ch: "f2-ch2", title: "CAPM①", difficulty: "A",
+    items: mkItems("finance2__2-12", [
+      { label: "空欄穴埋め", imp: "A-A", rotationLeft: 2, rotationRight: 2, flags: ["キーワード", "★"] },
+    ]),
+  },
+  {
+    num: "2-13", ch: "f2-ch2", title: "CAPM②", difficulty: "A",
+    items: mkItems("finance2__2-13", [
+      { label: "問1", imp: "A-A", rotationLeft: 2, rotationRight: 2, flags: [] },
+      { label: "問2", imp: "A-A", rotationLeft: 2, rotationRight: 2, flags: ["設例なし", "★"] },
+      { label: "問3", imp: "A-A", rotationLeft: 3, rotationRight: 2, flags: ["設例なし", "★"] },
+      { label: "問4", imp: "B-B", rotationLeft: 1, rotationRight: 1, flags: ["設例なし", "★"] },
+      { label: "問5", imp: "C-C", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
+    ]),
+  },
+  {
+    num: "2-14", ch: "f2-ch2", title: "βの算定", difficulty: "B",
+    items: mkItems("finance2__2-14", [
+      { label: "問題1-問1", imp: "A-A", rotationLeft: 1, rotationRight: 1, flags: [] },
+      { label: "問題1-問2", imp: "B-C+", rotationLeft: 2, rotationRight: 1, flags: ["設例なし"] },
+      { label: "問題1-問3", imp: "A-A", rotationLeft: 3, rotationRight: 2, flags: [] },
+      { label: "問題2(1)〜(3)", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: [] },
+    ]),
+  },
+  {
+    num: "2-15", ch: "f2-ch2", title: "CAPM③", difficulty: "B",
+    items: mkItems("finance2__2-15", [
+      { label: "問題1-問1", imp: "A-A", rotationLeft: 2, rotationRight: 2, flags: ["設例なし"] },
+      { label: "問題1-問2", imp: "A-A", rotationLeft: 3, rotationRight: 2, flags: ["③④設例なし"] },
+      { label: "問題1-問3", imp: "B-B", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
+      { label: "問題2", imp: "A-A", rotationLeft: 3, rotationRight: 2, flags: [] },
+      { label: "問題3", imp: "A-A", rotationLeft: 3, rotationRight: 2, flags: ["設例なし", "★"] },
+    ]),
+  },
+  {
+    num: "2-16", ch: "f2-ch2", title: "インベストメントの総合問題①", difficulty: "B",
+    items: mkItems("finance2__2-16", [
+      { label: "問1", imp: "A-A", rotationLeft: 2, rotationRight: 1, flags: [] },
+      { label: "問2", imp: "B-C+", rotationLeft: 1, rotationRight: 1, flags: ["設例なし"] },
+      { label: "問3", imp: "A-A", rotationLeft: 2, rotationRight: 1, flags: [] },
+    ]),
+  },
+  {
+    num: "2-17", ch: "f2-ch2", title: "インベストメントの総合問題②", difficulty: "C",
+    items: mkItems("finance2__2-17", [
+      { label: "空欄穴埋め（①〜⑧）", imp: "A-A", rotationLeft: 3, rotationRight: 2, flags: ["⑦⑧設例なし", "★"] },
+    ]),
+  },
+  {
+    num: "2-18", ch: "f2-ch2", title: "効率的市場①", difficulty: "A",
+    items: mkItems("finance2__2-18", [
+      { label: "空欄穴埋め", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["キーワード"] },
+    ]),
+  },
+  {
+    num: "2-19", ch: "f2-ch2", title: "効率的市場②", difficulty: "C",
+    items: mkItems("finance2__2-19", [
+      { label: "事象1〜6の正誤判定", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["設例なし"] },
+    ]),
+  },
+  {
+    num: "2-20", ch: "f2-ch2", title: "CAPM・アノマリー", difficulty: "B",
+    items: mkItems("finance2__2-20", [
+      { label: "問1", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["⑦以外キーワード"] },
+      { label: "問2", imp: "(1)B-B (2)〜(4)C+-C+", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
+      { label: "問3", imp: "B-B", rotationLeft: 2, rotationRight: 1, flags: ["設例なし"] },
+      { label: "問4", imp: "C+-C+", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
+    ]),
+  },
+  {
+    num: "2-21", ch: "f2-ch2", title: "債券投資①（債券価格，デュレーション，フォワードレート等）", difficulty: "C",
+    items: mkItems("finance2__2-21", [
+      { label: "問1", imp: "①~⑧A-A ⑤⑩C+-C+", rotationLeft: 3, rotationRight: 2, flags: ["④~⑩キーワード"] },
+      { label: "問2", imp: "(1)(2)B-B (3)(4)C+-C+", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
+      { label: "問3", imp: "B-C+", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
+    ]),
+  },
+  {
+    num: "2-22", ch: "f2-ch2", title: "債券投資②（利回り，イールドカーブ，デュレーション，債券投資戦略）", difficulty: "B",
+    items: mkItems("finance2__2-22", [
+      { label: "問題1(1)", imp: "C-C", rotationLeft: 1, rotationRight: null, flags: ["任意/不要"] },
+      { label: "問題1(2)", imp: "C-C", rotationLeft: 1, rotationRight: null, flags: ["任意/不要"] },
+      { label: "問題1(3)", imp: "C-C", rotationLeft: 1, rotationRight: null, flags: ["任意/不要"] },
+      { label: "問題1(4)", imp: "B-C+", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
+      { label: "問題1(5)", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["キーワード", "★"] },
+      { label: "問題1(6)", imp: "B-B", rotationLeft: 1, rotationRight: 1, flags: ["設例なし"] },
+      { label: "問題1(7)", imp: "①~③C+-C+ ④⑤B-B", rotationLeft: 2, rotationRight: 1, flags: ["キーワード"] },
+      { label: "問題1(8)", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["キーワード", "★"] },
+      { label: "問題2", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["設例なし", "★"] },
+    ]),
+  },
+  {
+    num: "2-23", ch: "f2-ch2", title: "債券投資③（債券投資戦略，その他）", difficulty: "B",
+    items: mkItems("finance2__2-23", [
+      { label: "問題1(1)(2)", imp: "B-B", rotationLeft: 2, rotationRight: 1, flags: ["(2)キーワード"] },
+      { label: "問題2", imp: "C+-C+", rotationLeft: 1, rotationRight: 1, flags: ["設例なし", "★"] },
+      { label: "問題3", imp: "C+-C+", rotationLeft: 1, rotationRight: 1, flags: ["設例なし"] },
+    ]),
+  },
+  {
+    num: "2-24", ch: "f2-ch2", title: "インベストメント　キーワードまとめ", difficulty: "A",
+    items: buildKeywordItems("finance2__2-24", [
+      [1, "期待効用理論", "B-B"], [2, "平均・分散アプローチ", "B-B"], [3, "幾何平均", "B-B", 1], [4, "分散", "B-B"],
+      [5, "リスク回避的投資家の特徴", "A-A"], [6, "無差別曲線", "B-B"], [7, "相関係数（ρ）", "A-A"],
+      [8, "リスク分散効果（ポートフォリオ効果）", "A-A"], [9, "共分散", "B-B"], [10, "最適ポートフォリオ", "A-A"],
+      [11, "投資機会集合", "A-A"], [12, "有効フロンティア（効率的フロンティア）", "A-A"],
+      [13, "最小分散フロンティア", "B-C+", 1], [14, "最小分散ポートフォリオ", "B-C+", 1], [15, "接点ポートフォリオ", "A-A"],
+      [16, "トービンの分離定理", "A-A"], [17, "貸付ポートフォリオ", "A-A"], [18, "借入ポートフォリオ", "A-A"],
+      [19, "市場均衡", "B-B"], [20, "市場ポートフォリオ", "A-A"], [21, "資本市場線（CML）", "A-A"],
+      [22, "システマティック・リスク（組織的リスク，市場リスク）", "A-A"],
+      [23, "アンシステマティック・リスク（非組織的リスク，個別リスク）", "A-A"], [24, "リスクの市場価格", "B-B"],
+      [25, "CAPM", "A-A", 1], [26, "β（ベータ）", "A-A", 1], [27, "証券市場線（SML）", "A-A"],
+      [28, "証券特性線", "C+-C+", 1], [29, "空売り", "B-B"], [30, "ジェンセン測度（ジェンセンのα）", "A-A"],
+      [31, "シャープ測度（シャープレシオ）", "A-A"], [32, "トレイナー測度（トレイナーレシオ）", "A-A"],
+      [33, "シングルファクターモデル", "B-B"], [34, "TOPIX（東証株価指数）", "B-B"], [35, "日経225（日経平均株価指数）", "B-B"],
+      [36, "JPX日経インデックス400（JPX日経400）", "B-B"], [37, "レバードベータ", "A-A", 1], [38, "アンレバードベータ", "A-A", 1],
+      [39, "効率的市場", "A-A"], [40, "ウィークフォーム（弱度の効率性）", "A-A"], [41, "セミストロングフォーム（準強度の効率性）", "A-A"],
+      [42, "ストロングフォーム（強度の効率性）", "A-A"], [43, "テクニカル分析", "A-A"], [44, "ファンダメンタルズ分析", "A-A"],
+      [45, "アクティブ運用", "B-B"], [46, "パッシブ運用", "B-B"], [47, "伝統的ファイナンスと裁定取引に対する考え方", "A-A"],
+      [48, "行動ファイナンスと裁定取引に対する考え方", "B-B"], [49, "ノイズトレーダーリスク", "C+-C+", 1], [50, "アノマリー", "B-B"],
+      [51, "日経平均採用銘柄の株価水準", "B-B"], [52, "リターンリバーサル", "B-B"], [53, "モメンタム", "B-B"],
+      [54, "小型株効果（規模効果，サイズ効果）", "B-C+"], [55, "バリュー株効果（B／M効果）", "B-C+"], [56, "イベントスタディ", "B-C+"],
+      [57, "プロスペクト理論", "A-A", 1], [58, "バイアス", "C+-C+", 1], [59, "損失回避", "C+-C+", 1],
+      [60, "ディスポジション効果", "C+-C+", 1], [61, "代表性", "C+-C+", 1], [62, "確実性効果", "C+-C+", 1],
+      [63, "フレーミング効果", "C+-C+", 1], [64, "後悔回避", "C+-C+", 1], [65, "所有効果（保有効果）", "C+-C+", 1],
+      [66, "現状維持バイアス", "C+-C+", 1], [67, "独立性効果", "C+-C+", 1], [68, "自信過剰", "C+-C+", 1],
+      [69, "群集行動（横並び行動）", "C+-C+", 1], [70, "アンカリング（係留）", "C+-C+", 1], [71, "心の会計", "C+-C+", 1],
+      [72, "マルチファクター・モデル", "B-B"], [73, "APT（裁定価格理論）", "B-B"], [74, "3ファクター・モデル", "B-B"],
+      [75, "4ファクター・モデル", "B-B"], [76, "利付債（クーポン債）", "B-B"], [77, "割引債（ゼロクーポン債）", "B-B"],
+      [78, "永久債（コンソル債）", "B-B"], [79, "直接利回り", "C+-C+"], [80, "最終利回り", "A-A"], [81, "実効利回り", "C+-C+"],
+      [82, "単利利回り", "C+-C+"], [83, "スポットレート", "A-A"], [84, "フォワードレート", "A-A"],
+      [85, "ディスカウント・ファクター", "B-B"], [86, "パー債券", "B-B"], [87, "オーバーパー債券", "B-B"],
+      [88, "アンダーパー債券", "B-B"], [89, "金利変動リスク", "B-B"], [90, "再投資リスク", "B-B"], [91, "信用リスク", "B-B"],
+      [92, "途中償還リスク", "C+-C+"], [93, "流動性リスク", "B-B"], [94, "（マコーレー）デュレーション", "A-A"],
+      [95, "修正デュレーション", "B-B"], [96, "金額デュレーション", "C+-C+", 1], [97, "コンベクシティ", "C+-C+"],
+      [98, "バイアンドホールド戦略", "C+-C+"], [99, "ブレット戦略", "C+-C+"], [100, "バーベル戦略", "C+-C+"],
+      [101, "ラダー戦略", "C+-C+"], [102, "イミュニゼーション戦略", "B-B"], [103, "金利の期間構造", "B-B"],
+      [104, "イールドカーブ（利回り曲線）", "A-A"], [105, "順イールド", "A-A"], [106, "逆イールド", "A-A"],
+      [107, "純粋期待仮説", "B-B"], [108, "流動性プレミアム仮説", "B-B"], [109, "市場分断仮説", "B-B"],
+    ]),
+  },
+  {
+    num: "2-25", ch: "f2-ch2", title: "追加論点講義（比較的重要性の高いもの）", difficulty: "B",
+    items: mkItems("finance2__2-25", [
+      { label: "問1(1) 空欄①", imp: "C+-C+", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
+      { label: "問1(2) 空欄②", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: [] },
+      { label: "問1(3) 空欄②〜⑤", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["②③キーワード"] },
+      { label: "問1(4) 空欄⑥⑦", imp: "B-C+", rotationLeft: 2, rotationRight: 1, flags: [] },
+      { label: "問1(5) 空欄⑧〜⑩", imp: "C+-C+", rotationLeft: 1, rotationRight: 1, flags: ["⑧⑨キーワード"] },
+      { label: "問1(6) 空欄⑪⑫⑬", imp: "C+-C+", rotationLeft: 2, rotationRight: 1, flags: ["キーワード"] },
+      { label: "問1(7) 空欄⑭⑮", imp: "B-B", rotationLeft: 3, rotationRight: 2, flags: [] },
+      { label: "問1(8) 空欄⑯⑱", imp: "B-B", rotationLeft: 3, rotationRight: 2, flags: [] },
+      { label: "問1(9) 空欄⑲", imp: "C+-C+", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
+      { label: "問1(10) 空欄⑳〜㉒", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["キーワード"] },
+      { label: "問1(11) 空欄㉒〜㉖", imp: "C+-C", rotationLeft: 1, rotationRight: null, flags: ["キーワード"] },
+      { label: "問1(12) 空欄㉔〜㉗", imp: "B-C+", rotationLeft: 2, rotationRight: 1, flags: [] },
+      { label: "問1(13) 空欄㉘", imp: "C+-C+", rotationLeft: 2, rotationRight: 1, flags: ["キーワード"] },
+      { label: "問1(14) 空欄", imp: "C+-C+", rotationLeft: 1, rotationRight: 1, flags: [] },
+      { label: "問1(15) 額面デュレーション", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: [] },
+      { label: "問1(16) 修正デュレーション", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: [] },
+      { label: "問2 無リスク資産と複数リスク資産の投資機会集合", imp: "B-C+", rotationLeft: 2, rotationRight: 1, flags: ["設例なし"] },
+      { label: "問3 効率的フロンティア作図（貸付利率<借入利率）", imp: "C+-C+", rotationLeft: 1, rotationRight: 1, flags: ["設例なし"] },
+      { label: "問4 プロスペクト理論・価値関数", imp: "C+-C+", rotationLeft: 2, rotationRight: 1, flags: ["キーワード"] },
+    ]),
+  },
+  {
+    num: "2-26", ch: "f2-ch2", title: "追加論点講義（比較的重要性の低いもの）", difficulty: "C",
+    items: mkItems("finance2__2-26", [
+      { label: "問1 行動ファイナンスのバイアス一覧（空欄①〜⑪）", imp: "C-C", rotationLeft: 1, rotationRight: null, flags: ["キーワード"] },
+    ]),
+  },
+  {
+    num: "3-1", ch: "f2-ch3", title: "デリバティブ総論", difficulty: "A",
+    items: mkItems("finance2__3-1", [
+      { label: "空欄穴埋め（①〜⑪）", imp: "①C+-C+ 他B-B", rotationLeft: 2, rotationRight: 1, flags: ["キーワード"] },
+    ]),
+  },
+  {
+    num: "3-2", ch: "f2-ch3", title: "先物・先渡取引", difficulty: "B",
+    items: mkItems("finance2__3-2", [
+      { label: "問1 空欄①〜⑪", imp: "①~③C+-C+ ④⑤A-A 他B-B", rotationLeft: 2, rotationRight: 2, flags: ["④⑤以外キーワード"] },
+      { label: "問2 株価指数先物取引の決済損益計算", imp: "A-A", rotationLeft: 3, rotationRight: 2, flags: [] },
+      { label: "問3 空欄①〜③", imp: "A-A", rotationLeft: 2, rotationRight: 2, flags: ["キーワード", "★"] },
+    ]),
+  },
+  {
+    num: "3-3", ch: "f2-ch3", title: "金利スワップ", difficulty: "B",
+    items: mkItems("finance2__3-3", [
+      { label: "空欄穴埋め（①〜⑦）", imp: "A-A", rotationLeft: 2, rotationRight: 2, flags: ["③~⑦キーワード"] },
+    ]),
+  },
+  {
+    num: "3-4", ch: "f2-ch3", title: "通貨スワップ", difficulty: "B",
+    items: mkItems("finance2__3-4", [
+      { label: "空欄穴埋め（①〜⑧）", imp: "C+-C+", rotationLeft: 1, rotationRight: 1, flags: ["①②キーワード"] },
+    ]),
+  },
+  {
+    num: "3-5", ch: "f2-ch3", title: "オプション", difficulty: "A",
+    items: mkItems("finance2__3-5", [
+      { label: "空欄穴埋め（①〜㉑）", imp: "A-A", rotationLeft: 2, rotationRight: 2, flags: ["キーワード", "★"] },
+    ]),
+  },
+  {
+    num: "3-6", ch: "f2-ch3", title: "オプションの損益計算", difficulty: "B",
+    items: mkItems("finance2__3-6", [
+      { label: "問1 プット売却損益表", imp: "A-A", rotationLeft: 2, rotationRight: 2, flags: [] },
+      { label: "問2 本質価値・時間価値算定", imp: "A-A", rotationLeft: 2, rotationRight: 2, flags: [] },
+      { label: "問3 コール売却損益表", imp: "A-A", rotationLeft: 2, rotationRight: 2, flags: [] },
+      { label: "問4 プット売却損益表・作図", imp: "A-A", rotationLeft: 2, rotationRight: 2, flags: [] },
+      { label: "問5 コール売却損益表・作図", imp: "A-A", rotationLeft: 2, rotationRight: 2, flags: [] },
+    ]),
+  },
+  {
+    num: "3-7", ch: "f2-ch3", title: "先物・オプションの損益計算", difficulty: "B",
+    items: mkItems("finance2__3-7", [
+      { label: "問1 空欄①〜⑥", imp: "A-B", rotationLeft: 2, rotationRight: 2, flags: ["①~④キーワード", "⑤⑥設例なし", "★"] },
+      { label: "問2 総ペイオフグラフ作図", imp: "A-B", rotationLeft: 3, rotationRight: 2, flags: ["設例なし", "★"] },
+      { label: "問3 先物とコールオプションのメリデメ", imp: "B-B", rotationLeft: 2, rotationRight: 1, flags: ["キーワード"] },
+    ]),
+  },
+  {
+    num: "3-8", ch: "f2-ch3", title: "本質価値と時間価値", difficulty: "A",
+    items: mkItems("finance2__3-8", [
+      { label: "問1 コールオプションプレミアムがゼロにならない理由", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["キーワード"] },
+      { label: "問2 本質価値・時間価値算定", imp: "A-A", rotationLeft: 2, rotationRight: 2, flags: [] },
+      { label: "問3 オプションプレミアム図・空欄", imp: "B-B", rotationLeft: 2, rotationRight: 1, flags: ["キーワード"] },
+    ]),
+  },
+  {
+    num: "3-9", ch: "f2-ch3", title: "オプションプレミアムの決定要因", difficulty: "A",
+    items: mkItems("finance2__3-9", [
+      { label: "(1) 正しくない記述を1つ選ぶ", imp: "A-A", rotationLeft: 3, rotationRight: 2, flags: ["設例なし", "★"] },
+      { label: "(2) 正しい記述2つを選ぶ", imp: "A-A", rotationLeft: 3, rotationRight: 2, flags: ["設例なし", "★"] },
+    ]),
+  },
+  {
+    num: "3-10", ch: "f2-ch3", title: "デリバティブにおける理論価格の算定", difficulty: "B",
+    items: mkItems("finance2__3-10", [
+      { label: "問1 裁定取引・先物理論価格", imp: "B-B", rotationLeft: 3, rotationRight: 3, flags: ["①④⑦⑨⑩⑬キーワード"] },
+      { label: "問2 先物理論価格（配当追加）", imp: "B-B", rotationLeft: 3, rotationRight: 3, flags: ["①④⑦⑨⑩キーワード"] },
+      { label: "問3 先物理論価格の算定", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: [] },
+      { label: "問4 金利下落・配当増加時の理論価格変化", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["設例なし", "★"] },
+    ]),
+  },
+  {
+    num: "3-11", ch: "f2-ch3", title: "為替予約（先渡取引）", difficulty: "A",
+    items: mkItems("finance2__3-11", [
+      { label: "問1 空欄①〜⑩", imp: "A-A", rotationLeft: 3, rotationRight: 3, flags: ["④⑤⑦⑧⑨設例なし", "⑨キーワード", "④⑤⑦⑧⑨★"] },
+      { label: "問2 円建て投資収益率", imp: "A-A", rotationLeft: 2, rotationRight: 2, flags: ["設例なし", "★"] },
+    ]),
+  },
+  {
+    num: "3-12", ch: "f2-ch3", title: "2項分布モデル（複製ポートフォリオ法・確実性等価法）", difficulty: "C",
+    items: mkItems("finance2__3-12", [
+      { label: "問1 下線部の取引名", imp: "B-B", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
+      { label: "問2 株価推移・オプションキャッシュフロー", imp: "A-A", rotationLeft: 3, rotationRight: 2, flags: [] },
+      { label: "問3 複製ポートフォリオ方程式・オプションプレミアム", imp: "A-A", rotationLeft: 3, rotationRight: 2, flags: [] },
+      { label: "問4 モデル名称（カタカナ）", imp: "B-B", rotationLeft: 2, rotationRight: 1, flags: ["キーワード"] },
+      { label: "問5 ヨーロピアン短期間モデル名称", imp: "C+-C+", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
+      { label: "問6 リスク中立確率算定", imp: "A-A", rotationLeft: 3, rotationRight: 2, flags: [] },
+      { label: "問7 オプションプレミアム算定", imp: "A-A", rotationLeft: 3, rotationRight: 2, flags: [] },
+      { label: "問8 期待収益率・標準偏差", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["(2)設例なし", "★"] },
+    ]),
+  },
+  {
+    num: "3-13", ch: "f2-ch3", title: "2項分布モデル（プットコールパリティ）", difficulty: "B",
+    items: mkItems("finance2__3-13", [
+      { label: "問1 コールオプション価格算定", imp: "A-A", rotationLeft: 3, rotationRight: 3, flags: [] },
+      { label: "問2(1) ITM/ATM/OTM判定", imp: "A-A", rotationLeft: 1, rotationRight: 1, flags: ["設例なし", "★"] },
+      { label: "問2(2) プットオプション現時点価格算定", imp: "A-A", rotationLeft: 2, rotationRight: 1, flags: ["設例なし", "★"] },
+      { label: "問3 コール1単位と同価値のポートフォリオ選択", imp: "B-B", rotationLeft: 1, rotationRight: 1, flags: ["設例なし"] },
+      { label: "問4 ポートフォリオのキャッシュフロー図選択", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["設例なし", "★"] },
+      { label: "問5 コール・プット価格が等しい場合の大小関係式", imp: "A-A", rotationLeft: 2, rotationRight: 1, flags: ["設例なし", "★"] },
+    ]),
+  },
+  {
+    num: "3-14", ch: "f2-ch3", title: "2項分布モデル（デルタヘッジング法）", difficulty: "C",
+    items: mkItems("finance2__3-14", [
+      { label: "空欄穴埋め（①〜④）", imp: "B-B", rotationLeft: 3, rotationRight: 2, flags: ["②キーワード"] },
+    ]),
+  },
+  {
+    num: "3-15", ch: "f2-ch3", title: "プットオプションのプレミアムの算定", difficulty: "C",
+    items: mkItems("finance2__3-15", [
+      { label: "問1 空欄①〜⑦", imp: "B-B", rotationLeft: 3, rotationRight: 2, flags: ["①⑤設例なし", "①⑤★"] },
+      { label: "問2 空欄①〜③", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: [] },
+    ]),
+  },
+  {
+    num: "3-16", ch: "f2-ch3", title: "オプションプレミアム（その他の論点）", difficulty: "C",
+    items: mkItems("finance2__3-16", [
+      { label: "問1 空欄①〜⑥", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["③⑤⑥キーワード", "①設例なし", "①★"] },
+      { label: "問2 空欄①〜⑧", imp: "B-B", rotationLeft: 3, rotationRight: 2, flags: ["設例なし", "★"] },
+    ]),
+  },
+  {
+    num: "3-17", ch: "f2-ch3", title: "オプションプレミアム（応用問題）", difficulty: "C",
+    items: mkItems("finance2__3-17", [
+      { label: "空欄穴埋め（②③④⑥⑬キーワード／他設例なし）", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["②③④⑥⑬キーワード", "他設例なし", "★"] },
+    ]),
+  },
+  {
+    num: "3-18", ch: "f2-ch3", title: "投資決定理論②", difficulty: "C",
+    items: mkItems("finance2__3-18", [
+      { label: "問1", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: [] },
+      { label: "問2", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: [] },
+      { label: "問3", imp: "B-B", rotationLeft: 2, rotationRight: 1, flags: ["キーワード"] },
+      { label: "問4", imp: "B-B", rotationLeft: 2, rotationRight: 1, flags: ["設例なし", "★"] },
+    ]),
+  },
+  {
+    num: "3-19", ch: "f2-ch3", title: "オプション戦略", difficulty: "B",
+    items: mkItems("finance2__3-19", [
+      { label: "問1", imp: "B-B", rotationLeft: 2, rotationRight: 1, flags: ["⑥キーワード"] },
+      { label: "問2", imp: "B-B", rotationLeft: 2, rotationRight: 1, flags: ["①キーワード"] },
+      { label: "問3", imp: "B-B", rotationLeft: 2, rotationRight: 1, flags: ["①キーワード"] },
+      { label: "問4", imp: "B-B", rotationLeft: 2, rotationRight: 1, flags: ["③キーワード"] },
+      { label: "問5", imp: "C+-C+", rotationLeft: 1, rotationRight: 1, flags: ["③⑥キーワード"] },
+      { label: "問6", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["②設例なし", "④キーワード", "★"] },
+    ]),
+  },
+  {
+    num: "3-20", ch: "f2-ch3", title: "デリバティブ　キーワードまとめ", difficulty: "A",
+    items: buildKeywordItems("finance2__3-20", [
+      [1, "金融派生商品", "C+-C+"], [2, "ロングポジション", "B-B"], [3, "ショートポジション", "B-B"], [4, "ペイオフ", "B-B"],
+      [5, "原資産", "B-B"], [6, "満期", "B-B"], [7, "レバレッジ", "B-B"], [8, "反対売買による差金決済", "B-B"],
+      [9, "ゼロサムゲーム", "B-B"], [10, "リスクヘッジ", "B-B"], [11, "スペキュレーション", "B-B"], [12, "アービトラージ", "B-B"],
+      [13, "取引所取引", "C+-C+"], [14, "相対取引", "C+-C+"], [15, "値洗い", "B-C+"], [16, "追証", "B-C+"], [17, "限月", "B-B"],
+      [18, "日経平均先物・TOPIX先物の取引単位", "B-B"], [19, "建玉", "B-B"], [20, "金利スワップ取引", "B-B"],
+      [21, "プレインバニラスワップ", "B-B"], [22, "想定元本", "B-B"], [23, "TIBOR", "B-B"], [24, "絶対優位", "B-B"],
+      [25, "比較優位", "B-B"], [26, "権利行使価格", "B-B"], [27, "ヨーロピアン・オプション", "A-A"],
+      [28, "アメリカン・オプション", "A-A"], [29, "コール・オプション", "A-A"], [30, "プット・オプション", "A-A"],
+      [31, "オプションプレミアム", "A-A"], [32, "本質価値（本源価値・内在価値）", "A-A"], [33, "時間価値", "A-A"],
+      [34, "ボラティリティ", "A-A"], [35, "タイムディケイ", "A-A"], [36, "インザマネー（ITM）", "A-A"],
+      [37, "アットザマネー（ATM）", "A-A"], [38, "アウトオブザマネー（OTM）", "A-A"],
+      [39, "為替差損ヘッジ（円高ドル安・売上債権）", "B-B"], [40, "為替差損ヘッジ（円安ドル高・仕入債務）", "B-B"],
+      [41, "コール・オプションのメリット・デメリット（先物の買いとの比較）", "B-B"],
+      [42, "株主資本価値とコール・オプションの関係", "B-B", 1], [43, "負債価値の複製（プット・オプション＋安全資産）", "C+-C+", 1],
+      [44, "無裁定価格理論", "B-B"], [45, "（カバー付）金利平価説", "B-B"], [46, "購買力平価説", "C+-C+", 1],
+      [47, "キャッシュアンドキャリー戦略", "B-B"], [48, "リバースキャッシュアンドキャリー戦略", "B-B"], [49, "キャリー・コスト", "B-B"],
+      [50, "2項分布モデル（バイノミアルモデル）", "A-A"], [51, "ブラックショールズモデル", "C+-C+"], [52, "リスク調整法", "B-B"],
+      [53, "確実性等価法", "A-A"], [54, "リスク中立確率", "A-A"], [55, "デルタ（△）", "B-B"], [56, "プットコールパリティ", "A-A"],
+      [57, "リアル・オプション", "B-B"], [58, "ブルスプレッドの特徴", "B-B"], [59, "ベアスプレッドの特徴", "B-B"],
+      [60, "ロングストラドルの特徴", "B-B"], [61, "ショートストラドルの特徴", "B-B"], [62, "プロテクティブプットの特徴", "B-B"],
+      [63, "カバードコールの特徴", "B-B"], [64, "キャップ", "C+-C+"], [65, "フロア", "C+-C+"],
+      [66, "クレジット・デフォルト・スワップ取引（CDS）", "B-B"],
+    ]),
+  },
+  {
+    num: "3-21", ch: "f2-ch3", title: "追加論点講義（比較的重要性の高いもの）", difficulty: "B",
+    items: mkItems("finance2__3-21", [
+      { label: "問1(1) 現物取引/先物取引キャッシュフロー比較", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: [] },
+      { label: "問1(2) 取引最終日/SQ/証拠金制度", imp: "C-C（一部C+-C+）", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
+      { label: "問1(3) 金利スワップ/絶対優位・比較優位", imp: "B-B（一部C+-C+）", rotationLeft: 2, rotationRight: 2, flags: ["キーワード"] },
+      { label: "問1(4) コールオプション決済CF計算", imp: "B-C+", rotationLeft: 2, rotationRight: 1, flags: [] },
+      { label: "問1(5) インプライド・ヒストリカルボラティリティ", imp: "C+-C+", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
+      { label: "問1(6) 企業価値/負債価値/株主資本価値とコールオプションのアナロジー", imp: "B-B", rotationLeft: 2, rotationRight: 1, flags: ["キーワード"] },
+      { label: "問1(7) 購買力平価説", imp: "C+-C+", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
+      { label: "問1(8) 先物価格・コールオプション決済フロー算定", imp: "C+-C+", rotationLeft: 2, rotationRight: 1, flags: [] },
+      { label: "問1(9) プットコールパリティ成立要件", imp: "C+-C+", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
+      { label: "問1(10) キャップ・フロア/クレジットデフォルトスワップ", imp: "C-C（一部B-C+）", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
+      { label: "問2 負債価値の複製（選択肢問題）", imp: "C+-C+", rotationLeft: 1, rotationRight: 1, flags: ["設例なし"] },
+      { label: "問3 為替レートに関する空欄補充", imp: "C-C", rotationLeft: 1, rotationRight: null, flags: ["一部設例なし", "他キーワード"] },
+      { label: "問4 リスクマネジメント正誤問題", imp: "C-C", rotationLeft: 1, rotationRight: null, flags: ["設例なし"] },
+    ]),
+  },
+  {
+    num: "3-22", ch: "f2-ch3", title: "追加論点講義（比較的重要性の低いもの）", difficulty: "C",
+    items: mkItems("finance2__3-22", [
+      { label: "空欄穴埋め（(1)〜(4)）", imp: "C-C", rotationLeft: 1, rotationRight: null, flags: ["キーワード"] },
+    ]),
+  },
+  {
+    num: "4-1", ch: "f2-ch4", title: "コーポレート・ファイナンス（森試験委員対策）", difficulty: "B",
+    items: mkItems("finance2__4-1", [
+      { label: "問1", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["(1)キーワード", "(2)設例なし"] },
+      { label: "問2", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["設例なし"] },
+      { label: "問3", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["設例なし"] },
+      { label: "問4", imp: "B-C+", rotationLeft: 2, rotationRight: 2, flags: ["キーワード"] },
+      { label: "問5", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["キーワード"] },
+    ]),
+  },
+  {
+    num: "4-2", ch: "f2-ch4", title: "リスクマネジメント（柳瀬試験委員，芹田試験委員対策）", difficulty: "B",
+    items: mkItems("finance2__4-2", [
+      { label: "問1", imp: "C+-C+（一部C-C）", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
+      { label: "問2", imp: "C+-C+", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
+      { label: "問3", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["キーワード"] },
+      { label: "問4", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["キーワード"] },
+      { label: "問5", imp: "C-C", rotationLeft: 1, rotationRight: null, flags: ["キーワード"] },
+      { label: "問6", imp: "B-C+", rotationLeft: 2, rotationRight: 1, flags: ["キーワード"] },
+      { label: "問7", imp: "C+-C+", rotationLeft: 1, rotationRight: 1, flags: [] },
+      { label: "問8", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["キーワード"] },
+      { label: "問9", imp: "B-C+", rotationLeft: 2, rotationRight: 1, flags: [] },
+    ]),
+  },
+  {
+    num: "4-3", ch: "f2-ch4", title: "ファイナンスに関するその他の論点　キーワードまとめ", difficulty: "A",
+    items: buildKeywordItems("finance2__4-3", [
+      [1, "財務柔軟性（財務フレキシビリティ）", "B-B"], [2, "エージェンシー理論における最適資本構成", "B-B"],
+      [3, "機会の窓仮説", "B-C+"], [4, "配当パズル", "B-B"], [5, "純粋リスク", "C+-C+"], [6, "投機的リスク", "C+-C+"],
+      [7, "BCP（事業継続計画）", "B-B"], [8, "VaR（バリュー・アット・リスク）", "C+-C+"], [9, "リスク・マップ", "B-B"],
+      [10, "ERM（全社的リスクマネジメント）", "B-B"], [11, "リスクコントロール", "B-B"], [12, "損失予防", "B-B"],
+      [13, "損失低減", "B-B"], [14, "リスクファイナンス", "B-B"], [15, "（リスクの）保有", "B-B"], [16, "（リスクの）移転", "B-B"],
+      [17, "（保険契約における）逆選択", "B-C+"], [18, "（保険契約における）モラルハザード", "B-C+"], [19, "確実性等価", "B-B"],
+    ]),
+  },
+];
+
+// ============================================================================
 // 今後、他の問題集（組織論・マーケティング・戦略論など）を追加する場合は、
 // 上記と同じ形式で KEIEI_PROBLEMS_<book> という配列を追加し、
 // 下の KEIEI_ALL_PROBLEMS に連結してください。
 // ============================================================================
 
 const KEIEI_ALL_PROBLEMS = []
-  .concat(KEIEI_PROBLEMS_FINANCE1.map(function (p) { return Object.assign({ book: "finance1" }, p); }));
+  .concat(KEIEI_PROBLEMS_FINANCE1.map(function (p) { return Object.assign({ book: "finance1" }, p); }))
+  .concat(KEIEI_PROBLEMS_FINANCE2.map(function (p) { return Object.assign({ book: "finance2" }, p); }));
