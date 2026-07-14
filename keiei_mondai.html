@@ -82,9 +82,9 @@ body {
 .prob-card.open .prob-body { display: block; }
 
 /* ITEM ROW — 問題名／重要度／必要回数／評価ボタンを1行に並べ、高さ方向は中央揃え */
-.item-row { padding: 8px 4px; border-bottom: 1px dashed var(--border); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.item-row { padding: 14px 4px; border-bottom: 1px dashed var(--border); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .item-row:last-child { border-bottom: none; }
-.item-label { font-size: 12px; font-weight: 700; color: var(--text); }
+.item-label { font-size: 16px; font-weight: 700; color: var(--text); }
 .imp-chip { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; font-family: 'Noto Sans JP', sans-serif; flex-shrink: 0; }
 .grade-A { background: #fdf0ee; color: #c0392b; }
 .grade-B { background: #fdf4e3; color: #7c5c00; }
@@ -97,10 +97,10 @@ body {
 .rotation-text { font-size: 11px; color: var(--text-2); font-family: 'DM Mono', monospace; white-space: nowrap; margin-left: auto; }
 .rotation-optional { font-size: 11px; color: var(--text-3); white-space: nowrap; margin-left: auto; }
 .item-btns { display: flex; gap: 4px; flex-shrink: 0; }
-.rec-btn { width: 30px; height: 30px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--bg); font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s; }
+.rec-btn { width: 39px; height: 39px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--bg); font-size: 17px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s; }
 .rec-btn.o:hover, .rec-btn.o:active { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
 .rec-btn.x:hover, .rec-btn.x:active { background: var(--x-bg); border-color: var(--x-color); color: var(--x-color); }
-.rec-btn.undo { font-size: 11px; color: var(--text-3); }
+.rec-btn.undo { font-size: 14px; color: var(--text-3); }
 .rec-btn.undo:hover { background: var(--bg); color: var(--text); }
 .rec-btn:disabled { opacity: .3; pointer-events: none; }
 .item-row.mastered { background: var(--o-bg); border-radius: var(--radius-sm); }
