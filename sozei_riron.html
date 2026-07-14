@@ -60,6 +60,22 @@ body {
 .btn-icon:hover { background: var(--text); border-color: var(--text); color: #fff; }
 .screen-title { font-size: 18px; font-weight: 700; margin-top: 4px; }
 
+.tab-bar { display: flex; gap: 4px; margin-top: 12px; border-bottom: 1px solid var(--border); }
+.tab-btn {
+  flex: 1;
+  padding: 10px 0;
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  color: var(--text-3);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color .15s, border-color .15s;
+}
+.tab-btn.active { color: var(--text); border-bottom-color: var(--text); }
+
 .content { padding: 16px 14px 0; max-width: 640px; margin: 0 auto; }
 
 .card {
@@ -327,6 +343,11 @@ details.comment-toggle .comment-body {
 
 .save-note { font-size: 11px; color: var(--text-3); margin-top: 10px; text-align: center; }
 
+.seiseki-table { width: 100%; border-collapse: collapse; }
+.seiseki-table th, .seiseki-table td { padding: 8px 6px; font-size: 12px; text-align: center; border-bottom: 1px solid var(--border); }
+.seiseki-table th { color: var(--text-3); font-weight: 700; font-size: 10px; letter-spacing: .05em; }
+.seiseki-table td.no-col { text-align: left; font-weight: 700; white-space: nowrap; }
+
 .hidden { display: none !important; }
 </style>
 </head>
@@ -342,9 +363,13 @@ details.comment-toggle .comment-body {
     </div>
   </div>
   <div class="screen-title" id="screen-title">出題設定</div>
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-quiz" onclick="switchTab('quiz')">出題</button>
+    <button class="tab-btn" id="tab-seiseki" onclick="switchTab('seiseki')">成績</button>
+  </div>
 </div>
 
-<div class="content">
+<div class="content" id="view-quiz">
 
   <!-- ── Screen 1: Setup ── -->
   <div id="screen-setup">
@@ -438,6 +463,27 @@ details.comment-toggle .comment-body {
     <div class="save-note" id="save-note"></div>
   </div>
 
+</div>
+
+<!-- ── 成績タブ ── -->
+<div class="content hidden" id="view-seiseki">
+  <div class="card">
+    <label class="field-label">科目</label>
+    <div class="subject-grid" id="seiseki-subject-grid"></div>
+  </div>
+  <div class="card">
+    <label class="field-label">重要度別 得点率</label>
+    <div id="seiseki-summary"></div>
+  </div>
+  <div class="card">
+    <table class="seiseki-table">
+      <thead>
+        <tr><th class="no-col">No.</th><th>重要度</th><th>演習回数</th><th>平均得点率</th></tr>
+      </thead>
+      <tbody id="seiseki-body"></tbody>
+    </table>
+    <div class="save-note" id="seiseki-empty-note"></div>
+  </div>
 </div>
 
 <script src="sozei_riron_data.js"></script>
@@ -606,7 +652,9 @@ function buildPool(subjects) {
   return pool;
 }
 
-// 重要度A/B/C配分（開発指示書3-1節）。在庫不足はA→B→Cの順に繰り越す。
+// 重要度A/B/C配分: 固定比率ではなく、選択科目内の実際のA/B/C構成比に
+// できるだけ近づくように配分する（端数は四捨五入し、Cで帳尻を合わせる）。
+// 在庫不足（丸め誤差でnA+nBがnを超える場合など）はA→B→Cの順に繰り越す。
 function selectQuestions(subjects, requestedCount) {
   const pool = buildPool(subjects);
   const n = Math.min(requestedCount, pool.length);
@@ -614,8 +662,9 @@ function selectQuestions(subjects, requestedCount) {
   const buckets = { A: [], B: [], C: [] };
   pool.forEach(function (q) { buckets[weightBucket(q)].push(q); });
 
-  let nA = Math.round(n * 0.6);
-  let nB = Math.round(n * 0.3);
+  const total = pool.length || 1;
+  let nA = Math.min(n, Math.round(n * buckets.A.length / total));
+  let nB = Math.min(n - nA, Math.round(n * buckets.B.length / total));
   let nC = n - nA - nB;
 
   const wanted = { A: nA, B: nB, C: nC };
@@ -819,11 +868,20 @@ function escapeHtml(s) {
   return div.innerHTML;
 }
 
+// 正誤問題の模範解答冒頭の〇／×を、正解記号として取り出す
+function getCorrectMaruBatsu(q) {
+  if (q.type !== '正誤問題' || !q.model_answer) return null;
+  const first = q.model_answer.trim().charAt(0);
+  return (first === '〇' || first === '×') ? first : null;
+}
+
 // scoring_points を○×チェックボックス形式で描画し、チェック状態から得点を自動集計する
 function renderScoringChecklist(q, disabled) {
   const wrap = document.getElementById('reveal-scoring');
   wrap.innerHTML = '';
   const items = q.scoring_points || [];
+  const correctMB = getCorrectMaruBatsu(q);
+  const userMB = (!disabled && session.currentAnswer) ? session.currentAnswer.maruBatsu : null;
 
   items.forEach(function (sp, idx) {
     const row = document.createElement('div');
@@ -832,11 +890,23 @@ function renderScoringChecklist(q, disabled) {
     row.id = 'score-item-' + idx;
     if (hasPoints && !disabled) row.onclick = function () { toggleScoreItem(idx); };
 
+    // 〇×欄は模範解答の正解記号を表示し、自分の回答と一致していれば自動でチェック済みにする
+    let displayContent = sp.content;
+    let autoChecked = false;
+    if (sp.label === '〇×欄' && correctMB) {
+      displayContent = '正解：' + correctMB;
+      if (userMB && userMB === correctMB) {
+        autoChecked = true;
+        session.checked[idx] = true;
+        row.classList.add('checked');
+      }
+    }
+
     row.innerHTML =
-      '<div class="score-mark" id="mark-' + idx + '">×</div>' +
+      '<div class="score-mark" id="mark-' + idx + '">' + (autoChecked ? '○' : '×') + '</div>' +
       '<div class="score-item-body">' +
         (sp.label ? '<div class="score-item-label">' + escapeHtml(sp.label) + '</div>' : '') +
-        '<div class="score-item-text">' + escapeHtml(sp.content || '（内容なし）') + '</div>' +
+        '<div class="score-item-text">' + escapeHtml(displayContent || '（内容なし）') + '</div>' +
       '</div>' +
       '<div class="score-item-pt">' + (hasPoints ? sp.points + '点' : '－') + '</div>';
     wrap.appendChild(row);
@@ -922,12 +992,17 @@ function finishSession(aborted) {
     const key = recordKey(q);
     const subjRecords = seiseki.records[q.subject];
     if (!subjRecords[key]) {
-      subjRecords[key] = { importance: q.importance, attempts: 0, correct: 0, partial: 0, wrong: 0, last_score_rate: 0 };
+      subjRecords[key] = { importance: q.importance, attempts: 0, correct: 0, partial: 0, wrong: 0, last_score_rate: 0, rate_sum: 0 };
     }
     const rec = subjRecords[key];
+    if (rec.rate_sum == null) {
+      // 平均得点率トラッキング追加前に記録されたレコードは、直近の得点率を遡及的に補完する
+      rec.rate_sum = (rec.last_score_rate || 0) * rec.attempts;
+    }
     rec.attempts += 1;
     rec[r.classification] += 1;
     rec.last_score_rate = r.rate;
+    rec.rate_sum += r.rate;
     rec.importance = q.importance;
   });
 
@@ -1008,12 +1083,142 @@ function importRecords(e) {
       alert('成績表を復元しました。');
       renderSubjectGrid();
       onCountInput();
+      if (!document.getElementById('view-seiseki').classList.contains('hidden')) renderSeisekiList();
     } catch (err) {
       alert('ファイルの読み込みに失敗しました。');
     }
   };
   reader.readAsText(file);
   e.target.value = '';
+}
+
+// ─────────────────────────────────────────────────────────────
+// 成績タブ（問題ごとの平均得点率一覧）
+// ─────────────────────────────────────────────────────────────
+let seisekiSubject = '法人';
+
+function switchTab(tab) {
+  document.getElementById('tab-quiz').classList.toggle('active', tab === 'quiz');
+  document.getElementById('tab-seiseki').classList.toggle('active', tab === 'seiseki');
+  document.getElementById('view-quiz').classList.toggle('hidden', tab !== 'quiz');
+  document.getElementById('view-seiseki').classList.toggle('hidden', tab !== 'seiseki');
+  if (tab === 'seiseki') {
+    document.getElementById('screen-title').textContent = '成績（問題ごとの平均得点率）';
+    renderSeisekiSubjectGrid();
+    renderSeisekiList();
+  } else {
+    document.getElementById('screen-title').textContent = document.getElementById('screen-setup').classList.contains('hidden')
+      ? (document.getElementById('screen-quiz').classList.contains('hidden') ? '出題終了' : '出題中')
+      : '出題設定';
+  }
+}
+
+function renderSeisekiSubjectGrid() {
+  const grid = document.getElementById('seiseki-subject-grid');
+  grid.innerHTML = '';
+  SUBJECT_KEYS.concat(['全科目']).forEach(function (key) {
+    const isAll = key === '全科目';
+    const active = seisekiSubject === key;
+    const btn = document.createElement('button');
+    btn.className = 'subject-btn' + (active ? ' active' : '');
+    btn.textContent = isAll ? '全科目' : SUBJECT_LABEL[key];
+    btn.onclick = function () {
+      seisekiSubject = key;
+      renderSeisekiSubjectGrid();
+      renderSeisekiList();
+    };
+    grid.appendChild(btn);
+  });
+}
+
+// レコードの平均得点率。rate_sum未設定の古いレコードは last_score_rate で代用する
+function avgRate(rec) {
+  if (!rec.attempts) return 0;
+  const sum = rec.rate_sum != null ? rec.rate_sum : (rec.last_score_rate || 0) * rec.attempts;
+  return sum / rec.attempts;
+}
+
+function recDisplayImportance(rec) {
+  if (rec.importance === 'A' || rec.importance === 'B' || rec.importance === 'C') return rec.importance;
+  return IMPORTANCE_OVERRIDE_ENABLED ? 'C' : 'D';
+}
+
+// 重要度（A/B/C/D）ごとに、演習済み問題の平均得点率を集計して表示する
+function renderSeisekiSummary(rows) {
+  const order = ['A', 'B', 'C', 'D'];
+  const buckets = {};
+  order.forEach(function (k) { buckets[k] = { attempted: 0, total: 0, rateSum: 0 }; });
+
+  rows.forEach(function (r) {
+    const b = buckets[r.importance];
+    if (!b) return;
+    b.total += 1;
+    if (r.attempted) {
+      b.attempted += 1;
+      b.rateSum += avgRate(r.rec);
+    }
+  });
+
+  const wrap = document.getElementById('seiseki-summary');
+  wrap.innerHTML = '';
+  order.forEach(function (k) {
+    const b = buckets[k];
+    if (b.total === 0) return; // 該当科目にその重要度の問題がなければ表示しない
+    const rate = b.attempted > 0 ? b.rateSum / b.attempted : null;
+    const row = document.createElement('div');
+    row.className = 'summary-row';
+    row.innerHTML =
+      '<span>重要度 ' + k + '</span>' +
+      '<span class="val">' + (rate == null ? '－' : (rate * 100).toFixed(0) + '%') +
+      ' <span style="color:var(--text-3);font-weight:400;font-size:11px">(' + b.attempted + '/' + b.total + '問)</span></span>';
+    wrap.appendChild(row);
+  });
+}
+
+function renderSeisekiList() {
+  const tbody = document.getElementById('seiseki-body');
+  tbody.innerHTML = '';
+  const subjects = seisekiSubject === '全科目' ? SUBJECT_KEYS : [seisekiSubject];
+
+  const rows = [];
+  subjects.forEach(function (subj) {
+    const recs = seiseki.records[subj] || {};
+    SOZEI_DATA[subj].forEach(function (q) {
+      const key = recordKey(q);
+      const rec = recs[key] || null;
+      const attempted = !!(rec && rec.attempts);
+      rows.push({
+        subj: subj, no: q.no, key: key, q: q, rec: rec,
+        attempted: attempted,
+        importance: attempted ? recDisplayImportance(rec) : displayImportance(q),
+      });
+    });
+  });
+  rows.sort(function (a, b) { return a.no - b.no; });
+
+  renderSeisekiSummary(rows);
+  document.getElementById('seiseki-empty-note').textContent = '';
+
+  rows.forEach(function (r) {
+    const attempted = r.attempted;
+    const label = seisekiSubject === '全科目' ? SUBJECT_LABEL[r.subj] + ' ' + r.key : r.key;
+    const importance = r.importance;
+    let rateCell;
+    if (attempted) {
+      const rate = avgRate(r.rec);
+      const cls = rate === 0 ? 'wrong' : (rate >= 0.8 ? 'correct' : 'partial');
+      rateCell = '<span class="tag ' + cls + '">' + (rate * 100).toFixed(0) + '%</span>';
+    } else {
+      rateCell = '<span style="color:var(--text-3)">未演習</span>';
+    }
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="no-col">' + escapeHtml(label) + '</td>' +
+      '<td>' + importance + '</td>' +
+      '<td>' + (attempted ? r.rec.attempts : 0) + '</td>' +
+      '<td>' + rateCell + '</td>';
+    tbody.appendChild(tr);
+  });
 }
 
 // ─────────────────────────────────────────────────────────────
