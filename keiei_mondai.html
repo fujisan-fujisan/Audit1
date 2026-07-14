@@ -100,9 +100,8 @@ body {
 .rec-btn { width: 39px; height: 39px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--bg); font-size: 17px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s; }
 .rec-btn.o:hover, .rec-btn.o:active { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
 .rec-btn.x:hover, .rec-btn.x:active { background: var(--x-bg); border-color: var(--x-color); color: var(--x-color); }
-.rec-btn.undo { font-size: 14px; color: var(--text-3); }
-.rec-btn.undo:hover { background: var(--bg); color: var(--text); }
 .rec-btn:disabled { opacity: .3; pointer-events: none; }
+.attempt-count { min-width: 39px; height: 39px; padding: 0 6px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--bg); color: var(--text-3); font-size: 13px; font-weight: 700; font-family: 'DM Mono', monospace; display: flex; align-items: center; justify-content: center; }
 .item-row.mastered { background: var(--o-bg); border-radius: var(--radius-sm); }
 
 /* STATS */
@@ -217,15 +216,6 @@ function recordResult(itemId, result) {
   p.log.push({ ts: Date.now(), result: result });
   saveProgress();
 }
-function undoLast(itemId) {
-  const p = ensureP(itemId);
-  const last = p.log.pop();
-  if (!last) return;
-  if (last.result === 'o') p.correct = Math.max(0, p.correct - 1);
-  else p.wrong = Math.max(0, p.wrong - 1);
-  saveProgress();
-}
-
 // ============================================================================
 // Tabs
 // ============================================================================
@@ -323,6 +313,8 @@ function renderItemRow(item) {
     ? '<span class="rotation-optional">回転不要／任意' + (p.correct > 0 ? '（実施済み）' : '') + '</span>'
     : '<span class="rotation-text">' + p.correct + '/' + item.rotationLeft + '回</span>';
 
+  const attempts = p.correct + p.wrong;
+
   return '<div class="item-row' + (mastered ? ' mastered' : '') + '">' +
     '<span class="item-label">' + escapeHtml(item.label) + '</span>' +
     '<span class="imp-chip ' + gradeClass(grade) + '">' + escapeHtml(item.imp) + '</span>' +
@@ -331,17 +323,13 @@ function renderItemRow(item) {
     '<div class="item-btns">' +
       '<button class="rec-btn o" onclick="listRecord(\'' + item.id + '\',\'o\')" title="正解">○</button>' +
       '<button class="rec-btn x" onclick="listRecord(\'' + item.id + '\',\'x\')" title="不正解">×</button>' +
-      '<button class="rec-btn undo" onclick="listUndo(\'' + item.id + '\')" title="取り消し">↺</button>' +
+      '<span class="attempt-count" title="演習回数">' + attempts + '回</span>' +
     '</div>' +
   '</div>';
 }
 
 function listRecord(itemId, result) {
   recordResult(itemId, result);
-  renderList();
-}
-function listUndo(itemId) {
-  undoLast(itemId);
   renderList();
 }
 
