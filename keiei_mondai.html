@@ -91,8 +91,6 @@ body {
 .grade-Cplus { background: #eaf1fb; color: #1a5fb4; }
 .grade-C { background: #eef7ee; color: #2e7d32; }
 .grade-unknown { background: var(--bg); color: var(--text-3); border: 1px solid var(--border); }
-.flag-chip { font-size: 9px; padding: 2px 6px; border-radius: 99px; border: 1px solid var(--border-strong); color: var(--text-2); background: var(--bg); flex-shrink: 0; }
-.flag-chip.f-keyword { border-color: #1a5fb4; color: #1a5fb4; background: #eef4fc; }
 
 .rotation-text { font-size: 11px; color: var(--text-2); font-family: 'DM Mono', monospace; white-space: nowrap; margin-left: auto; }
 .rotation-optional { font-size: 11px; color: var(--text-3); white-space: nowrap; margin-left: auto; }
@@ -200,9 +198,6 @@ function gradeClass(grade) {
   if (grade === 'C') return 'grade-C';
   return 'grade-unknown';
 }
-function classifyFlag(flag) {
-  return flag.indexOf('キーワード') !== -1 ? 'f-keyword' : '';
-}
 function escapeHtml(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
@@ -304,10 +299,6 @@ function renderItemRow(item) {
   const p = getP(item.id);
   const grade = extractGrade(item.imp);
   const mastered = isMastered(item);
-  const flagsHtml = (item.flags || [])
-    .filter(function (f) { return f.indexOf('設例なし') === -1 && f.indexOf('★') === -1; })
-    .map(function (f) { return '<span class="flag-chip ' + classifyFlag(f) + '">' + escapeHtml(f) + '</span>'; })
-    .join('');
 
   const rotationHtml = isOptional(item)
     ? '<span class="rotation-optional">回転不要／任意' + (p.correct > 0 ? '（実施済み）' : '') + '</span>'
@@ -318,7 +309,6 @@ function renderItemRow(item) {
   return '<div class="item-row' + (mastered ? ' mastered' : '') + '">' +
     '<span class="item-label">' + escapeHtml(item.label) + '</span>' +
     '<span class="imp-chip ' + gradeClass(grade) + '">' + escapeHtml(item.imp) + '</span>' +
-    flagsHtml +
     rotationHtml +
     '<div class="item-btns">' +
       '<button class="rec-btn o" onclick="listRecord(\'' + item.id + '\',\'o\')" title="正解">○</button>' +
