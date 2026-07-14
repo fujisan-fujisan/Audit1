@@ -78,6 +78,7 @@ body {
 .prob-mastered-badge { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; background: var(--o-bg); color: var(--o-color); flex-shrink: 0; }
 .prob-chevron { color: var(--text-3); font-size: 11px; transition: transform .15s; flex-shrink: 0; }
 .prob-card.open .prob-chevron { transform: rotate(90deg); }
+.prob-card.open { background: #f0f0ee; }
 .prob-body { display: none; border-top: 1px solid var(--border); padding: 4px 10px 8px; }
 .prob-card.open .prob-body { display: block; }
 
@@ -410,9 +411,13 @@ function renderStats() {
 // ============================================================================
 // Backup / Restore
 // ============================================================================
-function exportData() {
+async function exportData() {
   const data = { version: 1, label: '経営学個別問題集復習管理', exportedAt: new Date().toISOString(), progress: progress };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const file = new File([blob], 'keiei_mondai_backup.json', { type: 'application/json' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file] }); return; } catch (e) {}
+  }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'keiei_mondai_backup.json';
