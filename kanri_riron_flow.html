@@ -480,13 +480,17 @@ function escapeHtml(s) {
 // ============================================================================
 function flattenFlow(flow) {
   const out = [];
+  let lastNode = null; // 直近で出力したノード（分岐に入る直前のノード＝分岐点）
   function walk(segments) {
     segments.forEach(function (seg) {
       if (seg.kind === 'node') {
-        out.push({ kind: 'node', color: seg.color, text: seg.text });
+        const node = { kind: 'node', color: seg.color, text: seg.text };
+        out.push(node);
+        lastNode = node;
       } else if (seg.kind === 'branch') {
+        const anchor = lastNode; // 分岐に入る直前のノード＝分岐点。全ての区切りで共通して使う
         seg.paths.forEach(function (path, i) {
-          if (i > 0) out.push({ kind: 'divider' });
+          if (i > 0) out.push({ kind: 'divider', anchor: anchor });
           walk(path);
         });
       }
@@ -662,13 +666,19 @@ function nodeKeyFor(problemId, idx) {
   return problemId + '#' + idx;
 }
 
-// 直前に表示していたノードを探す（分岐の区切りはスキップし，直近の実ノードを返す）
+// 「1つ前」として表示すべきノードを決める。
+//   ・今が分岐の区切り（分岐点に戻る画面）なら，その分岐の分岐点ノードを返す
+//   ・今が分岐直後の最初のノードなら，同じく分岐点ノードを返す（直前の分岐で
+//     最後に解いた文章ではなく，分岐点の文章・語句を見せるため）
+//   ・それ以外は単純に1つ前のノードを返す
 function findPrevNode(pointer) {
-  for (let i = pointer - 1; i >= 0; i--) {
-    const s = session.flat[i];
-    if (s.kind === 'node') return s;
-  }
-  return null;
+  if (pointer < 0 || pointer >= session.flat.length) return null;
+  const cur = session.flat[pointer];
+  if (cur.kind === 'divider') return cur.anchor || null;
+  if (pointer === 0) return null;
+  const prior = session.flat[pointer - 1];
+  if (prior.kind === 'divider') return prior.anchor || null;
+  return prior;
 }
 
 function renderPrevCard(pointer) {
