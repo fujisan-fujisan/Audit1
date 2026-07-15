@@ -221,6 +221,19 @@ label.field-label {
 .problem-no { font-size: 12px; font-weight: 700; color: var(--text-2); }
 .problem-title { font-size: 15px; font-weight: 700; }
 
+.prev-card {
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  border-left: 3px solid var(--border-strong);
+  background: var(--bg);
+  opacity: .7;
+}
+.prev-card.blue { border-left-color: var(--blue-color); background: var(--blue-bg); }
+.prev-card.red { border-left-color: var(--red-color); background: var(--red-bg); }
+.prev-label { font-size: 10px; font-weight: 700; color: var(--text-3); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 4px; }
+.prev-text { white-space: pre-wrap; font-size: 12.5px; line-height: 1.6; color: var(--text-2); }
+
 .flow-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -342,6 +355,11 @@ label.field-label {
     </div>
     <div class="problem-head" id="problem-head"></div>
 
+    <div class="prev-card hidden" id="prev-card">
+      <div class="prev-label" id="prev-label">前のステップ</div>
+      <div class="prev-text" id="prev-text"></div>
+    </div>
+
     <div class="flow-card" id="flow-card" onclick="onCardTap()">
       <div class="flow-kind-label" id="flow-kind-label"></div>
       <div id="flow-body"></div>
@@ -389,7 +407,7 @@ label.field-label {
 const PROGRESS_KEY = 'kanri-ronri-flow-progress-v1';
 let progress = {}; // { [problemId#flatIdx]: { known: n, unknown: n, lastResult: 'o'|'x'|null } }
 
-let selectedProblems = new Set(RONRI_PROBLEMS.filter(function (p) { return p.ready; }).map(function (p) { return p.id; }));
+let selectedProblems = new Set();
 let openChapters = {};
 let orderMode = 'sequential';
 
@@ -509,7 +527,7 @@ function renderChapterTree() {
     const partial = isChapterPartiallySelected(ch);
     const checkClass = full ? 'checked' : (partial ? 'partial' : '');
     const checkMark = full ? '✓' : (partial ? '－' : '');
-    const isOpen = openChapters[ch.id] !== false;
+    const isOpen = openChapters[ch.id] === true;
     html += '<div class="ch-block' + (isOpen ? ' open' : '') + '">' +
       '<div class="ch-row">' +
         '<span class="ch-check ' + checkClass + '" onclick="event.stopPropagation();toggleChapterAll(\'' + ch.id + '\')">' + checkMark + '</span>' +
@@ -622,6 +640,26 @@ function nodeKeyFor(problemId, idx) {
   return problemId + '#' + idx;
 }
 
+// 直前に表示していたノードを探す（分岐の区切りはスキップし，直近の実ノードを返す）
+function findPrevNode(pointer) {
+  for (let i = pointer - 1; i >= 0; i--) {
+    const s = session.flat[i];
+    if (s.kind === 'node') return s;
+  }
+  return null;
+}
+
+function renderPrevCard(pointer) {
+  const prevCard = document.getElementById('prev-card');
+  const prevNode = findPrevNode(pointer);
+  if (!prevNode) {
+    prevCard.classList.add('hidden');
+    return;
+  }
+  prevCard.className = 'prev-card' + (prevNode.color !== 'plain' ? ' ' + prevNode.color : '');
+  document.getElementById('prev-text').textContent = prevNode.text;
+}
+
 function renderFlow() {
   const p = currentProblem();
   document.getElementById('progress-label').textContent = '問題 ' + (session.pIndex + 1) + ' / ' + session.queue.length;
@@ -642,6 +680,7 @@ function renderFlow() {
 
   if (session.stepPointer === -1) {
     // 問題文画面
+    document.getElementById('prev-card').classList.add('hidden');
     document.getElementById('progress-num').textContent = '問題文';
     card.classList.add('question');
     kindLabel.textContent = '問題';
@@ -652,9 +691,12 @@ function renderFlow() {
   }
 
   if (session.stepPointer >= session.flat.length) {
+    document.getElementById('prev-card').classList.add('hidden');
     renderSummary();
     return;
   }
+
+  renderPrevCard(session.stepPointer);
 
   const step = session.flat[session.stepPointer];
   document.getElementById('progress-num').textContent = 'ステップ ' + (session.stepPointer + 1) + ' / ' + session.flat.length;
