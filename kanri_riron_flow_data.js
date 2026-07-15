@@ -21,84 +21,6 @@ const RONRI_CHAPTERS = [
 
 const RONRI_PROBLEMS = [
   {
-    id: "1-1",
-    chapterId: "ch1",
-    no: "問題1-1",
-    title: "購入原価に算入する材料副費の範囲",
-    importance: "C",
-    typical: "A",
-    question: "材料副費を２つに分類し，材料の購入原価に算入する材料副費の範囲について，我が国の「原価計算基準」に準拠して説明しなさい。",
-    keywords: ["購入代価", "引取費用", "内部材料副費"],
-    ready: true,
-    flow: [
-      { kind: "node", color: "plain", text: "材料副費＝材料が出庫可能となるまでの付随費用" },
-      {
-        kind: "branch",
-        paths: [
-          [
-            { kind: "node", color: "plain", text: "企業外部で発生" },
-            { kind: "node", color: "plain", text: "引取費用" },
-          ],
-          [
-            { kind: "node", color: "plain", text: "企業内部で発生" },
-            { kind: "node", color: "plain", text: "内部材料副費" },
-          ],
-        ],
-      },
-      { kind: "node", color: "plain", text: "「原価計算基準」における購入原価の計算方法\n（①〜③の選択適用）" },
-      {
-        kind: "branch",
-        paths: [
-          [{ kind: "node", color: "plain", text: "① 購入原価＝購入代価＋引取費用" }],
-          [{ kind: "node", color: "plain", text: "② 購入原価＝購入代価＋引取費用＋内部材料副費の一部" }],
-          [{ kind: "node", color: "plain", text: "③ 購入原価＝購入代価＋引取費用＋内部材料副費の全部" }],
-        ],
-      },
-      {
-        kind: "branch",
-        paths: [
-          [{ kind: "node", color: "red", text: "引取費用は必ず算入" }],
-          [{ kind: "node", color: "red", text: "内部副費は不算入が認められる" }],
-        ],
-      },
-    ],
-  },
-  {
-    id: "1-2",
-    chapterId: "ch1",
-    no: "問題1-2",
-    title: "購入原価に算入しない材料副費の処理",
-    importance: "C",
-    typical: "B",
-    question: "材料の購入原価に内部材料副費を含めないことが認められる理由を２つあげ，それぞれに対応して認められる原価計算上の処理を，我が国の「原価計算基準」に準拠して説明しなさい。",
-    keywords: ["特定材料", "恣意的", "間接経費", "検収後（入庫後）", "出庫材料", "材料費"],
-    ready: true,
-    flow: [
-      { kind: "node", color: "plain", text: "一部の内部材料副費の特徴" },
-      {
-        kind: "branch",
-        paths: [
-          [
-            { kind: "node", color: "blue", text: "特定材料に跡付け困難\n（EX. 材料倉庫の減価償却費）" },
-            { kind: "node", color: "red", text: "購入原価に算入すれば\n計算が恣意的なものとなる" },
-          ],
-          [
-            { kind: "node", color: "blue", text: "材料検収後（入庫後）に発生\n（EX. 整理費，手入れ費，保管費）" },
-            { kind: "node", color: "red", text: "購入材料よりも\nむしろ出庫材料に関連" },
-          ],
-        ],
-      },
-      { kind: "node", color: "plain", text: "購入原価に算入しない材料副費（内部材料副費）の処理" },
-      {
-        kind: "branch",
-        paths: [
-          [{ kind: "node", color: "red", text: "間接経費として処理" }],
-          [{ kind: "node", color: "red", text: "材料費に配賦" }],
-        ],
-      },
-    ],
-  },
-  {
     id: "1-3",
     chapterId: "ch1",
     no: "問題1-3",
@@ -130,35 +52,6 @@ const RONRI_PROBLEMS = [
           ],
         ],
       },
-    ],
-  },
-  {
-    id: "1-4",
-    chapterId: "ch1",
-    no: "問題1-4",
-    title: "個別法の適用",
-    importance: "C",
-    typical: "C",
-    question: "材料の実際消費価格の計算方法のうち，最も正確な方法として個別法がある。現代の技術環境を踏まえて，個別法の適用可能性と適用対象について検討しなさい。",
-    keywords: ["ＩＴ技術", "費用対効果", "価格変動", "偶然性"],
-    ready: true,
-    flow: [
-      { kind: "node", color: "plain", text: "ＩＴ技術の発展" },
-      { kind: "node", color: "plain", text: "個別法の適用可能性は高まっている" },
-      {
-        kind: "branch",
-        paths: [
-          [
-            { kind: "node", color: "blue", text: "全ての材料に適用" },
-            { kind: "node", color: "red", text: "費用対効果の観点から問題あり" },
-          ],
-          [
-            { kind: "node", color: "blue", text: "価格変動下で適用" },
-            { kind: "node", color: "red", text: "原価計算に偶然性が混入\n（製品原価の比較可能性を阻害）" },
-          ],
-        ],
-      },
-      { kind: "node", color: "red", text: "適用対象は重要かつ価格変動のあまりない材料に限定すべき" },
     ],
   },
   {
@@ -224,38 +117,6 @@ const RONRI_PROBLEMS = [
           ],
         ],
       },
-    ],
-  },
-  {
-    id: "1-7",
-    chapterId: "ch1",
-    no: "問題1-7",
-    title: "望ましい消費賃率",
-    importance: "C",
-    typical: "B",
-    question: "直接工の消費賃率は，個別賃率，職種別平均賃率，工場全体の平均賃率（総平均賃率）の３つに分類されるが，原価計算上いずれの消費賃率が最も望ましいかを，理由を付して説明しなさい。",
-    keywords: ["経済性", "偶然性", "比較可能性", "職種別の賃率の相違", "正確性"],
-    ready: true,
-    flow: [
-      {
-        kind: "branch",
-        paths: [
-          [
-            { kind: "node", color: "plain", text: "個別賃率の適用" },
-            { kind: "node", color: "plain", text: "厳密な計算が可能" },
-            { kind: "node", color: "red", text: "計算が極めて煩雑" },
-            { kind: "node", color: "red", text: "原価計算に偶然性が混入" },
-            { kind: "node", color: "red", text: "経済性と比較可能性に問題" },
-          ],
-          [
-            { kind: "node", color: "plain", text: "総平均賃率の適用" },
-            { kind: "node", color: "plain", text: "計算は簡略化される" },
-            { kind: "node", color: "red", text: "職種別の賃率の相違を製品原価に反映できない" },
-            { kind: "node", color: "red", text: "正確性に問題" },
-          ],
-        ],
-      },
-      { kind: "node", color: "red", text: "職種別の平均賃率が最も望ましい" },
     ],
   },
   {
@@ -472,39 +333,140 @@ const RONRI_PROBLEMS = [
     ],
   },
   {
-    id: "1-15",
+    id: "1-16",
     chapterId: "ch1",
-    no: "問題1-15",
-    title: "公式法変動予算の限界",
+    no: "問題1-16",
+    title: "操業度差異の計算方法",
     importance: "B",
     typical: "B",
-    question: "製造間接費の管理に公式法変動予算を使用する場合の限界について説明しなさい。",
-    keywords: ["一次関数", "正常操業圏", "公式", "管理標準", "原価管理活動の良否"],
+    question: "製造間接費の操業度差異の計算方法について，固定予算を用いる場合と変動予算を用いる場合のいずれが理論的に妥当であるかを説明しなさい。",
+    keywords: ["変動費資源", "実際操業度", "固定費資源", "基準操業度"],
     ready: true,
     flow: [
-      { kind: "node", color: "plain", text: "公式法変動予算" },
-      { kind: "node", color: "plain", text: "製造間接費の発生を一次関数（y＝a＋bx）で直線的に予定\n（y：原価，a：固定費額，b：変動費率，x：操業度）" },
+      { kind: "node", color: "plain", text: "操業度差異（実際操業度と基準操業度の差に基づく差異）の計算方法" },
       {
         kind: "branch",
         paths: [
           [
-            { kind: "node", color: "blue", text: "xが正常操業圏の範囲内" },
-            { kind: "node", color: "blue", text: "aやbは一定" },
-            { kind: "node", color: "red", text: "公式で算定した予算額に妥当性あり" },
-            { kind: "node", color: "red", text: "原価管理活動の良否を正しく判断できる" },
+            { kind: "node", color: "blue", text: "固定予算を用いる場合" },
+            { kind: "node", color: "blue", text: "予定配賦率で評価" },
+            { kind: "node", color: "blue", text: "変動費と固定費の双方から操業度差異が生じると仮定" },
           ],
           [
-            { kind: "node", color: "blue", text: "xが正常操業圏の範囲外" },
-            { kind: "node", color: "blue", text: "aやbが変化" },
-            { kind: "node", color: "red", text: "公式で算定した予算額の妥当性が低下" },
-            { kind: "node", color: "red", text: "原価管理活動の良否を正しく判断できない" },
+            { kind: "node", color: "blue", text: "変動予算を用いる場合" },
+            { kind: "node", color: "blue", text: "固定費率で評価" },
+            { kind: "node", color: "blue", text: "固定費のみから操業度差異が生じると仮定" },
+          ],
+        ],
+      },
+      { kind: "node", color: "plain", text: "いずれの仮定が理論的に妥当といえるか？" },
+      { kind: "node", color: "plain", text: "変動費資源：実際操業度に応じて投入（支出額＝消費額）" },
+      { kind: "node", color: "plain", text: "固定費資源：基準操業度に見合う分だけ投入済み（支出額≠消費額）" },
+      { kind: "node", color: "red", text: "操業度差異は固定費のみから生じる" },
+      { kind: "node", color: "red", text: "変動予算を用いる場合の計算方法の方が理論的に妥当" },
+    ],
+  },
+  {
+    id: "1-17",
+    chapterId: "ch1",
+    no: "問題1-17",
+    title: "操業度差異分析の検討",
+    importance: "B",
+    typical: "B",
+    question: "伝統的な固定費率による操業度差異分析が経営管理に役立たない理由を説明し，経営管理に役立つ操業度差異分析の方法を提案しなさい。",
+    keywords: ["全部原価計算", "生産能力の未利用に伴う損失", "機会原価", "貢献利益"],
+    ready: true,
+    flow: [
+      { kind: "node", color: "plain", text: "伝統的な操業度差異分析" },
+      { kind: "node", color: "blue", text: "固定費率×（実際操業度－基準操業度）" },
+      { kind: "node", color: "blue", text: "固定費率は人為的な変動費化の手段に過ぎない\n（固定費は生産能力の利用度とは無関係に一定額発生）" },
+      { kind: "node", color: "blue", text: "生産能力の未利用に伴う損失を示すことはできない" },
+      { kind: "node", color: "red", text: "経営管理には役立たない" },
+      { kind: "node", color: "plain", text: "生産能力の未利用に伴う損失とは何か？" },
+      { kind: "node", color: "blue", text: "生産能力を十分に利用していれば得られたはずの利益" },
+      { kind: "node", color: "blue", text: "機会原価による評価を行うのが適切" },
+      { kind: "node", color: "red", text: "製品単位当たり貢献利益×（実際販売量－予定販売量）" },
+    ],
+  },
+  {
+    id: "1-18",
+    chapterId: "ch1",
+    no: "問題1-18",
+    title: "有利な操業度差異の解釈",
+    importance: "A",
+    typical: "C",
+    question: "基準操業度として実際的生産能力を採用する場合，有利な操業度差異は生じるか。年間と月間のそれぞれの分析について検討しなさい。",
+    keywords: ["生産能力", "12分の1", "暦日差異"],
+    ready: true,
+    flow: [
+      { kind: "node", color: "plain", text: "基準操業度として実際的生産能力を採用する場合" },
+      {
+        kind: "branch",
+        paths: [
+          [
+            { kind: "node", color: "red", text: "年間の分析" },
+            { kind: "node", color: "blue", text: "生産能力を超えて稼働することは不可能" },
+            { kind: "node", color: "blue", text: "必ず実際操業度≦基準操業度となる" },
+            { kind: "node", color: "red", text: "有利な操業度差異が生じる余地はない" },
+          ],
+          [
+            { kind: "node", color: "red", text: "月間の分析" },
+            { kind: "node", color: "blue", text: "1か月は1年のちょうど12分の1ではない" },
+            { kind: "node", color: "blue", text: "当月の実際的生産能力＞年間の実際的生産能力÷12となることもある" },
+            { kind: "node", color: "red", text: "有利な操業度差異（暦日差異）が生じることがある" },
           ],
         ],
       },
     ],
   },
-  { id: "1-16", chapterId: "ch1", no: "問題1-16", title: "操業度差異の計算方法", importance: "B", typical: "B", question: "", keywords: [], ready: false, flow: [] },
-  { id: "1-17", chapterId: "ch1", no: "問題1-17", title: "操業度差異分析の検討", importance: "B", typical: "B", question: "", keywords: [], ready: false, flow: [] },
-  { id: "1-18", chapterId: "ch1", no: "問題1-18", title: "有利な操業度差異の解釈", importance: "A", typical: "C", question: "", keywords: [], ready: false, flow: [] },
-  { id: "1-19", chapterId: "ch1", no: "問題1-19", title: "操業度差異の理論的会計処理", importance: "B", typical: "B", question: "", keywords: [], ready: false, flow: [] },
+  {
+    id: "1-19",
+    chapterId: "ch1",
+    no: "問題1-19",
+    title: "操業度差異の理論的会計処理",
+    importance: "B",
+    typical: "B",
+    question: "基準操業度として①実際的生産能力，②平均操業度，③期待実際操業度を採用する場合のそれぞれについて，操業度差異の理論的会計処理を理由を付して説明しなさい。",
+    keywords: ["異常", "非原価", "平均算定期間", "相殺", "繰延", "販売予測", "少額", "多額"],
+    ready: true,
+    flow: [
+      { kind: "node", color: "plain", text: "基準操業度の選択によって操業度差異の理論的会計処理は異なる" },
+      {
+        kind: "branch",
+        paths: [
+          [
+            { kind: "node", color: "red", text: "①実際的生産能力を採用する場合" },
+            { kind: "node", color: "blue", text: "フル操業が常態の場合に採用" },
+            { kind: "node", color: "blue", text: "操業度差異が生じるのは異常な状態" },
+            { kind: "node", color: "red", text: "非原価項目" },
+          ],
+          [
+            { kind: "node", color: "red", text: "②平均操業度を採用する場合" },
+            { kind: "node", color: "blue", text: "長期的な生産と販売の均衡を念頭に設定" },
+            { kind: "node", color: "blue", text: "平均算定期間で相殺されることを期待" },
+            { kind: "node", color: "red", text: "翌年度以降に繰延" },
+          ],
+          [
+            { kind: "node", color: "red", text: "③期待実際操業度を採用する場合" },
+            { kind: "node", color: "blue", text: "次年度の販売予測に基づいて設定" },
+            {
+              kind: "branch",
+              paths: [
+                [
+                  { kind: "node", color: "blue", text: "販売予測が適切" },
+                  { kind: "node", color: "red", text: "少額（原則）" },
+                  { kind: "node", color: "red", text: "売上原価に賦課" },
+                ],
+                [
+                  { kind: "node", color: "blue", text: "販売予測が不適切" },
+                  { kind: "node", color: "red", text: "多額（例外）" },
+                  { kind: "node", color: "red", text: "期末棚卸にも配賦" },
+                ],
+              ],
+            },
+          ],
+        ],
+      },
+    ],
+  },
 ];
