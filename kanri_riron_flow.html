@@ -234,6 +234,26 @@ label.field-label {
 .prev-label { font-size: 10px; font-weight: 700; color: var(--text-3); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 4px; }
 .prev-text { white-space: pre-wrap; font-size: 12.5px; line-height: 1.6; color: var(--text-2); }
 
+.next-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-3);
+  margin-bottom: 10px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--border-strong);
+}
+.next-hint .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-3); flex-shrink: 0; }
+.next-hint.plain .dot { background: var(--text-3); }
+.next-hint.blue { color: var(--blue-color); border-color: var(--blue-border); background: var(--blue-bg); }
+.next-hint.blue .dot { background: var(--blue-color); }
+.next-hint.red { color: var(--red-color); border-color: var(--red-border); background: var(--red-bg); }
+.next-hint.red .dot { background: var(--red-color); }
+
 .flow-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -364,6 +384,8 @@ label.field-label {
       <div class="flow-kind-label" id="flow-kind-label"></div>
       <div id="flow-body"></div>
     </div>
+
+    <div class="next-hint hidden" id="next-hint"></div>
 
     <div class="score-row hidden" id="score-row">
       <button class="score-btn know" onclick="scoreNode(true)"><span class="mark">○</span>分かった</button>
@@ -660,6 +682,31 @@ function renderPrevCard(pointer) {
   document.getElementById('prev-text').textContent = prevNode.text;
 }
 
+// 次のステップが「暗記対象外（無色）」「結論（赤）」「理由・根拠（青）」のいずれかを事前に示す
+function renderNextHint(pointer) {
+  const hintEl = document.getElementById('next-hint');
+  const next = session.flat[pointer + 1];
+
+  if (!next) {
+    hintEl.className = 'next-hint plain';
+    hintEl.innerHTML = '<span class="dot"></span>次: キーワード一覧へ';
+    return;
+  }
+  if (next.kind === 'divider') {
+    hintEl.className = 'next-hint plain';
+    hintEl.innerHTML = '<span class="dot"></span>次: 分岐点に戻ります（暗記対象外）';
+    return;
+  }
+  // next.kind === 'node'
+  const labels = {
+    plain: '暗記対象外（自動表示）',
+    blue: '理由・根拠（青マーカー・暗記対象）',
+    red: '結論（赤マーカー・暗記対象）',
+  };
+  hintEl.className = 'next-hint ' + next.color;
+  hintEl.innerHTML = '<span class="dot"></span>次: ' + labels[next.color];
+}
+
 function renderFlow() {
   const p = currentProblem();
   document.getElementById('progress-label').textContent = '問題 ' + (session.pIndex + 1) + ' / ' + session.queue.length;
@@ -681,6 +728,7 @@ function renderFlow() {
   if (session.stepPointer === -1) {
     // 問題文画面
     document.getElementById('prev-card').classList.add('hidden');
+    document.getElementById('next-hint').classList.add('hidden');
     document.getElementById('progress-num').textContent = '問題文';
     card.classList.add('question');
     kindLabel.textContent = '問題';
@@ -692,11 +740,14 @@ function renderFlow() {
 
   if (session.stepPointer >= session.flat.length) {
     document.getElementById('prev-card').classList.add('hidden');
+    document.getElementById('next-hint').classList.add('hidden');
     renderSummary();
     return;
   }
 
   renderPrevCard(session.stepPointer);
+  document.getElementById('next-hint').classList.remove('hidden');
+  renderNextHint(session.stepPointer);
 
   const step = session.flat[session.stepPointer];
   document.getElementById('progress-num').textContent = 'ステップ ' + (session.stepPointer + 1) + ' / ' + session.flat.length;
