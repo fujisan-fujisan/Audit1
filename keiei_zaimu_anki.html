@@ -348,8 +348,8 @@ label.field-label.sub { margin-top: 14px; }
     <div class="card">
       <label class="field-label">出題順</label>
       <div class="order-toggle">
-        <button class="order-btn active" id="order-random" onclick="setOrder('random')">ランダム</button>
-        <button class="order-btn" id="order-sequential" onclick="setOrder('sequential')">順番</button>
+        <button class="order-btn active" id="order-sequential" onclick="setOrder('sequential')">順番</button>
+        <button class="order-btn" id="order-random" onclick="setOrder('random')">ランダム</button>
       </div>
       <div class="priority-toggle-row">
         <label class="field-label" for="priority-switch">「今日の10問」（苦手優先クイックセッション）</label>
@@ -427,7 +427,7 @@ let selectedTopics = new Set();
 let openChapters = {};
 let openSections = {};
 let searchQuery = '';
-let orderMode = 'random';
+let orderMode = 'sequential';
 let quickMode = false;
 
 let session = null; // { queue: [...cards], index, results: [], flipped }
