@@ -673,12 +673,9 @@ function scoreCard(known) {
   recordCardResult(card.id, known);
   session.results.push({ card: card, known: known });
 
-  // 苦手優先の再出題: 「分からなかった」はこのセッション内で少し先に再度出題する
-  if (!known) {
-    const insertAt = Math.min(session.queue.length, session.index + 1 + Math.min(4, session.queue.length - session.index - 1));
-    session.queue.splice(insertAt, 0, card);
-    session.total = session.queue.length;
-  }
+  // このセッション内での再出題はしない（出題数が際限なく増えるのを避けるため）。
+  // 「分からなかった」カードは localStorage の履歴に基づき、次回以降の
+  // 「今日の10問」モードで優先的に再出題される。
 
   if (session.index + 1 < session.queue.length) {
     session.index += 1;
