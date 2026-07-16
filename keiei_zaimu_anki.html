@@ -451,6 +451,16 @@ function escapeHtml(s) {
   return div.innerHTML;
 }
 
+// 解答文を読みやすく整形する: 丸数字（①②③…）の箇条書きや、句点で区切られた
+// 複数の文からなる解答は、項目・文ごとに改行する（.flip-text の white-space:
+// pre-wrap により \n がそのまま改行として表示される）。
+function formatAnswerText(text) {
+  let t = text.replace(/[ 　]*([①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮])/g, '\n$1');
+  t = t.replace(/^\n/, '');
+  t = t.replace(/。(?!$)/g, '。\n');
+  return t;
+}
+
 // ============================================================================
 // 出題範囲: 章・節ツリー
 // ============================================================================
@@ -662,7 +672,7 @@ function flipCard() {
   session.flipped = true;
   document.getElementById('flip-card').classList.add('answered');
   document.getElementById('flip-face-label').textContent = 'A';
-  document.getElementById('flip-text').innerHTML = '<div class="answer-block">' + escapeHtml(card.a) + '</div>';
+  document.getElementById('flip-text').innerHTML = '<div class="answer-block">' + escapeHtml(formatAnswerText(card.a)) + '</div>';
   document.getElementById('flip-hint').textContent = '';
   document.getElementById('score-row').classList.remove('hidden');
 }
