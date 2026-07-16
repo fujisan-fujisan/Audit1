@@ -833,9 +833,11 @@ document.addEventListener('keydown', function (e) {
   if (e.code === 'Space') {
     e.preventDefault();
     if (!session.flipped) flipCard();
-  } else if (session.flipped && (e.key === '1')) {
+  } else if (session.flipped && (e.key === '1' || e.key === 'ArrowLeft')) {
+    e.preventDefault();
     scoreCard(true);
-  } else if (session.flipped && (e.key === '2')) {
+  } else if (session.flipped && (e.key === '2' || e.key === 'ArrowRight')) {
+    e.preventDefault();
     scoreCard(false);
   }
 });
