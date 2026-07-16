@@ -134,8 +134,24 @@ label.field-label.sub { margin-top: 14px; }
   font-size: 11px; color: transparent; font-weight: 700;
 }
 .sec-check.checked { background: var(--accent); border-color: var(--accent); color: #fff; }
+.sec-check.partial { background: var(--surface); border-color: var(--accent); color: var(--accent); }
 .sec-name { flex: 1; font-size: 12.5px; }
 .sec-count { font-size: 10.5px; color: var(--text-3); font-family: 'DM Mono', monospace; flex-shrink: 0; }
+.sec-chevron { color: var(--text-3); font-size: 9px; transition: transform .15s; flex-shrink: 0; width: 12px; text-align: center; }
+.sec-block.open .sec-chevron { transform: rotate(90deg); }
+
+.topic-body { display: none; padding: 2px 0 4px 26px; }
+.sec-block.open .topic-body { display: block; }
+.topic-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; cursor: pointer; user-select: none; }
+.topic-check {
+  flex-shrink: 0; width: 16px; height: 16px; border-radius: 4px;
+  border: 1px solid var(--border-strong); background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: transparent; font-weight: 700;
+}
+.topic-check.checked { background: var(--accent); border-color: var(--accent); color: #fff; }
+.topic-name { flex: 1; font-size: 12px; color: var(--text-2); }
+.topic-count { font-size: 10px; color: var(--text-3); font-family: 'DM Mono', monospace; flex-shrink: 0; }
 
 .order-toggle { display: flex; gap: 8px; margin-bottom: 4px; }
 .order-btn {
@@ -243,7 +259,9 @@ label.field-label.sub { margin-top: 14px; }
   user-select: none;
 }
 .flip-face-label { font-size: 11px; font-weight: 700; color: var(--text-3); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px; }
-.flip-cat-label { font-size: 11px; color: var(--text-3); margin-bottom: 4px; }
+.flip-card-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+.flip-cat-label { font-size: 11px; color: var(--text-3); }
+.flip-page-label { font-size: 10.5px; color: var(--text-3); font-family: 'DM Mono', monospace; flex-shrink: 0; white-space: nowrap; }
 .flip-text {
   white-space: pre-wrap;
   font-size: 16px;
@@ -353,7 +371,10 @@ label.field-label.sub { margin-top: 14px; }
     </div>
 
     <div class="flip-card" id="flip-card" onclick="onCardTap()">
-      <div class="flip-cat-label" id="flip-cat-label"></div>
+      <div class="flip-card-top">
+        <div class="flip-cat-label" id="flip-cat-label"></div>
+        <div class="flip-page-label" id="flip-page-label"></div>
+      </div>
       <div class="flip-face-label" id="flip-face-label">Q</div>
       <div class="flip-text" id="flip-text"></div>
       <div class="flip-hint" id="flip-hint">タップ／スペースキーでめくる</div>
@@ -397,12 +418,14 @@ label.field-label.sub { margin-top: 14px; }
 // ============================================================================
 // 定数・状態
 // ============================================================================
-const PROGRESS_KEY = 'keiei-zaimu-anki-progress-v1';
+const PROGRESS_KEY = 'keiei-zaimu-anki-progress-v2';
 let progress = {}; // { [cardId]: { known: n, unknown: n, lastResult: 'o'|'x'|null } }
 
 let selectedChapters = new Set();
 let selectedSections = new Set();
+let selectedTopics = new Set();
 let openChapters = {};
+let openSections = {};
 let searchQuery = '';
 let orderMode = 'random';
 let quickMode = false;
@@ -462,7 +485,7 @@ function formatAnswerText(text) {
 }
 
 // ============================================================================
-// 出題範囲: 章・節ツリー
+// 出題範囲: 章・節・論点ツリー（3階層。節に論点がなければ節自体が末端）
 // ============================================================================
 function chapterCards(chId) {
   return ZAIMU_CARDS.filter(function (c) { return c.chapterId === chId; });
@@ -470,16 +493,53 @@ function chapterCards(chId) {
 function sectionCards(secId) {
   return ZAIMU_CARDS.filter(function (c) { return c.sectionId === secId; });
 }
+function topicCards(topId) {
+  return ZAIMU_CARDS.filter(function (c) { return c.topicId === topId; });
+}
+
+// 節が末端（論点を持たない）かどうか
+function isSectionLeaf(sec) { return sec.topics.length === 0; }
+
+function isSectionFullySelected(sec) {
+  if (isSectionLeaf(sec)) return selectedSections.has(sec.id);
+  return sec.topics.every(function (t) { return selectedTopics.has(t.id); });
+}
+function isSectionPartiallySelected(sec) {
+  if (isSectionLeaf(sec)) return false;
+  const any = sec.topics.some(function (t) { return selectedTopics.has(t.id); });
+  return any && !isSectionFullySelected(sec);
+}
+function sectionHasAnySelected(sec) {
+  if (isSectionLeaf(sec)) return selectedSections.has(sec.id);
+  return sec.topics.some(function (t) { return selectedTopics.has(t.id); });
+}
 
 function isChapterFullySelected(ch) {
   if (ch.sections.length === 0) return selectedChapters.has(ch.id);
-  return ch.sections.every(function (s) { return selectedSections.has(s.id); });
+  return ch.sections.every(isSectionFullySelected);
 }
 function isChapterPartiallySelected(ch) {
   if (ch.sections.length === 0) return false;
-  const any = ch.sections.some(function (s) { return selectedSections.has(s.id); });
-  const all = isChapterFullySelected(ch);
-  return any && !all;
+  const any = ch.sections.some(sectionHasAnySelected);
+  return any && !isChapterFullySelected(ch);
+}
+
+function setSectionAll(sec, on) {
+  if (isSectionLeaf(sec)) {
+    if (on) selectedSections.add(sec.id); else selectedSections.delete(sec.id);
+  } else {
+    sec.topics.forEach(function (t) {
+      if (on) selectedTopics.add(t.id); else selectedTopics.delete(t.id);
+    });
+  }
+}
+
+function findSection(secId) {
+  for (const ch of ZAIMU_CHAPTERS) {
+    const sec = ch.sections.find(function (s) { return s.id === secId; });
+    if (sec) return sec;
+  }
+  return null;
 }
 
 function toggleChapterAll(chId) {
@@ -488,22 +548,32 @@ function toggleChapterAll(chId) {
   if (ch.sections.length === 0) {
     if (nowFull) selectedChapters.delete(chId); else selectedChapters.add(chId);
   } else {
-    ch.sections.forEach(function (s) {
-      if (nowFull) selectedSections.delete(s.id); else selectedSections.add(s.id);
-    });
+    ch.sections.forEach(function (s) { setSectionAll(s, !nowFull); });
   }
   renderChapterTree();
   onFilterChanged();
 }
 
-function toggleSection(secId) {
-  if (selectedSections.has(secId)) selectedSections.delete(secId); else selectedSections.add(secId);
+function toggleSectionAll(secId) {
+  const sec = findSection(secId);
+  setSectionAll(sec, !isSectionFullySelected(sec));
+  renderChapterTree();
+  onFilterChanged();
+}
+
+function toggleTopic(topId) {
+  if (selectedTopics.has(topId)) selectedTopics.delete(topId); else selectedTopics.add(topId);
   renderChapterTree();
   onFilterChanged();
 }
 
 function toggleChapterOpen(chId) {
   openChapters[chId] = !openChapters[chId];
+  renderChapterTree();
+}
+
+function toggleSectionOpen(secId) {
+  openSections[secId] = !openSections[secId];
   renderChapterTree();
 }
 
@@ -526,14 +596,35 @@ function renderChapterTree() {
       '</div>';
     if (ch.sections.length) {
       html += '<div class="sec-body">';
-      ch.sections.forEach(function (s) {
-        const sc = sectionCards(s.id);
-        const checked = selectedSections.has(s.id);
-        html += '<div class="sec-row" onclick="toggleSection(\'' + s.id + '\')">' +
-          '<span class="sec-check' + (checked ? ' checked' : '') + '">' + (checked ? '✓' : '') + '</span>' +
-          '<span class="sec-name">' + escapeHtml(s.name) + '</span>' +
-          '<span class="sec-count">' + sc.length + '問</span>' +
-        '</div>';
+      ch.sections.forEach(function (sec) {
+        const sc = sectionCards(sec.id);
+        const leaf = isSectionLeaf(sec);
+        const secFull = isSectionFullySelected(sec);
+        const secPartial = isSectionPartiallySelected(sec);
+        const secCheckClass = secFull ? 'checked' : (secPartial ? 'partial' : '');
+        const secCheckMark = secFull ? '✓' : (secPartial ? '－' : '');
+        const secOpen = openSections[sec.id] === true;
+        html += '<div class="sec-block' + (secOpen ? ' open' : '') + '">' +
+          '<div class="sec-row" onclick="' + (leaf ? ('toggleSectionAll(\'' + sec.id + '\')') : ('toggleSectionOpen(\'' + sec.id + '\')')) + '">' +
+            '<span class="sec-check ' + secCheckClass + '" onclick="event.stopPropagation();toggleSectionAll(\'' + sec.id + '\')">' + secCheckMark + '</span>' +
+            '<span class="sec-name">' + escapeHtml(sec.name) + '</span>' +
+            '<span class="sec-count">' + sc.length + '問</span>' +
+            (leaf ? '' : '<span class="sec-chevron">▶</span>') +
+          '</div>';
+        if (!leaf) {
+          html += '<div class="topic-body">';
+          sec.topics.forEach(function (top) {
+            const tc = topicCards(top.id);
+            const checked = selectedTopics.has(top.id);
+            html += '<div class="topic-row" onclick="toggleTopic(\'' + top.id + '\')">' +
+              '<span class="topic-check' + (checked ? ' checked' : '') + '">' + (checked ? '✓' : '') + '</span>' +
+              '<span class="topic-name">' + escapeHtml(top.name) + '</span>' +
+              '<span class="topic-count">' + tc.length + '問</span>' +
+            '</div>';
+          });
+          html += '</div>';
+        }
+        html += '</div>';
       });
       html += '</div>';
     }
@@ -546,7 +637,10 @@ function renderChapterTree() {
 // 出題対象カードの絞り込み
 // ============================================================================
 function matchesFilter(card) {
-  const inScope = card.sectionId ? selectedSections.has(card.sectionId) : selectedChapters.has(card.chapterId);
+  let inScope;
+  if (card.topicId) inScope = selectedTopics.has(card.topicId);
+  else if (card.sectionId) inScope = selectedSections.has(card.sectionId);
+  else inScope = selectedChapters.has(card.chapterId);
   if (!inScope) return false;
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
@@ -645,6 +739,11 @@ function sectionOf(card) {
   const ch = chapterOf(card);
   return ch.sections.find(function (s) { return s.id === card.sectionId; });
 }
+function topicOf(card) {
+  if (!card.topicId) return null;
+  const sec = sectionOf(card);
+  return sec.topics.find(function (t) { return t.id === card.topicId; });
+}
 
 function renderCard() {
   const card = currentCard();
@@ -654,7 +753,12 @@ function renderCard() {
 
   const ch = chapterOf(card);
   const sec = sectionOf(card);
-  document.getElementById('flip-cat-label').textContent = ch.name + (sec ? ' ＞ ' + sec.name : '');
+  const top = topicOf(card);
+  let catLabel = ch.name;
+  if (sec) catLabel += ' ＞ ' + sec.name;
+  if (top) catLabel += ' ＞ ' + top.name;
+  document.getElementById('flip-cat-label').textContent = catLabel;
+  document.getElementById('flip-page-label').textContent = card.page ? 'p.' + card.page : '';
   document.getElementById('flip-card').classList.remove('answered');
   document.getElementById('flip-face-label').textContent = 'Q';
   document.getElementById('flip-text').innerHTML = escapeHtml(card.q);
