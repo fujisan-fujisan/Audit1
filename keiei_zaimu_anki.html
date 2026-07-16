@@ -400,9 +400,8 @@ label.field-label.sub { margin-top: 14px; }
 const PROGRESS_KEY = 'keiei-zaimu-anki-progress-v1';
 let progress = {}; // { [cardId]: { known: n, unknown: n, lastResult: 'o'|'x'|null } }
 
-let selectedChapters = new Set(ZAIMU_CHAPTERS.map(function (c) { return c.id; }));
+let selectedChapters = new Set();
 let selectedSections = new Set();
-ZAIMU_CHAPTERS.forEach(function (c) { c.sections.forEach(function (s) { selectedSections.add(s.id); }); });
 let openChapters = {};
 let searchQuery = '';
 let orderMode = 'random';
