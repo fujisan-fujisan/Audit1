@@ -713,7 +713,7 @@ function renderPrevCard(pointer) {
 
 // 分岐点となるノードにつける統一バッジ（前のステップ表示・現在のステップ表示で共通利用）
 function branchFlagHtml(count) {
-  return '<span class="branch-flag">🔀 分岐点' + (count ? '（' + count + '方向に分岐）' : '') + '</span>';
+  return '<span class="branch-flag">分岐点' + (count ? '（' + count + '方向に分岐）' : '') + '</span>';
 }
 
 function renderBranchFlag(step) {
@@ -726,23 +726,18 @@ function renderBranchFlag(step) {
   }
 }
 
-// 次のステップが「暗記対象外（無色）」「結論（赤）」「理由・根拠（青）」のいずれかを事前に示す
+// 次のステップの色だけを事前に示す（枠の色で暗記対象かどうかを判断できるため文言は最小限にする）
 function renderNextHint(pointer) {
   const hintEl = document.getElementById('next-hint');
   const next = session.flat[pointer + 1];
 
   if (!next) {
     hintEl.className = 'next-hint plain';
-    hintEl.innerHTML = '<span class="dot"></span>次: キーワード一覧へ';
+    hintEl.innerHTML = '<span class="dot"></span>次: キーワード一覧';
     return;
   }
-  const labels = {
-    plain: '暗記対象外（自動表示）',
-    blue: '理由・根拠（青マーカー・暗記対象）',
-    red: '結論（赤マーカー・暗記対象）',
-  };
   hintEl.className = 'next-hint ' + next.color;
-  hintEl.innerHTML = '<span class="dot"></span>次: ' + labels[next.color];
+  hintEl.innerHTML = '<span class="dot"></span>次';
 }
 
 function renderFlow() {
@@ -807,11 +802,11 @@ function renderFlow() {
   card.classList.add(step.color);
   if (!session.revealed) {
     card.classList.add('hidden-state');
-    kindLabel.textContent = step.color === 'red' ? '結論（暗記対象）' : '前提・根拠（暗記対象）';
-    body.innerHTML = '<div class="hidden-placeholder"><span class="mark">？</span>次に続く語句・文章を思い出してください</div>';
+    kindLabel.textContent = '';
+    body.innerHTML = '<div class="hidden-placeholder"><span class="mark">？</span></div>';
   } else {
     card.classList.add('revealed');
-    kindLabel.textContent = step.color === 'red' ? '結論（暗記対象）' : '前提・根拠（暗記対象）';
+    kindLabel.textContent = '';
     body.innerHTML = '<div class="flow-text">' + escapeHtml(step.text) + '</div>';
     scoreRow.classList.remove('hidden');
   }
