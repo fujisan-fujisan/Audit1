@@ -234,6 +234,20 @@ label.field-label {
 .prev-label { font-size: 10px; font-weight: 700; color: var(--text-3); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 4px; }
 .prev-text { white-space: pre-wrap; font-size: 12.5px; line-height: 1.6; color: var(--text-2); }
 
+/* 分岐点であることを示す統一バッジ（前のステップ表示・現在のステップ表示で共通） */
+.branch-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 99px;
+  background: #f1e9fb;
+  color: #6b3fa0;
+}
+.branch-flag-row { margin-bottom: 10px; }
+
 .next-hint {
   display: flex;
   align-items: center;
@@ -270,8 +284,6 @@ label.field-label {
 .flow-text { white-space: pre-wrap; font-size: 16px; line-height: 1.85; color: var(--text); text-align: center; }
 .flow-card.question .flow-text { text-align: left; font-size: 15px; }
 .flow-card.plain { border-style: solid; }
-.flow-card.divider { background: #f5f5f3; }
-.flow-card.divider .flow-text { font-size: 13px; color: var(--text-2); }
 
 .flow-card.blue.hidden-state { cursor: pointer; border: 1px dashed var(--blue-border); background: #fbfcff; }
 .flow-card.red.hidden-state { cursor: pointer; border: 1px dashed var(--red-border); background: #fffaf9; }
@@ -381,6 +393,7 @@ label.field-label {
     </div>
 
     <div class="flow-card" id="flow-card" onclick="onCardTap()">
+      <div class="branch-flag-row hidden" id="branch-flag-current"></div>
       <div class="flow-kind-label" id="flow-kind-label"></div>
       <div id="flow-body"></div>
     </div>
@@ -476,7 +489,9 @@ function escapeHtml(s) {
 
 // ============================================================================
 // ロジカルフローの平坦化
-//   branch は各 path を自動で順番に辿り、path の切れ目に divider を挿む
+//   branch は各 path を自動で順番に辿る（区切り専用のステップは作らない）。
+//   分岐点となったノードには branchCount（何方向に分岐するか）を，
+//   2つ目以降の path の最初のノードには branchAnchor（分岐点ノードそのもの）を付与する。
 // ============================================================================
 function flattenFlow(flow) {
   const out = [];
@@ -488,10 +503,14 @@ function flattenFlow(flow) {
         out.push(node);
         lastNode = node;
       } else if (seg.kind === 'branch') {
-        const anchor = lastNode; // 分岐に入る直前のノード＝分岐点。全ての区切りで共通して使う
+        const anchor = lastNode; // 分岐に入る直前のノード＝分岐点。全てのpathで共通して使う
+        if (anchor) anchor.branchCount = seg.paths.length;
         seg.paths.forEach(function (path, i) {
-          if (i > 0) out.push({ kind: 'divider', anchor: anchor });
+          const startIdx = out.length;
           walk(path);
+          if (i > 0 && anchor && out[startIdx]) {
+            out[startIdx].branchAnchor = anchor;
+          }
         });
       }
     });
@@ -667,29 +686,44 @@ function nodeKeyFor(problemId, idx) {
 }
 
 // 「1つ前」として表示すべきノードを決める。
-//   ・今が分岐の区切り（分岐点に戻る画面）なら，その分岐の分岐点ノードを返す
-//   ・今が分岐直後の最初のノードなら，同じく分岐点ノードを返す（直前の分岐で
-//     最後に解いた文章ではなく，分岐点の文章・語句を見せるため）
+//   ・今のノードが分岐点から戻ってきた最初のノード（branchAnchor付き）なら，
+//     直前の分岐で最後に解いた文章ではなく，分岐点そのものを返す
 //   ・それ以外は単純に1つ前のノードを返す
 function findPrevNode(pointer) {
-  if (pointer < 0 || pointer >= session.flat.length) return null;
+  if (pointer <= 0 || pointer >= session.flat.length) return null;
   const cur = session.flat[pointer];
-  if (cur.kind === 'divider') return cur.anchor || null;
-  if (pointer === 0) return null;
+  if (cur.branchAnchor) return { node: cur.branchAnchor, isBranchPoint: true };
   const prior = session.flat[pointer - 1];
-  if (prior.kind === 'divider') return prior.anchor || null;
-  return prior;
+  return { node: prior, isBranchPoint: false };
 }
 
 function renderPrevCard(pointer) {
   const prevCard = document.getElementById('prev-card');
-  const prevNode = findPrevNode(pointer);
-  if (!prevNode) {
+  const prevLabel = document.getElementById('prev-label');
+  const prevInfo = findPrevNode(pointer);
+  if (!prevInfo || !prevInfo.node) {
     prevCard.classList.add('hidden');
     return;
   }
+  const prevNode = prevInfo.node;
   prevCard.className = 'prev-card' + (prevNode.color !== 'plain' ? ' ' + prevNode.color : '');
+  prevLabel.innerHTML = prevInfo.isBranchPoint ? branchFlagHtml() : '前のステップ';
   document.getElementById('prev-text').textContent = prevNode.text;
+}
+
+// 分岐点となるノードにつける統一バッジ（前のステップ表示・現在のステップ表示で共通利用）
+function branchFlagHtml(count) {
+  return '<span class="branch-flag">🔀 分岐点' + (count ? '（' + count + '方向に分岐）' : '') + '</span>';
+}
+
+function renderBranchFlag(step) {
+  const el = document.getElementById('branch-flag-current');
+  if (step && step.branchCount) {
+    el.innerHTML = branchFlagHtml(step.branchCount);
+    el.classList.remove('hidden');
+  } else {
+    el.classList.add('hidden');
+  }
 }
 
 // 次のステップが「暗記対象外（無色）」「結論（赤）」「理由・根拠（青）」のいずれかを事前に示す
@@ -702,12 +736,6 @@ function renderNextHint(pointer) {
     hintEl.innerHTML = '<span class="dot"></span>次: キーワード一覧へ';
     return;
   }
-  if (next.kind === 'divider') {
-    hintEl.className = 'next-hint plain';
-    hintEl.innerHTML = '<span class="dot"></span>次: 分岐点に戻ります（暗記対象外）';
-    return;
-  }
-  // next.kind === 'node'
   const labels = {
     plain: '暗記対象外（自動表示）',
     blue: '理由・根拠（青マーカー・暗記対象）',
@@ -739,6 +767,7 @@ function renderFlow() {
     // 問題文画面
     document.getElementById('prev-card').classList.add('hidden');
     document.getElementById('next-hint').classList.add('hidden');
+    document.getElementById('branch-flag-current').classList.add('hidden');
     document.getElementById('progress-num').textContent = '問題文';
     card.classList.add('question');
     kindLabel.textContent = '問題';
@@ -751,25 +780,18 @@ function renderFlow() {
   if (session.stepPointer >= session.flat.length) {
     document.getElementById('prev-card').classList.add('hidden');
     document.getElementById('next-hint').classList.add('hidden');
+    document.getElementById('branch-flag-current').classList.add('hidden');
     renderSummary();
     return;
   }
 
+  const step = session.flat[session.stepPointer];
   renderPrevCard(session.stepPointer);
+  renderBranchFlag(step);
   document.getElementById('next-hint').classList.remove('hidden');
   renderNextHint(session.stepPointer);
 
-  const step = session.flat[session.stepPointer];
   document.getElementById('progress-num').textContent = 'ステップ ' + (session.stepPointer + 1) + ' / ' + session.flat.length;
-
-  if (step.kind === 'divider') {
-    card.classList.add('divider');
-    kindLabel.textContent = '分岐';
-    body.innerHTML = '<div class="flow-text">🔀 分岐点に戻り，もう一方の分岐を確認します</div>';
-    nextBtn.textContent = '次へ';
-    nextBtn.classList.remove('hidden');
-    return;
-  }
 
   // step.kind === 'node'
   if (step.color === 'plain') {
