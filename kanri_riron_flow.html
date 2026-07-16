@@ -252,7 +252,6 @@ label.field-label {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
   font-size: 12px;
   font-weight: 700;
   color: var(--text-3);
@@ -261,12 +260,20 @@ label.field-label {
   border-radius: var(--radius-sm);
   border: 1px dashed var(--border-strong);
 }
-.next-hint .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-3); flex-shrink: 0; }
-.next-hint.plain .dot { background: var(--text-3); }
 .next-hint.blue { color: var(--blue-color); border-color: var(--blue-border); background: var(--blue-bg); }
-.next-hint.blue .dot { background: var(--blue-color); }
 .next-hint.red { color: var(--red-color); border-color: var(--red-border); background: var(--red-bg); }
-.next-hint.red .dot { background: var(--red-color); }
+.next-hint.branch {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  text-align: left;
+  color: #6b3fa0;
+  border: 1px solid #d9c6ef;
+  background: #f7f2fc;
+  padding: 8px 12px;
+}
+.next-hint-top { display: flex; align-items: center; gap: 6px; }
+.next-hint-text { white-space: pre-wrap; font-size: 12.5px; font-weight: 500; color: #6b3fa0; margin-top: 4px; }
 
 .flow-card {
   background: var(--surface);
@@ -726,18 +733,26 @@ function renderBranchFlag(step) {
   }
 }
 
-// 次のステップの色だけを事前に示す（枠の色で暗記対象かどうかを判断できるため文言は最小限にする）
+// 次のステップの色だけを事前に示す（枠の色で暗記対象かどうかを判断できるため文言は最小限にする）。
+// ただし次が分岐点に戻る最初のノードの場合は，分岐点であることとその文章を先に見せる。
 function renderNextHint(pointer) {
   const hintEl = document.getElementById('next-hint');
   const next = session.flat[pointer + 1];
 
   if (!next) {
     hintEl.className = 'next-hint plain';
-    hintEl.innerHTML = '<span class="dot"></span>次: キーワード一覧';
+    hintEl.textContent = '次: キーワード一覧';
+    return;
+  }
+  if (next.branchAnchor) {
+    hintEl.className = 'next-hint branch';
+    hintEl.innerHTML =
+      '<div class="next-hint-top">次: ' + branchFlagHtml() + '</div>' +
+      '<div class="next-hint-text">' + escapeHtml(next.branchAnchor.text) + '</div>';
     return;
   }
   hintEl.className = 'next-hint ' + next.color;
-  hintEl.innerHTML = '<span class="dot"></span>次';
+  hintEl.textContent = '次';
 }
 
 function renderFlow() {
