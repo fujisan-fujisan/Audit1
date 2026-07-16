@@ -694,6 +694,15 @@ function shuffleInPlace(arr) {
   return arr;
 }
 
+// page（例："②-50"、"④-16,17"）を「テキスト巻数＋ページ番号」の順序キーに変換する。
+// 複数ページ・複数巻にまたがる表記（"④-84,⑧-19"等）は先頭の1件のみを使う。
+const PAGE_VOLUME_ORDER = '①②③④⑤⑥⑦⑧⑨⑩';
+function pageSortKey(page) {
+  const m = page && page.match(/^([①②③④⑤⑥⑦⑧⑨⑩])-(\d+)/);
+  if (!m) return [PAGE_VOLUME_ORDER.length, 0];
+  return [PAGE_VOLUME_ORDER.indexOf(m[1]), parseInt(m[2], 10)];
+}
+
 function buildQueue() {
   let pool = filteredCards();
   if (quickMode) {
@@ -705,7 +714,13 @@ function buildQueue() {
   if (orderMode === 'random') {
     pool = shuffleInPlace(pool.slice());
   } else {
-    pool = pool.slice().sort(function (a, b) { return a.id - b.id; });
+    // 順番出題: テキストの参照ページ（page）の並び順に出題する
+    pool = pool.slice().sort(function (a, b) {
+      const ka = pageSortKey(a.page), kb = pageSortKey(b.page);
+      if (ka[0] !== kb[0]) return ka[0] - kb[0];
+      if (ka[1] !== kb[1]) return ka[1] - kb[1];
+      return a.id - b.id;
+    });
   }
   return pool;
 }
