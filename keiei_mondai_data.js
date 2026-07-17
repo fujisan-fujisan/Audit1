@@ -620,9 +620,14 @@ const KEIEI_PROBLEMS_FINANCE2 = [
   {
     num: "2-21", ch: "f2-ch2", title: "債券投資①（債券価格，デュレーション，フォワードレート等）", difficulty: "C",
     items: mkItems("finance2__2-21", [
-      { label: "問1", imp: "①~⑧A-A ⑤⑩C+-C+", rotationLeft: 3, rotationRight: 2, flags: ["④~⑩キーワード"] },
-      { label: "問2", imp: "(1)(2)B-B (3)(4)C+-C+", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
-      { label: "問3", imp: "B-C+", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
+      { label: "問題1-問1", imp: "①~⑧A-A ⑤⑩C+-C+", rotationLeft: 3, rotationRight: 2, flags: ["④~⑩キーワード"] },
+      { label: "問題1-問2", imp: "(1)(2)B-B (3)(4)C+-C+", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
+      { label: "問題1-問3", imp: "B-C+", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
+      { label: "問題2", imp: "⑤以外A-A ⑤C+-C+", rotationLeft: 3, rotationRight: 2, flags: ["②③⑥⑦キーワード", "②③のみ★"] },
+      { label: "問題3", imp: "①③A-A ②B-B", rotationLeft: 3, rotationRight: 2, flags: ["②③設例なし", "★"] },
+      { label: "問題4-問1", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["設例なし", "★"] },
+      { label: "問題4-問2", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["設例なし", "★"] },
+      { label: "問題5", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["設例なし", "★"] },
     ]),
   },
   {
