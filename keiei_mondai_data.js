@@ -648,7 +648,7 @@ const KEIEI_PROBLEMS_FINANCE2 = [
     num: "2-23", ch: "f2-ch2", title: "債券投資③（債券投資戦略，その他）", difficulty: "B",
     items: mkItems("finance2__2-23", [
       { label: "問題1(1)(2)", imp: "B-B", rotationLeft: 2, rotationRight: 1, flags: ["(2)キーワード"] },
-      { label: "問題2", imp: "C+-C+", rotationLeft: 1, rotationRight: 1, flags: ["設例なし", "★"] },
+      { label: "問題2", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["設例なし", "★"] },
       { label: "問題3", imp: "C+-C+", rotationLeft: 1, rotationRight: 1, flags: ["設例なし"] },
     ]),
   },
