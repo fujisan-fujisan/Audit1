@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>経営学（財務管理）暗記カード</title>
+<title>経営学暗記カード</title>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#ffffff">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -317,7 +317,7 @@ label.field-label.sub { margin-top: 14px; }
 
 <div class="header">
   <div class="header-row">
-    <div class="app-title">経営学（財務管理）暗記カード</div>
+    <div class="app-title">経営学暗記カード</div>
     <div class="header-actions">
       <button class="btn-icon" onclick="exportProgress()">バックアップ</button>
       <button class="btn-icon" onclick="document.getElementById('import-input').click()">復元</button>
@@ -694,13 +694,17 @@ function shuffleInPlace(arr) {
   return arr;
 }
 
-// page（例："②-50"、"④-16,17"）を「テキスト巻数＋ページ番号」の順序キーに変換する。
+// page（例："②-50"、"⑳-9"、"俯瞰図-14"）を「テキスト巻数＋ページ番号」の順序キーに変換する。
 // 複数ページ・複数巻にまたがる表記（"④-84,⑧-19"等）は先頭の1件のみを使う。
-const PAGE_VOLUME_ORDER = '①②③④⑤⑥⑦⑧⑨⑩';
+// 「俯瞰図-N」（第17章）は⑰と同じ巻番号として扱い、章の並び順に自然に収まるようにする。
+const PAGE_VOLUME_ORDER = '①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳';
 function pageSortKey(page) {
-  const m = page && page.match(/^([①②③④⑤⑥⑦⑧⑨⑩])-(\d+)/);
-  if (!m) return [PAGE_VOLUME_ORDER.length, 0];
-  return [PAGE_VOLUME_ORDER.indexOf(m[1]), parseInt(m[2], 10)];
+  if (!page) return [PAGE_VOLUME_ORDER.length, 0];
+  const m = page.match(/^([①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳])-(\d+)/);
+  if (m) return [PAGE_VOLUME_ORDER.indexOf(m[1]), parseInt(m[2], 10)];
+  const m2 = page.match(/^俯瞰図-(\d+)/);
+  if (m2) return [PAGE_VOLUME_ORDER.indexOf('⑰'), parseInt(m2[1], 10)];
+  return [PAGE_VOLUME_ORDER.length, 0];
 }
 
 function buildQueue() {
@@ -763,7 +767,7 @@ function topicOf(card) {
 function renderCard() {
   const card = currentCard();
   session.flipped = false;
-  document.getElementById('progress-label').textContent = '経営学（財務管理）暗記カード';
+  document.getElementById('progress-label').textContent = '経営学暗記カード';
   document.getElementById('progress-num').textContent = (session.index + 1) + ' / ' + session.total;
 
   const ch = chapterOf(card);
