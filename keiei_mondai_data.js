@@ -303,7 +303,7 @@ const KEIEI_PROBLEMS_FINANCE1 = [
     num: "1-33", ch: "f1-ch1", title: "エージェンシー理論", difficulty: "B",
     items: mkItems("finance1__1-33", [
       { label: "問1", imp: "C+-C+", rotationLeft: 2, rotationRight: 1, flags: ["⑪キーワード"] },
-      { label: "問2", imp: "C+-C+", rotationLeft: 2, rotationRight: 1, flags: ["⑬⑮キーワード"] },
+      { label: "問2", imp: "C+-C+", rotationLeft: 2, rotationRight: 1, flags: ["⑭⑮キーワード"] },
       { label: "問3", imp: "B-B", rotationLeft: 2, rotationRight: 1, flags: ["キーワード"] },
       { label: "問4", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["キーワード"] },
     ]),
@@ -333,6 +333,7 @@ const KEIEI_PROBLEMS_FINANCE1 = [
   {
     num: "1-36", ch: "f1-ch1", title: "株価と株主資本コスト", difficulty: "B",
     items: mkItems("finance1__1-36", [
+      { label: "問1 空欄①〜⑨（配当割引モデルの導出・数値例）", imp: "①~⑤B-B ⑥~⑨A-A", rotationLeft: 2, rotationRight: 1, flags: ["④⑤キーワード", "①~③⑨設例なし"] },
       { label: "問2(1) 当期末の1株当たり配当額", imp: "A-A", rotationLeft: 3, rotationRight: 2, flags: ["設例なし", "★"] },
       { label: "問2(2) サステイナブル成長率と翌期末配当額", imp: "A-A", rotationLeft: 3, rotationRight: 2, flags: ["設例なし", "★"] },
       { label: "問2(3) 当期首・当期末の株価", imp: "A-A", rotationLeft: 3, rotationRight: 2, flags: ["設例なし"] },
@@ -440,12 +441,12 @@ const KEIEI_PROBLEMS_FINANCE1 = [
       { label: "問2(7) マーケットタイミング理論", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: [] },
       { label: "問2(8) B社企業価値の数値算定", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["設例なし"] },
       { label: "問3 A社/B社株価・企業価値算定（空欄①〜⑭）", imp: "①~⑧B-B ⑨~⑭C+-C+", rotationLeft: 2, rotationRight: 2, flags: ["①②④キーワード"] },
-      { label: "問4 残余利益モデルによる株価算定", imp: "B-B", rotationLeft: 1, rotationRight: 1, flags: [] },
+      { label: "問4 残余利益モデルによる株価算定", imp: "C+-C+", rotationLeft: 1, rotationRight: 1, flags: [] },
       { label: "問5 新株発行の株主資本コスト算定", imp: "C+-C+", rotationLeft: 1, rotationRight: 1, flags: [] },
       { label: "問6 完全資本市場前提でのL社株主資本コスト算定", imp: "C+-C+", rotationLeft: 2, rotationRight: 1, flags: [] },
       { label: "問7 法人税ありの場合のL社株主資本コスト算定", imp: "C+-C+", rotationLeft: 2, rotationRight: 1, flags: [] },
       { label: "問8 BIS規制・伊藤レポート等（空欄①〜⑤）", imp: "C+-C+", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
-      { label: "問9 ROIC・ROIC-WACCスプレッド算定", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["キーワード"] },
+      { label: "問9 ROIC・ROIC-WACCスプレッド算定", imp: "B-B", rotationLeft: 3, rotationRight: 2, flags: [] },
       { label: "問10 デット・ファイナンスの種類（空欄①〜③）", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["キーワード"] },
       { label: "問11 公募増資・ライツオファリング・希薄化（空欄①〜③）", imp: "①③C+-C+ ②B-B", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
       { label: "問12 CBのパリティ・パリティ乖離率算定", imp: "C+-C+", rotationLeft: 2, rotationRight: 1, flags: [] },
