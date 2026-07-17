@@ -569,7 +569,7 @@ const KEIEI_PROBLEMS_FINANCE2 = [
       { label: "問題1-問1", imp: "A-A", rotationLeft: 1, rotationRight: 1, flags: [] },
       { label: "問題1-問2", imp: "B-C+", rotationLeft: 2, rotationRight: 1, flags: ["設例なし"] },
       { label: "問題1-問3", imp: "A-A", rotationLeft: 3, rotationRight: 2, flags: [] },
-      { label: "問題2(1)〜(3)", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: [] },
+      { label: "問題2(1)〜(3)", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["設例なし", "★"] },
     ]),
   },
   {
@@ -633,9 +633,9 @@ const KEIEI_PROBLEMS_FINANCE2 = [
   {
     num: "2-22", ch: "f2-ch2", title: "債券投資②（利回り，イールドカーブ，デュレーション，債券投資戦略）", difficulty: "B",
     items: mkItems("finance2__2-22", [
-      { label: "問題1(1)", imp: "C-C", rotationLeft: 1, rotationRight: null, flags: ["任意/不要"] },
-      { label: "問題1(2)", imp: "C-C", rotationLeft: 1, rotationRight: null, flags: ["任意/不要"] },
-      { label: "問題1(3)", imp: "C-C", rotationLeft: 1, rotationRight: null, flags: ["任意/不要"] },
+      { label: "問題1(1)", imp: "C-C", rotationLeft: null, rotationRight: 1, flags: ["任意/不要"] },
+      { label: "問題1(2)", imp: "C-C", rotationLeft: null, rotationRight: 1, flags: ["任意/不要"] },
+      { label: "問題1(3)", imp: "C-C", rotationLeft: null, rotationRight: 1, flags: ["任意/不要"] },
       { label: "問題1(4)", imp: "B-C+", rotationLeft: 1, rotationRight: 1, flags: ["キーワード"] },
       { label: "問題1(5)", imp: "B-B", rotationLeft: 2, rotationRight: 2, flags: ["キーワード", "★"] },
       { label: "問題1(6)", imp: "B-B", rotationLeft: 1, rotationRight: 1, flags: ["設例なし"] },
