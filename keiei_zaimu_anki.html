@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>経営学暗記カード</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#ffffff">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f9f9f8;
+  --surface: #ffffff;
+  --border: #e8e8e5;
+  --border-strong: #d0d0cb;
+  --text: #111111;
+  --text-2: #666666;
+  --text-3: #aaaaaa;
+  --accent: #4a7edc;
+  --o-color: #1a7a4a;
+  --o-bg: #edf7f2;
+  --x-color: #c0392b;
+  --x-bg: #fdf0ee;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 60px;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+/* ── Header ── */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 16px;
+}
+.header-row { display: flex; justify-content: space-between; align-items: center; }
+.app-title { font-size: 11px; font-weight: 700; letter-spacing: .12em; color: var(--text-3); text-transform: uppercase; }
+.header-actions { display: flex; gap: 6px; }
+.btn-icon {
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 11px;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.btn-icon:hover { background: var(--text); border-color: var(--text); color: #fff; }
+.screen-title { font-size: 18px; font-weight: 700; margin-top: 4px; }
+
+.tab-bar { display: flex; gap: 4px; margin-top: 12px; border-bottom: 1px solid var(--border); }
+.tab-btn {
+  flex: 1;
+  padding: 10px 0;
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  color: var(--text-3);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color .15s, border-color .15s;
+}
+.tab-btn.active { color: var(--text); border-bottom-color: var(--text); }
+
+.content { padding: 16px 14px 0; max-width: 640px; margin: 0 auto; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+label.field-label {
+  display: block;
+  font-size: 11px;
+  color: var(--text-3);
+  font-weight: 700;
+  letter-spacing: .06em;
+  margin-bottom: 8px;
+}
+label.field-label.sub { margin-top: 14px; }
+
+/* ── Setup: chapter/section checkbox tree ── */
+.ch-block { border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; overflow: hidden; }
+.ch-block:last-child { margin-bottom: 0; }
+.ch-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 10px;
+  cursor: pointer; user-select: none;
+  background: var(--surface);
+}
+.ch-row:active { background: var(--bg); }
+.ch-check {
+  flex-shrink: 0; width: 20px; height: 20px; border-radius: 5px;
+  border: 1px solid var(--border-strong); background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; color: transparent; font-weight: 700;
+}
+.ch-check.checked { background: var(--text); border-color: var(--text); color: #fff; }
+.ch-check.partial { background: var(--surface); border-color: var(--text); color: var(--text); }
+.ch-name { flex: 1; font-size: 13px; font-weight: 700; }
+.ch-count { font-size: 11px; color: var(--text-3); font-family: 'DM Mono', monospace; flex-shrink: 0; }
+.ch-chevron { color: var(--text-3); font-size: 10px; transition: transform .15s; flex-shrink: 0; width: 14px; text-align: center; }
+.ch-block.open .ch-chevron { transform: rotate(90deg); }
+.sec-body { display: none; border-top: 1px solid var(--border); background: #f5f5f3; padding: 4px 10px 6px 34px; }
+.ch-block.open .sec-body { display: block; }
+.sec-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; cursor: pointer; user-select: none; }
+.sec-check {
+  flex-shrink: 0; width: 18px; height: 18px; border-radius: 4px;
+  border: 1px solid var(--border-strong); background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: transparent; font-weight: 700;
+}
+.sec-check.checked { background: var(--accent); border-color: var(--accent); color: #fff; }
+.sec-check.partial { background: var(--surface); border-color: var(--accent); color: var(--accent); }
+.sec-name { flex: 1; font-size: 12.5px; }
+.sec-count { font-size: 10.5px; color: var(--text-3); font-family: 'DM Mono', monospace; flex-shrink: 0; }
+.sec-chevron { color: var(--text-3); font-size: 9px; transition: transform .15s; flex-shrink: 0; width: 12px; text-align: center; }
+.sec-block.open .sec-chevron { transform: rotate(90deg); }
+
+.topic-body { display: none; padding: 2px 0 4px 26px; }
+.sec-block.open .topic-body { display: block; }
+.topic-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; cursor: pointer; user-select: none; }
+.topic-check {
+  flex-shrink: 0; width: 16px; height: 16px; border-radius: 4px;
+  border: 1px solid var(--border-strong); background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: transparent; font-weight: 700;
+}
+.topic-check.checked { background: var(--accent); border-color: var(--accent); color: #fff; }
+.topic-name { flex: 1; font-size: 12px; color: var(--text-2); }
+.topic-count { font-size: 10px; color: var(--text-3); font-family: 'DM Mono', monospace; flex-shrink: 0; }
+
+.order-toggle { display: flex; gap: 8px; margin-bottom: 4px; }
+.order-btn {
+  flex: 1; padding: 10px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong); background: var(--surface);
+  color: var(--text); font-size: 13px; font-weight: 700;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif; cursor: pointer;
+  transition: all .15s;
+}
+.order-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
+
+.priority-toggle-row { display: flex; align-items: center; gap: 10px; padding: 10px 2px 2px; }
+.priority-toggle-row .field-label { margin: 0; flex: 1; }
+.switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch-track { position: absolute; inset: 0; background: var(--border-strong); border-radius: 99px; transition: background .15s; cursor: pointer; }
+.switch-track::before { content: ""; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform .15s; }
+.switch input:checked + .switch-track { background: var(--text); }
+.switch input:checked + .switch-track::before { transform: translateX(18px); }
+
+.btn-primary {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius);
+  border: none;
+  background: var(--text);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.btn-primary:hover { opacity: .85; }
+.btn-primary:disabled { opacity: .4; cursor: default; }
+
+.btn-secondary {
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all .15s;
+}
+.btn-secondary:hover { background: #fafaf9; }
+
+.btn-danger-text {
+  width: 100%;
+  text-align: center;
+  padding: 10px;
+  color: #b91c1c;
+  font-size: 12px;
+  font-weight: 700;
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.warn-box {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 12px;
+  margin-bottom: 14px;
+}
+
+.search-input {
+  width: 100%;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 11px 12px;
+  font-size: 13px;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,126,220,.12); }
+
+/* ── Quiz screen ── */
+.progress-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.progress-label { font-size: 12px; color: var(--text-3); font-weight: 700; letter-spacing: .04em; }
+.progress-num { font-family: 'DM Mono', 'Courier New', monospace; font-size: 14px; color: var(--text-2); }
+
+.flip-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 18px;
+  margin-bottom: 14px;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  user-select: none;
+}
+.flip-face-label { font-size: 11px; font-weight: 700; color: var(--text-3); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px; }
+.flip-card-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+.flip-cat-label { font-size: 11px; color: var(--text-3); }
+.flip-page-label { font-size: 10.5px; color: var(--text-3); font-family: 'DM Mono', monospace; flex-shrink: 0; white-space: nowrap; }
+.flip-text {
+  white-space: pre-wrap;
+  font-size: 16px;
+  line-height: 1.85;
+  color: var(--text);
+  flex: 1;
+}
+.flip-hint { font-size: 11px; color: var(--text-3); text-align: center; margin-top: 14px; }
+.flip-card.answered .flip-text { color: var(--text); }
+.answer-block { background: #f5f8ff; border: 1px solid #dde6fb; border-radius: var(--radius-sm); padding: 4px 2px; margin: -6px -2px 0; }
+
+.score-row { display: flex; gap: 10px; margin-bottom: 4px; }
+.score-btn {
+  flex: 1; padding: 16px 8px; border-radius: var(--radius);
+  border: 1px solid var(--border-strong); background: var(--surface);
+  font-size: 14px; font-weight: 700;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  cursor: pointer; transition: all .15s;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.score-btn .mark { font-size: 20px; }
+.score-btn.know:hover { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
+.score-btn.dontknow:hover { background: var(--x-bg); border-color: var(--x-color); color: var(--x-color); }
+
+.stat-mini-row { display: flex; gap: 10px; }
+.stat-mini { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; text-align: center; }
+.stat-mini-num { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 700; }
+.stat-mini-label { font-size: 10.5px; color: var(--text-3); margin-top: 2px; }
+
+/* ── Stats tab ── */
+.overview-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px; }
+.overview-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+.overview-num { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 700; }
+.overview-label { font-size: 11px; color: var(--text-3); }
+.progress-track { height: 8px; border-radius: 99px; background: var(--bg); overflow: hidden; border: 1px solid var(--border); }
+.progress-fill { height: 100%; background: var(--o-color); border-radius: 99px; transition: width .3s; }
+
+.stat-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px; }
+.stat-section-title { font-size: 11px; font-weight: 700; color: var(--text-3); letter-spacing: .06em; margin-bottom: 10px; text-transform: uppercase; }
+.stat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.stat-row:last-child { margin-bottom: 0; }
+.stat-row-label { font-size: 11.5px; width: 128px; flex-shrink: 0; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stat-row-track { flex: 1; height: 10px; border-radius: 99px; background: var(--bg); overflow: hidden; border: 1px solid var(--border); }
+.stat-row-fill { height: 100%; border-radius: 99px; }
+.stat-row-num { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text-2); width: 60px; text-align: right; flex-shrink: 0; }
+
+.empty-state { text-align: center; padding: 48px 16px; color: var(--text-3); font-size: 13px; }
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-row">
+    <div class="app-title">経営学暗記カード</div>
+    <div class="header-actions">
+      <button class="btn-icon" onclick="exportProgress()">バックアップ</button>
+      <button class="btn-icon" onclick="document.getElementById('import-input').click()">復元</button>
+      <input type="file" id="import-input" accept=".json" style="display:none" onchange="importProgress(event)">
+    </div>
+  </div>
+  <div class="screen-title" id="screen-title">出題設定</div>
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-quiz" onclick="switchTab('quiz')">カード</button>
+    <button class="tab-btn" id="tab-stats" onclick="switchTab('stats')">習熟度</button>
+  </div>
+</div>
+
+<div class="content" id="view-quiz">
+
+  <!-- ── Screen 1: Setup ── -->
+  <div id="screen-setup">
+    <div class="card">
+      <label class="field-label">出題範囲（章・節で絞り込み）</label>
+      <div id="chapter-tree"></div>
+    </div>
+
+    <div class="card">
+      <label class="field-label">キーワード検索（問題文・解答から絞り込み）</label>
+      <input class="search-input" type="text" id="search-input" placeholder="例：資本コスト" oninput="onSearchInput()">
+    </div>
+
+    <div class="card">
+      <label class="field-label">出題順</label>
+      <div class="order-toggle">
+        <button class="order-btn active" id="order-sequential" onclick="setOrder('sequential')">順番</button>
+        <button class="order-btn" id="order-random" onclick="setOrder('random')">ランダム</button>
+      </div>
+      <div class="priority-toggle-row">
+        <label class="field-label" for="priority-switch">「今日の10問」（苦手優先クイックセッション）</label>
+        <label class="switch">
+          <input type="checkbox" id="priority-switch" onchange="onPrioritySwitch()">
+          <span class="switch-track"></span>
+        </label>
+      </div>
+      <div id="count-warn" class="warn-box hidden"></div>
+    </div>
+    <button class="btn-primary" id="start-btn" onclick="startSession()">出題を開始する</button>
+  </div>
+
+  <!-- ── Screen 2: Quiz ── -->
+  <div id="screen-quiz" class="hidden">
+    <div class="progress-row">
+      <span class="progress-label" id="progress-label"></span>
+      <span class="progress-num" id="progress-num"></span>
+    </div>
+
+    <div class="flip-card" id="flip-card" onclick="onCardTap()">
+      <div class="flip-card-top">
+        <div class="flip-cat-label" id="flip-cat-label"></div>
+        <div class="flip-page-label" id="flip-page-label"></div>
+      </div>
+      <div class="flip-face-label" id="flip-face-label">Q</div>
+      <div class="flip-text" id="flip-text"></div>
+      <div class="flip-hint" id="flip-hint">タップ／スペースキーでめくる</div>
+    </div>
+
+    <div class="score-row hidden" id="score-row">
+      <button class="score-btn know" onclick="scoreCard(true)"><span class="mark">○</span>分かった</button>
+      <button class="score-btn dontknow" onclick="scoreCard(false)"><span class="mark">×</span>分からなかった</button>
+    </div>
+
+    <button class="btn-danger-text" onclick="abortSession()">中止する</button>
+  </div>
+
+  <!-- ── Screen 3: Result ── -->
+  <div id="screen-result" class="hidden">
+    <div class="card">
+      <div class="stat-mini-row">
+        <div class="stat-mini">
+          <div class="stat-mini-num" id="result-count"></div>
+          <div class="stat-mini-label">出題数</div>
+        </div>
+        <div class="stat-mini">
+          <div class="stat-mini-num" id="result-rate"></div>
+          <div class="stat-mini-label">正答率（分かった割合）</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="backToSetup()">出題設定に戻る</button>
+  </div>
+
+</div>
+
+<!-- ── 習熟度タブ ── -->
+<div class="content hidden" id="view-stats">
+  <div class="overview-card" id="stats-overview"></div>
+  <div class="stat-section" id="stats-by-chapter"></div>
+</div>
+
+<script src="keiei_zaimu_anki_data.js"></script>
+<script>
+// ============================================================================
+// 定数・状態
+// ============================================================================
+const PROGRESS_KEY = 'keiei-zaimu-anki-progress-v2';
+let progress = {}; // { [cardId]: { known: n, unknown: n, lastResult: 'o'|'x'|null } }
+
+let selectedChapters = new Set();
+let selectedSections = new Set();
+let selectedTopics = new Set();
+let openChapters = {};
+let openSections = {};
+let searchQuery = '';
+let orderMode = 'sequential';
+let quickMode = false;
+
+let session = null; // { queue: [...cards], index, results: [], flipped }
+
+// ============================================================================
+// 進捗の読み書き
+// ============================================================================
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem(PROGRESS_KEY);
+    if (raw) { progress = JSON.parse(raw); return; }
+  } catch (e) {}
+  progress = {};
+}
+function saveProgress() {
+  try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); } catch (e) {}
+}
+function getP(cardId) {
+  return progress[cardId] || { known: 0, unknown: 0, lastResult: null };
+}
+function ensureP(cardId) {
+  if (!progress[cardId]) progress[cardId] = { known: 0, unknown: 0, lastResult: null };
+  return progress[cardId];
+}
+function recordCardResult(cardId, known) {
+  const p = ensureP(cardId);
+  if (known) p.known++; else p.unknown++;
+  p.lastResult = known ? 'o' : 'x';
+  saveProgress();
+}
+
+// 苦手優先の重み: 未挑戦・直近×・×回数が多いカードほど高優先度
+function weightOf(card) {
+  const p = getP(card.id);
+  const attempts = p.known + p.unknown;
+  if (attempts === 0) return 6;
+  if (p.lastResult === 'x') return 5 + Math.min(p.unknown, 4);
+  return 1;
+}
+
+function escapeHtml(s) {
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+// 解答文を読みやすく整形する: 丸数字（①②③…）の箇条書きや、句点で区切られた
+// 複数の文からなる解答は、項目・文ごとに改行する（.flip-text の white-space:
+// pre-wrap により \n がそのまま改行として表示される）。
+function formatAnswerText(text) {
+  let t = text.replace(/[ 　]*([①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮])/g, '\n$1');
+  t = t.replace(/^\n/, '');
+  t = t.replace(/。(?!$)/g, '。\n');
+  return t;
+}
+
+// ============================================================================
+// 出題範囲: 章・節・論点ツリー（3階層。節に論点がなければ節自体が末端）
+// ============================================================================
+function chapterCards(chId) {
+  return ZAIMU_CARDS.filter(function (c) { return c.chapterId === chId; });
+}
+function sectionCards(secId) {
+  return ZAIMU_CARDS.filter(function (c) { return c.sectionId === secId; });
+}
+function topicCards(topId) {
+  return ZAIMU_CARDS.filter(function (c) { return c.topicId === topId; });
+}
+
+// 節が末端（論点を持たない）かどうか
+function isSectionLeaf(sec) { return sec.topics.length === 0; }
+
+function isSectionFullySelected(sec) {
+  if (isSectionLeaf(sec)) return selectedSections.has(sec.id);
+  return sec.topics.every(function (t) { return selectedTopics.has(t.id); });
+}
+function isSectionPartiallySelected(sec) {
+  if (isSectionLeaf(sec)) return false;
+  const any = sec.topics.some(function (t) { return selectedTopics.has(t.id); });
+  return any && !isSectionFullySelected(sec);
+}
+function sectionHasAnySelected(sec) {
+  if (isSectionLeaf(sec)) return selectedSections.has(sec.id);
+  return sec.topics.some(function (t) { return selectedTopics.has(t.id); });
+}
+
+function isChapterFullySelected(ch) {
+  if (ch.sections.length === 0) return selectedChapters.has(ch.id);
+  return ch.sections.every(isSectionFullySelected);
+}
+function isChapterPartiallySelected(ch) {
+  if (ch.sections.length === 0) return false;
+  const any = ch.sections.some(sectionHasAnySelected);
+  return any && !isChapterFullySelected(ch);
+}
+
+function setSectionAll(sec, on) {
+  if (isSectionLeaf(sec)) {
+    if (on) selectedSections.add(sec.id); else selectedSections.delete(sec.id);
+  } else {
+    sec.topics.forEach(function (t) {
+      if (on) selectedTopics.add(t.id); else selectedTopics.delete(t.id);
+    });
+  }
+}
+
+function findSection(secId) {
+  for (const ch of ZAIMU_CHAPTERS) {
+    const sec = ch.sections.find(function (s) { return s.id === secId; });
+    if (sec) return sec;
+  }
+  return null;
+}
+
+function toggleChapterAll(chId) {
+  const ch = ZAIMU_CHAPTERS.find(function (c) { return c.id === chId; });
+  const nowFull = isChapterFullySelected(ch);
+  if (ch.sections.length === 0) {
+    if (nowFull) selectedChapters.delete(chId); else selectedChapters.add(chId);
+  } else {
+    ch.sections.forEach(function (s) { setSectionAll(s, !nowFull); });
+  }
+  renderChapterTree();
+  onFilterChanged();
+}
+
+function toggleSectionAll(secId) {
+  const sec = findSection(secId);
+  setSectionAll(sec, !isSectionFullySelected(sec));
+  renderChapterTree();
+  onFilterChanged();
+}
+
+function toggleTopic(topId) {
+  if (selectedTopics.has(topId)) selectedTopics.delete(topId); else selectedTopics.add(topId);
+  renderChapterTree();
+  onFilterChanged();
+}
+
+function toggleChapterOpen(chId) {
+  openChapters[chId] = !openChapters[chId];
+  renderChapterTree();
+}
+
+function toggleSectionOpen(secId) {
+  openSections[secId] = !openSections[secId];
+  renderChapterTree();
+}
+
+function renderChapterTree() {
+  const wrap = document.getElementById('chapter-tree');
+  let html = '';
+  ZAIMU_CHAPTERS.forEach(function (ch) {
+    const cards = chapterCards(ch.id);
+    const full = isChapterFullySelected(ch);
+    const partial = isChapterPartiallySelected(ch);
+    const checkClass = full ? 'checked' : (partial ? 'partial' : '');
+    const checkMark = full ? '✓' : (partial ? '－' : '');
+    const isOpen = openChapters[ch.id] === true;
+    html += '<div class="ch-block' + (isOpen ? ' open' : '') + '">' +
+      '<div class="ch-row">' +
+        '<span class="ch-check ' + checkClass + '" onclick="event.stopPropagation();toggleChapterAll(\'' + ch.id + '\')">' + checkMark + '</span>' +
+        '<span class="ch-name" onclick="toggleChapterOpen(\'' + ch.id + '\')">' + escapeHtml(ch.name) + '</span>' +
+        '<span class="ch-count" onclick="toggleChapterOpen(\'' + ch.id + '\')">' + cards.length + '問</span>' +
+        (ch.sections.length ? '<span class="ch-chevron" onclick="toggleChapterOpen(\'' + ch.id + '\')">▶</span>' : '<span style="width:14px"></span>') +
+      '</div>';
+    if (ch.sections.length) {
+      html += '<div class="sec-body">';
+      ch.sections.forEach(function (sec) {
+        const sc = sectionCards(sec.id);
+        const leaf = isSectionLeaf(sec);
+        const secFull = isSectionFullySelected(sec);
+        const secPartial = isSectionPartiallySelected(sec);
+        const secCheckClass = secFull ? 'checked' : (secPartial ? 'partial' : '');
+        const secCheckMark = secFull ? '✓' : (secPartial ? '－' : '');
+        const secOpen = openSections[sec.id] === true;
+        html += '<div class="sec-block' + (secOpen ? ' open' : '') + '">' +
+          '<div class="sec-row" onclick="' + (leaf ? ('toggleSectionAll(\'' + sec.id + '\')') : ('toggleSectionOpen(\'' + sec.id + '\')')) + '">' +
+            '<span class="sec-check ' + secCheckClass + '" onclick="event.stopPropagation();toggleSectionAll(\'' + sec.id + '\')">' + secCheckMark + '</span>' +
+            '<span class="sec-name">' + escapeHtml(sec.name) + '</span>' +
+            '<span class="sec-count">' + sc.length + '問</span>' +
+            (leaf ? '' : '<span class="sec-chevron">▶</span>') +
+          '</div>';
+        if (!leaf) {
+          html += '<div class="topic-body">';
+          sec.topics.forEach(function (top) {
+            const tc = topicCards(top.id);
+            const checked = selectedTopics.has(top.id);
+            html += '<div class="topic-row" onclick="toggleTopic(\'' + top.id + '\')">' +
+              '<span class="topic-check' + (checked ? ' checked' : '') + '">' + (checked ? '✓' : '') + '</span>' +
+              '<span class="topic-name">' + escapeHtml(top.name) + '</span>' +
+              '<span class="topic-count">' + tc.length + '問</span>' +
+            '</div>';
+          });
+          html += '</div>';
+        }
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+  });
+  wrap.innerHTML = html;
+}
+
+// ============================================================================
+// 出題対象カードの絞り込み
+// ============================================================================
+function matchesFilter(card) {
+  let inScope;
+  if (card.topicId) inScope = selectedTopics.has(card.topicId);
+  else if (card.sectionId) inScope = selectedSections.has(card.sectionId);
+  else inScope = selectedChapters.has(card.chapterId);
+  if (!inScope) return false;
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    if (card.q.toLowerCase().indexOf(q) === -1 && card.a.toLowerCase().indexOf(q) === -1) return false;
+  }
+  return true;
+}
+
+function filteredCards() {
+  return ZAIMU_CARDS.filter(matchesFilter);
+}
+
+function onSearchInput() {
+  searchQuery = document.getElementById('search-input').value.trim();
+  onFilterChanged();
+}
+
+function setOrder(mode) {
+  orderMode = mode;
+  document.getElementById('order-random').classList.toggle('active', mode === 'random');
+  document.getElementById('order-sequential').classList.toggle('active', mode === 'sequential');
+}
+
+function onPrioritySwitch() {
+  quickMode = document.getElementById('priority-switch').checked;
+  onFilterChanged();
+}
+
+function onFilterChanged() {
+  const warnEl = document.getElementById('count-warn');
+  const startBtn = document.getElementById('start-btn');
+  const n = filteredCards().length;
+  if (n === 0) {
+    warnEl.textContent = '出題範囲に該当するカードがありません。範囲を見直してください。';
+    warnEl.classList.remove('hidden');
+    startBtn.disabled = true;
+  } else {
+    warnEl.classList.add('hidden');
+    startBtn.disabled = false;
+  }
+}
+
+// ============================================================================
+// セッション開始・進行
+// ============================================================================
+function shuffleInPlace(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// page（例："②-50"、"⑳-9"、"俯瞰図-14"）を「テキスト巻数＋ページ番号」の順序キーに変換する。
+// 複数ページ・複数巻にまたがる表記（"④-84,⑧-19"等）は先頭の1件のみを使う。
+// 「俯瞰図-N」（第17章）は⑰と同じ巻番号として扱い、章の並び順に自然に収まるようにする。
+const PAGE_VOLUME_ORDER = '①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳';
+function pageSortKey(page) {
+  if (!page) return [PAGE_VOLUME_ORDER.length, 0];
+  const m = page.match(/^([①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳])-(\d+)/);
+  if (m) return [PAGE_VOLUME_ORDER.indexOf(m[1]), parseInt(m[2], 10)];
+  const m2 = page.match(/^俯瞰図-(\d+)/);
+  if (m2) return [PAGE_VOLUME_ORDER.indexOf('⑰'), parseInt(m2[1], 10)];
+  return [PAGE_VOLUME_ORDER.length, 0];
+}
+
+function buildQueue() {
+  let pool = filteredCards();
+  if (quickMode) {
+    // 「今日の10問」: 苦手優先の重みで上位10問を選び、以降は通常どおり出題順を適用する
+    pool = pool.slice()
+      .sort(function (a, b) { return weightOf(b) - weightOf(a); })
+      .slice(0, Math.min(10, pool.length));
+  }
+  if (orderMode === 'random') {
+    pool = shuffleInPlace(pool.slice());
+  } else {
+    // 順番出題: テキストの参照ページ（page）の並び順に出題する
+    pool = pool.slice().sort(function (a, b) {
+      const ka = pageSortKey(a.page), kb = pageSortKey(b.page);
+      if (ka[0] !== kb[0]) return ka[0] - kb[0];
+      if (ka[1] !== kb[1]) return ka[1] - kb[1];
+      return a.id - b.id;
+    });
+  }
+  return pool;
+}
+
+function startSession() {
+  const queue = buildQueue();
+  if (queue.length === 0) return;
+  session = {
+    queue: queue,
+    index: 0,
+    total: queue.length,
+    results: [],
+    flipped: false,
+  };
+  document.getElementById('screen-setup').classList.add('hidden');
+  document.getElementById('screen-result').classList.add('hidden');
+  document.getElementById('screen-quiz').classList.remove('hidden');
+  document.getElementById('screen-title').textContent = '出題中';
+  renderCard();
+}
+
+function currentCard() {
+  return session.queue[session.index];
+}
+
+function chapterOf(card) {
+  return ZAIMU_CHAPTERS.find(function (c) { return c.id === card.chapterId; });
+}
+function sectionOf(card) {
+  if (!card.sectionId) return null;
+  const ch = chapterOf(card);
+  return ch.sections.find(function (s) { return s.id === card.sectionId; });
+}
+function topicOf(card) {
+  if (!card.topicId) return null;
+  const sec = sectionOf(card);
+  return sec.topics.find(function (t) { return t.id === card.topicId; });
+}
+
+function renderCard() {
+  const card = currentCard();
+  session.flipped = false;
+  document.getElementById('progress-label').textContent = '経営学暗記カード';
+  document.getElementById('progress-num').textContent = (session.index + 1) + ' / ' + session.total;
+
+  const ch = chapterOf(card);
+  const sec = sectionOf(card);
+  const top = topicOf(card);
+  let catLabel = ch.name;
+  if (sec) catLabel += ' ＞ ' + sec.name;
+  if (top) catLabel += ' ＞ ' + top.name;
+  document.getElementById('flip-cat-label').textContent = catLabel;
+  document.getElementById('flip-page-label').textContent = card.page ? 'p.' + card.page : '';
+  document.getElementById('flip-card').classList.remove('answered');
+  document.getElementById('flip-face-label').textContent = 'Q';
+  document.getElementById('flip-text').innerHTML = escapeHtml(card.q);
+  document.getElementById('flip-hint').textContent = 'タップ／スペースキーでめくる';
+  document.getElementById('score-row').classList.add('hidden');
+}
+
+function onCardTap() {
+  if (!session) return;
+  if (!session.flipped) flipCard();
+}
+
+function flipCard() {
+  const card = currentCard();
+  session.flipped = true;
+  document.getElementById('flip-card').classList.add('answered');
+  document.getElementById('flip-face-label').textContent = 'A';
+  document.getElementById('flip-text').innerHTML = '<div class="answer-block">' + escapeHtml(formatAnswerText(card.a)) + '</div>';
+  document.getElementById('flip-hint').textContent = '';
+  document.getElementById('score-row').classList.remove('hidden');
+}
+
+function scoreCard(known) {
+  const card = currentCard();
+  recordCardResult(card.id, known);
+  session.results.push({ card: card, known: known });
+
+  // このセッション内での再出題はしない（出題数が際限なく増えるのを避けるため）。
+  // 「分からなかった」カードは localStorage の履歴に基づき、次回以降の
+  // 「今日の10問」モードで優先的に再出題される。
+
+  if (session.index + 1 < session.queue.length) {
+    session.index += 1;
+    renderCard();
+  } else {
+    finishSession();
+  }
+}
+
+function abortSession() {
+  if (!confirm('出題を中止しますか？（ここまでの結果は記録されます）')) return;
+  finishSession();
+}
+
+function finishSession() {
+  const results = session.results;
+  document.getElementById('screen-quiz').classList.add('hidden');
+  document.getElementById('screen-result').classList.remove('hidden');
+  document.getElementById('screen-title').textContent = '出題終了';
+
+  const knownCount = results.filter(function (r) { return r.known; }).length;
+  const rate = results.length ? Math.round(knownCount / results.length * 100) : 0;
+  document.getElementById('result-count').textContent = results.length;
+  document.getElementById('result-rate').textContent = results.length ? rate + '%' : '－';
+  session = null;
+}
+
+function backToSetup() {
+  document.getElementById('screen-result').classList.add('hidden');
+  document.getElementById('screen-quiz').classList.add('hidden');
+  document.getElementById('screen-setup').classList.remove('hidden');
+  document.getElementById('screen-title').textContent = '出題設定';
+  onFilterChanged();
+}
+
+// ============================================================================
+// キーボード操作
+// ============================================================================
+document.addEventListener('keydown', function (e) {
+  if (!session || document.getElementById('screen-quiz').classList.contains('hidden')) return;
+  if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+  if (e.code === 'Space') {
+    e.preventDefault();
+    if (!session.flipped) flipCard();
+  } else if (session.flipped && (e.key === '1' || e.key === 'ArrowLeft')) {
+    e.preventDefault();
+    scoreCard(true);
+  } else if (session.flipped && (e.key === '2' || e.key === 'ArrowRight')) {
+    e.preventDefault();
+    scoreCard(false);
+  }
+});
+
+// ============================================================================
+// 習熟度タブ
+// ============================================================================
+function switchTab(tab) {
+  document.getElementById('tab-quiz').classList.toggle('active', tab === 'quiz');
+  document.getElementById('tab-stats').classList.toggle('active', tab === 'stats');
+  document.getElementById('view-quiz').classList.toggle('hidden', tab !== 'quiz');
+  document.getElementById('view-stats').classList.toggle('hidden', tab !== 'stats');
+  if (tab === 'stats') {
+    document.getElementById('screen-title').textContent = '習熟度';
+    renderStats();
+  } else {
+    document.getElementById('screen-title').textContent = document.getElementById('screen-setup').classList.contains('hidden')
+      ? (document.getElementById('screen-quiz').classList.contains('hidden') ? '出題終了' : '出題中')
+      : '出題設定';
+  }
+}
+
+function isMastered(cardId) {
+  const p = getP(cardId);
+  return p.known > 0 && p.lastResult === 'o';
+}
+
+function renderStats() {
+  const total = ZAIMU_CARDS.length;
+  const mastered = ZAIMU_CARDS.filter(function (c) { return isMastered(c.id); }).length;
+  const pct = total ? Math.round(mastered / total * 100) : 0;
+
+  document.getElementById('stats-overview').innerHTML =
+    '<div class="overview-row"><span class="overview-num">' + mastered + ' / ' + total + '</span><span class="overview-label">' + pct + '% 習得済み</span></div>' +
+    '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%"></div></div>';
+
+  let html = '<div class="stat-section-title">章別の習熟度</div>';
+  ZAIMU_CHAPTERS.forEach(function (ch) {
+    const cards = chapterCards(ch.id);
+    if (cards.length === 0) return;
+    const m = cards.filter(function (c) { return isMastered(c.id); }).length;
+    const p = Math.round(m / cards.length * 100);
+    html += '<div class="stat-row">' +
+      '<span class="stat-row-label" title="' + escapeHtml(ch.name) + '">' + escapeHtml(ch.name) + '</span>' +
+      '<div class="stat-row-track"><div class="stat-row-fill" style="width:' + p + '%;background:var(--o-color)"></div></div>' +
+      '<span class="stat-row-num">' + m + ' / ' + cards.length + '</span>' +
+    '</div>';
+  });
+  document.getElementById('stats-by-chapter').innerHTML = html;
+}
+
+// ============================================================================
+// バックアップ / 復元
+// ============================================================================
+async function exportProgress() {
+  const data = { version: 1, label: '経営学財務管理暗記カード進捗', exportedAt: new Date().toISOString(), progress: progress };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const file = new File([blob], 'keiei_zaimu_anki_backup.json', { type: 'application/json' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file] }); return; } catch (e) {}
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'keiei_zaimu_anki_backup.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importProgress(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function (ev) {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.progress) throw new Error('invalid');
+      if (!confirm('現在の進捗を上書きして復元しますか？')) return;
+      progress = data.progress;
+      saveProgress();
+      location.reload();
+    } catch (err) {
+      alert('ファイルの読み込みに失敗しました。');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ============================================================================
+// 初期化
+// ============================================================================
+loadProgress();
+renderChapterTree();
+onFilterChanged();
+</script>
+</body>
+</html>

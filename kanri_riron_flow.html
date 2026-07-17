@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>管理会計論（理論） ロジカルフロー学習</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#ffffff">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f9f9f8;
+  --surface: #ffffff;
+  --border: #e8e8e5;
+  --border-strong: #d0d0cb;
+  --text: #111111;
+  --text-2: #666666;
+  --text-3: #aaaaaa;
+  --accent: #4a7edc;
+  --o-color: #1a7a4a;
+  --o-bg: #edf7f2;
+  --x-color: #c0392b;
+  --x-bg: #fdf0ee;
+  --red-color: #b3261e;
+  --red-bg: #fdecea;
+  --red-border: #f2b8b5;
+  --blue-color: #1a56c4;
+  --blue-bg: #eaf1fd;
+  --blue-border: #b9d3f8;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 60px;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 16px;
+}
+.header-row { display: flex; justify-content: space-between; align-items: center; }
+.app-title { font-size: 11px; font-weight: 700; letter-spacing: .12em; color: var(--text-3); text-transform: uppercase; }
+.header-actions { display: flex; gap: 6px; }
+.btn-icon {
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 11px;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.btn-icon:hover { background: var(--text); border-color: var(--text); color: #fff; }
+.screen-title { font-size: 18px; font-weight: 700; margin-top: 4px; }
+
+.tab-bar { display: flex; gap: 4px; margin-top: 12px; border-bottom: 1px solid var(--border); }
+.tab-btn {
+  flex: 1;
+  padding: 10px 0;
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  color: var(--text-3);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color .15s, border-color .15s;
+}
+.tab-btn.active { color: var(--text); border-bottom-color: var(--text); }
+
+.content { padding: 16px 14px 0; max-width: 640px; margin: 0 auto; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+label.field-label {
+  display: block;
+  font-size: 11px;
+  color: var(--text-3);
+  font-weight: 700;
+  letter-spacing: .06em;
+  margin-bottom: 8px;
+}
+
+/* ── Setup: chapter/problem checkbox tree ── */
+.ch-block { border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; overflow: hidden; }
+.ch-block:last-child { margin-bottom: 0; }
+.ch-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 10px;
+  cursor: pointer; user-select: none;
+  background: var(--surface);
+}
+.ch-row:active { background: var(--bg); }
+.ch-check {
+  flex-shrink: 0; width: 20px; height: 20px; border-radius: 5px;
+  border: 1px solid var(--border-strong); background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; color: transparent; font-weight: 700;
+}
+.ch-check.checked { background: var(--text); border-color: var(--text); color: #fff; }
+.ch-check.partial { background: var(--surface); border-color: var(--text); color: var(--text); }
+.ch-name { flex: 1; font-size: 13px; font-weight: 700; }
+.ch-count { font-size: 11px; color: var(--text-3); font-family: 'DM Mono', monospace; flex-shrink: 0; }
+.ch-chevron { color: var(--text-3); font-size: 10px; transition: transform .15s; flex-shrink: 0; width: 14px; text-align: center; }
+.ch-block.open .ch-chevron { transform: rotate(90deg); }
+.prob-body { display: none; border-top: 1px solid var(--border); background: #f5f5f3; padding: 4px 10px 6px 12px; }
+.ch-block.open .prob-body { display: block; }
+.prob-row { display: flex; align-items: center; gap: 8px; padding: 9px 0; }
+.prob-row.disabled { opacity: .45; }
+.prob-check {
+  flex-shrink: 0; width: 18px; height: 18px; border-radius: 4px;
+  border: 1px solid var(--border-strong); background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: transparent; font-weight: 700; cursor: pointer;
+}
+.prob-check.checked { background: var(--accent); border-color: var(--accent); color: #fff; }
+.prob-name { flex: 1; font-size: 12.5px; cursor: pointer; }
+.prob-tag { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 99px; margin-left: 4px; }
+.prob-tag.imp-A { background: var(--red-bg); color: var(--red-color); }
+.prob-tag.imp-B { background: #fdf4e3; color: #7c5c00; }
+.prob-tag.imp-C { background: var(--o-bg); color: var(--o-color); }
+.prob-pending { font-size: 10.5px; color: var(--text-3); flex-shrink: 0; }
+
+.order-toggle { display: flex; gap: 8px; margin-bottom: 4px; }
+.order-btn {
+  flex: 1; padding: 10px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong); background: var(--surface);
+  color: var(--text); font-size: 13px; font-weight: 700;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif; cursor: pointer;
+  transition: all .15s;
+}
+.order-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
+
+.btn-primary {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius);
+  border: none;
+  background: var(--text);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.btn-primary:hover { opacity: .85; }
+.btn-primary:disabled { opacity: .4; cursor: default; }
+
+.btn-secondary {
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all .15s;
+}
+.btn-secondary:hover { background: #fafaf9; }
+
+.btn-danger-text {
+  width: 100%;
+  text-align: center;
+  padding: 10px;
+  color: #b91c1c;
+  font-size: 12px;
+  font-weight: 700;
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.warn-box {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 12px;
+  margin-bottom: 14px;
+}
+
+/* ── Flow screen ── */
+.progress-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.progress-label { font-size: 12px; color: var(--text-3); font-weight: 700; letter-spacing: .04em; }
+.progress-num { font-family: 'DM Mono', 'Courier New', monospace; font-size: 13px; color: var(--text-2); }
+
+.problem-head { margin-bottom: 10px; }
+.problem-head-top { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.problem-no { font-size: 12px; font-weight: 700; color: var(--text-2); }
+.problem-title { font-size: 15px; font-weight: 700; }
+
+.prev-card {
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  border-left: 3px solid var(--border-strong);
+  background: var(--bg);
+  opacity: .7;
+}
+.prev-card.blue { border-left-color: var(--blue-color); background: var(--blue-bg); }
+.prev-card.red { border-left-color: var(--red-color); background: var(--red-bg); }
+.prev-label { font-size: 10px; font-weight: 700; color: var(--text-3); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 4px; }
+.prev-text { white-space: pre-wrap; font-size: 12.5px; line-height: 1.6; color: var(--text-2); }
+
+/* 分岐点であることを示す統一バッジ（前のステップ表示・現在のステップ表示で共通） */
+.branch-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 99px;
+  background: #f1e9fb;
+  color: #6b3fa0;
+}
+.branch-flag-row { margin-bottom: 10px; }
+
+.next-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-3);
+  margin-bottom: 10px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--border-strong);
+}
+.next-hint.blue { color: var(--blue-color); border-color: var(--blue-border); background: var(--blue-bg); }
+.next-hint.red { color: var(--red-color); border-color: var(--red-border); background: var(--red-bg); }
+.next-hint.branch {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  text-align: left;
+  color: #6b3fa0;
+  border: 1px solid #d9c6ef;
+  background: #f7f2fc;
+  padding: 8px 12px;
+}
+.next-hint-top { display: flex; align-items: center; gap: 6px; }
+.next-hint-text { white-space: pre-wrap; font-size: 12.5px; font-weight: 500; color: #6b3fa0; margin-top: 4px; }
+
+.flow-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 18px;
+  margin-bottom: 14px;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  user-select: none;
+}
+.flow-kind-label { font-size: 11px; font-weight: 700; color: var(--text-3); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px; }
+.flow-text { white-space: pre-wrap; font-size: 16px; line-height: 1.85; color: var(--text); text-align: center; }
+.flow-card.question .flow-text { text-align: left; font-size: 15px; }
+.flow-card.plain { border-style: solid; }
+
+.flow-card.blue.hidden-state { cursor: pointer; border: 1px dashed var(--blue-border); background: #fbfcff; }
+.flow-card.red.hidden-state { cursor: pointer; border: 1px dashed var(--red-border); background: #fffaf9; }
+.flow-card.blue.revealed { border: 1px solid var(--blue-border); background: var(--blue-bg); }
+.flow-card.blue.revealed .flow-text { color: var(--blue-color); font-weight: 700; }
+.flow-card.red.revealed { border: 1px solid var(--red-border); background: var(--red-bg); }
+.flow-card.red.revealed .flow-text { color: var(--red-color); font-weight: 700; }
+
+.hidden-placeholder { text-align: center; color: var(--text-3); font-size: 13px; }
+.hidden-placeholder .mark { font-size: 26px; display: block; margin-bottom: 8px; }
+
+.flow-hint { font-size: 11px; color: var(--text-3); text-align: center; margin-top: 14px; }
+
+.score-row { display: flex; gap: 10px; margin-bottom: 4px; }
+.score-btn {
+  flex: 1; padding: 16px 8px; border-radius: var(--radius);
+  border: 1px solid var(--border-strong); background: var(--surface);
+  font-size: 14px; font-weight: 700;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  cursor: pointer; transition: all .15s;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.score-btn .mark { font-size: 20px; }
+.score-btn.know:hover { background: var(--o-bg); border-color: var(--o-color); color: var(--o-color); }
+.score-btn.dontknow:hover { background: var(--x-bg); border-color: var(--x-color); color: var(--x-color); }
+
+.keyword-chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.keyword-chip { font-size: 12px; padding: 5px 10px; border-radius: 99px; background: var(--bg); border: 1px solid var(--border-strong); color: var(--text-2); }
+
+.stat-mini-row { display: flex; gap: 10px; margin-bottom: 4px; }
+.stat-mini { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; text-align: center; }
+.stat-mini-num { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 700; }
+.stat-mini-label { font-size: 10.5px; color: var(--text-3); margin-top: 2px; }
+
+/* ── Stats tab ── */
+.overview-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px; }
+.overview-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+.overview-num { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 700; }
+.overview-label { font-size: 11px; color: var(--text-3); }
+.progress-track { height: 8px; border-radius: 99px; background: var(--bg); overflow: hidden; border: 1px solid var(--border); }
+.progress-fill { height: 100%; background: var(--o-color); border-radius: 99px; transition: width .3s; }
+
+.stat-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px; }
+.stat-section-title { font-size: 11px; font-weight: 700; color: var(--text-3); letter-spacing: .06em; margin-bottom: 10px; text-transform: uppercase; }
+.stat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.stat-row:last-child { margin-bottom: 0; }
+.stat-row-label { font-size: 11.5px; width: 150px; flex-shrink: 0; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stat-row-track { flex: 1; height: 10px; border-radius: 99px; background: var(--bg); overflow: hidden; border: 1px solid var(--border); }
+.stat-row-fill { height: 100%; border-radius: 99px; }
+.stat-row-num { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text-2); width: 70px; text-align: right; flex-shrink: 0; }
+.stat-note { font-size: 11px; color: var(--text-3); margin-top: 8px; }
+
+.empty-state { text-align: center; padding: 48px 16px; color: var(--text-3); font-size: 13px; }
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-row">
+    <div class="app-title">管理会計論（理論） ロジカルフロー学習</div>
+    <div class="header-actions">
+      <button class="btn-icon" onclick="exportProgress()">バックアップ</button>
+      <button class="btn-icon" onclick="document.getElementById('import-input').click()">復元</button>
+      <input type="file" id="import-input" accept=".json" style="display:none" onchange="importProgress(event)">
+    </div>
+  </div>
+  <div class="screen-title" id="screen-title">出題設定</div>
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-flow" onclick="switchTab('flow')">フロー</button>
+    <button class="tab-btn" id="tab-stats" onclick="switchTab('stats')">習熟度</button>
+  </div>
+</div>
+
+<div class="content" id="view-flow">
+
+  <!-- ── Screen 1: Setup ── -->
+  <div id="screen-setup">
+    <div class="card">
+      <label class="field-label">出題範囲（章・問題で絞り込み）</label>
+      <div id="chapter-tree"></div>
+    </div>
+
+    <div class="card">
+      <label class="field-label">出題順</label>
+      <div class="order-toggle">
+        <button class="order-btn active" id="order-sequential" onclick="setOrder('sequential')">順番</button>
+        <button class="order-btn" id="order-random" onclick="setOrder('random')">ランダム</button>
+      </div>
+      <div id="count-warn" class="warn-box hidden"></div>
+    </div>
+    <button class="btn-primary" id="start-btn" onclick="startSession()">学習を開始する</button>
+  </div>
+
+  <!-- ── Screen 2: Flow ── -->
+  <div id="screen-flow" class="hidden">
+    <div class="progress-row">
+      <span class="progress-label" id="progress-label"></span>
+      <span class="progress-num" id="progress-num"></span>
+    </div>
+    <div class="problem-head" id="problem-head"></div>
+
+    <div class="prev-card hidden" id="prev-card">
+      <div class="prev-label" id="prev-label">前のステップ</div>
+      <div class="prev-text" id="prev-text"></div>
+    </div>
+
+    <div class="flow-card" id="flow-card" onclick="onCardTap()">
+      <div class="branch-flag-row hidden" id="branch-flag-current"></div>
+      <div class="flow-kind-label" id="flow-kind-label"></div>
+      <div id="flow-body"></div>
+    </div>
+
+    <div class="next-hint hidden" id="next-hint"></div>
+
+    <div class="score-row hidden" id="score-row">
+      <button class="score-btn know" onclick="scoreNode(true)"><span class="mark">○</span>分かった</button>
+      <button class="score-btn dontknow" onclick="scoreNode(false)"><span class="mark">×</span>分からなかった</button>
+    </div>
+    <button class="btn-primary hidden" id="next-btn" onclick="onNextTap()">次へ</button>
+
+    <button class="btn-danger-text" onclick="abortSession()">中止する</button>
+  </div>
+
+  <!-- ── Screen 3: Result ── -->
+  <div id="screen-result" class="hidden">
+    <div class="card">
+      <div class="stat-mini-row">
+        <div class="stat-mini">
+          <div class="stat-mini-num" id="result-count"></div>
+          <div class="stat-mini-label">出題ノード数</div>
+        </div>
+        <div class="stat-mini">
+          <div class="stat-mini-num" id="result-rate"></div>
+          <div class="stat-mini-label">加重正答率（赤＝2点／青＝1点）</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="backToSetup()">出題設定に戻る</button>
+  </div>
+
+</div>
+
+<!-- ── 習熟度タブ ── -->
+<div class="content hidden" id="view-stats">
+  <div class="overview-card" id="stats-overview"></div>
+  <div class="stat-section" id="stats-by-problem"></div>
+</div>
+
+<script src="kanri_riron_flow_data.js"></script>
+<script>
+// ============================================================================
+// 定数・状態
+// ============================================================================
+const PROGRESS_KEY = 'kanri-ronri-flow-progress-v1';
+let progress = {}; // { [problemId#flatIdx]: { known: n, unknown: n, lastResult: 'o'|'x'|null } }
+
+let selectedProblems = new Set();
+let openChapters = {};
+let orderMode = 'sequential';
+
+let session = null; // { queue: [...problems], pIndex, flat: [...steps], stepPointer, revealed, results: [] }
+
+// ============================================================================
+// 進捗の読み書き
+// ============================================================================
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem(PROGRESS_KEY);
+    if (raw) { progress = JSON.parse(raw); return; }
+  } catch (e) {}
+  progress = {};
+}
+function saveProgress() {
+  try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); } catch (e) {}
+}
+function getP(nodeKey) {
+  return progress[nodeKey] || { known: 0, unknown: 0, lastResult: null };
+}
+function ensureP(nodeKey) {
+  if (!progress[nodeKey]) progress[nodeKey] = { known: 0, unknown: 0, lastResult: null };
+  return progress[nodeKey];
+}
+function recordResult(nodeKey, known) {
+  const p = ensureP(nodeKey);
+  if (known) p.known++; else p.unknown++;
+  p.lastResult = known ? 'o' : 'x';
+  saveProgress();
+}
+
+function weightOf(color) {
+  if (color === 'red') return 2;
+  if (color === 'blue') return 1;
+  return 0;
+}
+
+function escapeHtml(s) {
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+// ============================================================================
+// ロジカルフローの平坦化
+//   branch は各 path を自動で順番に辿る（区切り専用のステップは作らない）。
+//   分岐点となったノードには branchCount（何方向に分岐するか）を，
+//   2つ目以降の path の最初のノードには branchAnchor（分岐点ノードそのもの）を付与する。
+// ============================================================================
+function flattenFlow(flow) {
+  const out = [];
+  let lastNode = null; // 直近で出力したノード（分岐に入る直前のノード＝分岐点）
+  function walk(segments) {
+    segments.forEach(function (seg) {
+      if (seg.kind === 'node') {
+        const node = { kind: 'node', color: seg.color, text: seg.text };
+        out.push(node);
+        lastNode = node;
+      } else if (seg.kind === 'branch') {
+        const anchor = lastNode; // 分岐に入る直前のノード＝分岐点。全てのpathで共通して使う
+        if (anchor) anchor.branchCount = seg.paths.length;
+        seg.paths.forEach(function (path, i) {
+          const startIdx = out.length;
+          walk(path);
+          if (i > 0 && anchor && out[startIdx]) {
+            out[startIdx].branchAnchor = anchor;
+          }
+        });
+      }
+    });
+  }
+  walk(flow);
+  out.forEach(function (step, i) { step.idx = i; });
+  return out;
+}
+
+// ============================================================================
+// 出題範囲: 章・問題ツリー
+// ============================================================================
+function chapterProblems(chId) {
+  return RONRI_PROBLEMS.filter(function (p) { return p.chapterId === chId; });
+}
+
+function isChapterFullySelected(ch) {
+  const probs = chapterProblems(ch.id).filter(function (p) { return p.ready; });
+  if (probs.length === 0) return false;
+  return probs.every(function (p) { return selectedProblems.has(p.id); });
+}
+function isChapterPartiallySelected(ch) {
+  const probs = chapterProblems(ch.id).filter(function (p) { return p.ready; });
+  const any = probs.some(function (p) { return selectedProblems.has(p.id); });
+  return any && !isChapterFullySelected(ch);
+}
+
+function toggleChapterAll(chId) {
+  const ch = RONRI_CHAPTERS.find(function (c) { return c.id === chId; });
+  const probs = chapterProblems(ch.id).filter(function (p) { return p.ready; });
+  const nowFull = isChapterFullySelected(ch);
+  probs.forEach(function (p) {
+    if (nowFull) selectedProblems.delete(p.id); else selectedProblems.add(p.id);
+  });
+  renderChapterTree();
+  onFilterChanged();
+}
+
+function toggleProblem(pid) {
+  const p = RONRI_PROBLEMS.find(function (x) { return x.id === pid; });
+  if (!p || !p.ready) return;
+  if (selectedProblems.has(pid)) selectedProblems.delete(pid); else selectedProblems.add(pid);
+  renderChapterTree();
+  onFilterChanged();
+}
+
+function toggleChapterOpen(chId) {
+  openChapters[chId] = !openChapters[chId];
+  renderChapterTree();
+}
+
+function renderChapterTree() {
+  const wrap = document.getElementById('chapter-tree');
+  let html = '';
+  RONRI_CHAPTERS.forEach(function (ch) {
+    const probs = chapterProblems(ch.id);
+    const readyCount = probs.filter(function (p) { return p.ready; }).length;
+    const full = isChapterFullySelected(ch);
+    const partial = isChapterPartiallySelected(ch);
+    const checkClass = full ? 'checked' : (partial ? 'partial' : '');
+    const checkMark = full ? '✓' : (partial ? '－' : '');
+    const isOpen = openChapters[ch.id] === true;
+    html += '<div class="ch-block' + (isOpen ? ' open' : '') + '">' +
+      '<div class="ch-row">' +
+        '<span class="ch-check ' + checkClass + '" onclick="event.stopPropagation();toggleChapterAll(\'' + ch.id + '\')">' + checkMark + '</span>' +
+        '<span class="ch-name" onclick="toggleChapterOpen(\'' + ch.id + '\')">' + escapeHtml(ch.name) + '</span>' +
+        '<span class="ch-count" onclick="toggleChapterOpen(\'' + ch.id + '\')">' + readyCount + ' / ' + probs.length + '問</span>' +
+        '<span class="ch-chevron" onclick="toggleChapterOpen(\'' + ch.id + '\')">▶</span>' +
+      '</div>';
+    html += '<div class="prob-body">';
+    probs.forEach(function (p) {
+      const checked = selectedProblems.has(p.id);
+      if (p.ready) {
+        html += '<div class="prob-row">' +
+          '<span class="prob-check' + (checked ? ' checked' : '') + '" onclick="toggleProblem(\'' + p.id + '\')">' + (checked ? '✓' : '') + '</span>' +
+          '<span class="prob-name" onclick="toggleProblem(\'' + p.id + '\')">' + escapeHtml(p.no) + ' ' + escapeHtml(p.title) + '</span>' +
+          '<span class="prob-tag imp-' + p.importance + '">' + p.importance + '</span>' +
+        '</div>';
+      } else {
+        html += '<div class="prob-row disabled">' +
+          '<span class="prob-check"></span>' +
+          '<span class="prob-name">' + escapeHtml(p.no) + ' ' + escapeHtml(p.title) + '</span>' +
+          '<span class="prob-pending">準備中</span>' +
+        '</div>';
+      }
+    });
+    html += '</div>';
+    html += '</div>';
+  });
+  wrap.innerHTML = html;
+}
+
+// ============================================================================
+// 出題対象の絞り込み
+// ============================================================================
+function selectedProblemList() {
+  return RONRI_PROBLEMS.filter(function (p) { return p.ready && selectedProblems.has(p.id); });
+}
+
+function setOrder(mode) {
+  orderMode = mode;
+  document.getElementById('order-random').classList.toggle('active', mode === 'random');
+  document.getElementById('order-sequential').classList.toggle('active', mode === 'sequential');
+}
+
+function onFilterChanged() {
+  const warnEl = document.getElementById('count-warn');
+  const startBtn = document.getElementById('start-btn');
+  const n = selectedProblemList().length;
+  if (n === 0) {
+    warnEl.textContent = '出題範囲に該当する問題がありません。範囲を見直してください。';
+    warnEl.classList.remove('hidden');
+    startBtn.disabled = true;
+  } else {
+    warnEl.classList.add('hidden');
+    startBtn.disabled = false;
+  }
+}
+
+// ============================================================================
+// セッション開始・進行
+// ============================================================================
+function shuffleInPlace(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function buildQueue() {
+  let pool = selectedProblemList();
+  if (orderMode === 'random') {
+    pool = shuffleInPlace(pool.slice());
+  } else {
+    pool = pool.slice().sort(function (a, b) { return a.id.localeCompare(b.id, undefined, { numeric: true }); });
+  }
+  return pool;
+}
+
+function startSession() {
+  const queue = buildQueue();
+  if (queue.length === 0) return;
+  session = {
+    queue: queue,
+    pIndex: 0,
+    flat: null,
+    stepPointer: -1, // -1 = 問題文画面
+    revealed: false,
+    results: [], // { problemId, idx, color, known }
+  };
+  document.getElementById('screen-setup').classList.add('hidden');
+  document.getElementById('screen-result').classList.add('hidden');
+  document.getElementById('screen-flow').classList.remove('hidden');
+  document.getElementById('screen-title').textContent = '学習中';
+  loadCurrentProblem();
+}
+
+function currentProblem() {
+  return session.queue[session.pIndex];
+}
+
+function loadCurrentProblem() {
+  const p = currentProblem();
+  session.flat = flattenFlow(p.flow);
+  session.stepPointer = -1;
+  session.revealed = false;
+  renderFlow();
+}
+
+function nodeKeyFor(problemId, idx) {
+  return problemId + '#' + idx;
+}
+
+// 「1つ前」として表示すべきノードを決める。
+//   ・今のノードが分岐点から戻ってきた最初のノード（branchAnchor付き）なら，
+//     直前の分岐で最後に解いた文章ではなく，分岐点そのものを返す
+//   ・それ以外は単純に1つ前のノードを返す
+function findPrevNode(pointer) {
+  if (pointer <= 0 || pointer >= session.flat.length) return null;
+  const cur = session.flat[pointer];
+  if (cur.branchAnchor) return { node: cur.branchAnchor, isBranchPoint: true };
+  const prior = session.flat[pointer - 1];
+  return { node: prior, isBranchPoint: false };
+}
+
+function renderPrevCard(pointer) {
+  const prevCard = document.getElementById('prev-card');
+  const prevLabel = document.getElementById('prev-label');
+  const prevInfo = findPrevNode(pointer);
+  if (!prevInfo || !prevInfo.node) {
+    prevCard.classList.add('hidden');
+    return;
+  }
+  const prevNode = prevInfo.node;
+  prevCard.className = 'prev-card' + (prevNode.color !== 'plain' ? ' ' + prevNode.color : '');
+  prevLabel.innerHTML = prevInfo.isBranchPoint ? branchFlagHtml() : '前のステップ';
+  document.getElementById('prev-text').textContent = prevNode.text;
+}
+
+// 分岐点となるノードにつける統一バッジ（前のステップ表示・現在のステップ表示で共通利用）
+function branchFlagHtml(count) {
+  return '<span class="branch-flag">分岐点' + (count ? '（' + count + '方向に分岐）' : '') + '</span>';
+}
+
+function renderBranchFlag(step) {
+  const el = document.getElementById('branch-flag-current');
+  if (step && step.branchCount) {
+    el.innerHTML = branchFlagHtml(step.branchCount);
+    el.classList.remove('hidden');
+  } else {
+    el.classList.add('hidden');
+  }
+}
+
+// 次のステップの色だけを事前に示す（枠の色で暗記対象かどうかを判断できるため文言は最小限にする）。
+// ただし次が分岐点に戻る最初のノードの場合は，分岐点であることとその文章を先に見せる。
+function renderNextHint(pointer) {
+  const hintEl = document.getElementById('next-hint');
+  const next = session.flat[pointer + 1];
+
+  if (!next) {
+    hintEl.className = 'next-hint plain';
+    hintEl.textContent = '次: キーワード一覧';
+    return;
+  }
+  if (next.branchAnchor) {
+    hintEl.className = 'next-hint branch';
+    hintEl.innerHTML =
+      '<div class="next-hint-top">次: ' + branchFlagHtml() + '</div>' +
+      '<div class="next-hint-text">' + escapeHtml(next.branchAnchor.text) + '</div>';
+    return;
+  }
+  hintEl.className = 'next-hint ' + next.color;
+  hintEl.textContent = '次';
+}
+
+function renderFlow() {
+  const p = currentProblem();
+  document.getElementById('progress-label').textContent = '問題 ' + (session.pIndex + 1) + ' / ' + session.queue.length;
+  document.getElementById('problem-head').innerHTML =
+    '<div class="problem-head-top"><span class="problem-no">' + escapeHtml(p.no) + '</span>' +
+    '<span class="prob-tag imp-' + p.importance + '">重要度' + p.importance + '</span></div>' +
+    '<div class="problem-title">' + escapeHtml(p.title) + '</div>';
+
+  const card = document.getElementById('flow-card');
+  const kindLabel = document.getElementById('flow-kind-label');
+  const body = document.getElementById('flow-body');
+  const scoreRow = document.getElementById('score-row');
+  const nextBtn = document.getElementById('next-btn');
+
+  card.className = 'flow-card';
+  scoreRow.classList.add('hidden');
+  nextBtn.classList.add('hidden');
+
+  if (session.stepPointer === -1) {
+    // 問題文画面
+    document.getElementById('prev-card').classList.add('hidden');
+    document.getElementById('next-hint').classList.add('hidden');
+    document.getElementById('branch-flag-current').classList.add('hidden');
+    document.getElementById('progress-num').textContent = '問題文';
+    card.classList.add('question');
+    kindLabel.textContent = '問題';
+    body.innerHTML = '<div class="flow-text">' + escapeHtml(p.question) + '</div>';
+    nextBtn.textContent = '解答フローを見る';
+    nextBtn.classList.remove('hidden');
+    return;
+  }
+
+  if (session.stepPointer >= session.flat.length) {
+    document.getElementById('prev-card').classList.add('hidden');
+    document.getElementById('next-hint').classList.add('hidden');
+    document.getElementById('branch-flag-current').classList.add('hidden');
+    renderSummary();
+    return;
+  }
+
+  const step = session.flat[session.stepPointer];
+  renderPrevCard(session.stepPointer);
+  renderBranchFlag(step);
+  document.getElementById('next-hint').classList.remove('hidden');
+  renderNextHint(session.stepPointer);
+
+  document.getElementById('progress-num').textContent = 'ステップ ' + (session.stepPointer + 1) + ' / ' + session.flat.length;
+
+  // step.kind === 'node'
+  if (step.color === 'plain') {
+    card.classList.add('plain');
+    kindLabel.textContent = '';
+    body.innerHTML = '<div class="flow-text">' + escapeHtml(step.text) + '</div>';
+    nextBtn.textContent = '次へ';
+    nextBtn.classList.remove('hidden');
+    return;
+  }
+
+  // blue or red: 暗記対象
+  card.classList.add(step.color);
+  if (!session.revealed) {
+    card.classList.add('hidden-state');
+    kindLabel.textContent = '';
+    body.innerHTML = '<div class="hidden-placeholder"><span class="mark">？</span></div>';
+  } else {
+    card.classList.add('revealed');
+    kindLabel.textContent = '';
+    body.innerHTML = '<div class="flow-text">' + escapeHtml(step.text) + '</div>';
+    scoreRow.classList.remove('hidden');
+  }
+}
+
+function onCardTap() {
+  if (!session) return;
+  if (session.stepPointer < 0 || session.stepPointer >= session.flat.length) return;
+  const step = session.flat[session.stepPointer];
+  if (step.kind === 'node' && step.color !== 'plain' && !session.revealed) {
+    session.revealed = true;
+    renderFlow();
+  }
+}
+
+function onNextTap() {
+  if (!session) return;
+  if (session.stepPointer >= session.flat.length) return; // サマリー画面ではnext-btnは使わない
+  session.stepPointer += 1;
+  session.revealed = false;
+  renderFlow();
+}
+
+function scoreNode(known) {
+  const step = session.flat[session.stepPointer];
+  const p = currentProblem();
+  const key = nodeKeyFor(p.id, step.idx);
+  recordResult(key, known);
+  session.results.push({ problemId: p.id, idx: step.idx, color: step.color, known: known });
+  session.stepPointer += 1;
+  session.revealed = false;
+  renderFlow();
+}
+
+function renderSummary() {
+  const p = currentProblem();
+  const card = document.getElementById('flow-card');
+  const kindLabel = document.getElementById('flow-kind-label');
+  const body = document.getElementById('flow-body');
+  const nextBtn = document.getElementById('next-btn');
+
+  document.getElementById('progress-num').textContent = '完了';
+  card.className = 'flow-card';
+  kindLabel.textContent = 'キーワード';
+  const chips = p.keywords.map(function (k) { return '<span class="keyword-chip">' + escapeHtml(k) + '</span>'; }).join('');
+  body.innerHTML = '<div class="keyword-chip-row">' + (chips || '<span class="flow-text">（キーワード未登録）</span>') + '</div>';
+  document.getElementById('score-row').classList.add('hidden');
+
+  const isLast = session.pIndex + 1 >= session.queue.length;
+  nextBtn.textContent = isLast ? '結果を見る' : '次の問題へ';
+  nextBtn.classList.remove('hidden');
+  nextBtn.onclick = isLast ? finishSession : advanceToNextProblem;
+}
+
+function advanceToNextProblem() {
+  session.pIndex += 1;
+  document.getElementById('next-btn').onclick = onNextTap;
+  loadCurrentProblem();
+}
+
+function abortSession() {
+  if (!confirm('学習を中止しますか？（ここまでの結果は記録されます）')) return;
+  finishSession();
+}
+
+function finishSession() {
+  const results = session.results;
+  document.getElementById('next-btn').onclick = onNextTap;
+  document.getElementById('screen-flow').classList.add('hidden');
+  document.getElementById('screen-result').classList.remove('hidden');
+  document.getElementById('screen-title').textContent = '学習終了';
+
+  let wSum = 0, wKnown = 0;
+  results.forEach(function (r) {
+    const w = weightOf(r.color);
+    wSum += w;
+    if (r.known) wKnown += w;
+  });
+  const rate = wSum ? Math.round(wKnown / wSum * 100) : 0;
+  document.getElementById('result-count').textContent = results.length;
+  document.getElementById('result-rate').textContent = wSum ? rate + '%' : '－';
+  session = null;
+}
+
+function backToSetup() {
+  document.getElementById('screen-result').classList.add('hidden');
+  document.getElementById('screen-flow').classList.add('hidden');
+  document.getElementById('screen-setup').classList.remove('hidden');
+  document.getElementById('screen-title').textContent = '出題設定';
+  onFilterChanged();
+}
+
+// ============================================================================
+// キーボード操作
+// ============================================================================
+document.addEventListener('keydown', function (e) {
+  if (!session || document.getElementById('screen-flow').classList.contains('hidden')) return;
+  if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+  const scoreVisible = !document.getElementById('score-row').classList.contains('hidden');
+  if (e.code === 'Space') {
+    e.preventDefault();
+    if (session.stepPointer >= 0 && session.stepPointer < session.flat.length) {
+      const step = session.flat[session.stepPointer];
+      if (step.kind === 'node' && step.color !== 'plain' && !session.revealed) { onCardTap(); return; }
+    }
+    if (!scoreVisible) onNextTap();
+  } else if (scoreVisible && e.key === '1') {
+    scoreNode(true);
+  } else if (scoreVisible && e.key === '2') {
+    scoreNode(false);
+  }
+});
+
+// ============================================================================
+// 習熟度タブ
+// ============================================================================
+function switchTab(tab) {
+  document.getElementById('tab-flow').classList.toggle('active', tab === 'flow');
+  document.getElementById('tab-stats').classList.toggle('active', tab === 'stats');
+  document.getElementById('view-flow').classList.toggle('hidden', tab !== 'flow');
+  document.getElementById('view-stats').classList.toggle('hidden', tab !== 'stats');
+  if (tab === 'stats') {
+    document.getElementById('screen-title').textContent = '習熟度';
+    renderStats();
+  } else {
+    document.getElementById('screen-title').textContent = document.getElementById('screen-setup').classList.contains('hidden')
+      ? (document.getElementById('screen-flow').classList.contains('hidden') ? '学習終了' : '学習中')
+      : '出題設定';
+  }
+}
+
+function isMastered(nodeKey) {
+  const p = getP(nodeKey);
+  return p.known > 0 && p.lastResult === 'o';
+}
+
+// 問題ごとの加重習熟度: 赤=2点/青=1点。無色ノードは暗記対象ではないため集計しない。
+function problemMastery(p) {
+  const flat = flattenFlow(p.flow);
+  let wSum = 0, wMastered = 0;
+  flat.forEach(function (step) {
+    if (step.kind !== 'node' || step.color === 'plain') return;
+    const w = weightOf(step.color);
+    wSum += w;
+    if (isMastered(nodeKeyFor(p.id, step.idx))) wMastered += w;
+  });
+  return { wSum: wSum, wMastered: wMastered };
+}
+
+function renderStats() {
+  const readyProblems = RONRI_PROBLEMS.filter(function (p) { return p.ready; });
+  let totalW = 0, totalM = 0;
+  const rows = readyProblems.map(function (p) {
+    const m = problemMastery(p);
+    totalW += m.wSum;
+    totalM += m.wMastered;
+    return { p: p, m: m };
+  });
+  const pct = totalW ? Math.round(totalM / totalW * 100) : 0;
+
+  document.getElementById('stats-overview').innerHTML =
+    '<div class="overview-row"><span class="overview-num">' + pct + '%</span><span class="overview-label">加重習熟度（赤2点・青1点）</span></div>' +
+    '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%"></div></div>';
+
+  let html = '<div class="stat-section-title">問題別の習熟度</div>';
+  if (rows.length === 0) {
+    html += '<div class="empty-state">データ登録済みの問題がありません</div>';
+  }
+  rows.forEach(function (r) {
+    const p = Math.round(r.m.wSum ? r.m.wMastered / r.m.wSum * 100 : 0);
+    html += '<div class="stat-row">' +
+      '<span class="stat-row-label" title="' + escapeHtml(r.p.title) + '">' + escapeHtml(r.p.no) + '</span>' +
+      '<div class="stat-row-track"><div class="stat-row-fill" style="width:' + p + '%;background:var(--o-color)"></div></div>' +
+      '<span class="stat-row-num">' + p + '%</span>' +
+    '</div>';
+  });
+  html += '<div class="stat-note">対象: データ登録済み（準備中の問題は除く）の赤・青ノードのみ</div>';
+  document.getElementById('stats-by-problem').innerHTML = html;
+}
+
+// ============================================================================
+// バックアップ / 復元
+// ============================================================================
+async function exportProgress() {
+  const data = { version: 1, label: '管理会計論ロジカルフロー学習進捗', exportedAt: new Date().toISOString(), progress: progress };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const file = new File([blob], 'kanri_riron_flow_backup.json', { type: 'application/json' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file] }); return; } catch (e) {}
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'kanri_riron_flow_backup.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importProgress(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function (ev) {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.progress) throw new Error('invalid');
+      if (!confirm('現在の進捗を上書きして復元しますか？')) return;
+      progress = data.progress;
+      saveProgress();
+      location.reload();
+    } catch (err) {
+      alert('ファイルの読み込みに失敗しました。');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ============================================================================
+// 初期化
+// ============================================================================
+loadProgress();
+renderChapterTree();
+onFilterChanged();
+</script>
+</body>
+</html>
