@@ -451,6 +451,7 @@ let progress = {}; // { [problemId#flatIdx]: { known: n, unknown: n, lastResult:
 
 let selectedProblems = new Set();
 let openChapters = {};
+let openStatsChapters = {};
 let orderMode = 'sequential';
 
 let session = null; // { queue: [...problems], pIndex, flat: [...steps], stepPointer, revealed, results: [] }
@@ -971,14 +972,21 @@ function problemMastery(p) {
   return { wSum: wSum, wMastered: wMastered };
 }
 
+function toggleStatsChapterOpen(chId) {
+  openStatsChapters[chId] = !openStatsChapters[chId];
+  renderStats();
+}
+
 function renderStats() {
   const readyProblems = RONRI_PROBLEMS.filter(function (p) { return p.ready; });
   let totalW = 0, totalM = 0;
-  const rows = readyProblems.map(function (p) {
+  const rowsByChapter = {};
+  readyProblems.forEach(function (p) {
     const m = problemMastery(p);
     totalW += m.wSum;
     totalM += m.wMastered;
-    return { p: p, m: m };
+    if (!rowsByChapter[p.chapterId]) rowsByChapter[p.chapterId] = [];
+    rowsByChapter[p.chapterId].push({ p: p, m: m });
   });
   const pct = totalW ? Math.round(totalM / totalW * 100) : 0;
 
@@ -986,19 +994,36 @@ function renderStats() {
     '<div class="overview-row"><span class="overview-num">' + pct + '%</span><span class="overview-label">加重習熟度（赤2点・青1点）</span></div>' +
     '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%"></div></div>';
 
-  let html = '<div class="stat-section-title">問題別の習熟度</div>';
-  if (rows.length === 0) {
+  let html = '<div class="stat-section-title">章別の習熟度</div>';
+  if (readyProblems.length === 0) {
     html += '<div class="empty-state">データ登録済みの問題がありません</div>';
+  } else {
+    RONRI_CHAPTERS.forEach(function (ch) {
+      const rows = rowsByChapter[ch.id];
+      if (!rows || rows.length === 0) return;
+      let chW = 0, chM = 0;
+      rows.forEach(function (r) { chW += r.m.wSum; chM += r.m.wMastered; });
+      const chPct = chW ? Math.round(chM / chW * 100) : 0;
+      const isOpen = openStatsChapters[ch.id] === true;
+      html += '<div class="ch-block' + (isOpen ? ' open' : '') + '">' +
+        '<div class="ch-row" onclick="toggleStatsChapterOpen(\'' + ch.id + '\')">' +
+          '<span class="ch-name">' + escapeHtml(ch.name) + '</span>' +
+          '<span class="ch-count">' + rows.length + '問・' + chPct + '%</span>' +
+          '<span class="ch-chevron">▶</span>' +
+        '</div>';
+      html += '<div class="prob-body">';
+      rows.forEach(function (r) {
+        const p = Math.round(r.m.wSum ? r.m.wMastered / r.m.wSum * 100 : 0);
+        html += '<div class="stat-row">' +
+          '<span class="stat-row-label" title="' + escapeHtml(r.p.title) + '">' + escapeHtml(r.p.no) + '</span>' +
+          '<div class="stat-row-track"><div class="stat-row-fill" style="width:' + p + '%;background:var(--o-color)"></div></div>' +
+          '<span class="stat-row-num">' + p + '%</span>' +
+        '</div>';
+      });
+      html += '</div></div>';
+    });
+    html += '<div class="stat-note">対象: データ登録済み（準備中の問題は除く）の赤・青ノードのみ</div>';
   }
-  rows.forEach(function (r) {
-    const p = Math.round(r.m.wSum ? r.m.wMastered / r.m.wSum * 100 : 0);
-    html += '<div class="stat-row">' +
-      '<span class="stat-row-label" title="' + escapeHtml(r.p.title) + '">' + escapeHtml(r.p.no) + '</span>' +
-      '<div class="stat-row-track"><div class="stat-row-fill" style="width:' + p + '%;background:var(--o-color)"></div></div>' +
-      '<span class="stat-row-num">' + p + '%</span>' +
-    '</div>';
-  });
-  html += '<div class="stat-note">対象: データ登録済み（準備中の問題は除く）の赤・青ノードのみ</div>';
   document.getElementById('stats-by-problem').innerHTML = html;
 }
 
