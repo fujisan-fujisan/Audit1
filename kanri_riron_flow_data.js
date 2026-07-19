@@ -866,7 +866,7 @@ const RONRI_PROBLEMS = [
     keywords: ["仕損費中の加工費","減損費中の直接材料費","実在量比","加工換算量比"],
     ready: true,
     flow: [
-      { kind: "node", color: "red", text: "①仕損が定点で発生し，仕損費を両者負担とする場合" },
+      { kind: "node", color: "plain", text: "①仕損が定点で発生し，仕損費を両者負担とする場合" },
       {
         kind: "branch",
         paths: [
@@ -886,7 +886,7 @@ const RONRI_PROBLEMS = [
         ],
       },
       { kind: "node", color: "red", text: "仕損費中の加工費の負担のさせ方が相違する" },
-      { kind: "node", color: "red", text: "②減損が工程を通じて平均的に発生する場合" },
+      { kind: "node", color: "plain", text: "②減損が工程を通じて平均的に発生する場合" },
       {
         kind: "branch",
         paths: [
@@ -926,12 +926,12 @@ const RONRI_PROBLEMS = [
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "red", text: "①定点発生（仕損＜月初）" },
+          { kind: "node", color: "plain", text: "①定点発生（仕損＜月初）" },
           { kind: "node", color: "blue", text: "当月において月初仕掛品から\n仕損が生じる余地なし" },
           { kind: "node", color: "red", text: "先入先出法が適合\n（平均法は不適合）" },
         ],
         [
-          { kind: "node", color: "red", text: "②減損平均発生" },
+          { kind: "node", color: "plain", text: "②減損平均発生" },
           { kind: "node", color: "blue", text: "当月において月初仕掛品からも\n減損が生じていることは明らか" },
           { kind: "node", color: "red", text: "平均法が適合\n（先入先出法は不適合）" },
         ],
