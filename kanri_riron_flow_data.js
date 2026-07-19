@@ -992,7 +992,7 @@ const RONRI_PROBLEMS = [
           { kind: "node", color: "red", text: "異常仕損品にも負担させるべき\n（因果関係を重視）" },
         ],
         [
-          { kind: "node", color: "plain", text: "正常仕損費はあくまでも良品を製造するために不可避的に発生" },
+          { kind: "node", color: "blue", text: "正常仕損費はあくまでも良品を製造するために不可避的に発生" },
           { kind: "node", color: "red", text: "異常仕損品（不良品）には負担させるべきでない\n（正常性概念を重視）" },
         ],
         ],
@@ -1021,16 +1021,16 @@ const RONRI_PROBLEMS = [
           { kind: "node", color: "plain", text: "仕損は工程の前半に集中して発生" },
         ],
         [
-          { kind: "node", color: "blue", text: "仕損品は実体がある" },
+          { kind: "node", color: "plain", text: "仕損品は実体がある" },
         ],
         ],
       },
-      { kind: "node", color: "blue", text: "ラインオフされるまでは加工が行われる" },
-      { kind: "node", color: "blue", text: "工程前半で発生した仕損品も工程終点まで加工されている" },
-      { kind: "node", color: "red", text: "生産ラインの上流に検査点を増設" },
-      { kind: "node", color: "red", text: "仕損品を発生後速やかにラインオフすることが可能" },
-      { kind: "node", color: "red", text: "無駄な変動費資源の投入を回避可能" },
-      { kind: "node", color: "red", text: "原価節約が可能" },
+      { kind: "node", color: "plain", text: "ラインオフされるまでは加工が行われる" },
+      { kind: "node", color: "plain", text: "工程前半で発生した仕損品も工程終点まで加工されている" },
+      { kind: "node", color: "plain", text: "生産ラインの上流に検査点を増設" },
+      { kind: "node", color: "plain", text: "仕損品を発生後速やかにラインオフすることが可能" },
+      { kind: "node", color: "plain", text: "無駄な変動費資源の投入を回避可能" },
+      { kind: "node", color: "plain", text: "原価節約が可能" },
     ],
   },
   {
@@ -1045,32 +1045,32 @@ const RONRI_PROBLEMS = [
     ready: true,
     flow: [
       { kind: "node", color: "plain", text: "累加法の特徴" },
-      { kind: "node", color: "plain", text: "各工程の完成品原価を次工程に振り替える" },
+      { kind: "node", color: "blue", text: "各工程の完成品原価を次工程に振り替える" },
       {
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "blue", text: "製品原価の計算の見地" },
+          { kind: "node", color: "red", text: "製品原価の計算の見地" },
           { kind: "node", color: "blue", text: "自工程の計算に当たって\n前工程の計算の終了を待つ必要がある" },
           { kind: "node", color: "red", text: "製品原価の計算が遅延\n（問題点①）" },
         ],
         [
-          { kind: "node", color: "blue", text: "責任会計の見地" },
-          { kind: "node", color: "red", text: "管理不能な前工程の\n能率の良否の影響が自工程に混入" },
+          { kind: "node", color: "red", text: "責任会計の見地" },
+          { kind: "node", color: "blue", text: "管理不能な前工程の\n能率の良否の影響が自工程に混入" },
           { kind: "node", color: "red", text: "原価業績を純粋に把握できない\n（問題点②）" },
         ],
         ],
       },
       { kind: "node", color: "blue", text: "問題の本質は完成品の実際原価を振り替える点にある" },
-      { kind: "node", color: "blue", text: "工程間の振替製品を予定原価又は正常原価で評価" },
+      { kind: "node", color: "red", text: "工程間の振替製品を予定原価又は正常原価で評価" },
       {
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "red", text: "前工程の計算の終了を待たずに\n自工程の計算が可能" },
+          { kind: "node", color: "blue", text: "前工程の計算の終了を待たずに\n自工程の計算が可能" },
         ],
         [
-          { kind: "node", color: "red", text: "管理不能な前工程の\n能率の良否の影響を排除できる" },
+          { kind: "node", color: "blue", text: "管理不能な前工程の\n能率の良否の影響を排除できる" },
         ],
         ],
       },
@@ -1088,7 +1088,7 @@ const RONRI_PROBLEMS = [
     ready: true,
     flow: [
       { kind: "node", color: "plain", text: "非累加法" },
-      { kind: "node", color: "plain", text: "最終完成品や工程仕掛品に含まれる各工程費を直接計算" },
+      { kind: "node", color: "blue", text: "最終完成品や工程仕掛品に含まれる各工程費を直接計算" },
       {
         kind: "branch",
         paths: [
@@ -1119,7 +1119,7 @@ const RONRI_PROBLEMS = [
     flow: [
       { kind: "node", color: "plain", text: "加工費工程別総合原価計算（加工費法）の特徴" },
       { kind: "node", color: "blue", text: "原料費について工程別計算を省略" },
-      { kind: "node", color: "red", text: "原料費の進捗度や減損費の負担関係を考慮できない" },
+      { kind: "node", color: "blue", text: "原料費の進捗度や減損費の負担関係を考慮できない" },
       {
         kind: "branch",
         paths: [
@@ -1299,19 +1299,19 @@ const RONRI_PROBLEMS = [
           { kind: "node", color: "plain", text: "現行の原則的な原価計算" },
           { kind: "node", color: "plain", text: "価値移転の道筋を\n因果関係を重視して正確に描く" },
           { kind: "node", color: "blue", text: "（原価発生原因主義）" },
-          { kind: "node", color: "red", text: "価値移転的原価計算" },
+          { kind: "node", color: "blue", text: "価値移転的原価計算" },
         ],
         [
           { kind: "node", color: "plain", text: "連産品の計算" },
           { kind: "node", color: "plain", text: "売価の高い製品に\n相対的に多くの原価を負担させる" },
           { kind: "node", color: "blue", text: "（負担能力主義）" },
-          { kind: "node", color: "red", text: "価値回収的原価計算" },
+          { kind: "node", color: "blue", text: "価値回収的原価計算" },
         ],
         ],
       },
       { kind: "node", color: "red", text: "連産品の計算は現行の原則的な原価計算の考え方に反する" },
-      { kind: "node", color: "red", text: "連産品は同時必然的に産出される" },
-      { kind: "node", color: "red", text: "価値移転的原価計算の適用は不可能" },
+      { kind: "node", color: "blue", text: "連産品は同時必然的に産出される" },
+      { kind: "node", color: "blue", text: "価値移転的原価計算の適用は不可能" },
       { kind: "node", color: "red", text: "財務諸表作成の便宜上，例外的に認められる" },
     ],
   },
@@ -1343,12 +1343,12 @@ const RONRI_PROBLEMS = [
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "red", text: "連産品は\n同時必然的に産出される" },
-          { kind: "node", color: "red", text: "価値移転的原価計算の\n適用は不可能" },
+          { kind: "node", color: "blue", text: "連産品は\n同時必然的に産出される" },
+          { kind: "node", color: "blue", text: "価値移転的原価計算の\n適用は不可能" },
           { kind: "node", color: "red", text: "原価負担能力に基づく等価係数\n（価値回収的原価計算）" },
         ],
         [
-          { kind: "node", color: "red", text: "等級製品は\n個別的に生産される" },
+          { kind: "node", color: "blue", text: "等級製品は\n個別的に生産される" },
           { kind: "node", color: "blue", text: "一般に組別総合原価計算の\n適用が可能" },
           { kind: "node", color: "red", text: "原価発生原因に基づく等価係数\n（価値移転的原価計算）" },
         ],
@@ -1475,8 +1475,8 @@ const RONRI_PROBLEMS = [
     ready: true,
     flow: [
       { kind: "node", color: "plain", text: "標準原価計算による原価管理" },
-      { kind: "node", color: "red", text: "原価統制" },
-      { kind: "node", color: "red", text: "原価目標(標準原価)の達成を確保するための活動" },
+      { kind: "node", color: "blue", text: "原価統制" },
+      { kind: "node", color: "blue", text: "原価目標(標準原価)の達成を確保するための活動" },
       {
         kind: "branch",
         paths: [
@@ -1589,7 +1589,7 @@ const RONRI_PROBLEMS = [
     keywords: ["正常仕損費","負担関係","負担割合","度外視","異常仕損費","標準消費量"],
     ready: true,
     flow: [
-      { kind: "node", color: "plain", text: "第1法" },
+      { kind: "node", color: "red", text: "第1法" },
       { kind: "node", color: "blue", text: "原価要素別標準消費量の中に正常仕損の余裕分を組み込む" },
       {
         kind: "branch",
@@ -1604,7 +1604,7 @@ const RONRI_PROBLEMS = [
         ],
         ],
       },
-      { kind: "node", color: "plain", text: "第2法" },
+      { kind: "node", color: "red", text: "第2法" },
       { kind: "node", color: "blue", text: "正味標準原価に正常仕損費を特別費として加算する" },
       {
         kind: "branch",
@@ -1746,7 +1746,7 @@ const RONRI_PROBLEMS = [
     ready: true,
     flow: [
       { kind: "node", color: "plain", text: "修正パーシャル・プラン" },
-      { kind: "node", color: "red", text: "直接材料費や直接労務費の各仕掛品勘定の借方には\n標準価格（標準賃率）で計算した実際原価を記入" },
+      { kind: "node", color: "blue", text: "直接材料費や直接労務費の各仕掛品勘定の借方には\n標準価格（標準賃率）で計算した実際原価を記入" },
       {
         kind: "branch",
         paths: [
@@ -1760,7 +1760,7 @@ const RONRI_PROBLEMS = [
         ],
         ],
       },
-      { kind: "node", color: "plain", text: "原価業績報告書は仕掛品勘定をベースに作成" },
+      { kind: "node", color: "blue", text: "原価業績報告書は仕掛品勘定をベースに作成" },
       { kind: "node", color: "red", text: "工程管理者にとって管理不能な差異を予め排除できる\n（工程管理者にとって管理可能な差異のみを反映できる）" },
       { kind: "node", color: "red", text: "責任会計の見地においてパーシャル・プランよりも優れている" },
     ],
@@ -1846,7 +1846,7 @@ const RONRI_PROBLEMS = [
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "blue", text: "個別生産やロット生産" },
+          { kind: "node", color: "red", text: "個別生産やロット生産" },
           { kind: "node", color: "blue", text: "事前に生産量が確定" },
           { kind: "node", color: "blue", text: "標準投入量を\n事前に算定可能" },
           { kind: "node", color: "red", text: "適合する" },
@@ -1885,7 +1885,7 @@ const RONRI_PROBLEMS = [
         ],
         ],
       },
-      { kind: "node", color: "plain", text: "原価差異を把握するタイミングと\n標準原価を複式簿記機構に組み入れるタイミングは通常一致する" },
+      { kind: "node", color: "blue", text: "原価差異を把握するタイミングと\n標準原価を複式簿記機構に組み入れるタイミングは通常一致する" },
       {
         kind: "branch",
         paths: [
@@ -1968,20 +1968,20 @@ const RONRI_PROBLEMS = [
         paths: [
         [
           { kind: "node", color: "blue", text: "価格差異" },
-          { kind: "node", color: "blue", text: "主として企業外部の要因によって発生" },
-          { kind: "node", color: "red", text: "現場管理者にとって一般に管理不能" },
+          { kind: "node", color: "plain", text: "主として企業外部の要因によって発生" },
+          { kind: "node", color: "blue", text: "現場管理者にとって一般に管理不能" },
           { kind: "node", color: "blue", text: "原価責任を問えない" },
         ],
         [
           { kind: "node", color: "blue", text: "数量差異" },
-          { kind: "node", color: "blue", text: "主として企業内部の要因によって発生" },
-          { kind: "node", color: "red", text: "現場管理者にとって一般に管理可能" },
+          { kind: "node", color: "plain", text: "主として企業内部の要因によって発生" },
+          { kind: "node", color: "blue", text: "現場管理者にとって一般に管理可能" },
           { kind: "node", color: "blue", text: "原価責任を問いうる" },
         ],
         ],
       },
       { kind: "node", color: "blue", text: "価格差異よりも数量差異を純粋に把握する必要" },
-      { kind: "node", color: "red", text: "数量差異は標準価格で評価するのが適切" },
+      { kind: "node", color: "blue", text: "数量差異は標準価格で評価するのが適切" },
       { kind: "node", color: "red", text: "混合差異は価格差異に含めるべき" },
     ],
   },
@@ -2061,7 +2061,7 @@ const RONRI_PROBLEMS = [
       { kind: "node", color: "plain", text: "直接労務費は支払形態からすれば固定費" },
       { kind: "node", color: "plain", text: "直接工の労働力は作業時間とともに消費され，\n製品生産量の増減とともに変動する\n（消費形態からすれば変動費）" },
       { kind: "node", color: "blue", text: "直接工の作業能率の良否を会計的に評価する必要" },
-      { kind: "node", color: "blue", text: "原価管理上は変動費として取り扱う" },
+      { kind: "node", color: "red", text: "原価管理上は変動費として取り扱う" },
       { kind: "node", color: "blue", text: "本来固定的に発生するものを変動費と擬制" },
       { kind: "node", color: "blue", text: "未利用キャパシティがあれば賃率差異が発生" },
       { kind: "node", color: "red", text: "賃率差異は操業度差異としての性質を有する" },
@@ -2177,12 +2177,12 @@ const RONRI_PROBLEMS = [
         paths: [
         [
           { kind: "node", color: "red", text: "実際原価主義者の立場" },
-          { kind: "node", color: "red", text: "実際原価こそが\n外部報告目的に最良の真実の価" },
+          { kind: "node", color: "blue", text: "実際原価こそが\n外部報告目的に最良の真実の価" },
           { kind: "node", color: "red", text: "原価差異は期末仕掛品，期末製品\n及び売上原価に追加配賦すべき" },
         ],
         [
           { kind: "node", color: "red", text: "標準原価主義者の立場" },
-          { kind: "node", color: "red", text: "標準が科学的に設定されている限り\n管理可能差異は回避すべき無駄（損失）" },
+          { kind: "node", color: "blue", text: "標準が科学的に設定されている限り\n管理可能差異は回避すべき無駄（損失）" },
           { kind: "node", color: "blue", text: "製品原価性なし\n（製品を通じて回収すべきでない）" },
           { kind: "node", color: "red", text: "非原価（営業外費用）又は\n期間原価とすべき" },
         ],
@@ -2201,12 +2201,12 @@ const RONRI_PROBLEMS = [
     keywords: ["理想標準原価","標準の設定","多額の原価差異","配賦すべき総額","少額"],
     ready: true,
     flow: [
-      { kind: "node", color: "red", text: "標準原価計算制度において用いられる標準原価" },
+      { kind: "node", color: "blue", text: "標準原価計算制度において用いられる標準原価" },
       { kind: "node", color: "blue", text: "現実的標準原価又は正常原価であって理想標準原価ではない" },
       { kind: "node", color: "blue", text: "標準（価格標準・物量標準）の設定が適切" },
       { kind: "node", color: "blue", text: "多額の原価差異は生じない" },
-      { kind: "node", color: "plain", text: "配賦すべき総額が少額" },
-      { kind: "node", color: "plain", text: "期末棚卸資産に配賦すべき金額は極めて少額（無視しうる）" },
+      { kind: "node", color: "blue", text: "配賦すべき総額が少額" },
+      { kind: "node", color: "red", text: "期末棚卸資産に配賦すべき金額は極めて少額（無視しうる）" },
       { kind: "node", color: "red", text: "当年度の売上原価に賦課\n（原則的処理）" },
     ],
   },
@@ -3344,10 +3344,10 @@ const RONRI_PROBLEMS = [
     keywords: ["支出済みの過去原価","キャッシュ・アウトフロー","埋没原価","損金算入","法人税等の減少額","差額原価（差額キャッシュ・フロー）"],
     ready: true,
     flow: [
-      { kind: "node", color: "plain", text: "減価償却費" },
+      { kind: "node", color: "blue", text: "減価償却費" },
       { kind: "node", color: "blue", text: "支出済みの過去原価" },
       { kind: "node", color: "blue", text: "キャッシュ・アウトフローを伴わない" },
-      { kind: "node", color: "plain", text: "損金算入" },
+      { kind: "node", color: "blue", text: "損金算入" },
       { kind: "node", color: "blue", text: "キャッシュ・アウトフローとしての法人税等が減少" },
       {
         kind: "branch",
@@ -3442,7 +3442,7 @@ const RONRI_PROBLEMS = [
     keywords: ["正味現在価値","単調に減少","内部利益率","資本コスト率"],
     ready: true,
     flow: [
-      { kind: "node", color: "red", text: "典型的投資案" },
+      { kind: "node", color: "blue", text: "典型的投資案" },
       { kind: "node", color: "blue", text: "キャッシュ・フローの正負の符号の変化が1回だけ" },
       { kind: "node", color: "blue", text: "算定される内部利益率は1つ" },
       { kind: "node", color: "blue", text: "正味現在価値は割引率の増加に応じて単調に減少\n（正味現在価値線は右下がり）" },
@@ -3450,11 +3450,11 @@ const RONRI_PROBLEMS = [
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "plain", text: "正味現在価値＞0" },
+          { kind: "node", color: "blue", text: "正味現在価値＞0" },
           { kind: "node", color: "blue", text: "内部利益率＞資本コスト率" },
         ],
         [
-          { kind: "node", color: "plain", text: "正味現在価値＜0" },
+          { kind: "node", color: "blue", text: "正味現在価値＜0" },
           { kind: "node", color: "blue", text: "内部利益率＜資本コスト率" },
         ],
         ],
@@ -3505,14 +3505,14 @@ const RONRI_PROBLEMS = [
           { kind: "node", color: "red", text: "正味現在価値法" },
           { kind: "node", color: "blue", text: "金額による評価" },
           { kind: "node", color: "blue", text: "加法性が成立する" },
-          { kind: "node", color: "red", text: "組合せで評価できる" },
+          { kind: "node", color: "blue", text: "組合せで評価できる" },
           { kind: "node", color: "red", text: "適切な資本配分が可能" },
         ],
         [
           { kind: "node", color: "red", text: "内部利益率法\n収益性指数法" },
           { kind: "node", color: "blue", text: "比率による評価" },
           { kind: "node", color: "blue", text: "加法性は成立しない" },
-          { kind: "node", color: "red", text: "組合せで評価できない" },
+          { kind: "node", color: "blue", text: "組合せで評価できない" },
           { kind: "node", color: "red", text: "誤った資本配分を導く恐れ" },
         ],
         ],
@@ -3555,18 +3555,18 @@ const RONRI_PROBLEMS = [
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "blue", text: "資本コスト率＜ＩＲＲA-B" },
+          { kind: "node", color: "plain", text: "資本コスト率＜ＩＲＲA-B" },
           { kind: "node", color: "plain", text: "A案のＮＰＶ＞B案のＮＰＶ" },
           { kind: "node", color: "plain", text: "A案を選択" },
         ],
         [
-          { kind: "node", color: "blue", text: "ＩＲＲA-B＜資本コスト率" },
+          { kind: "node", color: "plain", text: "ＩＲＲA-B＜資本コスト率" },
           { kind: "node", color: "plain", text: "A案のＮＰＶ＜B案のＮＰＶ" },
           { kind: "node", color: "plain", text: "B案を選択" },
         ],
         ],
       },
-      { kind: "node", color: "red", text: "ＩＲＲ法のみでＮＰＶ法と同じ結論を得ることが可能" },
+      { kind: "node", color: "plain", text: "ＩＲＲ法のみでＮＰＶ法と同じ結論を得ることが可能" },
     ],
   },
   {
@@ -3588,16 +3588,16 @@ const RONRI_PROBLEMS = [
         paths: [
         [
           { kind: "node", color: "plain", text: "将来キャッシュ・フロー\n（分子：割引計算の対象）" },
-          { kind: "node", color: "blue", text: "予測に不確実性を伴う" },
+          { kind: "node", color: "plain", text: "予測に不確実性を伴う" },
         ],
         [
           { kind: "node", color: "plain", text: "資本コスト率\n（分母：割引率ないし切捨率）" },
-          { kind: "node", color: "blue", text: "測定に困難性を伴う" },
+          { kind: "node", color: "plain", text: "測定に困難性を伴う" },
         ],
         ],
       },
-      { kind: "node", color: "red", text: "計算要素や決定要素自体の測定が困難" },
-      { kind: "node", color: "red", text: "予測の正確性が低ければ評価結果の信頼性も減退" },
+      { kind: "node", color: "plain", text: "計算要素や決定要素自体の測定が困難" },
+      { kind: "node", color: "plain", text: "予測の正確性が低ければ評価結果の信頼性も減退" },
     ],
   },
   {
@@ -3650,7 +3650,7 @@ const RONRI_PROBLEMS = [
           { kind: "node", color: "blue", text: "正味現在価値法" },
           { kind: "node", color: "blue", text: "将来ＣＦの割引率" },
           { kind: "node", color: "blue", text: "計算に当たって\n資本コスト率の測定が必要" },
-          { kind: "node", color: "red", text: "資本コスト率の測定という\n困難な問題を回避できない" },
+          { kind: "node", color: "blue", text: "資本コスト率の測定という\n困難な問題を回避できない" },
         ],
         [
           { kind: "node", color: "blue", text: "内部利益率法" },
@@ -4315,10 +4315,10 @@ const RONRI_PROBLEMS = [
     keywords: ["業務執行権限","投資決裁権","本社","利益センター","投資センター"],
     ready: true,
     flow: [
-      { kind: "node", color: "plain", text: "事業部" },
+      { kind: "node", color: "blue", text: "事業部" },
       { kind: "node", color: "blue", text: "業務執行にかかわる包括的な意思決定権限を有する" },
       { kind: "node", color: "red", text: "広義には利益センター\n（収益と原価の双方に責任を負う独立採算単位）" },
-      { kind: "node", color: "plain", text: "事業部長に対する権限委譲のパターン" },
+      { kind: "node", color: "blue", text: "事業部長に対する権限委譲のパターン" },
       {
         kind: "branch",
         paths: [
@@ -4397,7 +4397,7 @@ const RONRI_PROBLEMS = [
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "red", text: "現在のＲＯＩ" },
+          { kind: "node", color: "blue", text: "現在のＲＯＩ" },
         ],
         [
           { kind: "node", color: "red", text: "資本コスト率" },
@@ -4547,20 +4547,20 @@ const RONRI_PROBLEMS = [
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "red", text: "本社費は各事業部で管理不能" },
+          { kind: "node", color: "blue", text: "本社費は各事業部で管理不能" },
         ],
         [
-          { kind: "node", color: "plain", text: "適当な配賦基準がない" },
+          { kind: "node", color: "blue", text: "適当な配賦基準がない" },
         ],
         ],
       },
-      { kind: "node", color: "red", text: "配賦すれば各事業部の業績測定を混濁させる恐れ" },
+      { kind: "node", color: "blue", text: "配賦すれば各事業部の業績測定を混濁させる恐れ" },
       { kind: "node", color: "red", text: "本社費は各事業部に配賦すべきでない" },
       { kind: "node", color: "red", text: "事業部制の実務" },
       { kind: "node", color: "red", text: "本社費を配賦するのが通常" },
-      { kind: "node", color: "red", text: "理由①：各事業部に本社費回収の必要性を認識させるため" },
-      { kind: "node", color: "red", text: "理由②：各事業部に本社費の発生に対する牽制機能を持たせるため" },
-      { kind: "node", color: "red", text: "理由③：各事業部の業績測定を独立の会社のそれに近付けるため" },
+      { kind: "node", color: "blue", text: "理由①：各事業部に本社費回収の必要性を認識させるため" },
+      { kind: "node", color: "blue", text: "理由②：各事業部に本社費の発生に対する牽制機能を持たせるため" },
+      { kind: "node", color: "blue", text: "理由③：各事業部の業績測定を独立の会社のそれに近付けるため" },
     ],
   },
   {
@@ -4670,7 +4670,7 @@ const RONRI_PROBLEMS = [
     keywords: ["対面業界","リスクの相違","誤った資本配分"],
     ready: true,
     flow: [
-      { kind: "node", color: "red", text: "A社は多角化企業" },
+      { kind: "node", color: "blue", text: "A社は多角化企業" },
       { kind: "node", color: "blue", text: "対面業界のリスクを考慮した資本コスト率を適用すべき" },
       {
         kind: "branch",
@@ -4741,7 +4741,7 @@ const RONRI_PROBLEMS = [
     flow: [
       { kind: "node", color: "red", text: "外部市場の需要が豊富" },
       { kind: "node", color: "red", text: "供給事業部が完全操業状態にある場合" },
-      { kind: "node", color: "red", text: "内部振替を選択すればその分だけ外部販売の機会を失う" },
+      { kind: "node", color: "blue", text: "内部振替を選択すればその分だけ外部販売の機会を失う" },
       {
         kind: "branch",
         paths: [
@@ -4822,7 +4822,7 @@ const RONRI_PROBLEMS = [
         ],
       },
       { kind: "node", color: "red", text: "業績測定上の公平性の観点から問題" },
-      { kind: "node", color: "red", text: "標準原価をコストベースとする場合" },
+      { kind: "node", color: "blue", text: "標準原価をコストベースとする場合" },
       {
         kind: "branch",
         paths: [
@@ -4908,14 +4908,14 @@ const RONRI_PROBLEMS = [
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "red", text: "業務の集中" },
+          { kind: "node", color: "blue", text: "業務の集中" },
         ],
         [
           { kind: "node", color: "red", text: "業務の見直し" },
           { kind: "node", color: "plain", text: "ＡＢＭ" },
         ],
         [
-          { kind: "node", color: "red", text: "業務の標準化" },
+          { kind: "node", color: "blue", text: "業務の標準化" },
         ],
         ],
       },
