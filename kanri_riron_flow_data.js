@@ -46,7 +46,7 @@ const RONRI_PROBLEMS = [
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "red", text: "継続記録法" },
+          { kind: "node", color: "plain", text: "継続記録法" },
           { kind: "node", color: "blue", text: "払出記録を行う" },
           { kind: "node", color: "red", text: "常に帳簿残高が明らか" },
           { kind: "node", color: "red", text: "実地棚卸により" },
@@ -54,7 +54,7 @@ const RONRI_PROBLEMS = [
           { kind: "node", color: "plain", text: "材料の会計管理が可能" },
         ],
         [
-          { kind: "node", color: "red", text: "棚卸計算法" },
+          { kind: "node", color: "plain", text: "棚卸計算法" },
           { kind: "node", color: "blue", text: "払出記録を行わない" },
           { kind: "node", color: "red", text: "帳簿残高は不明" },
           { kind: "node", color: "red", text: "実地棚卸をしても" },
@@ -145,7 +145,7 @@ const RONRI_PROBLEMS = [
     keywords: ["定時外作業を行った原因","特定製品","偶然性"],
     ready: true,
     flow: [
-      { kind: "node", color: "red", text: "定時外作業手当を別建てで処理する場合" },
+      { kind: "node", color: "plain", text: "定時外作業手当を別建てで処理する場合" },
       { kind: "node", color: "red", text: "定時外作業を行った原因に応じて処理すべき" },
       {
         kind: "branch",
@@ -180,11 +180,11 @@ const RONRI_PROBLEMS = [
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "red", text: "⑴価値移転的原価計算" },
+          { kind: "node", color: "plain", text: "⑴価値移転的原価計算" },
           { kind: "node", color: "blue", text: "因果関係を重視した計算" },
         ],
         [
-          { kind: "node", color: "red", text: "⑵価値回収的原価計算" },
+          { kind: "node", color: "plain", text: "⑵価値回収的原価計算" },
           { kind: "node", color: "blue", text: "原価負担能力に応じた計算" },
         ],
         ],
@@ -278,7 +278,7 @@ const RONRI_PROBLEMS = [
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "red", text: "①期間損益計算の観点\n（原価計算制度）" },
+          { kind: "node", color: "plain", text: "①期間損益計算の観点\n（原価計算制度）" },
           { kind: "node", color: "blue", text: "現代企業は慢性的に不働能力を抱えている" },
           { kind: "node", color: "blue", text: "不確実性にさらされている" },
           { kind: "node", color: "blue", text: "実際的生産能力や平均操業度を選択" },
@@ -288,7 +288,7 @@ const RONRI_PROBLEMS = [
           { kind: "node", color: "red", text: "次年度の予測に基づく期待実際操業度が望ましい" },
         ],
         [
-          { kind: "node", color: "red", text: "②価格決定の観点\n（特殊原価調査）" },
+          { kind: "node", color: "plain", text: "②価格決定の観点\n（特殊原価調査）" },
           { kind: "node", color: "blue", text: "競争環境は非常に厳しい" },
           { kind: "node", color: "blue", text: "期待実際操業度や平均操業度を選択" },
           { kind: "node", color: "blue", text: "配賦率が相対的に高くなる" },
@@ -315,13 +315,13 @@ const RONRI_PROBLEMS = [
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "red", text: "固定予算" },
+          { kind: "node", color: "plain", text: "固定予算" },
           { kind: "node", color: "plain", text: "予算期間において予期される一定の操業度に基づいて算定" },
           { kind: "node", color: "plain", text: "基準操業度における発生予定額" },
           { kind: "node", color: "red", text: "予定配賦率算定の基礎\n（期間損益計算目的）" },
         ],
         [
-          { kind: "node", color: "red", text: "変動予算" },
+          { kind: "node", color: "plain", text: "変動予算" },
           { kind: "node", color: "plain", text: "予算期間において予期される範囲内の種々の操業度に応じて算定" },
           { kind: "node", color: "plain", text: "実際操業度における発生予定額" },
           { kind: "node", color: "red", text: "製造間接費の管理標準\n（原価管理目的）" },
@@ -375,12 +375,12 @@ const RONRI_PROBLEMS = [
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "blue", text: "固定予算を用いる場合" },
+          { kind: "node", color: "plain", text: "固定予算を用いる場合" },
           { kind: "node", color: "blue", text: "予定配賦率で評価" },
           { kind: "node", color: "blue", text: "変動費と固定費の双方から操業度差異が生じると仮定" },
         ],
         [
-          { kind: "node", color: "blue", text: "変動予算を用いる場合" },
+          { kind: "node", color: "plain", text: "変動予算を用いる場合" },
           { kind: "node", color: "blue", text: "固定費率で評価" },
           { kind: "node", color: "blue", text: "固定費のみから操業度差異が生じると仮定" },
         ],
@@ -431,13 +431,13 @@ const RONRI_PROBLEMS = [
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "red", text: "年間の分析" },
+          { kind: "node", color: "plain", text: "年間の分析" },
           { kind: "node", color: "blue", text: "生産能力を超えて稼働することは不可能" },
           { kind: "node", color: "blue", text: "必ず実際操業度≦基準操業度となる" },
           { kind: "node", color: "red", text: "有利な操業度差異が生じる余地はない" },
         ],
         [
-          { kind: "node", color: "red", text: "月間の分析" },
+          { kind: "node", color: "plain", text: "月間の分析" },
           { kind: "node", color: "blue", text: "1か月は1年のちょうど12分の1ではない" },
           { kind: "node", color: "blue", text: "当月の実際的生産能力＞年間の実際的生産能力÷12となることもある" },
           { kind: "node", color: "red", text: "有利な操業度差異（暦日差異）が生じることがある" },
@@ -462,19 +462,19 @@ const RONRI_PROBLEMS = [
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "red", text: "①実際的生産能力を採用する場合" },
+          { kind: "node", color: "plain", text: "①実際的生産能力を採用する場合" },
           { kind: "node", color: "blue", text: "フル操業が常態の場合に採用" },
           { kind: "node", color: "blue", text: "操業度差異が生じるのは異常な状態" },
           { kind: "node", color: "red", text: "非原価項目" },
         ],
         [
-          { kind: "node", color: "red", text: "②平均操業度を採用する場合" },
+          { kind: "node", color: "plain", text: "②平均操業度を採用する場合" },
           { kind: "node", color: "blue", text: "長期的な生産と販売の均衡を念頭に設定" },
           { kind: "node", color: "blue", text: "平均算定期間で相殺されることを期待" },
           { kind: "node", color: "red", text: "翌年度以降に繰延" },
         ],
         [
-          { kind: "node", color: "red", text: "③期待実際操業度を採用する場合" },
+          { kind: "node", color: "plain", text: "③期待実際操業度を採用する場合" },
           { kind: "node", color: "blue", text: "次年度の販売予測に基づいて設定" },
           {
             kind: "branch",
