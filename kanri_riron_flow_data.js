@@ -142,20 +142,20 @@ const RONRI_PROBLEMS = [
     keywords: ["定時外作業を行った原因", "特定製品", "偶然性"],
     ready: true,
     flow: [
-      { kind: "node", color: "plain", text: "定時外作業手当を別建てで処理する場合" },
-      { kind: "node", color: "plain", text: "定時外作業を行った原因に応じて処理すべき" },
+      { kind: "node", color: "red", text: "定時外作業手当を別建てで処理する場合" },
+      { kind: "node", color: "red", text: "定時外作業を行った原因に応じて処理すべき" },
       {
         kind: "branch",
         paths: [
           [
-            { kind: "node", color: "plain", text: "定時外作業を予定していない場合" },
-            { kind: "node", color: "plain", text: "特定製品に原因あり\n（他の製品は無関係）" },
+            { kind: "node", color: "red", text: "定時外作業を予定していない場合" },
+            { kind: "node", color: "blue", text: "特定製品に原因あり\n（他の製品は無関係）" },
             { kind: "node", color: "red", text: "直接労務費として処理" },
           ],
           [
-            { kind: "node", color: "plain", text: "定時外作業を行うのが通常の場合" },
-            { kind: "node", color: "plain", text: "どの製品にも定時外作業を行う可能性あり" },
-            { kind: "node", color: "red", text: "特定製品に負担させれば原価計算に偶然性が混入\n（製品原価の比較可能性を阻害）" },
+            { kind: "node", color: "red", text: "定時外作業を行うのが通常の場合" },
+            { kind: "node", color: "blue", text: "どの製品にも定時外作業を行う可能性あり" },
+            { kind: "node", color: "blue", text: "特定製品に負担させれば原価計算に偶然性が混入\n（製品原価の比較可能性を阻害）" },
             { kind: "node", color: "red", text: "間接労務費として処理" },
           ],
         ],
@@ -267,7 +267,7 @@ const RONRI_PROBLEMS = [
         kind: "branch",
         paths: [
           [
-            { kind: "node", color: "plain", text: "①期間損益計算の観点\n（原価計算制度）" },
+            { kind: "node", color: "red", text: "①期間損益計算の観点\n（原価計算制度）" },
             { kind: "node", color: "blue", text: "現代企業は慢性的に不働能力を抱えている" },
             { kind: "node", color: "blue", text: "不確実性にさらされている" },
             { kind: "node", color: "blue", text: "実際的生産能力や平均操業度を選択" },
@@ -277,10 +277,10 @@ const RONRI_PROBLEMS = [
             { kind: "node", color: "red", text: "次年度の予測に基づく期待実際操業度が望ましい" },
           ],
           [
-            { kind: "node", color: "plain", text: "②価格決定の観点\n（特殊原価調査）" },
+            { kind: "node", color: "red", text: "②価格決定の観点\n（特殊原価調査）" },
             { kind: "node", color: "blue", text: "競争環境は非常に厳しい" },
             { kind: "node", color: "blue", text: "期待実際操業度や平均操業度を選択" },
-            { kind: "node", color: "red", text: "配賦率が相対的に高くなる" },
+            { kind: "node", color: "blue", text: "配賦率が相対的に高くなる" },
             { kind: "node", color: "red", text: "製品原価や価格も高くなる" },
             { kind: "node", color: "red", text: "競争に勝ち残れない" },
             { kind: "node", color: "red", text: "配賦率が最小となる実際的生産能力が望ましい" },
