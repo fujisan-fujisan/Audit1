@@ -499,11 +499,11 @@ const RONRI_PROBLEMS = [
         kind: "branch",
         paths: [
           [
-            { kind: "node", color: "red", text: "工場内の作業を同質的に扱う\n（各部門の作業を区別しない）" },
+            { kind: "node", color: "blue", text: "工場内の作業を同質的に扱う\n（各部門の作業を区別しない）" },
             { kind: "node", color: "blue", text: "各部門における\n資源の消費状況を反映できない" },
           ],
           [
-            { kind: "node", color: "red", text: "工場全体を配賦単位とする\n（配賦基準は１つだけ）" },
+            { kind: "node", color: "blue", text: "工場全体を配賦単位とする\n（配賦基準は１つだけ）" },
             { kind: "node", color: "blue", text: "部門別に\n適切な配賦基準を選択できない" },
           ],
         ],
@@ -620,7 +620,7 @@ const RONRI_PROBLEMS = [
     flow: [
       { kind: "node", color: "blue", text: "ある原価を部門共通費と捉える" },
       { kind: "node", color: "blue", text: "各部門管理者は当該原価について責任を問われない\n（部門共通費配賦額＝管理不能費）" },
-      { kind: "node", color: "red", text: "原価の発生に関する責任の所在が曖昧になる" },
+      { kind: "node", color: "blue", text: "原価の発生に関する責任の所在が曖昧になる" },
       { kind: "node", color: "red", text: "原価管理上望ましくない" },
       { kind: "node", color: "red", text: "部門共通費を部門個別費として捉える" },
       { kind: "node", color: "red", text: "原価責任を明確化" },
