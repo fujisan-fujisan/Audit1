@@ -76,6 +76,9 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .type-jirei{background:var(--jirei-bg);color:var(--jirei)}
 
 /* ── CHAPTER ── */
+.mode-toggle-row{display:flex;gap:8px;padding:12px 14px 0}
+.mode-toggle-btn{flex:1;padding:9px;border-radius:var(--radius-sm);border:1.5px solid var(--border2);background:var(--surface2);font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:all .12s;text-align:center;color:var(--text2)}
+.mode-toggle-btn.on{background:var(--text);border-color:var(--text);color:#fff}
 .chapter-list{padding:12px 14px 40px;display:flex;flex-direction:column;gap:8px;overflow-y:auto}
 .ch-btn{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px 14px;text-align:left;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px;font-family:'Noto Sans JP',sans-serif;width:100%}
 .ch-btn:hover{border-color:var(--border2);background:var(--surface2)}
@@ -378,6 +381,11 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
       <div class="page-header-sub" id="chapter-sub"></div>
     </div>
   </div>
+  <div class="mode-toggle-row">
+    <button class="mode-toggle-btn on" data-mode="normal" onclick="selectQuizMode('normal')">通常</button>
+    <button class="mode-toggle-btn" data-mode="ronsh" onclick="selectQuizMode('ronsh')">論証のみ</button>
+    <button class="mode-toggle-btn" data-mode="reverse" onclick="selectQuizMode('reverse')">論点当て</button>
+  </div>
   <div class="chapter-list" id="chapter-list"></div>
 </div>
 
@@ -416,7 +424,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
     <div class="result-top">
       <div class="result-ch-lbl" id="result-ch-lbl"></div>
       <div class="result-big" id="result-big">0<span>%</span></div>
-      <div class="result-total-lbl">平均理解度</div>
+      <div class="result-total-lbl" id="result-total-lbl">平均理解度</div>
     </div>
     <div class="result-breakdown">
       <div class="bd-card"><div class="bd-num" id="bd-answered">0</div><div class="bd-lbl">回答済み</div></div>
@@ -431,7 +439,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
       </div>
       <div id="session-duration-saved" class="time-record-saved"></div>
     </div>
-    <div class="result-detail-title">問題別 理解度</div>
+    <div class="result-detail-title" id="result-detail-title">問題別 理解度</div>
     <div id="result-detail-items"></div>
     <div class="result-btns">
       <button class="btn-retry" onclick="retryChapter()">同じ章でもう一度</button>
@@ -788,22 +796,26 @@ function goRegister(){
 
 // ── CHAPTER ──
 function renderChapterList(){
-  const chsWithItems=DATA.filter(ch=>ch.items.length>0);
-  const total=chsWithItems.reduce((s,ch)=>s+ch.items.length,0);
+  document.querySelectorAll('.mode-toggle-btn').forEach(btn=>{
+    btn.classList.toggle('on',btn.dataset.mode===quizMode);
+  });
+
+  const chsWithItems=DATA.map(ch=>({ch,modeItems:getModeItems(ch)})).filter(x=>x.modeItems.length>0);
+  const total=chsWithItems.reduce((s,x)=>s+x.modeItems.length,0);
   document.getElementById('chapter-sub').textContent=
     total?`${total}問登録済み · ${chsWithItems.length}章節`:'問題未登録';
 
   if(!chsWithItems.length){
     document.getElementById('chapter-list').innerHTML=`
       <div class="empty-state">
-        問題が登録されていません<br>
-        <button class="btn-small" style="max-width:200px;margin:12px auto 0" onclick="goRegister()">問題を登録する →</button>
+        ${quizMode==='normal'?'問題が登録されていません':'このモードで出題できる問題がありません'}<br>
+        ${quizMode==='normal'?'<button class="btn-small" style="max-width:200px;margin:12px auto 0" onclick="goRegister()">問題を登録する →</button>':''}
       </div>`;
     return;
   }
 
-  document.getElementById('chapter-list').innerHTML=chsWithItems.map((ch,i)=>{
-    const recs=ch.items.map(it=>getLastUnderstanding(it.id)).filter(u=>u!==null);
+  document.getElementById('chapter-list').innerHTML=chsWithItems.map(({ch,modeItems})=>{
+    const recs=modeItems.map(it=>getLastUnderstanding(it.id)).filter(u=>u!==null);
     const avg=recs.length?Math.round(recs.reduce((s,v)=>s+v,0)/recs.length):null;
     const lastSess=(sessData[ch.ch]||[]).slice(-1)[0];
     const lastDate=lastSess?lastSess.date.replace(/^\d{4}\//,''):null;
@@ -812,14 +824,14 @@ function renderChapterList(){
     const histHTML=avg!==null
       ?`<div class="ch-btn-hist">${lastInfo}<span class="best">${avg}%</span></div>`
       :`<div class="ch-btn-hist" style="font-weight:400;color:var(--text3)">未挑戦${lastInfo}</div>`;
-    const ronsh=ch.items.filter(it=>it.type==='ronsh').length;
-    const kihon=ch.items.filter(it=>it.type==='kihon').length;
-    const jirei=ch.items.filter(it=>it.type==='jirei').length;
+    const ronsh=modeItems.filter(it=>it.type==='ronsh').length;
+    const kihon=modeItems.filter(it=>it.type==='kihon').length;
+    const jirei=modeItems.filter(it=>it.type==='jirei').length;
     const sub=[ronsh?`論証${ronsh}`:'',kihon?`参照${kihon}`:'',jirei?`事例${jirei}`:''].filter(Boolean).join('·');
     const chIdx=DATA.indexOf(ch);
     return `<button class="ch-btn" onclick="selectFilter(${chIdx})">
       <div class="ch-btn-info">
-        <span class="ch-btn-name">${fmtCh(ch.ch)}　${escHtml(ch.chName)}</span><span class="ch-btn-count">　${ch.items.length}問${sub?' ('+sub+')':''}</span>
+        <span class="ch-btn-name">${fmtCh(ch.ch)}　${escHtml(ch.chName)}</span><span class="ch-btn-count">　${modeItems.length}問${sub?' ('+sub+')':''}</span>
       </div>
       ${histHTML}
     </button>`;
@@ -830,8 +842,26 @@ function renderChapterList(){
 let quizState={
   chIndex:null,items:[],currentIdx:0,
   phase:'input',userAnswer:'',
-  scores:{},oxResult:null,results:[],
+  scores:{},oxResult:null,results:[],mode:'normal',
 };
+
+// 出題モード: normal=通常 / ronsh=論証のみ / reverse=論点当て（模範解答→問題名）
+let quizMode='normal';
+
+function getModeItems(ch,mode){
+  mode=mode||quizMode;
+  if(mode==='ronsh') return ch.items.filter(it=>it.type==='ronsh');
+  if(mode==='reverse') return ch.items.filter(it=>it.type!=='kihon'&&!!getAns(it.id));
+  return ch.items;
+}
+
+function selectQuizMode(mode){
+  quizMode=mode;
+  document.querySelectorAll('.mode-toggle-btn').forEach(btn=>{
+    btn.classList.toggle('on',btn.dataset.mode===mode);
+  });
+  renderChapterList();
+}
 
 const FILTER_THRESHOLDS=[
   {label:'すべて',value:null},
@@ -842,14 +872,16 @@ const FILTER_THRESHOLDS=[
 
 function selectFilter(chIndex){
   const ch=DATA[chIndex];
-  const hasRecords=ch.items.some(it=>(recData[it.id]||[]).length>0);
-  if(!hasRecords){ startQuiz(chIndex); return; }
+  const modeItems=getModeItems(ch);
+  if(!modeItems.length){ alert('このモードで出題できる問題がありません。'); return; }
+  const hasRecords=modeItems.some(it=>(recData[it.id]||[]).length>0);
+  if(!hasRecords){ startQuiz(chIndex,modeItems); return; }
   document.getElementById('filter-modal-ch').textContent=`${fmtCh(ch.ch)}　${ch.chName}`;
   document.getElementById('filter-custom-input').value='';
   document.getElementById('filter-options').innerHTML=FILTER_THRESHOLDS.map(t=>{
     const count=t.value===null
-      ?ch.items.length
-      :ch.items.filter(it=>{const u=getLastUnderstanding(it.id);return u===null||u<=t.value;}).length;
+      ?modeItems.length
+      :modeItems.filter(it=>{const u=getLastUnderstanding(it.id);return u===null||u<=t.value;}).length;
     return `<button class="filter-opt-btn" onclick="applyFilter(${chIndex},${t.value})" ${count===0?'disabled':''}>
       <span class="filter-opt-label">${t.label}</span>
       <span class="filter-opt-count">${count}問</span>
@@ -862,9 +894,10 @@ function selectFilter(chIndex){
 
 function applyFilter(chIndex,threshold){
   closeFilterOverlay();
-  if(threshold===null){ startQuiz(chIndex); return; }
   const ch=DATA[chIndex];
-  const filtered=ch.items.filter(it=>{const u=getLastUnderstanding(it.id);return u===null||u<=threshold;});
+  const modeItems=getModeItems(ch);
+  if(threshold===null){ startQuiz(chIndex,modeItems); return; }
+  const filtered=modeItems.filter(it=>{const u=getLastUnderstanding(it.id);return u===null||u<=threshold;});
   startQuiz(chIndex,filtered);
 }
 
@@ -881,9 +914,10 @@ function closeFilterOverlay(){
 
 function startQuiz(chIndex,filteredItems){
   const ch=DATA[chIndex];
-  const items=filteredItems||ch.items;
-  quizState={chIndex,items:[...items],currentIdx:0,phase:'input',userAnswer:'',scores:{},oxResult:null,results:[],startTime:Date.now()};
-  document.getElementById('quiz-chapter-name').textContent=`${fmtCh(ch.ch)}　${ch.chName}`;
+  const items=filteredItems||getModeItems(ch);
+  quizState={chIndex,items:[...items],currentIdx:0,phase:'input',userAnswer:'',scores:{},oxResult:null,results:[],mode:quizMode,startTime:Date.now()};
+  const modeLbl=quizMode==='ronsh'?'（論証のみ）':quizMode==='reverse'?'（論点当て）':'';
+  document.getElementById('quiz-chapter-name').textContent=`${fmtCh(ch.ch)}　${ch.chName}${modeLbl}`;
   renderQuizScreen();
   showScreen('quiz');
 }
@@ -897,13 +931,51 @@ function renderQuizScreen(){
   document.getElementById('quiz-progress-text').textContent=`${currentIdx+1} / ${total}`;
 
   const content=document.getElementById('quiz-content');
-  const typeBadge=item.type==='ronsh'?`<span class="type-badge type-ronsh">論証</span>`
-    :item.type==='jirei'?`<span class="type-badge type-jirei">事例</span>`
-    :`<span class="type-badge type-kihon">監基報参照</span>`;
+  const typeBadge=item.type==='jirei'?`<span class="type-badge type-jirei">事例</span>`:'';
+
+  if(quizState.mode==='reverse'){
+    const modelAns=getAns(item.id);
+    const promptCard=`
+      <div class="ronten-card">
+        <div class="ronten-label">模範解答 ${typeBadge}</div>
+        <div class="ronten-name">${escHtml(modelAns)}</div>
+      </div>`;
+
+    if(phase==='input'){
+      content.innerHTML=promptCard+`
+        <div class="answer-card">
+          <div class="answer-card-title">この解答の問題名（論点）を入力</div>
+          <textarea class="answer-input" id="answer-input" placeholder=""></textarea>
+          <button class="btn-submit" onclick="submitAnswer()">確認する →</button>
+        </div>
+        <button class="btn-skip" onclick="skipItem()">この問題をスキップ</button>`;
+    } else {
+      const ox=quizState.oxResult;
+      content.innerHTML=promptCard+`
+        <div class="answer-card" style="background:var(--surface2);border-color:var(--border)">
+          <div class="answer-card-title">あなたの解答</div>
+          <div style="font-size:12px;line-height:1.8;color:var(--text);white-space:pre-wrap">${escHtml(quizState.userAnswer)||'（未入力）'}</div>
+        </div>
+        <div class="answer-card model-answer-card">
+          <div class="answer-card-title">正解（問題名）</div>
+          <div style="font-size:12px;line-height:1.8;color:var(--text);white-space:pre-wrap">${escHtml(item.name)}</div>
+        </div>
+        <div class="ox-eval-card">
+          <div class="ox-eval-title">自己評価</div>
+          <div class="ox-btns">
+            <button class="ox-btn${ox==='o'?' sel-o':''}" onclick="setOx('o')">○　正解</button>
+            <button class="ox-btn${ox==='x'?' sel-x':''}" onclick="setOx('x')">×　不正解</button>
+          </div>
+        </div>
+        <button class="btn-next" onclick="nextItem()">次の問題 →</button>`;
+    }
+    window.scrollTo(0,0);
+    return;
+  }
 
   const rontenCard=`
     <div class="ronten-card">
-      <div class="ronten-label">問題 ${typeBadge}</div>
+      <div class="ronten-label">問題${typeBadge?' '+typeBadge:''}</div>
       <div class="ronten-name">${escHtml(item.name)}</div>
     </div>`;
 
@@ -1032,20 +1104,25 @@ function setOx(val){
 
 function nextItem(){
   const item=quizState.items[quizState.currentIdx];
-  const date=new Date().toLocaleDateString('ja-JP');
-  if(!recData[item.id]) recData[item.id]=[];
 
-  if(item.type!=='kihon'){
-    const kws=getKws(item.id);
-    const u=kws.length>0?calcUnderstanding(quizState.scores):null;
-    recData[item.id].push({date,type:item.type,scores:{...quizState.scores},understanding:u});
-    quizState.results.push({id:item.id,type:item.type,understanding:u,skipped:false});
+  if(quizState.mode==='reverse'){
+    quizState.results.push({id:item.id,type:'reverse',correct:quizState.oxResult==='o',skipped:false});
   } else {
-    const u=quizState.oxResult==='o'?100:quizState.oxResult==='x'?0:null;
-    recData[item.id].push({date,type:'kihon',result:quizState.oxResult||null});
-    quizState.results.push({id:item.id,type:'kihon',understanding:u,skipped:false});
+    const date=new Date().toLocaleDateString('ja-JP');
+    if(!recData[item.id]) recData[item.id]=[];
+
+    if(item.type!=='kihon'){
+      const kws=getKws(item.id);
+      const u=kws.length>0?calcUnderstanding(quizState.scores):null;
+      recData[item.id].push({date,type:item.type,scores:{...quizState.scores},understanding:u});
+      quizState.results.push({id:item.id,type:item.type,understanding:u,skipped:false});
+    } else {
+      const u=quizState.oxResult==='o'?100:quizState.oxResult==='x'?0:null;
+      recData[item.id].push({date,type:'kihon',result:quizState.oxResult||null});
+      quizState.results.push({id:item.id,type:'kihon',understanding:u,skipped:false});
+    }
+    saveRec();
   }
-  saveRec();
 
   quizState.currentIdx++;
   quizState.phase='input';
@@ -1057,7 +1134,11 @@ function nextItem(){
 
 function skipItem(){
   const item=quizState.items[quizState.currentIdx];
-  quizState.results.push({id:item.id,type:item.type,understanding:null,skipped:true});
+  if(quizState.mode==='reverse'){
+    quizState.results.push({id:item.id,type:'reverse',correct:null,skipped:true});
+  } else {
+    quizState.results.push({id:item.id,type:item.type,understanding:null,skipped:true});
+  }
   quizState.currentIdx++;
   quizState.phase='input';
   quizState.userAnswer='';
@@ -1068,11 +1149,19 @@ function skipItem(){
 
 function finishQuiz(){
   const ch=DATA[quizState.chIndex];
+  const isReverse=quizState.mode==='reverse';
   const answered=quizState.results.filter(r=>!r.skipped);
   const skipped=quizState.results.filter(r=>r.skipped);
-  const us=answered.map(r=>r.understanding).filter(u=>u!==null);
-  const avg=us.length?Math.round(us.reduce((s,v)=>s+v,0)/us.length):null;
+  let avg;
+  if(isReverse){
+    avg=answered.length?Math.round(answered.filter(r=>r.correct).length/answered.length*100):null;
+  } else {
+    const us=answered.map(r=>r.understanding).filter(u=>u!==null);
+    avg=us.length?Math.round(us.reduce((s,v)=>s+v,0)/us.length):null;
+  }
 
+  document.getElementById('result-total-lbl').textContent=isReverse?'正答率':'平均理解度';
+  document.getElementById('result-detail-title').textContent=isReverse?'問題別 正誤':'問題別 理解度';
   document.getElementById('result-ch-lbl').textContent=`${fmtCh(ch.ch)}　${ch.chName}`;
   document.getElementById('result-big').innerHTML=avg!==null?`${avg}<span>%</span>`:`–<span></span>`;
   document.getElementById('bd-answered').textContent=answered.length;
@@ -1095,12 +1184,19 @@ function finishQuiz(){
     const typeBadge=item?.type==='ronsh'?`<span class="type-badge type-ronsh">論証</span>`
       :item?.type==='jirei'?`<span class="type-badge type-jirei">事例</span>`
       :`<span class="type-badge type-kihon">参照</span>`;
-    const u=r.understanding;
-    const col=uColor(u);
     if(r.skipped) return `<div class="result-ronten-item">
       <div class="rri-name">${typeBadge}${escHtml(name)}</div>
       <div style="font-size:10px;color:var(--text3)">スキップ</div>
     </div>`;
+    if(isReverse){
+      const col=r.correct?'var(--ok)':'var(--ng)';
+      return `<div class="result-ronten-item">
+        <div class="rri-name">${typeBadge}${escHtml(name)}</div>
+        <div class="rri-pct" style="color:${col}">${r.correct?'○ 正解':'×  不正解'}</div>
+      </div>`;
+    }
+    const u=r.understanding;
+    const col=uColor(u);
     return `<div class="result-ronten-item">
       <div class="rri-name">${typeBadge}${escHtml(name)}</div>
       <div class="rri-bar-row">
@@ -1113,7 +1209,7 @@ function finishQuiz(){
   showScreen('result');
 }
 
-function retryChapter(){ startQuiz(quizState.chIndex); }
+function retryChapter(){ startQuiz(quizState.chIndex,getModeItems(DATA[quizState.chIndex],quizState.mode)); }
 
 function saveSessionDuration(){
   const val=parseInt(document.getElementById('session-duration-input')?.value||'',10);
