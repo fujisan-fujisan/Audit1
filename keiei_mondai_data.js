@@ -219,6 +219,8 @@ const KEIEI_PROBLEMS_FINANCE1 = [
     items: mkItems("finance1__1-21", [
       { label: "問1", imp: "A-A", rotationLeft: 3, rotationRight: 2, flags: ["設例なし", "★"] },
       { label: "問2", imp: "B-B", rotationLeft: 2, rotationRight: 1, flags: ["設例なし", "★"] },
+      { label: "問3 図示（株主資本コスト・税引後加重平均資本コスト・税引後負債コストの推移）", imp: "B-B", rotationLeft: 2, rotationRight: 1, flags: ["設例なし"] },
+      { label: "問4 図示（トレードオフモデルでの同様の推移）", imp: "C+-C+", rotationLeft: 1, rotationRight: 1, flags: ["設例なし"] },
     ]),
   },
   {
