@@ -752,6 +752,11 @@ function renderNextHint(pointer) {
       '<div class="next-hint-text">' + escapeHtml(next.branchAnchor.text) + '</div>';
     return;
   }
+  if (next.idx === 0) {
+    hintEl.className = 'next-hint plain';
+    hintEl.textContent = '次: 始点';
+    return;
+  }
   hintEl.className = 'next-hint ' + next.color;
   hintEl.textContent = '次';
 }
@@ -777,7 +782,6 @@ function renderFlow() {
   if (session.stepPointer === -1) {
     // 問題文画面
     document.getElementById('prev-card').classList.add('hidden');
-    document.getElementById('next-hint').classList.add('hidden');
     document.getElementById('branch-flag-current').classList.add('hidden');
     document.getElementById('progress-num').textContent = '問題文';
     card.classList.add('question');
@@ -785,6 +789,8 @@ function renderFlow() {
     body.innerHTML = '<div class="flow-text">' + escapeHtml(p.question) + '</div>';
     nextBtn.textContent = '解答フローを見る';
     nextBtn.classList.remove('hidden');
+    document.getElementById('next-hint').classList.remove('hidden');
+    renderNextHint(-1);
     return;
   }
 
