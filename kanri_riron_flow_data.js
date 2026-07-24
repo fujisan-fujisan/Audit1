@@ -2243,14 +2243,14 @@ const RONRI_PROBLEMS = [
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "red", text: "全部原価計算" },
+          { kind: "node", color: "plain", text: "全部原価計算" },
           { kind: "node", color: "blue", text: "損益計算上は職能別に原価を分類するのみ" },
           { kind: "node", color: "blue", text: "固定費の期間発生額は明示されない" },
           { kind: "node", color: "blue", text: "固定費の発生についての注意が欠落しがち" },
           { kind: "node", color: "red", text: "発生額を所与とした利用的管理\n（単位当たり固定費の引き下げ）" },
         ],
         [
-          { kind: "node", color: "red", text: "直接原価計算" },
+          { kind: "node", color: "plain", text: "直接原価計算" },
           { kind: "node", color: "blue", text: "変動費と固定費を区分して損益計算" },
           { kind: "node", color: "blue", text: "固定費の期間発生額が明示される" },
           { kind: "node", color: "blue", text: "固定費がなぜ発生するのかという思考が生まれる" },
@@ -2275,7 +2275,7 @@ const RONRI_PROBLEMS = [
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "red", text: "コミッテド・コスト\n（拘束固定費）" },
+          { kind: "node", color: "plain", text: "コミッテド・コスト\n（拘束固定費）" },
           { kind: "node", color: "blue", text: "長期的な意思決定の結果として耐用年数の全期間の発生額が決定\n（EX．減価償却費）" },
           { kind: "node", color: "blue", text: "短期的に回避不能" },
           { kind: "node", color: "blue", text: "毎期の予算では管理不能" },
@@ -2283,7 +2283,7 @@ const RONRI_PROBLEMS = [
           { kind: "node", color: "plain", text: "途中期間は操業度管理しかない" },
         ],
         [
-          { kind: "node", color: "red", text: "マネジド・コスト\n（自由裁量固定費）" },
+          { kind: "node", color: "plain", text: "マネジド・コスト\n（自由裁量固定費）" },
           { kind: "node", color: "blue", text: "資源の投入と効果の最適な関係が不明のため政策的に支出額を決定\n（EX．広告宣伝費）" },
           { kind: "node", color: "blue", text: "短期的に回避可能" },
           { kind: "node", color: "blue", text: "毎期の予算で管理可能" },
@@ -2345,12 +2345,12 @@ const RONRI_PROBLEMS = [
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "blue", text: "全部原価計算" },
+          { kind: "node", color: "plain", text: "全部原価計算" },
           { kind: "node", color: "blue", text: "損益計算上は職能別に\n原価を分類するのみ" },
           { kind: "node", color: "blue", text: "差額原価と埋没原価\nの分類に対応しない" },
         ],
         [
-          { kind: "node", color: "blue", text: "直接原価計算" },
+          { kind: "node", color: "plain", text: "直接原価計算" },
           { kind: "node", color: "blue", text: "変動費と固定費を\n区別して損益計算" },
           { kind: "node", color: "blue", text: "差額原価と埋没原価\nの分類の基礎を提供" },
         ],
@@ -2374,14 +2374,14 @@ const RONRI_PROBLEMS = [
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "red", text: "全部原価計算方式の損益計算" },
+          { kind: "node", color: "plain", text: "全部原価計算方式の損益計算" },
           { kind: "node", color: "blue", text: "原価を職能別に分類するのみ" },
           { kind: "node", color: "blue", text: "特定の売上高に占める原価と利益の割合を示すのみ\n（貢献利益を計算できない）" },
           { kind: "node", color: "red", text: "営業量の変化が営業利益に与える影響を動態的に分析できない" },
           { kind: "node", color: "red", text: "短期利益計画に役立たない" },
         ],
         [
-          { kind: "node", color: "red", text: "直接原価計算方式の損益計算" },
+          { kind: "node", color: "plain", text: "直接原価計算方式の損益計算" },
           { kind: "node", color: "blue", text: "原価を変動費と固定費に分類" },
           { kind: "node", color: "blue", text: "営業量に比例して増減する貢献利益を算定しうる" },
           { kind: "node", color: "red", text: "営業量の変化が営業利益に与える影響を動態的に分析可能" },
@@ -2434,19 +2434,19 @@ const RONRI_PROBLEMS = [
     keywords: ["営業量の変化","営業利益の変化","固定費の存在"],
     ready: true,
     flow: [
-      { kind: "node", color: "red", text: "経営レバレッジ" },
+      { kind: "node", color: "plain", text: "経営レバレッジ" },
       { kind: "node", color: "red", text: "営業量の変化に対して営業利益がより大きく変化する現象" },
       {
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "blue", text: "営業量が増加" },
+          { kind: "node", color: "plain", text: "営業量が増加" },
           { kind: "node", color: "blue", text: "変動費も同じ割合で増加" },
           { kind: "node", color: "blue", text: "固定費は一定" },
           { kind: "node", color: "blue", text: "営業利益はより大きな割合で増加" },
         ],
         [
-          { kind: "node", color: "blue", text: "営業量が減少" },
+          { kind: "node", color: "plain", text: "営業量が減少" },
           { kind: "node", color: "blue", text: "変動費も同じ割合で減少" },
           { kind: "node", color: "blue", text: "固定費は一定" },
           { kind: "node", color: "blue", text: "営業利益はより大きな割合で減少" },
@@ -2471,14 +2471,14 @@ const RONRI_PROBLEMS = [
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "red", text: "好況期" },
+          { kind: "node", color: "plain", text: "好況期" },
           { kind: "node", color: "blue", text: "営業量が増加する可能性が高い" },
           { kind: "node", color: "blue", text: "経営レバレッジを大きくする\n（固定費の利用度を高める）" },
           { kind: "node", color: "blue", text: "営業利益をより大きく増加させることが可能" },
           { kind: "node", color: "red", text: "生産能力を増加し変動費の発生を抑える経営行動\n（設備投資）" },
         ],
         [
-          { kind: "node", color: "red", text: "不況期" },
+          { kind: "node", color: "plain", text: "不況期" },
           { kind: "node", color: "blue", text: "営業量が減少する可能性が高い" },
           { kind: "node", color: "blue", text: "経営レバレッジを小さくする\n（固定費の利用度を下げる）" },
           { kind: "node", color: "blue", text: "損失に転落するリスクを低くすることが可能" },
