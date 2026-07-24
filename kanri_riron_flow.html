@@ -343,6 +343,88 @@ label.field-label {
 .stat-row-num { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text-2); width: 70px; text-align: right; flex-shrink: 0; }
 .stat-note { font-size: 11px; color: var(--text-3); margin-top: 8px; }
 
+/* ── Manage tab ── */
+.prob-row.selectable { cursor: pointer; }
+.prob-row.active .prob-name { font-weight: 700; }
+.prob-row.active { background: #eef0ff; margin: 0 -10px; padding: 9px 10px; border-radius: var(--radius-sm); }
+
+.manage-flow-tree { margin-top: 12px; }
+.flow-arrow { text-align: center; color: var(--text-3); font-size: 13px; line-height: 1; margin: 2px 0; }
+
+.manage-node {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-radius: 999px;
+  padding: 10px 8px 10px 16px;
+  margin-bottom: 2px;
+}
+.manage-node.plain {
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  padding: 10px 14px;
+  cursor: default;
+}
+.manage-node.blue { background: var(--blue-bg); cursor: pointer; }
+.manage-node.red { background: var(--red-bg); cursor: pointer; }
+.manage-node.off {
+  background: var(--surface);
+  border: 1px dashed var(--border-strong);
+  cursor: pointer;
+  opacity: .65;
+}
+.manage-node.off.blue { border-left: 4px solid var(--blue-border); }
+.manage-node.off.red { border-left: 4px solid var(--red-border); }
+.manage-node-text { font-size: 12.5px; line-height: 1.5; white-space: pre-wrap; }
+.manage-node-rate {
+  flex-shrink: 0;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.6);
+}
+.manage-node.blue .manage-node-rate { color: var(--blue-color); }
+.manage-node.red .manage-node-rate { color: var(--red-color); }
+.manage-node.off .manage-node-rate { color: var(--text-3); background: none; }
+
+.manage-branch {
+  border: 1px solid #d9c6ef;
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  margin-bottom: 2px;
+  background: #fbf9fd;
+}
+.manage-branch-paths { display: flex; flex-direction: column; gap: 10px; }
+.manage-branch-path { border-left: 2px solid #d9c6ef; padding-left: 10px; }
+.manage-path-label { font-size: 10.5px; font-weight: 700; color: #6b3fa0; margin-bottom: 6px; }
+
+.node-modal-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,.45);
+  display: flex; align-items: flex-end; justify-content: center;
+  z-index: 50;
+}
+.node-modal-backdrop.hidden { display: none !important; }
+.node-modal {
+  width: 100%; max-width: 480px;
+  background: var(--surface);
+  border-radius: 16px 16px 0 0;
+  padding: 18px 18px 22px;
+}
+.node-modal-badge {
+  display: inline-block;
+  font-size: 11px; font-weight: 700;
+  padding: 4px 10px; border-radius: 999px;
+  margin-bottom: 10px;
+}
+.node-modal-badge.blue { background: var(--blue-bg); color: var(--blue-color); }
+.node-modal-badge.red { background: var(--red-bg); color: var(--red-color); }
+.node-modal-badge.plain { background: var(--bg); color: var(--text-3); }
+.node-modal-text { font-size: 13.5px; line-height: 1.6; white-space: pre-wrap; margin-bottom: 10px; }
+.node-modal-stat { font-size: 12px; color: var(--text-3); margin-bottom: 16px; }
+
 .empty-state { text-align: center; padding: 48px 16px; color: var(--text-3); font-size: 13px; }
 
 .hidden { display: none !important; }
@@ -363,6 +445,7 @@ label.field-label {
   <div class="tab-bar">
     <button class="tab-btn active" id="tab-flow" onclick="switchTab('flow')">フロー</button>
     <button class="tab-btn" id="tab-stats" onclick="switchTab('stats')">習熟度</button>
+    <button class="tab-btn" id="tab-manage" onclick="switchTab('manage')">ノード管理</button>
   </div>
 </div>
 
@@ -441,6 +524,25 @@ label.field-label {
   <div class="stat-section" id="stats-by-problem"></div>
 </div>
 
+<!-- ── ノード管理タブ ── -->
+<div class="content hidden" id="view-manage">
+  <div class="card">
+    <label class="field-label">問題を選択</label>
+    <div id="manage-chapter-tree"></div>
+  </div>
+  <div id="manage-flow-view"></div>
+</div>
+
+<div class="node-modal-backdrop hidden" id="node-modal-backdrop" onclick="closeNodeModal()">
+  <div class="node-modal" onclick="event.stopPropagation()">
+    <div class="node-modal-badge" id="node-modal-badge"></div>
+    <div class="node-modal-text" id="node-modal-text"></div>
+    <div class="node-modal-stat" id="node-modal-stat"></div>
+    <button class="btn-primary" id="node-modal-toggle"></button>
+    <button class="btn-secondary" onclick="closeNodeModal()">閉じる</button>
+  </div>
+</div>
+
 <script src="kanri_riron_flow_data.js"></script>
 <script>
 // ============================================================================
@@ -449,9 +551,14 @@ label.field-label {
 const PROGRESS_KEY = 'kanri-ronri-flow-progress-v1';
 let progress = {}; // { [problemId#flatIdx]: { known: n, unknown: n, lastResult: 'o'|'x'|null } }
 
+const COLOR_OVERRIDE_KEY = 'kanri-ronri-flow-color-overrides-v1';
+let colorOverrides = {}; // { [problemId#flatIdx]: 'plain' } ※元データの色を上書きしたいノードのみ格納
+
 let selectedProblems = new Set();
 let openChapters = {};
 let openStatsChapters = {};
+let openManageChapters = {};
+let selectedManageProblemId = null;
 let orderMode = 'sequential';
 
 let session = null; // { queue: [...problems], pIndex, flat: [...steps], stepPointer, revealed, results: [] }
@@ -483,6 +590,34 @@ function recordResult(nodeKey, known) {
   saveProgress();
 }
 
+// ============================================================================
+// ノード色の手動上書き（ノード管理タブ）
+//   本来のデータでは赤・青のノードでも，ユーザーが「暗記対象ではない」と
+//   判断した場合に無色へ上書きできるようにする。ブラウザのlocalStorageに
+//   保存するのみで元データ（kanri_riron_flow_data.js）は変更しない。
+// ============================================================================
+function loadColorOverrides() {
+  try {
+    const raw = localStorage.getItem(COLOR_OVERRIDE_KEY);
+    if (raw) { colorOverrides = JSON.parse(raw); return; }
+  } catch (e) {}
+  colorOverrides = {};
+}
+function saveColorOverrides() {
+  try { localStorage.setItem(COLOR_OVERRIDE_KEY, JSON.stringify(colorOverrides)); } catch (e) {}
+}
+function getColorOverride(problemId, idx) {
+  return colorOverrides[nodeKeyFor(problemId, idx)] || null;
+}
+function setColorOverride(problemId, idx, color) {
+  colorOverrides[nodeKeyFor(problemId, idx)] = color;
+  saveColorOverrides();
+}
+function clearColorOverride(problemId, idx) {
+  delete colorOverrides[nodeKeyFor(problemId, idx)];
+  saveColorOverrides();
+}
+
 function weightOf(color) {
   if (color === 'red') return 2;
   if (color === 'blue') return 1;
@@ -501,7 +636,7 @@ function escapeHtml(s) {
 //   分岐点となったノードには branchCount（何方向に分岐するか）を，
 //   2つ目以降の path の最初のノードには branchAnchor（分岐点ノードそのもの）を付与する。
 // ============================================================================
-function flattenFlow(flow) {
+function flattenFlow(flow, problemId) {
   const out = [];
   let lastNode = null; // 直近で出力したノード（分岐に入る直前のノード＝分岐点）
   function walk(segments) {
@@ -524,8 +659,31 @@ function flattenFlow(flow) {
     });
   }
   walk(flow);
-  out.forEach(function (step, i) { step.idx = i; });
+  out.forEach(function (step, i) {
+    step.idx = i;
+    if (problemId) {
+      const override = getColorOverride(problemId, i);
+      if (override) step.color = override;
+    }
+  });
   return out;
+}
+
+// flattenFlowと同じ走査順でidxを振りつつ，木構造（branchのpathのネスト）は保持したまま返す。
+// ノード管理タブで，元の配置のまま全体を表示するために使う。
+function annotateFlowTree(flow, problemId) {
+  let counter = 0;
+  function walk(segments) {
+    return segments.map(function (seg) {
+      if (seg.kind === 'node') {
+        const idx = counter++;
+        const override = getColorOverride(problemId, idx);
+        return { kind: 'node', text: seg.text, originalColor: seg.color, color: override || seg.color, idx: idx };
+      }
+      return { kind: 'branch', paths: seg.paths.map(function (path) { return walk(path); }) };
+    });
+  }
+  return walk(flow);
 }
 
 // ============================================================================
@@ -683,7 +841,7 @@ function currentProblem() {
 
 function loadCurrentProblem() {
   const p = currentProblem();
-  session.flat = flattenFlow(p.flow);
+  session.flat = flattenFlow(p.flow, p.id);
   session.stepPointer = -1;
   session.revealed = false;
   renderFlow();
@@ -948,11 +1106,17 @@ document.addEventListener('keydown', function (e) {
 function switchTab(tab) {
   document.getElementById('tab-flow').classList.toggle('active', tab === 'flow');
   document.getElementById('tab-stats').classList.toggle('active', tab === 'stats');
+  document.getElementById('tab-manage').classList.toggle('active', tab === 'manage');
   document.getElementById('view-flow').classList.toggle('hidden', tab !== 'flow');
   document.getElementById('view-stats').classList.toggle('hidden', tab !== 'stats');
+  document.getElementById('view-manage').classList.toggle('hidden', tab !== 'manage');
   if (tab === 'stats') {
     document.getElementById('screen-title').textContent = '習熟度';
     renderStats();
+  } else if (tab === 'manage') {
+    document.getElementById('screen-title').textContent = 'ノード管理';
+    renderManageChapterTree();
+    renderManageFlow();
   } else {
     document.getElementById('screen-title').textContent = document.getElementById('screen-setup').classList.contains('hidden')
       ? (document.getElementById('screen-flow').classList.contains('hidden') ? '学習終了' : '学習中')
@@ -967,7 +1131,7 @@ function isMastered(nodeKey) {
 
 // 問題ごとの加重習熟度: 赤=2点/青=1点。無色ノードは暗記対象ではないため集計しない。
 function problemMastery(p) {
-  const flat = flattenFlow(p.flow);
+  const flat = flattenFlow(p.flow, p.id);
   let wSum = 0, wMastered = 0;
   flat.forEach(function (step) {
     if (step.kind !== 'node' || step.color === 'plain') return;
@@ -1034,10 +1198,179 @@ function renderStats() {
 }
 
 // ============================================================================
+// ノード管理タブ
+//   ロジカルフローを読み込んだ配置のまま全体表示し，赤・青ノードには正答率を表示。
+//   ノードをタップすると，暗記対象かどうかを切り替えるポップアップを開く。
+// ============================================================================
+function toggleManageChapterOpen(chId) {
+  openManageChapters[chId] = !openManageChapters[chId];
+  renderManageChapterTree();
+}
+
+function selectManageProblem(pid) {
+  selectedManageProblemId = pid;
+  renderManageChapterTree();
+  renderManageFlow();
+}
+
+function renderManageChapterTree() {
+  const wrap = document.getElementById('manage-chapter-tree');
+  const readyChapters = RONRI_CHAPTERS.filter(function (ch) {
+    return chapterProblems(ch.id).some(function (p) { return p.ready; });
+  });
+  if (readyChapters.length === 0) {
+    wrap.innerHTML = '<div class="empty-state">データ登録済みの問題がありません</div>';
+    return;
+  }
+  let html = '';
+  readyChapters.forEach(function (ch) {
+    const probs = chapterProblems(ch.id).filter(function (p) { return p.ready; });
+    const isOpen = openManageChapters[ch.id] === true;
+    html += '<div class="ch-block' + (isOpen ? ' open' : '') + '">' +
+      '<div class="ch-row" onclick="toggleManageChapterOpen(\'' + ch.id + '\')">' +
+        '<span class="ch-name">' + escapeHtml(ch.name) + '</span>' +
+        '<span class="ch-count">' + probs.length + '問</span>' +
+        '<span class="ch-chevron">▶</span>' +
+      '</div>';
+    html += '<div class="prob-body">';
+    probs.forEach(function (p) {
+      const active = selectedManageProblemId === p.id;
+      html += '<div class="prob-row selectable' + (active ? ' active' : '') + '" onclick="selectManageProblem(\'' + p.id + '\')">' +
+        '<span class="prob-name">' + escapeHtml(p.no) + ' ' + escapeHtml(p.title) + '</span>' +
+        '<span class="prob-tag imp-' + p.importance + '">' + p.importance + '</span>' +
+      '</div>';
+    });
+    html += '</div></div>';
+  });
+  wrap.innerHTML = html;
+}
+
+function manageNodeRateLabel(problemId, idx) {
+  const p = getP(nodeKeyFor(problemId, idx));
+  const total = p.known + p.unknown;
+  if (total === 0) return '－';
+  return Math.round(p.known / total * 100) + '%';
+}
+
+function renderManageNode(problemId, node) {
+  if (node.originalColor === 'plain') {
+    return '<div class="manage-node plain"><div class="manage-node-text">' + escapeHtml(node.text) + '</div></div>';
+  }
+  const isOff = node.color === 'plain'; // 上書きにより暗記対象から外されている
+  const cls = 'manage-node ' + (isOff ? 'off ' + node.originalColor : node.color);
+  const rate = manageNodeRateLabel(problemId, node.idx);
+  return '<div class="' + cls + '" onclick="openNodeModal(\'' + problemId + '\',' + node.idx + ')">' +
+    '<div class="manage-node-text">' + escapeHtml(node.text) + '</div>' +
+    '<div class="manage-node-rate">' + rate + '</div>' +
+  '</div>';
+}
+
+function renderManageSegments(problemId, segments) {
+  let html = '';
+  segments.forEach(function (seg, i) {
+    if (i > 0) html += '<div class="flow-arrow">↓</div>';
+    if (seg.kind === 'node') {
+      html += renderManageNode(problemId, seg);
+    } else {
+      html += '<div class="manage-branch">' +
+        '<div class="branch-flag-row">' + branchFlagHtml(seg.paths.length) + '</div>' +
+        '<div class="manage-branch-paths">';
+      seg.paths.forEach(function (path, pi) {
+        html += '<div class="manage-branch-path">' +
+          '<div class="manage-path-label">経路 ' + (pi + 1) + '</div>' +
+          renderManageSegments(problemId, path) +
+        '</div>';
+      });
+      html += '</div></div>';
+    }
+  });
+  return html;
+}
+
+function renderManageFlow() {
+  const wrap = document.getElementById('manage-flow-view');
+  if (!selectedManageProblemId) {
+    wrap.innerHTML = '<div class="empty-state">上のリストから問題を選択してください</div>';
+    return;
+  }
+  const p = RONRI_PROBLEMS.find(function (x) { return x.id === selectedManageProblemId; });
+  if (!p) { wrap.innerHTML = ''; return; }
+  const tree = annotateFlowTree(p.flow, p.id);
+  wrap.innerHTML =
+    '<div class="card">' +
+      '<div class="problem-head-top"><span class="problem-no">' + escapeHtml(p.no) + '</span>' +
+      '<span class="prob-tag imp-' + p.importance + '">重要度' + p.importance + '</span></div>' +
+      '<div class="problem-title">' + escapeHtml(p.title) + '</div>' +
+    '</div>' +
+    '<div class="manage-flow-tree">' + renderManageSegments(p.id, tree) + '</div>';
+}
+
+function findFlowNodeByIdx(flow, idx) {
+  let target = null, counter = 0;
+  (function walk(segments) {
+    segments.forEach(function (seg) {
+      if (target) return;
+      if (seg.kind === 'node') {
+        if (counter === idx) target = seg;
+        counter++;
+      } else {
+        seg.paths.forEach(walk);
+      }
+    });
+  })(flow);
+  return target;
+}
+
+const COLOR_LABEL = { red: '赤（結論）', blue: '青（前提・根拠）', plain: '無色（回答不要）' };
+
+function openNodeModal(problemId, idx) {
+  const p = RONRI_PROBLEMS.find(function (x) { return x.id === problemId; });
+  if (!p) return;
+  const original = findFlowNodeByIdx(p.flow, idx);
+  if (!original) return;
+
+  const override = getColorOverride(problemId, idx);
+  const effectiveColor = override || original.color;
+  const isActive = effectiveColor !== 'plain';
+  const stat = getP(nodeKeyFor(problemId, idx));
+  const total = stat.known + stat.unknown;
+  const rateText = total === 0 ? '記録なし' : (Math.round(stat.known / total * 100) + '%（' + stat.known + '/' + total + '回）');
+
+  document.getElementById('node-modal-badge').className = 'node-modal-badge ' + effectiveColor;
+  document.getElementById('node-modal-badge').textContent = COLOR_LABEL[effectiveColor];
+  document.getElementById('node-modal-text').textContent = original.text;
+  document.getElementById('node-modal-stat').textContent = '正答率: ' + rateText;
+
+  const toggleBtn = document.getElementById('node-modal-toggle');
+  toggleBtn.textContent = isActive
+    ? '無色にする（暗記対象から外す）'
+    : '暗記対象に戻す（元は' + (original.color === 'red' ? '赤' : '青') + '）';
+  toggleBtn.onclick = function () { toggleNodeOverride(problemId, idx, original.color); };
+
+  document.getElementById('node-modal-backdrop').classList.remove('hidden');
+}
+
+function toggleNodeOverride(problemId, idx, originalColor) {
+  const override = getColorOverride(problemId, idx);
+  const isActive = (override || originalColor) !== 'plain';
+  if (isActive) {
+    setColorOverride(problemId, idx, 'plain');
+  } else {
+    clearColorOverride(problemId, idx);
+  }
+  closeNodeModal();
+  renderManageFlow();
+}
+
+function closeNodeModal() {
+  document.getElementById('node-modal-backdrop').classList.add('hidden');
+}
+
+// ============================================================================
 // バックアップ / 復元
 // ============================================================================
 async function exportProgress() {
-  const data = { version: 1, label: '管理会計論ロジカルフロー学習進捗', exportedAt: new Date().toISOString(), progress: progress };
+  const data = { version: 2, label: '管理会計論ロジカルフロー学習進捗', exportedAt: new Date().toISOString(), progress: progress, colorOverrides: colorOverrides };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const file = new File([blob], 'kanri_riron_flow_backup.json', { type: 'application/json' });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -1061,6 +1394,10 @@ function importProgress(e) {
       if (!confirm('現在の進捗を上書きして復元しますか？')) return;
       progress = data.progress;
       saveProgress();
+      if (data.colorOverrides) {
+        colorOverrides = data.colorOverrides;
+        saveColorOverrides();
+      }
       location.reload();
     } catch (err) {
       alert('ファイルの読み込みに失敗しました。');
@@ -1074,6 +1411,7 @@ function importProgress(e) {
 // 初期化
 // ============================================================================
 loadProgress();
+loadColorOverrides();
 renderChapterTree();
 onFilterChanged();
 </script>
