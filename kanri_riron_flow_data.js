@@ -2538,20 +2538,20 @@ const RONRI_PROBLEMS = [
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "red", text: "計画機能" },
+          { kind: "node", color: "plain", text: "計画機能" },
           { kind: "node", color: "plain", text: "予算編成プロセス" },
           { kind: "node", color: "plain", text: "全社的な目標や\n利益計画を予算として\n責任センター別に細分化" },
           { kind: "node", color: "plain", text: "各管理者の目標を公式化" },
         ],
         [
-          { kind: "node", color: "red", text: "統制機能" },
+          { kind: "node", color: "plain", text: "統制機能" },
           { kind: "node", color: "plain", text: "予算統制プロセス" },
           { kind: "node", color: "plain", text: "予算執行前の事前統制\n予算執行中の期中統制\n予算執行後の事後統制" },
           { kind: "node", color: "plain", text: "予算目標の達成を確保" },
         ],
         ],
       },
-      { kind: "node", color: "red", text: "調整機能" },
+      { kind: "node", color: "plain", text: "調整機能" },
       { kind: "node", color: "plain", text: "予算編成プロセスと予算統制プロセス" },
       { kind: "node", color: "blue", text: "下位組織単位相互の水平的な調整" },
       { kind: "node", color: "blue", text: "全社目標と各下位組織単位との垂直的な調整" },
@@ -2573,14 +2573,14 @@ const RONRI_PROBLEMS = [
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "red", text: "トップダウン型予算" },
+          { kind: "node", color: "plain", text: "トップダウン型予算" },
           { kind: "node", color: "blue", text: "トップの意向を受けた\n予算担当部門が予算を編成" },
           { kind: "node", color: "red", text: "トップの予算編成方針や\n利益計画との整合性あり\n（メリット）" },
           { kind: "node", color: "blue", text: "各部門に予算の執行を強制\n（参加機会なし）" },
           { kind: "node", color: "red", text: "部門管理者の動機づけに問題\n（デメリット）" },
         ],
         [
-          { kind: "node", color: "red", text: "ボトムアップ型予算" },
+          { kind: "node", color: "plain", text: "ボトムアップ型予算" },
           { kind: "node", color: "blue", text: "執行部門である各部門に\n予算編成の権限を委譲" },
           { kind: "node", color: "red", text: "部門管理者の動機づけや\n責任感の醸成に資する\n（メリット）" },
           { kind: "node", color: "blue", text: "部門管理者の動機づけで\n総合予算を編成" },
@@ -2601,7 +2601,7 @@ const RONRI_PROBLEMS = [
     keywords: ["発生主義","収益・費用","現金主義","収入・支出","計画的な資金繰り"],
     ready: true,
     flow: [
-      { kind: "node", color: "blue", text: "損益予算" },
+      { kind: "node", color: "plain", text: "損益予算" },
       { kind: "node", color: "blue", text: "発生主義に基づく収益・費用の見積" },
       { kind: "node", color: "blue", text: "現金主義に基づく収入・支出の見積と一致しない" },
       { kind: "node", color: "red", text: "損益予算のみでは計画的な資金繰りができない" },
@@ -2812,12 +2812,12 @@ const RONRI_PROBLEMS = [
         kind: "branch",
         paths: [
         [
-          { kind: "node", color: "red", text: "計画・調整目的" },
+          { kind: "node", color: "plain", text: "計画・調整目的" },
           { kind: "node", color: "blue", text: "資金予算の統制が重要" },
           { kind: "node", color: "red", text: "期待水準\n（実現の見込みが高い水準）" },
         ],
         [
-          { kind: "node", color: "red", text: "事前統制目的" },
+          { kind: "node", color: "plain", text: "事前統制目的" },
           { kind: "node", color: "blue", text: "動機づけが重要" },
           { kind: "node", color: "red", text: "ストレッチ水準\n（実現にかなりの努力を要する水準）" },
         ],
