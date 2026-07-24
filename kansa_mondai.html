@@ -603,18 +603,21 @@ const REC_KEY  = 'kmonday-rec-v1';
 const ANS_KEY  = 'kmonday-ans-v1';
 const DATA_KEY = 'kmonday-data-v1';
 const SESS_KEY = 'kmonday-sess-v1';
+const REV_KEY  = 'kmonday-rev-v1';
 
 let DATA    = []; // [{ch, chName, items:[{id, type, name, importance}]}]
 let kwData  = {}; // {itemId: [string, ...]}
 let recData = {}; // {itemId: [{date, type, scores?, result?, understanding?}]}
 let ansData = {}; // {itemId: string}
 let sessData = {}; // {chKey: [{date, isoDate, duration}]}
+let revData = {}; // {itemId: [{date, correct}]} 論点当てモード専用の正誤記録（通常/論証のみモードの理解度とは独立）
 
 function loadStorage(){
   try{ const k=localStorage.getItem(KW_KEY);  if(k) kwData=JSON.parse(k);  }catch(e){}
   try{ const r=localStorage.getItem(REC_KEY); if(r) recData=JSON.parse(r); }catch(e){}
   try{ const a=localStorage.getItem(ANS_KEY); if(a) ansData=JSON.parse(a); }catch(e){}
   try{ const s=localStorage.getItem(SESS_KEY); if(s) sessData=JSON.parse(s); }catch(e){}
+  try{ const v=localStorage.getItem(REV_KEY); if(v) revData=JSON.parse(v); }catch(e){}
   try{
     const d=localStorage.getItem(DATA_KEY);
     if(d){ JSON.parse(d).forEach(ch=>DATA.push(ch)); sortDataByMaster(); }
@@ -632,6 +635,7 @@ function saveRec(){  try{ localStorage.setItem(REC_KEY, JSON.stringify(recData))
 function saveAns(){  try{ localStorage.setItem(ANS_KEY, JSON.stringify(ansData)); }catch(e){} }
 function saveData(){ try{ localStorage.setItem(DATA_KEY,JSON.stringify(DATA));    }catch(e){} }
 function saveSess(){ try{ localStorage.setItem(SESS_KEY,JSON.stringify(sessData));  }catch(e){} }
+function saveRev(){  try{ localStorage.setItem(REV_KEY, JSON.stringify(revData)); }catch(e){} }
 
 function getAns(id){ return ansData[id]||''; }
 function setAns(id,val){ ansData[id]=val; saveAns(); }
@@ -670,6 +674,15 @@ function getLastUnderstanding(id){
   const last=recs[recs.length-1];
   if(last.type==='kihon') return last.result==='o'?100:0;
   return last.understanding;
+}
+function getLastReverseResult(id){
+  const recs=revData[id]||[];
+  if(!recs.length) return null;
+  return recs[recs.length-1].correct?100:0;
+}
+// 出題モードに応じた「前回スコア」。論点当てモードは通常/論証のみモードの理解度と独立して管理する
+function getLastScoreForMode(id,mode){
+  return mode==='reverse'?getLastReverseResult(id):getLastUnderstanding(id);
 }
 
 // ── SCREENS ──
@@ -815,7 +828,7 @@ function renderChapterList(){
   }
 
   document.getElementById('chapter-list').innerHTML=chsWithItems.map(({ch,modeItems})=>{
-    const recs=modeItems.map(it=>getLastUnderstanding(it.id)).filter(u=>u!==null);
+    const recs=modeItems.map(it=>getLastScoreForMode(it.id,quizMode)).filter(u=>u!==null);
     const avg=recs.length?Math.round(recs.reduce((s,v)=>s+v,0)/recs.length):null;
     const lastSess=(sessData[ch.ch]||[]).slice(-1)[0];
     const lastDate=lastSess?lastSess.date.replace(/^\d{4}\//,''):null;
@@ -874,14 +887,15 @@ function selectFilter(chIndex){
   const ch=DATA[chIndex];
   const modeItems=getModeItems(ch);
   if(!modeItems.length){ alert('このモードで出題できる問題がありません。'); return; }
-  const hasRecords=modeItems.some(it=>(recData[it.id]||[]).length>0);
+  const recStore=quizMode==='reverse'?revData:recData;
+  const hasRecords=modeItems.some(it=>(recStore[it.id]||[]).length>0);
   if(!hasRecords){ startQuiz(chIndex,modeItems); return; }
   document.getElementById('filter-modal-ch').textContent=`${fmtCh(ch.ch)}　${ch.chName}`;
   document.getElementById('filter-custom-input').value='';
   document.getElementById('filter-options').innerHTML=FILTER_THRESHOLDS.map(t=>{
     const count=t.value===null
       ?modeItems.length
-      :modeItems.filter(it=>{const u=getLastUnderstanding(it.id);return u===null||u<=t.value;}).length;
+      :modeItems.filter(it=>{const u=getLastScoreForMode(it.id,quizMode);return u===null||u<=t.value;}).length;
     return `<button class="filter-opt-btn" onclick="applyFilter(${chIndex},${t.value})" ${count===0?'disabled':''}>
       <span class="filter-opt-label">${t.label}</span>
       <span class="filter-opt-count">${count}問</span>
@@ -897,7 +911,7 @@ function applyFilter(chIndex,threshold){
   const ch=DATA[chIndex];
   const modeItems=getModeItems(ch);
   if(threshold===null){ startQuiz(chIndex,modeItems); return; }
-  const filtered=modeItems.filter(it=>{const u=getLastUnderstanding(it.id);return u===null||u<=threshold;});
+  const filtered=modeItems.filter(it=>{const u=getLastScoreForMode(it.id,quizMode);return u===null||u<=threshold;});
   startQuiz(chIndex,filtered);
 }
 
@@ -1106,7 +1120,12 @@ function nextItem(){
   const item=quizState.items[quizState.currentIdx];
 
   if(quizState.mode==='reverse'){
-    quizState.results.push({id:item.id,type:'reverse',correct:quizState.oxResult==='o',skipped:false});
+    const date=new Date().toLocaleDateString('ja-JP');
+    if(!revData[item.id]) revData[item.id]=[];
+    const correct=quizState.oxResult==='o';
+    revData[item.id].push({date,correct});
+    saveRev();
+    quizState.results.push({id:item.id,type:'reverse',correct,skipped:false});
   } else {
     const date=new Date().toLocaleDateString('ja-JP');
     if(!recData[item.id]) recData[item.id]=[];
@@ -1323,6 +1342,7 @@ function deleteItem(id){
   delete ansData[id]; saveAns();
   delete kwData[id];  saveKw();
   delete recData[id]; saveRec();
+  delete revData[id]; saveRev();
   const chs=DATA.filter(ch=>ch.items.length>0);
   if(!chs.length){
     document.getElementById('manage-tabs').innerHTML='';
@@ -1487,7 +1507,7 @@ function submitRegister(){
 
 // ── BACKUP / RESTORE ──
 async function backupAll(){
-  const d={version:1,type:'backup',savedAt:new Date().toISOString(),data:DATA,kwData,recData,ansData,sessData};
+  const d={version:1,type:'backup',savedAt:new Date().toISOString(),data:DATA,kwData,recData,ansData,sessData,revData};
   const fname='kansa-mondai-backup.json';
   const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
   const file=new File([blob],fname,{type:'application/json'});
@@ -1513,6 +1533,7 @@ function restoreAll(e){
       if(d.recData){ Object.keys(recData).forEach(k=>delete recData[k]); Object.assign(recData,d.recData); saveRec(); }
       if(d.ansData){ Object.keys(ansData).forEach(k=>delete ansData[k]); Object.assign(ansData,d.ansData); saveAns(); }
       if(d.sessData){ Object.keys(sessData).forEach(k=>delete sessData[k]); Object.assign(sessData,d.sessData); saveSess(); }
+      if(d.revData){ Object.keys(revData).forEach(k=>delete revData[k]); Object.assign(revData,d.revData); saveRev(); }
       alert('復元が完了しました！');
     }catch(err){ alert('ファイルの読み込みに失敗しました。'); }
   };
