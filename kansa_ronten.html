@@ -96,6 +96,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .confirm-score-badge{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--ok-dim);color:var(--ok)}
 .confirm-score-sub{font-size:11px;color:var(--text2)}
 .confirm-btns{display:flex;gap:8px}
+.mode-btns{display:flex;flex-direction:column;gap:8px}
 .btn-yes{flex:2;padding:13px;border-radius:var(--radius-sm);border:none;background:var(--text);color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .12s}
 .btn-yes:active{transform:scale(.97)}
 .btn-no{flex:1;padding:13px;border-radius:var(--radius-sm);border:1.5px solid var(--border2);background:transparent;color:var(--text2);font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .12s}
@@ -284,6 +285,21 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
   <div class="chapter-list" id="section-list"></div>
 </div>
 
+<!-- MODE SELECT OVERLAY -->
+<div class="confirm-overlay" id="mode-overlay">
+  <div class="confirm-modal">
+    <div class="confirm-handle"></div>
+    <div class="confirm-lbl">この節で挑戦する内容を選択</div>
+    <div class="confirm-ronten" id="mode-section-name"></div>
+    <div id="mode-leaf-sub" style="font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.6"></div>
+    <div class="mode-btns">
+      <button class="btn-primary" onclick="chooseModeTopic()">論点を挙げる（節の論点をリコール）</button>
+      <button class="btn-primary" onclick="chooseModeLeaf()">末端論点を挙げる（論点ごとの細目をリコール）</button>
+      <button class="btn-back" onclick="closeModeOverlay()">キャンセル</button>
+    </div>
+  </div>
+</div>
+
 <!-- GAME -->
 <div class="screen" id="screen-game">
   <div class="game-header">
@@ -291,7 +307,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
     <div class="game-header-top">
       <button class="back-btn" onclick="abortGame()" style="flex-shrink:0">← 戻る</button>
       <div class="game-chapter-name" id="game-chapter-name"></div>
-      <div class="game-score-display">正解 <span id="score-display">0</span></div>
+      <div class="game-score-display">正解 <span id="score-display">0</span> ／ 全<span id="total-display">0</span>問</div>
     </div>
     <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
   </div>
@@ -299,7 +315,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
     <div class="input-card">
       <div class="input-card-title" id="input-card-title">論点を入力</div>
       <div class="input-group">
-        <textarea class="game-input" id="input-title" rows="2" placeholder="思い出せるだけ入力してください"></textarea>
+        <textarea class="game-input" id="input-title" rows="2" placeholder="思い出せるだけ入力してください（Enterで照合／Shift+Enterで改行）" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitEntry();}"></textarea>
       </div>
       <button class="btn-submit" onclick="submitEntry()">照合する →</button>
     </div>
@@ -478,7 +494,7 @@ function goSection(chIdx){
   document.getElementById('section-page-sub').textContent=`${ch.ch}　全${ch.sections.length}節`;
   document.getElementById('section-list').innerHTML=ch.sections.map((sec,i)=>{
     const quizCount=sec.topics.filter(t=>isQuizzable(t.imp)).length;
-    return`<button class="ch-btn" onclick="startTopicGame(${chIdx},${i})">
+    return`<button class="ch-btn" onclick="openModeSelect(${chIdx},${i})">
       <div class="ch-btn-num">${sec.sec}</div>
       <div class="ch-btn-info"><div class="ch-btn-name">${sec.secName}</div><div class="ch-btn-count">出題対象 ${quizCount}件 / 全${sec.topics.length}件</div></div>
       <div class="ch-btn-arrow">›</div>
@@ -487,21 +503,52 @@ function goSection(chIdx){
   showScreen('section');
 }
 
+// ── MODE SELECT ──
+let pendingModeSelection=null;
+function openModeSelect(chIdx,secIdx){
+  const ch=DATA[chIdx],sec=ch.sections[secIdx];
+  pendingModeSelection={chIdx,secIdx};
+  document.getElementById('mode-section-name').textContent=`${sec.sec} ${sec.secName}`;
+  const leafTopics=sec.topics.filter(t=>isQuizzable(t.imp)&&getLeaves(t.id).length>0);
+  const quizCount=sec.topics.filter(t=>isQuizzable(t.imp)).length;
+  const leafTotal=leafTopics.reduce((s,t)=>s+getLeaves(t.id).length,0);
+  document.getElementById('mode-leaf-sub').textContent=leafTopics.length
+    ?`末端論点 登録済み: ${leafTopics.length}/${quizCount}論点（全${leafTotal}問）`
+    :'末端論点はまだ登録されていません（管理画面から登録できます）';
+  document.getElementById('mode-overlay').classList.add('open');
+}
+function closeModeOverlay(){ document.getElementById('mode-overlay').classList.remove('open'); pendingModeSelection=null; }
+function chooseModeTopic(){
+  if(!pendingModeSelection)return;
+  const{chIdx,secIdx}=pendingModeSelection;
+  closeModeOverlay();
+  startTopicGame(chIdx,secIdx);
+}
+function chooseModeLeaf(){
+  if(!pendingModeSelection)return;
+  const{chIdx,secIdx}=pendingModeSelection;
+  closeModeOverlay();
+  startSectionLeafGame(chIdx,secIdx);
+}
+
 // ── GAME ENGINE (shared by topic-recall & leaf-recall) ──
-let gameState={kind:'topic',chIdx:null,secIdx:null,topicId:null,items:[],answeredIds:new Set(),lockedIds:new Set(),results:[],score:0};
+let gameState={kind:'topic',chIdx:null,secIdx:null,topicId:null,queue:null,queueIndex:0,allItems:null,items:[],answeredIds:new Set(),lockedIds:new Set(),results:[],score:0};
 let pendingConfirm=null;
 let lastTopicResult=null; // cached snapshot to return to after a leaf sub-game
 
 function abortGame(){
-  if(gameState.kind==='topic') goSection(gameState.chIdx);
+  if(gameState.kind==='topic'||gameState.kind==='sectionLeaf') goSection(gameState.chIdx);
   else{
     if(lastTopicResult){renderTopicResultScreen(lastTopicResult);showScreen('result');}
     else goSection(gameState.chIdx);
   }
 }
 
+function getGameTotal(){ return gameState.kind==='sectionLeaf'?gameState.allItems.length:gameState.items.length; }
+
 function resetGameUIShell(){
   document.getElementById('score-display').textContent='0';
+  document.getElementById('total-display').textContent=getGameTotal();
   document.getElementById('prog-fill').style.width='0%';
   document.getElementById('results-list').innerHTML='';
   document.getElementById('results-count-lbl').textContent='回答済み: 0件';
@@ -512,7 +559,7 @@ function resetGameUIShell(){
 function startTopicGame(chIdx,secIdx){
   const ch=DATA[chIdx],sec=ch.sections[secIdx];
   const activeItems=sec.topics.filter(t=>isQuizzable(t.imp));
-  gameState={kind:'topic',chIdx,secIdx,topicId:null,items:activeItems,answeredIds:new Set(),lockedIds:new Set(),results:[],score:0};
+  gameState={kind:'topic',chIdx,secIdx,topicId:null,queue:null,queueIndex:0,allItems:null,items:activeItems,answeredIds:new Set(),lockedIds:new Set(),results:[],score:0};
   document.getElementById('game-crumb').textContent=`${ch.ch} ${ch.chName}`;
   document.getElementById('game-chapter-name').innerHTML=`<span class="game-stage-tag stage-topic">節の論点</span>${sec.sec} ${sec.secName}`;
   document.getElementById('input-card-title').textContent='この節にある論点を入力';
@@ -525,12 +572,48 @@ function startLeafGame(chIdx,secIdx,topicId){
   const topic=sec.topics.find(t=>t.id===topicId);
   const leaves=getLeaves(topicId);
   const items=leaves.map((text,i)=>({id:topicId+'::'+i,name:text}));
-  gameState={kind:'leaf',chIdx,secIdx,topicId,items,answeredIds:new Set(),lockedIds:new Set(),results:[],score:0};
+  gameState={kind:'leaf',chIdx,secIdx,topicId,queue:null,queueIndex:0,allItems:null,items,answeredIds:new Set(),lockedIds:new Set(),results:[],score:0};
   document.getElementById('game-crumb').textContent=`${ch.ch} ${ch.chName} ／ ${sec.sec} ${sec.secName}`;
   document.getElementById('game-chapter-name').innerHTML=`<span class="game-stage-tag stage-leaf">末端論点</span>${escHtml(topic.name)}`;
   document.getElementById('input-card-title').textContent='この論点にある末端論点を入力';
   resetGameUIShell();
   showScreen('game');
+}
+
+function startSectionLeafGame(chIdx,secIdx){
+  const ch=DATA[chIdx],sec=ch.sections[secIdx];
+  const queue=sec.topics.filter(t=>isQuizzable(t.imp)&&getLeaves(t.id).length>0);
+  if(!queue.length){
+    alert('この節にはまだ末端論点が登録されていません。「論点・末端論点を管理する」画面で登録してください。');
+    return;
+  }
+  const allItems=[];
+  queue.forEach(t=>{ getLeaves(t.id).forEach((text,i)=>{ allItems.push({id:t.id+'::'+i,name:text,topicId:t.id,topicName:t.name}); }); });
+  gameState={kind:'sectionLeaf',chIdx,secIdx,topicId:null,queue,queueIndex:0,allItems,items:[],answeredIds:new Set(),lockedIds:new Set(),results:[],score:0};
+  loadCurrentQueuePool();
+  document.getElementById('game-crumb').textContent=`${ch.ch} ${ch.chName} ／ ${sec.sec} ${sec.secName}`;
+  updateSectionLeafHeader();
+  document.getElementById('input-card-title').textContent='この論点にある末端論点を入力';
+  resetGameUIShell();
+  showScreen('game');
+}
+function loadCurrentQueuePool(){
+  const t=gameState.queue[gameState.queueIndex];
+  gameState.items=gameState.allItems.filter(it=>it.topicId===t.id);
+}
+function updateSectionLeafHeader(){
+  const t=gameState.queue[gameState.queueIndex];
+  document.getElementById('game-chapter-name').innerHTML=`<span class="game-stage-tag stage-leaf">末端論点</span>${escHtml(t.name)}`;
+}
+function maybeAdvanceSectionTopic(){
+  if(gameState.kind!=='sectionLeaf')return;
+  const avail=gameState.items.filter(i=>!gameState.answeredIds.has(i.id)&&!gameState.lockedIds.has(i.id));
+  if(avail.length>0)return;
+  if(gameState.queueIndex<gameState.queue.length-1){
+    gameState.queueIndex++;
+    loadCurrentQueuePool();
+    updateSectionLeafHeader();
+  }
 }
 
 function submitEntry(){
@@ -564,7 +647,7 @@ function confirmYes(){
   gameState.results.unshift({id:matchedItem.id,inputTitle,status:'ok'});
   recordResult(matchedItem.id,true);
   document.getElementById('input-title').value='';
-  pendingConfirm=null;updateGameUI();
+  pendingConfirm=null;maybeAdvanceSectionTopic();updateGameUI();
 }
 function confirmNo(){
   document.getElementById('confirm-overlay').classList.remove('open');
@@ -574,30 +657,36 @@ function confirmNo(){
   gameState.results.unshift({id:matchedItem.id,inputTitle,status:'locked'});
   recordResult(matchedItem.id,false);
   document.getElementById('input-title').value='';
-  pendingConfirm=null;updateGameUI();
+  pendingConfirm=null;maybeAdvanceSectionTopic();updateGameUI();
 }
 
+function getLookupPool(){ return gameState.kind==='sectionLeaf'?gameState.allItems:gameState.items; }
+
 function updateGameUI(){
-  const total=gameState.items.length,done=gameState.answeredIds.size+gameState.lockedIds.size;
+  const total=getGameTotal(),done=gameState.answeredIds.size+gameState.lockedIds.size;
+  const pool=getLookupPool();
   document.getElementById('score-display').textContent=gameState.score;
+  document.getElementById('total-display').textContent=total;
   document.getElementById('prog-fill').style.width=(total?Math.round(done/total*100):0)+'%';
   document.getElementById('results-list').innerHTML=gameState.results.map(r=>{
-    const item=gameState.items.find(i=>i.id===r.id),name=item?item.name:r.id;
+    const item=pool.find(i=>i.id===r.id),name=item?item.name:r.id;
     if(r.status==='ok')return`<div class="result-item ok"><div class="result-dot ok">○</div><div class="result-content"><div class="result-name">${escHtml(name)}</div>${r.inputTitle?`<div class="result-input-text">入力: ${escHtml(r.inputTitle)}</div>`:''}</div></div>`;
     return`<div class="result-item locked"><div class="result-dot locked">✕</div><div class="result-content"><div class="result-name">${escHtml(name)}</div><div class="result-locked-msg">🔒 ロック（違う項目と判定したためネタバレ防止）</div></div></div>`;
   }).join('');
-  document.getElementById('results-count-lbl').textContent=`回答済み: ${gameState.results.length}件（正解: ${gameState.score}）`;
+  document.getElementById('results-count-lbl').textContent=`回答済み: ${gameState.results.length}件（正解: ${gameState.score}） ／ 全${total}問`;
 }
 
 function finishGame(){
   if(gameState.kind==='topic') finishTopicGame();
-  else finishLeafGame();
+  else if(gameState.kind==='leaf') finishLeafGame();
+  else finishSectionLeafGame();
 }
 
 function computeStats(){
-  const total=gameState.items.length,score=gameState.score,locked=gameState.lockedIds.size,remain=total-score-locked;
+  const pool=getLookupPool();
+  const total=pool.length,score=gameState.score,locked=gameState.lockedIds.size,remain=total-score-locked;
   const rate=total?Math.round(score/total*100):0;
-  gameState.items.forEach(item=>{
+  pool.forEach(item=>{
     if(!gameState.answeredIds.has(item.id)&&!gameState.lockedIds.has(item.id)) recordResult(item.id,false);
   });
   return{total,score,locked,remain,rate};
@@ -689,6 +778,38 @@ function finishLeafGame(){
   document.getElementById('result-btns').innerHTML=btns;
   showScreen('result');
   document.getElementById('result-ch-lbl').style.whiteSpace='';
+}
+
+function finishSectionLeafGame(){
+  const{chIdx,secIdx,queue,allItems}=gameState;
+  const ch=DATA[chIdx],sec=ch.sections[secIdx];
+  const stats=computeStats();
+  const histKey='sectionleaf_'+chIdx+'_'+secIdx;
+  if(!gameHistory[histKey])gameHistory[histKey]=[];
+  gameHistory[histKey].push({date:new Date().toLocaleDateString('ja-JP'),score:stats.score,total:stats.total,locked:stats.locked});
+  saveHistory();
+  const answeredIds=gameState.answeredIds,lockedIds=gameState.lockedIds;
+  document.getElementById('result-ch-lbl').textContent=`${ch.ch} ${ch.chName} ／ ${sec.sec} ${sec.secName}`;
+  document.getElementById('result-big').innerHTML=`${stats.score}<span>/${stats.total}</span>`;
+  document.getElementById('result-total-lbl').textContent='この節の末端論点を上げられました';
+  document.getElementById('bd-ok').textContent=stats.score;document.getElementById('bd-locked').textContent=stats.locked;document.getElementById('bd-remain').textContent=stats.remain;
+  document.getElementById('result-rate').innerHTML=`達成率 <span class="rn${stats.rate<50?' warn':''}">${stats.rate}%</span>`;
+  document.getElementById('result-msg').textContent=resultMsg(stats.rate);
+  const recs=gameHistory[histKey]||[],hs=document.getElementById('result-hist-sec');
+  if(recs.length>1){hs.style.display='block';document.getElementById('hist-bars').innerHTML=recs.map((r,i)=>{const p=r.total?Math.round(r.score/r.total*100):0;return`<div class="hist-bar-row"><div class="hist-bar-lbl">${i+1}回</div><div class="hist-bar-track"><div class="hist-bar-fill" style="width:${p}%"></div></div><div class="hist-bar-val">${r.score}/${r.total}</div></div>`;}).join('');}else{hs.style.display='none';}
+  document.getElementById('result-detail-title').textContent='この節の末端論点一覧（論点別）';
+  document.getElementById('result-detail-items').innerHTML=queue.map(topic=>{
+    const rows=allItems.filter(it=>it.topicId===topic.id).map(it=>{
+      const isOk=answeredIds.has(it.id),isL=lockedIds.has(it.id);
+      const dot=isOk?'<span class="rdi-dot ok">○</span>':isL?'<span class="rdi-dot locked">✕</span>':'<span class="rdi-dot none">–</span>';
+      return`<div class="rdi">${dot}<div class="rdi-body"><div class="rdi-name">${escHtml(it.name)}</div></div></div>`;
+    }).join('');
+    return`<div class="manage-section-title" style="margin-top:14px">${impBadge(topic.imp)} ${escHtml(topic.name)}</div>${rows}`;
+  }).join('');
+  document.getElementById('result-btns').innerHTML=`
+    <button class="btn-retry" onclick="startSectionLeafGame(${chIdx},${secIdx})">同じ節でもう一度</button>
+    <button class="btn-back" onclick="goSection(${chIdx})">節一覧に戻る</button>`;
+  showScreen('result');
 }
 
 function backToTopicResult(chIdx,secIdx){
