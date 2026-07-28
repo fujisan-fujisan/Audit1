@@ -293,8 +293,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
     <div class="confirm-ronten" id="mode-section-name"></div>
     <div id="mode-leaf-sub" style="font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.6"></div>
     <div class="mode-btns">
-      <button class="btn-primary" onclick="chooseModeTopic()">論点を挙げる（節の論点をリコール）</button>
-      <button class="btn-primary" onclick="chooseModeLeaf()">末端論点を挙げる（論点ごとの細目をリコール）</button>
+      <button class="btn-primary" onclick="chooseModeTopic()">論点を挙げる</button>
+      <button class="btn-primary" onclick="chooseModeLeaf()">末端論点を挙げる</button>
       <button class="btn-back" onclick="closeModeOverlay()">キャンセル</button>
     </div>
   </div>
@@ -671,9 +671,9 @@ function updateGameUI(){
   document.getElementById('results-list').innerHTML=gameState.results.map(r=>{
     const item=pool.find(i=>i.id===r.id),name=item?item.name:r.id;
     if(r.status==='ok')return`<div class="result-item ok"><div class="result-dot ok">○</div><div class="result-content"><div class="result-name">${escHtml(name)}</div>${r.inputTitle?`<div class="result-input-text">入力: ${escHtml(r.inputTitle)}</div>`:''}</div></div>`;
-    return`<div class="result-item locked"><div class="result-dot locked">✕</div><div class="result-content"><div class="result-name">${escHtml(name)}</div><div class="result-locked-msg">🔒 ロック（違う項目と判定したためネタバレ防止）</div></div></div>`;
+    return`<div class="result-item locked"><div class="result-dot locked">✕</div><div class="result-content"><div class="result-name">${escHtml(name)}</div><div class="result-locked-msg">🔒 ロック・違う項目と判定したためネタバレ防止</div></div></div>`;
   }).join('');
-  document.getElementById('results-count-lbl').textContent=`回答済み: ${gameState.results.length}件（正解: ${gameState.score}） ／ 全${total}問`;
+  document.getElementById('results-count-lbl').textContent=`回答済み: ${gameState.results.length}件 ／ 正解: ${gameState.score}件 ／ 全${total}問`;
 }
 
 function finishGame(){
@@ -797,7 +797,7 @@ function finishSectionLeafGame(){
   document.getElementById('result-msg').textContent=resultMsg(stats.rate);
   const recs=gameHistory[histKey]||[],hs=document.getElementById('result-hist-sec');
   if(recs.length>1){hs.style.display='block';document.getElementById('hist-bars').innerHTML=recs.map((r,i)=>{const p=r.total?Math.round(r.score/r.total*100):0;return`<div class="hist-bar-row"><div class="hist-bar-lbl">${i+1}回</div><div class="hist-bar-track"><div class="hist-bar-fill" style="width:${p}%"></div></div><div class="hist-bar-val">${r.score}/${r.total}</div></div>`;}).join('');}else{hs.style.display='none';}
-  document.getElementById('result-detail-title').textContent='この節の末端論点一覧（論点別）';
+  document.getElementById('result-detail-title').textContent='この節の末端論点一覧・論点別';
   document.getElementById('result-detail-items').innerHTML=queue.map(topic=>{
     const rows=allItems.filter(it=>it.topicId===topic.id).map(it=>{
       const isOk=answeredIds.has(it.id),isL=lockedIds.has(it.id);
@@ -877,7 +877,7 @@ function renderManageTopicCard(topic){
       <div class="manage-item-status${leaves.length?' has-ans':''}">末端${leaves.length}件</div>
     </div>
     <div class="manage-item-body">
-      <div class="manage-section-title">末端論点（この論点に含まれる細目）</div>
+      <div class="manage-section-title">末端論点</div>
       <div class="manage-ans-list" id="leaflist-${topic.id}">${leaves.map((l,i)=>`<div class="manage-ans-row leaf-row"><div class="manage-ans-text">${escHtml(l)}</div><button class="manage-ans-del" onclick="deleteLeaf('${topic.id}',${i});refreshManageItem('${topic.id}')">✕</button></div>`).join('')}</div>
       <div class="manage-add-row" style="margin-bottom:14px">
         <textarea class="manage-add-input" id="leafinput-${topic.id}" rows="2" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();commitLeaf('${topic.id}');}"></textarea>
@@ -932,7 +932,7 @@ function renderRecordTopicRow(topic){
   if(quizzable&&leaves.length){
     let ok=0,total=0;
     leaves.forEach((l,i)=>{const r=recordData[topic.id+'::'+i];if(r){ok+=r.ok;total+=r.total;}});
-    leafSub=`<div class="record-item-sub">末端${leaves.length}件${total?`／正解 ${ok}/${total}`:'（未回答）'}</div>`;
+    leafSub=`<div class="record-item-sub">末端${leaves.length}件${total?`／正解 ${ok}/${total}`:'／未回答'}</div>`;
   }else if(quizzable){
     leafSub=`<div class="record-item-sub">末端論点 未登録</div>`;
   }
