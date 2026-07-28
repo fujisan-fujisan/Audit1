@@ -315,7 +315,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
     <div class="input-card">
       <div class="input-card-title" id="input-card-title">論点を入力</div>
       <div class="input-group">
-        <textarea class="game-input" id="input-title" rows="2" placeholder="思い出せるだけ入力してください（Enterで照合／Shift+Enterで改行）" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitEntry();}"></textarea>
+        <textarea class="game-input" id="input-title" rows="2" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitEntry();}"></textarea>
       </div>
       <button class="btn-submit" onclick="submitEntry()">照合する →</button>
     </div>
@@ -513,8 +513,8 @@ function openModeSelect(chIdx,secIdx){
   const quizCount=sec.topics.filter(t=>isQuizzable(t.imp)).length;
   const leafTotal=leafTopics.reduce((s,t)=>s+getLeaves(t.id).length,0);
   document.getElementById('mode-leaf-sub').textContent=leafTopics.length
-    ?`末端論点 登録済み: ${leafTopics.length}/${quizCount}論点（全${leafTotal}問）`
-    :'末端論点はまだ登録されていません（管理画面から登録できます）';
+    ?`末端論点 登録済み: ${leafTopics.length}/${quizCount}論点、末端論点 計${leafTotal}問`
+    :'末端論点はまだ登録されていません';
   document.getElementById('mode-overlay').classList.add('open');
 }
 function closeModeOverlay(){ document.getElementById('mode-overlay').classList.remove('open'); pendingModeSelection=null; }
@@ -880,7 +880,7 @@ function renderManageTopicCard(topic){
       <div class="manage-section-title">末端論点（この論点に含まれる細目）</div>
       <div class="manage-ans-list" id="leaflist-${topic.id}">${leaves.map((l,i)=>`<div class="manage-ans-row leaf-row"><div class="manage-ans-text">${escHtml(l)}</div><button class="manage-ans-del" onclick="deleteLeaf('${topic.id}',${i});refreshManageItem('${topic.id}')">✕</button></div>`).join('')}</div>
       <div class="manage-add-row" style="margin-bottom:14px">
-        <textarea class="manage-add-input" id="leafinput-${topic.id}" placeholder="末端論点を入力...（Enterで登録／Shift+Enterで改行）" rows="2" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();commitLeaf('${topic.id}');}"></textarea>
+        <textarea class="manage-add-input" id="leafinput-${topic.id}" rows="2" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();commitLeaf('${topic.id}');}"></textarea>
         <button class="manage-add-btn" onclick="commitLeaf('${topic.id}')">追加</button>
       </div>
     </div></div>`;
