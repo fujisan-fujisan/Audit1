@@ -213,11 +213,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .manage-item-card.excluded .manage-item-header{opacity:.45}
 .manage-item-card.excluded .manage-item-name{text-decoration:line-through}
 .manage-section-title{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;margin-top:2px}
-.alias-row{background:#f0f0ff;border-color:#c0c0e8}
 .leaf-row{background:#fff8e8;border-color:#e8d8a8}
-.manage-add-input-line{flex:1;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:12px;padding:8px 10px;outline:none;transition:border-color .15s;height:36px}
-.manage-add-input-line:focus{border-color:var(--text)}
-.manage-add-input-line::placeholder{color:var(--text3)}
 .record-item{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}
 .record-item:last-child{border-bottom:none}
 .record-item.excluded{opacity:.4}
@@ -373,7 +369,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
     <button class="back-btn" onclick="goStart()">← トップ</button>
     <div class="page-header-info">
       <div class="page-header-title">論点・末端論点を管理</div>
-      <div class="page-header-sub">A・Bランクの論点で別名登録や末端論点の登録ができます</div>
+      <div class="page-header-sub">A・Bランクの論点ごとに末端論点を登録できます</div>
     </div>
   </div>
   <div class="manage-tabs" id="manage-tabs"></div>
@@ -396,22 +392,18 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 <script src="kansa_ronten_data.js"></script>
 <script>
 // ── STORAGE ──
-const HIST_KEY='kansa-ronten-history-v1', ANS_KEY='kansa-ronten-answers-v1', EXCL_KEY='kansa-ronten-exclude-v1',
-      ALIAS_KEY='kansa-ronten-alias-v1', REC_KEY='kansa-ronten-record-v1', LEAF_KEY='kansa-ronten-leaves-v1';
-let gameHistory={}, answerData={}, excludeData={}, aliasData={}, recordData={}, leafData={};
+const HIST_KEY='kansa-ronten-history-v1', EXCL_KEY='kansa-ronten-exclude-v1',
+      REC_KEY='kansa-ronten-record-v1', LEAF_KEY='kansa-ronten-leaves-v1';
+let gameHistory={}, excludeData={}, recordData={}, leafData={};
 
 function loadStorage(){
   try{const h=localStorage.getItem(HIST_KEY);if(h)gameHistory=JSON.parse(h);}catch(e){}
-  try{const a=localStorage.getItem(ANS_KEY);if(a)answerData=JSON.parse(a);}catch(e){}
   try{const e=localStorage.getItem(EXCL_KEY);if(e)excludeData=JSON.parse(e);}catch(e){}
-  try{const al=localStorage.getItem(ALIAS_KEY);if(al)aliasData=JSON.parse(al);}catch(e){}
   try{const r=localStorage.getItem(REC_KEY);if(r)recordData=JSON.parse(r);}catch(e){}
   try{const l=localStorage.getItem(LEAF_KEY);if(l)leafData=JSON.parse(l);}catch(e){}
 }
 function saveHistory(){try{localStorage.setItem(HIST_KEY,JSON.stringify(gameHistory));}catch(e){}}
-function saveAnswers(){try{localStorage.setItem(ANS_KEY,JSON.stringify(answerData));}catch(e){}}
 function saveExclude(){try{localStorage.setItem(EXCL_KEY,JSON.stringify(excludeData));}catch(e){}}
-function saveAlias(){try{localStorage.setItem(ALIAS_KEY,JSON.stringify(aliasData));}catch(e){}}
 function saveRecord(){try{localStorage.setItem(REC_KEY,JSON.stringify(recordData));}catch(e){}}
 function saveLeaves(){try{localStorage.setItem(LEAF_KEY,JSON.stringify(leafData));}catch(e){}}
 
@@ -421,14 +413,6 @@ function recordResult(id,isOk){
   if(isOk)recordData[id].ok++;
   saveRecord();
 }
-function getAliases(id){return aliasData[id]||[];}
-function addAlias(id,word){
-  if(!word.trim())return;
-  if(!aliasData[id])aliasData[id]=[];
-  if(!aliasData[id].includes(word.trim()))aliasData[id].push(word.trim());
-  saveAlias();
-}
-function deleteAlias(id,idx){ if(!aliasData[id])return; aliasData[id].splice(idx,1); saveAlias(); }
 function isExcluded(id){return excludeData[id]===true;}
 function toggleExclude(id){ excludeData[id]=!isExcluded(id); saveExclude(); refreshManageItem(id); }
 
@@ -456,12 +440,8 @@ function scorePair(q,t){
 }
 function similarity(query,item){
   const q=normalize(query);
-  let best={score:0,text:item.name};
-  const ts=scorePair(q,normalize(item.name));
-  if(ts>best.score)best={score:ts,text:item.name};
-  (answerData[item.id]||[]).forEach(a=>{const s=scorePair(q,normalize(a));if(s>best.score)best={score:s,text:a};});
-  (aliasData[item.id]||[]).forEach(a=>{const s=scorePair(q,normalize(a));if(s>best.score)best={score:s,text:a};});
-  return best;
+  const s=scorePair(q,normalize(item.name));
+  return{score:s,text:item.name};
 }
 function findTopMatches(queryText,items,lockedIds,answeredIds,topN=5){
   const q=queryText;
@@ -779,7 +759,7 @@ function renderManageTopicCard(topic){
       </div>
     </div>`;
   }
-  const ans=answerData[topic.id]||[],hasAns=ans.length>0,excl=isExcluded(topic.id);
+  const excl=isExcluded(topic.id);
   const leaves=getLeaves(topic.id);
   return`<div class="manage-item-card${excl?' excluded':''}" id="mc-${topic.id}">
     <div class="manage-item-header" onclick="toggleManageItem('${topic.id}')">
@@ -798,18 +778,6 @@ function renderManageTopicCard(topic){
         <textarea class="manage-add-input" id="leafinput-${topic.id}" placeholder="末端論点を入力..." rows="2"></textarea>
         <button class="manage-add-btn" onclick="commitLeaf('${topic.id}')">追加</button>
       </div>
-      <div class="manage-section-title">別名・言い換え（論点名の照合用）</div>
-      <div class="manage-ans-list" id="aliaslist-${topic.id}">${getAliases(topic.id).map((a,i)=>`<div class="manage-ans-row alias-row"><div class="manage-ans-text">${escHtml(a)}</div><button class="manage-ans-del" onclick="deleteAlias('${topic.id}',${i});refreshManageItem('${topic.id}')">✕</button></div>`).join('')}</div>
-      <div class="manage-add-row" style="margin-bottom:14px">
-        <input class="manage-add-input-line" id="aliasinput-${topic.id}" type="text">
-        <button class="manage-add-btn" onclick="commitAlias('${topic.id}')">追加</button>
-      </div>
-      <div class="manage-section-title">解答内容（別解として許容する表現）</div>
-      <div class="manage-ans-list" id="anslist-${topic.id}">${ans.map((a,i)=>`<div class="manage-ans-row"><div class="manage-ans-text">${escHtml(a)}</div><button class="manage-ans-del" onclick="deleteAnswer('${topic.id}',${i})">✕</button></div>`).join('')}</div>
-      <div class="manage-add-row">
-        <textarea class="manage-add-input" id="ansinput-${topic.id}" placeholder="解答内容を入力..." rows="2"></textarea>
-        <button class="manage-add-btn" onclick="addAnswer('${topic.id}')">追加</button>
-      </div>
     </div></div>`;
 }
 function commitLeaf(id){
@@ -817,19 +785,7 @@ function commitLeaf(id){
   const val=input.value.trim();if(!val)return;
   addLeaf(id,val);input.value='';refreshManageItem(id);
 }
-function commitAlias(id){
-  const input=document.getElementById('aliasinput-'+id);if(!input)return;
-  const val=input.value.trim();if(!val)return;
-  addAlias(id,val);input.value='';refreshManageItem(id);
-}
 function toggleManageItem(id){ document.getElementById('mc-'+id)?.classList.toggle('open'); }
-function addAnswer(id){
-  const input=document.getElementById('ansinput-'+id);if(!input)return;
-  const val=input.value.trim();if(!val)return;
-  if(!answerData[id])answerData[id]=[];
-  answerData[id].push(val);saveAnswers();input.value='';refreshManageItem(id);
-}
-function deleteAnswer(id,idx){ if(!answerData[id])return; answerData[id].splice(idx,1); saveAnswers(); refreshManageItem(id); }
 function refreshManageItem(id){
   const card=document.getElementById('mc-'+id);
   const isOpen=card?.classList.contains('open');
@@ -889,9 +845,7 @@ async function exportBackup(){
     label:'監査論 論点リコール バックアップ',
     exportedAt:new Date().toISOString(),
     itemState:JSON.parse(localStorage.getItem(HIST_KEY)||'{}'),
-    answerData:JSON.parse(localStorage.getItem(ANS_KEY)||'{}'),
     excludeData:JSON.parse(localStorage.getItem(EXCL_KEY)||'{}'),
-    aliasData:JSON.parse(localStorage.getItem(ALIAS_KEY)||'{}'),
     recordData:JSON.parse(localStorage.getItem(REC_KEY)||'{}'),
     leafData:JSON.parse(localStorage.getItem(LEAF_KEY)||'{}'),
   };
@@ -914,9 +868,7 @@ function importBackup(e){
       const d=JSON.parse(ev.target.result);
       if(d.version!==1)throw new Error('invalid');
       if(d.itemState)  localStorage.setItem(HIST_KEY,  JSON.stringify(d.itemState));
-      if(d.answerData) localStorage.setItem(ANS_KEY,   JSON.stringify(d.answerData));
       if(d.excludeData)localStorage.setItem(EXCL_KEY,  JSON.stringify(d.excludeData));
-      if(d.aliasData)  localStorage.setItem(ALIAS_KEY, JSON.stringify(d.aliasData));
       if(d.recordData) localStorage.setItem(REC_KEY,   JSON.stringify(d.recordData));
       if(d.leafData)   localStorage.setItem(LEAF_KEY,  JSON.stringify(d.leafData));
       location.reload();
