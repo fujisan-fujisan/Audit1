@@ -91,7 +91,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .confirm-modal{background:var(--surface);border-radius:16px 16px 0 0;padding:20px 16px 44px;width:100%;max-width:600px;max-height:80vh;overflow-y:auto}
 .confirm-handle{width:32px;height:3px;background:var(--border2);border-radius:999px;margin:0 auto 16px}
 .confirm-lbl{font-size:10px;font-weight:700;color:var(--text2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
-.confirm-ronten{font-size:16px;font-weight:700;margin-bottom:8px;line-height:1.4}
+.confirm-ronten{font-size:16px;font-weight:700;margin-bottom:8px;line-height:1.4;white-space:pre-line}
 .confirm-score-row{display:flex;align-items:center;gap:8px;margin-bottom:16px}
 .confirm-score-badge{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--ok-dim);color:var(--ok)}
 .confirm-score-sub{font-size:11px;color:var(--text2)}
@@ -112,8 +112,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .result-dot.ok{color:var(--ok)}
 .result-dot.locked{color:var(--lock)}
 .result-content{flex:1;min-width:0}
-.result-name{font-size:12px;font-weight:700;color:var(--text);line-height:1.4}
-.result-input-text{font-size:10px;color:var(--text2);margin-top:2px}
+.result-name{font-size:12px;font-weight:700;color:var(--text);line-height:1.4;white-space:pre-line}
+.result-input-text{font-size:10px;color:var(--text2);margin-top:2px;white-space:pre-line}
 .result-locked-msg{font-size:10px;color:var(--lock);margin-top:2px}
 
 .btn-finish{width:100%;padding:13px;border-radius:var(--radius-sm);border:1.5px solid var(--border2);background:transparent;color:var(--text2);font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-top:14px;transition:all .15s}
@@ -153,7 +153,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .rdi-dot{font-size:12px;font-weight:700;width:18px;flex-shrink:0;margin-top:2px;text-align:center}
 .rdi-dot.ok{color:var(--ok)}.rdi-dot.locked{color:var(--lock)}.rdi-dot.none{color:var(--text3)}.rdi-dot.na{color:var(--border2)}
 .rdi-body{flex:1;min-width:0}
-.rdi-name{font-size:12px;color:var(--text);line-height:1.5}
+.rdi-name{font-size:12px;color:var(--text);line-height:1.5;white-space:pre-line}
 .rdi-name.na{color:var(--text3)}
 .rdi-sub{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap}
 .rdi-imp{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;flex-shrink:0}
@@ -198,7 +198,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .manage-item-card.open .manage-item-body{display:block}
 .manage-ans-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
 .manage-ans-row{display:flex;align-items:flex-start;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px}
-.manage-ans-text{flex:1;font-size:12px;color:var(--text);line-height:1.5}
+.manage-ans-text{flex:1;font-size:12px;color:var(--text);line-height:1.5;white-space:pre-line}
 .manage-ans-del{background:none;border:none;color:var(--text3);font-size:14px;cursor:pointer;padding:0 2px;flex-shrink:0;transition:color .12s;line-height:1;margin-top:1px}
 .manage-ans-del:hover{color:var(--ng)}
 .manage-add-row{display:flex;gap:6px;align-items:flex-start}
@@ -333,7 +333,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
     <div class="confirm-handle"></div>
     <div class="confirm-lbl">最も近い項目</div>
     <div class="confirm-ronten" id="confirm-ronten"></div>
-    <div id="confirm-matched-text" style="font-size:12px;color:var(--text2);margin-bottom:8px;line-height:1.5;display:none;"></div>
+    <div id="confirm-matched-text" style="font-size:12px;color:var(--text2);margin-bottom:8px;line-height:1.5;white-space:pre-line;display:none;"></div>
     <div class="confirm-score-row">
       <div class="confirm-score-badge" id="confirm-score-badge"></div>
       <div class="confirm-score-sub" id="confirm-score-sub"></div>
@@ -889,6 +889,7 @@ function commitLeaf(id){
   const input=document.getElementById('leafinput-'+id);if(!input)return;
   const val=input.value.trim();if(!val)return;
   addLeaf(id,val);input.value='';refreshManageItem(id);
+  document.getElementById('leafinput-'+id)?.focus();
 }
 function toggleManageItem(id){ document.getElementById('mc-'+id)?.classList.toggle('open'); }
 function refreshManageItem(id){
