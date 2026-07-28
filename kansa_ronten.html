@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="apple-touch-icon" href="icons/kansa.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>監査論 論点リコール</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f9f9f8;
+  --surface: #ffffff;
+  --surface2: #f2f2f0;
+  --border: #e8e8e5;
+  --border2: #d0d0cb;
+  --text: #111111;
+  --text2: #666666;
+  --text3: #aaaaaa;
+  --ok: #1a7a4a;
+  --ok-dim: #edf7f2;
+  --ng: #c0392b;
+  --ng-dim: #fdf0ee;
+  --lock: #999999;
+  --lock-dim: #f2f2f2;
+  --accent: #2d5be3;
+  --accent-dim: #eaf0fd;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6;overflow-x:hidden}
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex;flex-direction:column}
+
+/* START */
+#screen-start{align-items:center;justify-content:center;padding:60px 24px}
+.start-title{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:18px;letter-spacing:.04em}
+.start-btns{display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px}
+.btn-primary{background:var(--text);color:#fff;border:none;border-radius:var(--radius);padding:15px 24px;font-size:14px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:all .12s}
+.btn-primary:active{transform:scale(.97)}
+.btn-secondary{background:var(--surface);color:var(--text2);border:1.5px solid var(--border2);border-radius:var(--radius);padding:13px 24px;font-size:14px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:all .12s}
+.btn-secondary:hover{border-color:var(--text2);color:var(--text)}
+.btn-secondary:active{transform:scale(.97)}
+
+/* COMMON HEADER */
+.page-header{padding:18px 16px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0}
+.back-btn{background:none;border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text2);font-size:12px;padding:5px 10px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.back-btn:hover{border-color:var(--text2);color:var(--text)}
+.page-header-info{flex:1;min-width:0}
+.page-header-title{font-size:15px;font-weight:700}
+.page-header-sub{font-size:11px;color:var(--text2);margin-top:1px}
+
+/* CHAPTER / SECTION LIST */
+.chapter-list{padding:12px 14px 40px;display:flex;flex-direction:column;gap:8px;overflow-y:auto}
+.ch-btn{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px 14px;text-align:left;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px;font-family:'Noto Sans JP',sans-serif;width:100%}
+.ch-btn:hover{border-color:var(--border2);background:var(--surface2)}
+.ch-btn:active{transform:scale(.98)}
+.ch-btn-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);min-width:26px}
+.ch-btn-info{flex:1;min-width:0}
+.ch-btn-name{font-size:13px;font-weight:700;color:var(--text)}
+.ch-btn-count{font-size:10px;color:var(--text2);margin-top:2px;font-family:'DM Mono',monospace}
+.ch-btn-arrow{color:var(--text3);font-size:14px;flex-shrink:0}
+
+/* GAME */
+.game-header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--border);padding:12px 16px;flex-shrink:0}
+.game-header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:8px}
+.game-chapter-name{font-size:12px;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.game-score-display{font-family:'DM Mono',monospace;font-size:13px;color:var(--text2);white-space:nowrap;flex-shrink:0}
+.game-score-display span{color:var(--ok);font-weight:700}
+.game-crumb{font-size:10px;color:var(--text3);margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.game-stage-tag{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:999px;margin-right:6px;vertical-align:middle}
+.stage-topic{background:var(--accent-dim);color:var(--accent)}
+.stage-leaf{background:#fdf4e3;color:#7c5c00}
+.prog-track{height:3px;background:var(--border);border-radius:999px;overflow:hidden}
+.prog-fill{height:100%;background:var(--text);border-radius:999px;transition:width .4s ease}
+.game-content{padding:14px;max-width:600px;margin:0 auto;width:100%;padding-bottom:40px;overflow-y:auto}
+
+.input-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px}
+.input-card-title{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px}
+.input-group{margin-bottom:10px}
+.input-lbl{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.game-input{width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:16px;padding:10px 12px;outline:none;transition:border-color .15s;resize:vertical;min-height:54px;touch-action:manipulation}
+.game-input:focus{border-color:var(--text)}
+.game-input::placeholder{color:var(--text3)}
+.btn-submit{width:100%;padding:12px;border-radius:var(--radius-sm);border:none;background:var(--text);color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .12s;margin-top:2px}
+.btn-submit:active{transform:scale(.97)}
+
+/* CONFIRM */
+.confirm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end;justify-content:center}
+.confirm-overlay.open{display:flex}
+.confirm-modal{background:var(--surface);border-radius:16px 16px 0 0;padding:20px 16px 44px;width:100%;max-width:600px;max-height:80vh;overflow-y:auto}
+.confirm-handle{width:32px;height:3px;background:var(--border2);border-radius:999px;margin:0 auto 16px}
+.confirm-lbl{font-size:10px;font-weight:700;color:var(--text2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.confirm-ronten{font-size:16px;font-weight:700;margin-bottom:8px;line-height:1.4}
+.confirm-score-row{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.confirm-score-badge{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--ok-dim);color:var(--ok)}
+.confirm-score-sub{font-size:11px;color:var(--text2)}
+.confirm-btns{display:flex;gap:8px}
+.btn-yes{flex:2;padding:13px;border-radius:var(--radius-sm);border:none;background:var(--text);color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .12s}
+.btn-yes:active{transform:scale(.97)}
+.btn-no{flex:1;padding:13px;border-radius:var(--radius-sm);border:1.5px solid var(--border2);background:transparent;color:var(--text2);font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .12s}
+.btn-no:active{transform:scale(.97)}
+
+/* RESULTS (in-game list) */
+.results-section{margin-top:4px}
+.results-count-lbl{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+.result-item{border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:6px;display:flex;align-items:flex-start;gap:10px}
+.result-item.ok{border-color:var(--ok);background:var(--ok-dim)}
+.result-item.locked{border-color:var(--lock);background:var(--lock-dim);opacity:.6}
+.result-dot{font-size:13px;font-weight:700;flex-shrink:0;width:18px;text-align:center;margin-top:1px}
+.result-dot.ok{color:var(--ok)}
+.result-dot.locked{color:var(--lock)}
+.result-content{flex:1;min-width:0}
+.result-name{font-size:12px;font-weight:700;color:var(--text);line-height:1.4}
+.result-input-text{font-size:10px;color:var(--text2);margin-top:2px}
+.result-locked-msg{font-size:10px;color:var(--lock);margin-top:2px}
+
+.btn-finish{width:100%;padding:13px;border-radius:var(--radius-sm);border:1.5px solid var(--border2);background:transparent;color:var(--text2);font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-top:14px;transition:all .15s}
+.btn-finish:hover{border-color:var(--text2);color:var(--text)}
+.error-msg{font-size:11px;color:var(--ng);padding:8px 12px;background:var(--ng-dim);border-radius:var(--radius-sm);border:1px solid var(--ng);margin-bottom:8px}
+
+/* RESULT SCREEN */
+#screen-result{align-items:stretch}
+.result-inner{padding:28px 18px 60px;max-width:600px;margin:0 auto;width:100%}
+.result-top{text-align:center;margin-bottom:24px}
+.result-ch-lbl{font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);letter-spacing:.06em;margin-bottom:10px;word-break:break-word}
+.result-big{font-family:'DM Mono',monospace;font-size:64px;font-weight:500;color:var(--text);line-height:1;margin-bottom:4px}
+.result-big span{font-size:24px;color:var(--text2)}
+.result-total-lbl{font-size:12px;color:var(--text2);margin-bottom:6px}
+.result-rate{font-size:13px;font-weight:700;margin-bottom:14px}
+.result-rate .rn{color:var(--ok)}
+.result-rate .rn.warn{color:var(--ng)}
+.result-msg{font-size:13px;color:var(--text2);line-height:1.7}
+.result-breakdown{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px}
+.bd-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;text-align:center}
+.bd-num{font-family:'DM Mono',monospace;font-size:22px;font-weight:500}
+.bd-num.ok{color:var(--ok)}
+.bd-num.locked{color:var(--lock)}
+.bd-num.remain{color:var(--text2)}
+.bd-lbl{font-size:9px;color:var(--text3);margin-top:3px;letter-spacing:.06em;text-transform:uppercase}
+.result-hist-sec{margin-bottom:22px}
+.result-hist-title{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.hist-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.hist-bar-lbl{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);min-width:22px}
+.hist-bar-track{flex:1;height:7px;background:var(--border);border-radius:999px;overflow:hidden}
+.hist-bar-fill{height:100%;background:var(--text);border-radius:999px;transition:width .6s ease}
+.hist-bar-val{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);min-width:36px;text-align:right}
+.result-detail-sec{margin-bottom:20px}
+.result-detail-title{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.rdi{display:flex;align-items:flex-start;gap:8px;padding:9px 0;border-bottom:1px solid var(--border)}
+.rdi:last-child{border-bottom:none}
+.rdi-dot{font-size:12px;font-weight:700;width:18px;flex-shrink:0;margin-top:2px;text-align:center}
+.rdi-dot.ok{color:var(--ok)}.rdi-dot.locked{color:var(--lock)}.rdi-dot.none{color:var(--text3)}.rdi-dot.na{color:var(--border2)}
+.rdi-body{flex:1;min-width:0}
+.rdi-name{font-size:12px;color:var(--text);line-height:1.5}
+.rdi-name.na{color:var(--text3)}
+.rdi-sub{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap}
+.rdi-imp{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;flex-shrink:0}
+.imp-A{background:#fdf0ee;color:#c0392b}
+.imp-B{background:#fdf4e3;color:#7c5c00}
+.imp-C{background:#edf7f2;color:#1a7a4a}
+.imp-Z{background:var(--surface2);color:var(--text3)}
+.rdi-leafbtn{font-size:9px;font-weight:700;padding:2px 8px;border-radius:999px;border:1.5px solid var(--accent);background:var(--accent-dim);color:var(--accent);cursor:pointer;font-family:'Noto Sans JP',sans-serif;white-space:nowrap}
+.rdi-leafbtn:active{transform:scale(.95)}
+.rdi-leafbtn.empty{border-color:var(--border2);background:var(--surface2);color:var(--text3)}
+.rdi-leafacc{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace}
+.result-btns{display:flex;flex-direction:column;gap:8px}
+.btn-retry{background:var(--text);color:#fff;border:none;border-radius:var(--radius-sm);padding:14px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .12s}
+.btn-retry:active{transform:scale(.97)}
+.btn-back{background:transparent;color:var(--text2);border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:13px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
+.btn-back:hover{border-color:var(--text2);color:var(--text)}
+.btn-next-topic{background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:14px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .12s}
+.btn-next-topic:active{transform:scale(.97)}
+
+/* MANAGE / RECORD */
+#screen-manage{padding:0}
+#screen-record{padding:0}
+.manage-tabs{display:flex;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);padding:0 4px;flex-shrink:0}
+.manage-tabs::-webkit-scrollbar{display:none}
+.mctab{padding:10px 12px;font-size:12px;font-weight:700;font-family:'Noto Sans JP',sans-serif;background:transparent;border:none;cursor:pointer;color:var(--text3);border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s}
+.mctab.active{color:var(--text);border-bottom-color:var(--text)}
+.manage-content{padding:12px 14px 60px;max-width:640px;margin:0 auto;overflow-y:auto}
+.manage-sec-block{margin-bottom:18px}
+.manage-sec-hdr{font-size:12px;font-weight:700;color:var(--text);padding:8px 2px;border-bottom:2px solid var(--border2);margin-bottom:8px}
+.manage-item-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden}
+.manage-item-card.na{background:transparent;border-style:dashed}
+.manage-item-header{padding:11px 13px;display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.manage-item-card.na .manage-item-header{cursor:default}
+.manage-item-header:active{background:var(--surface2)}
+.manage-item-card.na .manage-item-header:active{background:transparent}
+.manage-item-name{flex:1;font-size:12px;font-weight:700;color:var(--text);line-height:1.4;min-width:0}
+.manage-item-card.na .manage-item-name{font-weight:400;color:var(--text3)}
+.manage-item-imp{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;flex-shrink:0}
+.manage-item-status{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);flex-shrink:0}
+.manage-item-status.has-ans{color:var(--ok)}
+.manage-item-body{display:none;border-top:1px solid var(--border);padding:12px 13px}
+.manage-item-card.open .manage-item-body{display:block}
+.manage-ans-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.manage-ans-row{display:flex;align-items:flex-start;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px}
+.manage-ans-text{flex:1;font-size:12px;color:var(--text);line-height:1.5}
+.manage-ans-del{background:none;border:none;color:var(--text3);font-size:14px;cursor:pointer;padding:0 2px;flex-shrink:0;transition:color .12s;line-height:1;margin-top:1px}
+.manage-ans-del:hover{color:var(--ng)}
+.manage-add-row{display:flex;gap:6px;align-items:flex-start}
+.manage-add-input{flex:1;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:16px;padding:8px 10px;outline:none;resize:vertical;min-height:50px;transition:border-color .15s;touch-action:manipulation}
+.manage-add-input:focus{border-color:var(--text)}
+.manage-add-input::placeholder{color:var(--text3)}
+.manage-add-btn{padding:8px 12px;border-radius:var(--radius-sm);border:1.5px solid var(--border2);background:var(--surface);color:var(--text2);font-size:12px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.manage-add-btn:hover{border-color:var(--text);color:var(--text)}
+.manage-excl-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.manage-excl-label{font-size:12px;color:var(--text2);font-weight:700}
+.manage-excl-toggle{padding:5px 14px;border-radius:999px;border:1.5px solid var(--border2);background:var(--surface2);color:var(--text3);font-size:12px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:all .15s}
+.manage-excl-toggle.on{background:var(--ok-dim);border-color:var(--ok);color:var(--ok)}
+.manage-item-card.excluded .manage-item-header{opacity:.45}
+.manage-item-card.excluded .manage-item-name{text-decoration:line-through}
+.manage-section-title{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;margin-top:2px}
+.alias-row{background:#f0f0ff;border-color:#c0c0e8}
+.leaf-row{background:#fff8e8;border-color:#e8d8a8}
+.manage-add-input-line{flex:1;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:12px;padding:8px 10px;outline:none;transition:border-color .15s;height:36px}
+.manage-add-input-line:focus{border-color:var(--text)}
+.manage-add-input-line::placeholder{color:var(--text3)}
+.record-item{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}
+.record-item:last-child{border-bottom:none}
+.record-item.excluded{opacity:.4}
+.record-item.na{opacity:.55}
+.record-item-name{flex:1;font-size:12px;color:var(--text);line-height:1.4}
+.record-item-sub{font-size:10px;color:var(--text3);margin-top:2px;font-family:'DM Mono',monospace}
+.record-item-right{flex-shrink:0;text-align:right}
+.record-score{font-family:'DM Mono',monospace;font-size:13px;font-weight:700}
+.record-sec-hdr{font-size:12px;font-weight:700;color:var(--text);padding:14px 2px 8px;border-bottom:2px solid var(--border2);margin-bottom:4px}
+@media (min-width:820px){
+  body{font-size:17px}
+  .start-btns{max-width:480px}
+  .page-header{padding:22px 28px 18px}
+  .page-header-title{font-size:19px}
+  .page-header-sub{font-size:14px}
+  .back-btn{font-size:14px;padding:7px 14px}
+  .chapter-list{padding:16px 28px 60px;gap:10px}
+  .ch-btn{padding:16px 18px}
+  .ch-btn-num{font-size:13px;min-width:34px}
+  .ch-btn-name{font-size:16px}
+  .game-content{max-width:100%;padding:20px 28px 60px}
+  .game-input{font-size:16px}
+  .btn-submit,.btn-finish{font-size:16px;padding:15px}
+  .result-inner{max-width:100%;padding:36px 28px 80px}
+  .result-big{font-size:80px}
+  .result-big span{font-size:28px}
+  .manage-content{max-width:100%;padding:16px 28px 80px}
+  .manage-item-name{font-size:15px}
+  .manage-add-input{font-size:14px}
+  .mctab{font-size:14px;padding:12px 18px}
+  .record-item-name{font-size:15px}
+  .record-score{font-size:14px}
+  .btn-retry,.btn-back,.btn-next-topic{font-size:16px;padding:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- START -->
+<div class="screen active" id="screen-start">
+  <div class="start-title">監査論 論点リコール</div>
+  <div class="start-btns">
+    <button class="btn-primary" onclick="goChapter()">章・節を選んで始める →</button>
+    <button class="btn-secondary" onclick="goManage()">論点・末端論点を管理する</button>
+    <button class="btn-secondary" onclick="goRecord()">過去の回答を確認する</button>
+  </div>
+  <div style="display:flex;gap:8px;width:100%;max-width:320px;margin-top:32px">
+    <button class="btn-secondary" style="flex:1;font-size:12px;padding:10px" onclick="exportBackup()">バックアップ</button>
+    <button class="btn-secondary" style="flex:1;font-size:12px;padding:10px" onclick="document.getElementById('backup-input').click()">復元</button>
+    <input type="file" id="backup-input" accept=".json" style="display:none" onchange="importBackup(event)">
+  </div>
+</div>
+
+<!-- CHAPTER -->
+<div class="screen" id="screen-chapter">
+  <div class="page-header">
+    <button class="back-btn" onclick="goStart()">← トップ</button>
+    <div class="page-header-info">
+      <div class="page-header-title">章を選択</div>
+      <div class="page-header-sub">全10章</div>
+    </div>
+  </div>
+  <div class="chapter-list" id="chapter-list"></div>
+</div>
+
+<!-- SECTION -->
+<div class="screen" id="screen-section">
+  <div class="page-header">
+    <button class="back-btn" onclick="goChapter()">← 章一覧</button>
+    <div class="page-header-info">
+      <div class="page-header-title" id="section-page-title">節を選択</div>
+      <div class="page-header-sub" id="section-page-sub"></div>
+    </div>
+  </div>
+  <div class="chapter-list" id="section-list"></div>
+</div>
+
+<!-- GAME -->
+<div class="screen" id="screen-game">
+  <div class="game-header">
+    <div class="game-crumb" id="game-crumb"></div>
+    <div class="game-header-top">
+      <button class="back-btn" onclick="abortGame()" style="flex-shrink:0">← 戻る</button>
+      <div class="game-chapter-name" id="game-chapter-name"></div>
+      <div class="game-score-display">正解 <span id="score-display">0</span></div>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="game-content">
+    <div class="input-card">
+      <div class="input-card-title" id="input-card-title">論点を入力</div>
+      <div class="input-group">
+        <textarea class="game-input" id="input-title" rows="2" placeholder="思い出せるだけ入力してください"></textarea>
+      </div>
+      <button class="btn-submit" onclick="submitEntry()">照合する →</button>
+    </div>
+    <div class="results-section">
+      <div class="results-count-lbl" id="results-count-lbl">回答済み: 0件</div>
+      <div id="results-list"></div>
+    </div>
+    <button class="btn-finish" onclick="finishGame()">終了して結果を見る</button>
+  </div>
+</div>
+
+<!-- CONFIRM OVERLAY -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-modal">
+    <div class="confirm-handle"></div>
+    <div class="confirm-lbl">最も近い項目</div>
+    <div class="confirm-ronten" id="confirm-ronten"></div>
+    <div id="confirm-matched-text" style="font-size:12px;color:var(--text2);margin-bottom:8px;line-height:1.5;display:none;"></div>
+    <div class="confirm-score-row">
+      <div class="confirm-score-badge" id="confirm-score-badge"></div>
+      <div class="confirm-score-sub" id="confirm-score-sub"></div>
+    </div>
+    <div class="confirm-btns">
+      <button class="btn-yes" onclick="confirmYes()">✓ これが答えたかった項目</button>
+      <button class="btn-no" onclick="confirmNo()">✕ 違う</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div class="screen" id="screen-result">
+  <div class="result-inner">
+    <div class="result-top">
+      <div class="result-ch-lbl" id="result-ch-lbl"></div>
+      <div class="result-big" id="result-big">0<span>/0</span></div>
+      <div class="result-total-lbl" id="result-total-lbl">論点を上げられました</div>
+      <div class="result-rate" id="result-rate"></div>
+      <div class="result-msg" id="result-msg"></div>
+    </div>
+    <div class="result-breakdown">
+      <div class="bd-card"><div class="bd-num ok" id="bd-ok">0</div><div class="bd-lbl">正解</div></div>
+      <div class="bd-card"><div class="bd-num locked" id="bd-locked">0</div><div class="bd-lbl">ロック</div></div>
+      <div class="bd-card"><div class="bd-num remain" id="bd-remain">0</div><div class="bd-lbl">未回答</div></div>
+    </div>
+    <div class="result-hist-sec" id="result-hist-sec" style="display:none">
+      <div class="result-hist-title">過去の記録</div>
+      <div id="hist-bars"></div>
+    </div>
+    <div class="result-detail-sec">
+      <div class="result-detail-title" id="result-detail-title">この節の論点一覧</div>
+      <div id="result-detail-items"></div>
+    </div>
+    <div class="result-btns" id="result-btns"></div>
+  </div>
+</div>
+
+<!-- MANAGE -->
+<div class="screen" id="screen-manage">
+  <div class="page-header">
+    <button class="back-btn" onclick="goStart()">← トップ</button>
+    <div class="page-header-info">
+      <div class="page-header-title">論点・末端論点を管理</div>
+      <div class="page-header-sub">A・Bランクの論点で別名登録や末端論点の登録ができます</div>
+    </div>
+  </div>
+  <div class="manage-tabs" id="manage-tabs"></div>
+  <div class="manage-content" id="manage-content"></div>
+</div>
+
+<!-- RECORD -->
+<div class="screen" id="screen-record">
+  <div class="page-header">
+    <button class="back-btn" onclick="goStart()">← トップ</button>
+    <div class="page-header-info">
+      <div class="page-header-title">過去の回答</div>
+      <div class="page-header-sub">論点・末端論点ごとの正解回数</div>
+    </div>
+  </div>
+  <div class="manage-tabs" id="record-tabs"></div>
+  <div class="manage-content" id="record-content"></div>
+</div>
+
+<script src="kansa_ronten_data.js"></script>
+<script>
+// ── STORAGE ──
+const HIST_KEY='kansa-ronten-history-v1', ANS_KEY='kansa-ronten-answers-v1', EXCL_KEY='kansa-ronten-exclude-v1',
+      ALIAS_KEY='kansa-ronten-alias-v1', REC_KEY='kansa-ronten-record-v1', LEAF_KEY='kansa-ronten-leaves-v1';
+let gameHistory={}, answerData={}, excludeData={}, aliasData={}, recordData={}, leafData={};
+
+function loadStorage(){
+  try{const h=localStorage.getItem(HIST_KEY);if(h)gameHistory=JSON.parse(h);}catch(e){}
+  try{const a=localStorage.getItem(ANS_KEY);if(a)answerData=JSON.parse(a);}catch(e){}
+  try{const e=localStorage.getItem(EXCL_KEY);if(e)excludeData=JSON.parse(e);}catch(e){}
+  try{const al=localStorage.getItem(ALIAS_KEY);if(al)aliasData=JSON.parse(al);}catch(e){}
+  try{const r=localStorage.getItem(REC_KEY);if(r)recordData=JSON.parse(r);}catch(e){}
+  try{const l=localStorage.getItem(LEAF_KEY);if(l)leafData=JSON.parse(l);}catch(e){}
+}
+function saveHistory(){try{localStorage.setItem(HIST_KEY,JSON.stringify(gameHistory));}catch(e){}}
+function saveAnswers(){try{localStorage.setItem(ANS_KEY,JSON.stringify(answerData));}catch(e){}}
+function saveExclude(){try{localStorage.setItem(EXCL_KEY,JSON.stringify(excludeData));}catch(e){}}
+function saveAlias(){try{localStorage.setItem(ALIAS_KEY,JSON.stringify(aliasData));}catch(e){}}
+function saveRecord(){try{localStorage.setItem(REC_KEY,JSON.stringify(recordData));}catch(e){}}
+function saveLeaves(){try{localStorage.setItem(LEAF_KEY,JSON.stringify(leafData));}catch(e){}}
+
+function recordResult(id,isOk){
+  if(!recordData[id])recordData[id]={ok:0,total:0};
+  recordData[id].total++;
+  if(isOk)recordData[id].ok++;
+  saveRecord();
+}
+function getAliases(id){return aliasData[id]||[];}
+function addAlias(id,word){
+  if(!word.trim())return;
+  if(!aliasData[id])aliasData[id]=[];
+  if(!aliasData[id].includes(word.trim()))aliasData[id].push(word.trim());
+  saveAlias();
+}
+function deleteAlias(id,idx){ if(!aliasData[id])return; aliasData[id].splice(idx,1); saveAlias(); }
+function isExcluded(id){return excludeData[id]===true;}
+function toggleExclude(id){ excludeData[id]=!isExcluded(id); saveExclude(); refreshManageItem(id); }
+
+function getLeaves(topicId){return leafData[topicId]||[];}
+function addLeaf(topicId,text){
+  if(!text.trim())return;
+  if(!leafData[topicId])leafData[topicId]=[];
+  leafData[topicId].push(text.trim());
+  saveLeaves();
+}
+function deleteLeaf(topicId,idx){ if(!leafData[topicId])return; leafData[topicId].splice(idx,1); saveLeaves(); }
+
+// ── SIMILARITY ──
+function normalize(s){return s.replace(/^各論[①-⑳]?[-－―]?/,'').replace(/[　\s・。、「」『』【】（）()〔〕\-－―:：]/g,'').toLowerCase();}
+function ngramSet(s,n){const set=new Set();for(let i=0;i<=s.length-n;i++)set.add(s.slice(i,i+n));return set;}
+function ngramSim(a,b,n=2){
+  const na=ngramSet(a,n),nb=ngramSet(b,n);
+  if(!na.size&&!nb.size)return 1;if(!na.size||!nb.size)return 0;
+  let inter=0;na.forEach(g=>{if(nb.has(g))inter++;});
+  return inter/(na.size+nb.size-inter);
+}
+function charInclude(q,t){if(!q.length)return 0;let h=0;for(const c of q){if(t.includes(c))h++;}return h/q.length;}
+function scorePair(q,t){
+  return Math.max(ngramSim(q,t,2), ngramSim(q,t,1)*0.7, charInclude(q,t)*0.6);
+}
+function similarity(query,item){
+  const q=normalize(query);
+  let best={score:0,text:item.name};
+  const ts=scorePair(q,normalize(item.name));
+  if(ts>best.score)best={score:ts,text:item.name};
+  (answerData[item.id]||[]).forEach(a=>{const s=scorePair(q,normalize(a));if(s>best.score)best={score:s,text:a};});
+  (aliasData[item.id]||[]).forEach(a=>{const s=scorePair(q,normalize(a));if(s>best.score)best={score:s,text:a};});
+  return best;
+}
+function findTopMatches(queryText,items,lockedIds,answeredIds,topN=5){
+  const q=queryText;
+  if(!q.trim())return[];
+  const avail=items.filter(i=>!lockedIds.has(i.id)&&!answeredIds.has(i.id));
+  const scored=avail.map(item=>{const r=similarity(q,item);return{item,score:r.score,matchedText:r.text};});
+  scored.sort((a,b)=>b.score-a.score);
+  return scored.slice(0,topN).filter(s=>s.score>0.05);
+}
+
+// ── HELPERS ──
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+const IMP_LABEL={A:'A',B:'B',C:'C',Z:'ー'};
+function impBadge(imp){return `<span class="rdi-imp imp-${imp}">${IMP_LABEL[imp]}</span>`;}
+function isQuizzable(imp){return imp==='A'||imp==='B';}
+
+// ── SCREENS ──
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  window.scrollTo(0,0);
+  if(['start','chapter','manage','record'].includes(id)) localStorage.setItem('kansa-ronten-screen',id);
+}
+function goStart(){showScreen('start');}
+function goChapter(){renderChapterList();showScreen('chapter');}
+function goManage(){renderManageTabs(manageChIndex);showScreen('manage');}
+function goRecord(){renderRecordTabs(recordChIndex);showScreen('record');}
+
+// ── CHAPTER / SECTION LIST ──
+function renderChapterList(){
+  document.getElementById('chapter-list').innerHTML=DATA.map((ch,i)=>{
+    const secCount=ch.sections.length;
+    return`<button class="ch-btn" onclick="goSection(${i})">
+      <div class="ch-btn-num">${i+1}</div>
+      <div class="ch-btn-info"><div class="ch-btn-name">${ch.chName}</div><div class="ch-btn-count">全${secCount}節</div></div>
+      <div class="ch-btn-arrow">›</div>
+    </button>`;
+  }).join('');
+}
+let currentChIdx=0;
+function goSection(chIdx){
+  currentChIdx=chIdx;
+  const ch=DATA[chIdx];
+  document.getElementById('section-page-title').textContent=ch.chName;
+  document.getElementById('section-page-sub').textContent=`${ch.ch}　全${ch.sections.length}節`;
+  document.getElementById('section-list').innerHTML=ch.sections.map((sec,i)=>{
+    const quizCount=sec.topics.filter(t=>isQuizzable(t.imp)).length;
+    return`<button class="ch-btn" onclick="startTopicGame(${chIdx},${i})">
+      <div class="ch-btn-num">${sec.sec}</div>
+      <div class="ch-btn-info"><div class="ch-btn-name">${sec.secName}</div><div class="ch-btn-count">出題対象 ${quizCount}件 / 全${sec.topics.length}件</div></div>
+      <div class="ch-btn-arrow">›</div>
+    </button>`;
+  }).join('');
+  showScreen('section');
+}
+
+// ── GAME ENGINE (shared by topic-recall & leaf-recall) ──
+let gameState={kind:'topic',chIdx:null,secIdx:null,topicId:null,items:[],answeredIds:new Set(),lockedIds:new Set(),results:[],score:0};
+let pendingConfirm=null;
+let lastTopicResult=null; // cached snapshot to return to after a leaf sub-game
+
+function abortGame(){
+  if(gameState.kind==='topic') goSection(gameState.chIdx);
+  else{
+    if(lastTopicResult){renderTopicResultScreen(lastTopicResult);showScreen('result');}
+    else goSection(gameState.chIdx);
+  }
+}
+
+function resetGameUIShell(){
+  document.getElementById('score-display').textContent='0';
+  document.getElementById('prog-fill').style.width='0%';
+  document.getElementById('results-list').innerHTML='';
+  document.getElementById('results-count-lbl').textContent='回答済み: 0件';
+  document.getElementById('input-title').value='';
+  document.querySelector('.error-msg')?.remove();
+}
+
+function startTopicGame(chIdx,secIdx){
+  const ch=DATA[chIdx],sec=ch.sections[secIdx];
+  const activeItems=sec.topics.filter(t=>isQuizzable(t.imp)&&!isExcluded(t.id));
+  gameState={kind:'topic',chIdx,secIdx,topicId:null,items:activeItems,answeredIds:new Set(),lockedIds:new Set(),results:[],score:0};
+  document.getElementById('game-crumb').textContent=`${ch.ch} ${ch.chName}`;
+  document.getElementById('game-chapter-name').innerHTML=`<span class="game-stage-tag stage-topic">節の論点</span>${sec.sec} ${sec.secName}`;
+  document.getElementById('input-card-title').textContent='この節にある論点を入力';
+  resetGameUIShell();
+  showScreen('game');
+}
+
+function startLeafGame(chIdx,secIdx,topicId){
+  const ch=DATA[chIdx],sec=ch.sections[secIdx];
+  const topic=sec.topics.find(t=>t.id===topicId);
+  const leaves=getLeaves(topicId);
+  const items=leaves.map((text,i)=>({id:topicId+'::'+i,name:text})).filter(it=>!isExcluded(it.id));
+  gameState={kind:'leaf',chIdx,secIdx,topicId,items,answeredIds:new Set(),lockedIds:new Set(),results:[],score:0};
+  document.getElementById('game-crumb').textContent=`${ch.ch} ${ch.chName} ／ ${sec.sec} ${sec.secName}`;
+  document.getElementById('game-chapter-name').innerHTML=`<span class="game-stage-tag stage-leaf">末端論点</span>${escHtml(topic.name)}`;
+  document.getElementById('input-card-title').textContent='この論点にある末端論点を入力';
+  resetGameUIShell();
+  showScreen('game');
+}
+
+function submitEntry(){
+  const tv=document.getElementById('input-title').value.trim();
+  if(!tv){showError('内容を入力してください');return;}
+  const avail=gameState.items.filter(i=>!gameState.answeredIds.has(i.id)&&!gameState.lockedIds.has(i.id));
+  if(!avail.length){showError('対象の項目はすべて回答済みまたはロックされています');return;}
+  const matches=findTopMatches(tv,gameState.items,gameState.lockedIds,gameState.answeredIds,1);
+  if(!matches.length){showError('一致する項目が見つかりませんでした。もう少し具体的に入力してください。');return;}
+  const top=matches[0];
+  pendingConfirm={matchedItem:top.item,inputTitle:tv};
+  document.getElementById('confirm-ronten').textContent=top.item.name;
+  const matchedEl=document.getElementById('confirm-matched-text');
+  if(top.matchedText&&top.matchedText!==top.item.name){
+    matchedEl.textContent='→ 「'+top.matchedText+'」で一致';
+    matchedEl.style.display='';
+  }else{
+    matchedEl.style.display='none';
+  }
+  const pct=Math.round(top.score*100);
+  document.getElementById('confirm-score-badge').textContent=`類似度 ${pct}%`;
+  document.getElementById('confirm-score-sub').textContent=pct>=60?'高い一致度です':pct>=35?'部分的に一致しています':'一致度が低めです。違う場合は「違う」を選んでください。';
+  document.getElementById('confirm-overlay').classList.add('open');
+}
+
+function confirmYes(){
+  document.getElementById('confirm-overlay').classList.remove('open');
+  if(!pendingConfirm)return;
+  const{matchedItem,inputTitle}=pendingConfirm;
+  gameState.answeredIds.add(matchedItem.id);gameState.score++;
+  gameState.results.unshift({id:matchedItem.id,inputTitle,status:'ok'});
+  recordResult(matchedItem.id,true);
+  document.getElementById('input-title').value='';
+  pendingConfirm=null;updateGameUI();
+}
+function confirmNo(){
+  document.getElementById('confirm-overlay').classList.remove('open');
+  if(!pendingConfirm)return;
+  const{matchedItem,inputTitle}=pendingConfirm;
+  gameState.lockedIds.add(matchedItem.id);
+  gameState.results.unshift({id:matchedItem.id,inputTitle,status:'locked'});
+  recordResult(matchedItem.id,false);
+  document.getElementById('input-title').value='';
+  pendingConfirm=null;updateGameUI();
+}
+
+function updateGameUI(){
+  const total=gameState.items.length,done=gameState.answeredIds.size+gameState.lockedIds.size;
+  document.getElementById('score-display').textContent=gameState.score;
+  document.getElementById('prog-fill').style.width=(total?Math.round(done/total*100):0)+'%';
+  document.getElementById('results-list').innerHTML=gameState.results.map(r=>{
+    const item=gameState.items.find(i=>i.id===r.id),name=item?item.name:r.id;
+    if(r.status==='ok')return`<div class="result-item ok"><div class="result-dot ok">○</div><div class="result-content"><div class="result-name">${escHtml(name)}</div>${r.inputTitle?`<div class="result-input-text">入力: ${escHtml(r.inputTitle)}</div>`:''}</div></div>`;
+    return`<div class="result-item locked"><div class="result-dot locked">✕</div><div class="result-content"><div class="result-name">${escHtml(name)}</div><div class="result-locked-msg">🔒 ロック（違う項目と判定したためネタバレ防止）</div></div></div>`;
+  }).join('');
+  document.getElementById('results-count-lbl').textContent=`回答済み: ${gameState.results.length}件（正解: ${gameState.score}）`;
+}
+
+function finishGame(){
+  if(gameState.kind==='topic') finishTopicGame();
+  else finishLeafGame();
+}
+
+function computeStats(){
+  const total=gameState.items.length,score=gameState.score,locked=gameState.lockedIds.size,remain=total-score-locked;
+  const rate=total?Math.round(score/total*100):0;
+  gameState.items.forEach(item=>{
+    if(!gameState.answeredIds.has(item.id)&&!gameState.lockedIds.has(item.id)) recordResult(item.id,false);
+  });
+  return{total,score,locked,remain,rate};
+}
+function resultMsg(rate){
+  const msgs=[[80,'素晴らしい！ほぼ完璧に把握できています。'],[60,'かなり上げられました。あと少しで完璧です。'],[40,'半分以上上げられました。繰り返しで定着させましょう。'],[0,'まだ伸びしろがあります。繰り返し挑戦して定着させましょう。']];
+  return(msgs.find(([t])=>rate>=t)||msgs[msgs.length-1])[1];
+}
+
+function finishTopicGame(){
+  const{chIdx,secIdx}=gameState;
+  const ch=DATA[chIdx],sec=ch.sections[secIdx];
+  const stats=computeStats();
+  const histKey=chIdx+'_'+secIdx;
+  if(!gameHistory[histKey])gameHistory[histKey]=[];
+  gameHistory[histKey].push({date:new Date().toLocaleDateString('ja-JP'),score:stats.score,total:stats.total,locked:stats.locked});
+  saveHistory();
+  lastTopicResult={chIdx,secIdx,stats,answeredIds:Array.from(gameState.answeredIds),lockedIds:Array.from(gameState.lockedIds),histKey};
+  renderTopicResultScreen(lastTopicResult);
+  showScreen('result');
+}
+
+function renderTopicResultScreen(snap){
+  const{chIdx,secIdx,stats}=snap;
+  const ch=DATA[chIdx],sec=ch.sections[secIdx];
+  const answeredIds=new Set(snap.answeredIds),lockedIds=new Set(snap.lockedIds);
+  document.getElementById('result-ch-lbl').textContent=`${ch.ch} ${ch.chName} ／ ${sec.sec} ${sec.secName}`;
+  document.getElementById('result-big').innerHTML=`${stats.score}<span>/${stats.total}</span>`;
+  document.getElementById('result-total-lbl').textContent='この節の論点を上げられました';
+  document.getElementById('bd-ok').textContent=stats.score;document.getElementById('bd-locked').textContent=stats.locked;document.getElementById('bd-remain').textContent=stats.remain;
+  document.getElementById('result-rate').innerHTML=`達成率 <span class="rn${stats.rate<50?' warn':''}">${stats.rate}%</span>`;
+  document.getElementById('result-msg').textContent=resultMsg(stats.rate);
+  const recs=gameHistory[snap.histKey]||[],hs=document.getElementById('result-hist-sec');
+  if(recs.length>1){hs.style.display='block';document.getElementById('hist-bars').innerHTML=recs.map((r,i)=>{const p=r.total?Math.round(r.score/r.total*100):0;return`<div class="hist-bar-row"><div class="hist-bar-lbl">${i+1}回</div><div class="hist-bar-track"><div class="hist-bar-fill" style="width:${p}%"></div></div><div class="hist-bar-val">${r.score}/${r.total}</div></div>`;}).join('');}else{hs.style.display='none';}
+  document.getElementById('result-detail-title').textContent='この節の論点一覧';
+  document.getElementById('result-detail-items').innerHTML=sec.topics.map(topic=>{
+    const quizzable=isQuizzable(topic.imp);
+    const isOk=quizzable&&answeredIds.has(topic.id),isL=quizzable&&lockedIds.has(topic.id);
+    let dot;
+    if(!quizzable) dot='<span class="rdi-dot na">－</span>';
+    else if(isOk) dot='<span class="rdi-dot ok">○</span>';
+    else if(isL) dot='<span class="rdi-dot locked">✕</span>';
+    else dot='<span class="rdi-dot none">–</span>';
+    const leafCount=getLeaves(topic.id).length;
+    let leafBtn='';
+    if(quizzable){
+      if(leafCount>0) leafBtn=`<button class="rdi-leafbtn" onclick="startLeafGame(${chIdx},${secIdx},'${topic.id}')">末端論点 ${leafCount}件 ▶</button>`;
+      else leafBtn=`<button class="rdi-leafbtn empty" onclick="goManage();openManageTopic('${topic.id}')">末端論点 未登録</button>`;
+    }
+    return`<div class="rdi">${dot}<div class="rdi-body"><div class="rdi-name${quizzable?'':' na'}">${escHtml(topic.name)}</div><div class="rdi-sub">${impBadge(topic.imp)}${leafBtn}</div></div></div>`;
+  }).join('');
+  document.getElementById('result-btns').innerHTML=`
+    <button class="btn-retry" onclick="startTopicGame(${chIdx},${secIdx})">同じ節でもう一度</button>
+    <button class="btn-back" onclick="goSection(${chIdx})">節一覧に戻る</button>`;
+}
+
+function finishLeafGame(){
+  const{chIdx,secIdx,topicId}=gameState;
+  const ch=DATA[chIdx],sec=ch.sections[secIdx];
+  const topic=sec.topics.find(t=>t.id===topicId);
+  const stats=computeStats();
+  const histKey='leaf_'+topicId;
+  if(!gameHistory[histKey])gameHistory[histKey]=[];
+  gameHistory[histKey].push({date:new Date().toLocaleDateString('ja-JP'),score:stats.score,total:stats.total,locked:stats.locked});
+  saveHistory();
+  const answeredIds=gameState.answeredIds,lockedIds=gameState.lockedIds;
+  document.getElementById('result-ch-lbl').textContent=`${ch.ch} ${ch.chName} ／ ${sec.sec} ${sec.secName}\n${topic.name}`;
+  document.getElementById('result-ch-lbl').style.whiteSpace='pre-line';
+  document.getElementById('result-big').innerHTML=`${stats.score}<span>/${stats.total}</span>`;
+  document.getElementById('result-total-lbl').textContent='この論点の末端論点を上げられました';
+  document.getElementById('bd-ok').textContent=stats.score;document.getElementById('bd-locked').textContent=stats.locked;document.getElementById('bd-remain').textContent=stats.remain;
+  document.getElementById('result-rate').innerHTML=`達成率 <span class="rn${stats.rate<50?' warn':''}">${stats.rate}%</span>`;
+  document.getElementById('result-msg').textContent=resultMsg(stats.rate);
+  const recs=gameHistory[histKey]||[],hs=document.getElementById('result-hist-sec');
+  if(recs.length>1){hs.style.display='block';document.getElementById('hist-bars').innerHTML=recs.map((r,i)=>{const p=r.total?Math.round(r.score/r.total*100):0;return`<div class="hist-bar-row"><div class="hist-bar-lbl">${i+1}回</div><div class="hist-bar-track"><div class="hist-bar-fill" style="width:${p}%"></div></div><div class="hist-bar-val">${r.score}/${r.total}</div></div>`;}).join('');}else{hs.style.display='none';}
+  document.getElementById('result-detail-title').textContent='この論点の末端論点一覧';
+  document.getElementById('result-detail-items').innerHTML=gameState.items.map(it=>{
+    const isOk=answeredIds.has(it.id),isL=lockedIds.has(it.id);
+    const dot=isOk?'<span class="rdi-dot ok">○</span>':isL?'<span class="rdi-dot locked">✕</span>':'<span class="rdi-dot none">–</span>';
+    return`<div class="rdi">${dot}<div class="rdi-body"><div class="rdi-name">${escHtml(it.name)}</div></div></div>`;
+  }).join('');
+  // find next quizzable topic in this section that has leaves, after the current one
+  const candList=sec.topics.filter(t=>isQuizzable(t.imp)&&getLeaves(t.id).length>0);
+  const curIdx=candList.findIndex(t=>t.id===topicId);
+  const nextTopic=curIdx>=0&&curIdx<candList.length-1?candList[curIdx+1]:null;
+  let btns=`<button class="btn-retry" onclick="startLeafGame(${chIdx},${secIdx},'${topicId}')">この論点をもう一度</button>`;
+  if(nextTopic) btns+=`<button class="btn-next-topic" onclick="startLeafGame(${chIdx},${secIdx},'${nextTopic.id}')">次の論点「${escHtml(nextTopic.name)}」へ →</button>`;
+  btns+=`<button class="btn-back" onclick="backToTopicResult(${chIdx},${secIdx})">節の結果に戻る</button>`;
+  document.getElementById('result-btns').innerHTML=btns;
+  showScreen('result');
+  document.getElementById('result-ch-lbl').style.whiteSpace='';
+}
+
+function backToTopicResult(chIdx,secIdx){
+  if(lastTopicResult&&lastTopicResult.chIdx===chIdx&&lastTopicResult.secIdx===secIdx){
+    renderTopicResultScreen(lastTopicResult);
+    showScreen('result');
+  }else{
+    goSection(chIdx);
+  }
+}
+
+function showError(msg){
+  document.querySelector('.error-msg')?.remove();
+  const el=document.createElement('div');el.className='error-msg';el.textContent=msg;
+  document.querySelector('.input-card').after(el);setTimeout(()=>el.remove(),4000);
+}
+
+// ── MANAGE ──
+let manageChIndex=0;
+let pendingOpenTopicId=null;
+function renderManageTabs(chIndex){
+  manageChIndex=chIndex;
+  document.getElementById('manage-tabs').innerHTML=DATA.map((ch,i)=>`<button class="mctab${i===chIndex?' active':''}" onclick="renderManageTabs(${i})">${ch.ch}</button>`).join('');
+  const ch=DATA[chIndex];
+  document.getElementById('manage-content').innerHTML=ch.sections.map((sec,secIdx)=>{
+    return`<div class="manage-sec-block">
+      <div class="manage-sec-hdr">${sec.sec}　${sec.secName}</div>
+      ${sec.topics.map(topic=>renderManageTopicCard(topic)).join('')}
+    </div>`;
+  }).join('');
+  if(pendingOpenTopicId){
+    const id=pendingOpenTopicId;pendingOpenTopicId=null;
+    setTimeout(()=>{const card=document.getElementById('mc-'+id);if(card){card.classList.add('open');card.scrollIntoView({block:'center',behavior:'smooth'});}},50);
+  }
+}
+function openManageTopic(topicId){
+  // find which chapter the topic belongs to and switch tab
+  for(let ci=0;ci<DATA.length;ci++){
+    const ch=DATA[ci];
+    for(const sec of ch.sections){
+      if(sec.topics.some(t=>t.id===topicId)){
+        pendingOpenTopicId=topicId;
+        renderManageTabs(ci);
+        return;
+      }
+    }
+  }
+}
+function renderManageTopicCard(topic){
+  const quizzable=isQuizzable(topic.imp);
+  if(!quizzable){
+    return`<div class="manage-item-card na">
+      <div class="manage-item-header">
+        <div class="manage-item-name">${escHtml(topic.name)}</div>
+        ${impBadge(topic.imp)}
+        <div class="manage-item-status">出題対象外</div>
+      </div>
+    </div>`;
+  }
+  const ans=answerData[topic.id]||[],hasAns=ans.length>0,excl=isExcluded(topic.id);
+  const leaves=getLeaves(topic.id);
+  return`<div class="manage-item-card${excl?' excluded':''}" id="mc-${topic.id}">
+    <div class="manage-item-header" onclick="toggleManageItem('${topic.id}')">
+      <div class="manage-item-name">${escHtml(topic.name)}</div>
+      ${impBadge(topic.imp)}
+      <div class="manage-item-status${leaves.length?' has-ans':''}">末端${leaves.length}件</div>
+    </div>
+    <div class="manage-item-body">
+      <div class="manage-excl-row">
+        <span class="manage-excl-label">出題対象に含める</span>
+        <button class="manage-excl-toggle${excl?'':' on'}" id="excl-${topic.id}" onclick="toggleExclude('${topic.id}')">${excl?'OFF':'ON'}</button>
+      </div>
+      <div class="manage-section-title">末端論点（この論点に含まれる細目）</div>
+      <div class="manage-ans-list" id="leaflist-${topic.id}">${leaves.map((l,i)=>`<div class="manage-ans-row leaf-row"><div class="manage-ans-text">${escHtml(l)}</div><button class="manage-ans-del" onclick="deleteLeaf('${topic.id}',${i});refreshManageItem('${topic.id}')">✕</button></div>`).join('')}</div>
+      <div class="manage-add-row" style="margin-bottom:14px">
+        <textarea class="manage-add-input" id="leafinput-${topic.id}" placeholder="末端論点を入力..." rows="2"></textarea>
+        <button class="manage-add-btn" onclick="commitLeaf('${topic.id}')">追加</button>
+      </div>
+      <div class="manage-section-title">別名・言い換え（論点名の照合用）</div>
+      <div class="manage-ans-list" id="aliaslist-${topic.id}">${getAliases(topic.id).map((a,i)=>`<div class="manage-ans-row alias-row"><div class="manage-ans-text">${escHtml(a)}</div><button class="manage-ans-del" onclick="deleteAlias('${topic.id}',${i});refreshManageItem('${topic.id}')">✕</button></div>`).join('')}</div>
+      <div class="manage-add-row" style="margin-bottom:14px">
+        <input class="manage-add-input-line" id="aliasinput-${topic.id}" type="text">
+        <button class="manage-add-btn" onclick="commitAlias('${topic.id}')">追加</button>
+      </div>
+      <div class="manage-section-title">解答内容（別解として許容する表現）</div>
+      <div class="manage-ans-list" id="anslist-${topic.id}">${ans.map((a,i)=>`<div class="manage-ans-row"><div class="manage-ans-text">${escHtml(a)}</div><button class="manage-ans-del" onclick="deleteAnswer('${topic.id}',${i})">✕</button></div>`).join('')}</div>
+      <div class="manage-add-row">
+        <textarea class="manage-add-input" id="ansinput-${topic.id}" placeholder="解答内容を入力..." rows="2"></textarea>
+        <button class="manage-add-btn" onclick="addAnswer('${topic.id}')">追加</button>
+      </div>
+    </div></div>`;
+}
+function commitLeaf(id){
+  const input=document.getElementById('leafinput-'+id);if(!input)return;
+  const val=input.value.trim();if(!val)return;
+  addLeaf(id,val);input.value='';refreshManageItem(id);
+}
+function commitAlias(id){
+  const input=document.getElementById('aliasinput-'+id);if(!input)return;
+  const val=input.value.trim();if(!val)return;
+  addAlias(id,val);input.value='';refreshManageItem(id);
+}
+function toggleManageItem(id){ document.getElementById('mc-'+id)?.classList.toggle('open'); }
+function addAnswer(id){
+  const input=document.getElementById('ansinput-'+id);if(!input)return;
+  const val=input.value.trim();if(!val)return;
+  if(!answerData[id])answerData[id]=[];
+  answerData[id].push(val);saveAnswers();input.value='';refreshManageItem(id);
+}
+function deleteAnswer(id,idx){ if(!answerData[id])return; answerData[id].splice(idx,1); saveAnswers(); refreshManageItem(id); }
+function refreshManageItem(id){
+  const card=document.getElementById('mc-'+id);
+  const isOpen=card?.classList.contains('open');
+  const topic=findTopicById(id);
+  if(!topic)return;
+  const newHtml=renderManageTopicCard(topic);
+  const temp=document.createElement('div');temp.innerHTML=newHtml;
+  const newCard=temp.firstElementChild;
+  if(isOpen)newCard.classList.add('open');
+  if(card)card.replaceWith(newCard);
+}
+function findTopicById(id){
+  for(const ch of DATA) for(const sec of ch.sections){ const t=sec.topics.find(t=>t.id===id); if(t)return t; }
+  return null;
+}
+
+// ── RECORD ──
+let recordChIndex=0;
+function getItemRecord(id){ return recordData[id]||{ok:0,total:0}; }
+function renderRecordTabs(chIndex){
+  recordChIndex=chIndex;
+  document.getElementById('record-tabs').innerHTML=DATA.map((ch,i)=>`<button class="mctab${i===chIndex?' active':''}" onclick="renderRecordTabs(${i})">${ch.ch}</button>`).join('');
+  const ch=DATA[chIndex];
+  document.getElementById('record-content').innerHTML=ch.sections.map(sec=>{
+    return`<div class="manage-sec-block">
+      <div class="record-sec-hdr">${sec.sec}　${sec.secName}</div>
+      ${sec.topics.map(topic=>renderRecordTopicRow(topic)).join('')}
+    </div>`;
+  }).join('');
+}
+function renderRecordTopicRow(topic){
+  const quizzable=isQuizzable(topic.imp);
+  const excl=isExcluded(topic.id);
+  const rec=getItemRecord(topic.id);
+  const hasRec=rec.total>0;
+  const rate=hasRec?Math.round(rec.ok/rec.total*100):null;
+  const rateColor=(!quizzable||excl)?'var(--text3)':rate===null?'var(--text3)':rate>=80?'var(--ok)':rate>=50?'#c07000':'var(--ng)';
+  const leaves=getLeaves(topic.id);
+  let leafSub='';
+  if(quizzable&&leaves.length){
+    let ok=0,total=0;
+    leaves.forEach((l,i)=>{const r=recordData[topic.id+'::'+i];if(r){ok+=r.ok;total+=r.total;}});
+    leafSub=`<div class="record-item-sub">末端${leaves.length}件${total?`／正解 ${ok}/${total}`:'（未回答）'}</div>`;
+  }else if(quizzable){
+    leafSub=`<div class="record-item-sub">末端論点 未登録</div>`;
+  }
+  return`<div class="record-item${(!quizzable)?' na':''}${excl?' excluded':''}">
+    <div class="record-item-name">${impBadge(topic.imp)} ${escHtml(topic.name)}${leafSub}</div>
+    <div class="record-item-right"><span class="record-score" style="color:${rateColor}">${quizzable?(hasRec?rec.ok+'/'+rec.total:'–'):'対象外'}</span></div>
+  </div>`;
+}
+
+// ── BACKUP ──
+async function exportBackup(){
+  const d={
+    version:1,
+    label:'監査論 論点リコール バックアップ',
+    exportedAt:new Date().toISOString(),
+    itemState:JSON.parse(localStorage.getItem(HIST_KEY)||'{}'),
+    answerData:JSON.parse(localStorage.getItem(ANS_KEY)||'{}'),
+    excludeData:JSON.parse(localStorage.getItem(EXCL_KEY)||'{}'),
+    aliasData:JSON.parse(localStorage.getItem(ALIAS_KEY)||'{}'),
+    recordData:JSON.parse(localStorage.getItem(REC_KEY)||'{}'),
+    leafData:JSON.parse(localStorage.getItem(LEAF_KEY)||'{}'),
+  };
+  const fname='kansa-ronten.json';
+  const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+  const file=new File([blob],fname,{type:'application/json'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file]});return;}catch(e){}
+  }
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=fname;
+  a.click();
+}
+function importBackup(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      const d=JSON.parse(ev.target.result);
+      if(d.version!==1)throw new Error('invalid');
+      if(d.itemState)  localStorage.setItem(HIST_KEY,  JSON.stringify(d.itemState));
+      if(d.answerData) localStorage.setItem(ANS_KEY,   JSON.stringify(d.answerData));
+      if(d.excludeData)localStorage.setItem(EXCL_KEY,  JSON.stringify(d.excludeData));
+      if(d.aliasData)  localStorage.setItem(ALIAS_KEY, JSON.stringify(d.aliasData));
+      if(d.recordData) localStorage.setItem(REC_KEY,   JSON.stringify(d.recordData));
+      if(d.leafData)   localStorage.setItem(LEAF_KEY,  JSON.stringify(d.leafData));
+      location.reload();
+    }catch(err){alert('ファイルの読み込みに失敗しました。');}
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+
+// ── INIT ──
+loadStorage();
+
+const _savedScreen=localStorage.getItem('kansa-ronten-screen');
+if(_savedScreen&&_savedScreen!=='start'){
+  if(_savedScreen==='chapter')goChapter();
+  else if(_savedScreen==='manage')goManage();
+  else if(_savedScreen==='record')goRecord();
+}
+</script>
+</body>
+</html>
