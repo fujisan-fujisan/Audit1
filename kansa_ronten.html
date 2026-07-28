@@ -759,7 +759,7 @@ function renderManageTopicCard(topic){
       <div class="manage-section-title">末端論点（この論点に含まれる細目）</div>
       <div class="manage-ans-list" id="leaflist-${topic.id}">${leaves.map((l,i)=>`<div class="manage-ans-row leaf-row"><div class="manage-ans-text">${escHtml(l)}</div><button class="manage-ans-del" onclick="deleteLeaf('${topic.id}',${i});refreshManageItem('${topic.id}')">✕</button></div>`).join('')}</div>
       <div class="manage-add-row" style="margin-bottom:14px">
-        <textarea class="manage-add-input" id="leafinput-${topic.id}" placeholder="末端論点を入力..." rows="2"></textarea>
+        <textarea class="manage-add-input" id="leafinput-${topic.id}" placeholder="末端論点を入力...（Enterで登録／Shift+Enterで改行）" rows="2" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();commitLeaf('${topic.id}');}"></textarea>
         <button class="manage-add-btn" onclick="commitLeaf('${topic.id}')">追加</button>
       </div>
     </div></div>`;
